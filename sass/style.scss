@@ -14,6 +14,7 @@
     --code-background-color: #f2f2f2;
     --code-color: #222;
     --blockquote-color: #222;
+    color-scheme: light;
 }
 
 // Dark mode - system preference
@@ -27,6 +28,7 @@
         --code-background-color: #2d2d44;
         --code-color: #d4d4d4;
         --blockquote-color: #d4d4d4;
+        color-scheme: dark;
     }
 }
 
@@ -40,6 +42,21 @@
     --code-background-color: #2d2d44;
     --code-color: #d4d4d4;
     --blockquote-color: #d4d4d4;
+    color-scheme: dark;
+}
+
+// Light mode - manual toggle (override system dark preference)
+[data-theme="light"] {
+    --background-color: #ffffff;
+    --heading-color: #232333;
+    --text-color: #232333;
+    --link-color: #232333;
+    --visited-color: #232333;
+    --main-color: #ff0000;
+    --code-background-color: #f2f2f2;
+    --code-color: #222;
+    --blockquote-color: #222;
+    color-scheme: light;
 }
 
 * {
