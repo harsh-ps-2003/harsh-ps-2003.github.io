@@ -1,6 +1,7 @@
 +++
 title = "Accepting that shiny job offer?"
 date = 2026-08-01
+draft = true
 +++
 
 Okay, so finally I have accepted a full-time offer from an early stage startup. During my journey of talking to founders, HRs, giving 50ish interviews, I have realized a lot. Like a lot for a naive out of uni kid! Also, was helping bunch of folks to clear interviews, so have some third-party perspective as well. AI writing resumes, and AI ATS filtering resumes, what a joke! I have received lots of mails of people who have been reading the stuff I write and it helping them. So, I am writing this blog, according to 2026 reality. I hope the upcoming generation of engineering and researchers have it better than me ;(
