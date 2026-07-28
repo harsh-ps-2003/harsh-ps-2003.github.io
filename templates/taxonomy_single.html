@@ -1,6 +1,18 @@
 {% extends "base.html" %}
 
 {% block title %}#{{ term.name }} | {{ config.title }}{% endblock title %}
+{% block meta_title %}#{{ term.name }} | {{ config.title }}{% endblock meta_title %}
+
+{% block description %}Posts tagged with #{{ term.name }}{% endblock description %}
+
+{% block og_url %}{{ term.permalink }}{% endblock og_url %}
+{% block og_title %}#{{ term.name }}{% endblock og_title %}
+{% block og_description %}Posts tagged with #{{ term.name }}{% endblock og_description %}
+
+{% block twitter_title %}#{{ term.name }}{% endblock twitter_title %}
+{% block twitter_description %}Posts tagged with #{{ term.name }}{% endblock twitter_description %}
+
+{% block canonical %}{{ term.permalink }}{% endblock canonical %}
 
 {% block content %}
 <h1>#{{ term.name }}</h1>

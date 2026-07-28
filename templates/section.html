@@ -1,8 +1,18 @@
 {% extends "base.html" %}
 
 {% block title %}{{ section.title }} | {{ config.title }}{% endblock title %}
+{% block meta_title %}{{ section.title }} | {{ config.title }}{% endblock meta_title %}
 
 {% block description %}{{ section.description | default(value=config.description) }}{% endblock description %}
+
+{% block og_url %}{{ section.permalink }}{% endblock og_url %}
+{% block og_title %}{{ section.title }}{% endblock og_title %}
+{% block og_description %}{{ section.description | default(value=config.description) }}{% endblock og_description %}
+
+{% block twitter_title %}{{ section.title }}{% endblock twitter_title %}
+{% block twitter_description %}{{ section.description | default(value=config.description) }}{% endblock twitter_description %}
+
+{% block canonical %}{{ section.permalink }}{% endblock canonical %}
 
 {% block content %}
 {% if section.content %}

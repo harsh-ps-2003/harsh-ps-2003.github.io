@@ -1,6 +1,7 @@
 +++
 title = "exploring 1brc"
 date = 2026-07-30
+draft = true
 +++
 
 To initiate people, [One Billion Row Challenge](https://1brc.dev/) is a perf-oriented programming challenge. It was [done in a lot of ways](https://github.com/gunnarmorling/1brc/tree/c92346790e8548f52e81254227efc935356e5e53#1brc-on-the-web) and I was curious on whats the best way for such problems. 

@@ -1,6 +1,18 @@
 {% extends "base.html" %}
 
 {% block title %}Tags | {{ config.title }}{% endblock title %}
+{% block meta_title %}Tags | {{ config.title }}{% endblock meta_title %}
+
+{% block description %}Browse all tags on {{ config.title }}{% endblock description %}
+
+{% block og_url %}{{ config.base_url }}/tags/{% endblock og_url %}
+{% block og_title %}Tags{% endblock og_title %}
+{% block og_description %}Browse all tags on {{ config.title }}{% endblock og_description %}
+
+{% block twitter_title %}Tags{% endblock twitter_title %}
+{% block twitter_description %}Browse all tags on {{ config.title }}{% endblock twitter_description %}
+
+{% block canonical %}{{ config.base_url }}/tags/{% endblock canonical %}
 
 {% block content %}
 <h1>Tags</h1>
