@@ -1,0 +1,14 @@
+{
+  "name": "harsh-ps-2003",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personal blog",
+  "scripts": {
+    "diagram:export": "./scripts/export-diagrams.sh",
+    "diagram:svg": "excalidraw-export --svg",
+    "diagram:png": "excalidraw-export --scale 2"
+  },
+  "devDependencies": {
+    "@moona3k/excalidraw-export": "^0.2.1"
+  }
+}

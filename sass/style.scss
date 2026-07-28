@@ -178,6 +178,31 @@ img {
     max-width: 100%;
 }
 
+// Excalidraw diagrams - invert colors in dark mode
+// Use class="excalidraw" or place in a container with class="diagram"
+img.excalidraw,
+.diagram img {
+    transition: filter 0.3s ease;
+}
+
+// Dark mode - manual toggle
+[data-theme="dark"] {
+    img.excalidraw,
+    .diagram img {
+        filter: invert(93%) hue-rotate(180deg);
+    }
+}
+
+// Dark mode - system preference
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        img.excalidraw,
+        .diagram img {
+            filter: invert(93%) hue-rotate(180deg);
+        }
+    }
+}
+
 code {
     font-family: monospace;
     padding: 2px;

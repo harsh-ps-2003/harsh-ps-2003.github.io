@@ -113,12 +113,62 @@ graph TD
 # Install Zola (macOS)
 brew install zola
 
+# Install Node dependencies (for diagram export)
+pnpm install
+
 # Run dev server with live reload
 zola serve
 
 # Build for production
 zola build
 ```
+
+## Diagrams with Excalidraw
+
+This blog supports Excalidraw diagrams for system design and architecture illustrations.
+
+### Creating Diagrams
+
+**Method 1: Using Excalidraw MCP (Recommended)**
+
+With the Excalidraw MCP server, you can create diagrams directly from Cursor:
+
+```
+# Create a diagram using MCP tools
+1. Use batch_create_elements to create shapes and arrows
+2. Use export_scene to save as .excalidraw file
+3. Use export_to_image to export as SVG
+```
+
+**Method 2: Manual Export**
+
+```bash
+# Export a single diagram to SVG
+pnpm exec excalidraw-export content/writes/my-post/diagram.excalidraw --svg
+
+# Export all diagrams in the project
+pnpm run diagram:export
+```
+
+### Diagram Workflow
+
+1. **Create**: Use Excalidraw MCP or the VS Code extension to create `.excalidraw` files
+2. **Save**: Place `.excalidraw` files next to your blog post or in `static/diagrams/`
+3. **Export**: Run `pnpm run diagram:export` to convert all to SVG
+4. **Use**: Reference in markdown: `![Architecture](architecture.svg)`
+
+### File Locations
+
+- **Post-specific diagrams**: `content/writes/my-post/diagram.excalidraw` → `diagram.svg`
+- **Shared diagrams**: `static/diagrams/architecture.excalidraw` → `architecture.svg`
+
+### Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm run diagram:export` | Export all `.excalidraw` files to SVG |
+| `pnpm run diagram:svg <file>` | Export single file to SVG |
+| `pnpm run diagram:png <file>` | Export single file to PNG (2x scale) |
 
 ## Adding Content
 

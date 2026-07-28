@@ -7,3 +7,8 @@ public/
 # Editor
 .vscode/
 *.swp
+
+# Node.js
+node_modules/
+.pnpm-store/
+pnpm-lock.yaml
