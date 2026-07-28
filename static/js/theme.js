@@ -12,6 +12,7 @@
         document.documentElement.style.colorScheme = theme;
         localStorage.setItem(STORAGE_KEY, theme);
         updateIcon(theme);
+        updateCodeBlocks(theme);
     }
     
     function updateIcon(theme) {
@@ -19,8 +20,22 @@
         if (icon) icon.textContent = theme === 'dark' ? 'light' : 'dark';
     }
     
+    function updateCodeBlocks(theme) {
+        const codeBlocks = document.querySelectorAll('pre.giallo');
+        codeBlocks.forEach(function(block) {
+            block.style.colorScheme = theme;
+        });
+    }
+    
     // Set theme immediately to prevent flash
     setTheme(getPreferredTheme());
+    
+    // Also update code blocks after DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCodeBlocks(getPreferredTheme());
+        });
+    }
     
     // Expose toggle function globally
     window.toggleTheme = function() {
