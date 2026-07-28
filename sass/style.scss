@@ -14,7 +14,6 @@
     --code-background-color: #f2f2f2;
     --code-color: #222;
     --blockquote-color: #222;
-    color-scheme: light;
 }
 
 // Dark mode - system preference
@@ -28,7 +27,6 @@
         --code-background-color: #2d2d44;
         --code-color: #d4d4d4;
         --blockquote-color: #d4d4d4;
-        color-scheme: dark;
     }
 }
 
@@ -42,7 +40,6 @@
     --code-background-color: #2d2d44;
     --code-color: #d4d4d4;
     --blockquote-color: #d4d4d4;
-    color-scheme: dark;
 }
 
 // Light mode - manual toggle (override system dark preference)
@@ -56,7 +53,23 @@
     --code-background-color: #f2f2f2;
     --code-color: #222;
     --blockquote-color: #222;
-    color-scheme: light;
+}
+
+// Required for Zola giallo syntax highlighting
+.giallo-l {
+    display: inline-block;
+    min-height: 1lh;
+    width: 100%;
+}
+
+.giallo-ln {
+    display: inline-block;
+    user-select: none;
+    margin-right: 0.4em;
+    padding: 0.4em;
+    min-width: 3ch;
+    text-align: right;
+    opacity: 0.5;
 }
 
 * {

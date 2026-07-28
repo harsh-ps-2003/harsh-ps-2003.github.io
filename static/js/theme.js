@@ -9,10 +9,9 @@
     
     function setTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
-        document.documentElement.style.colorScheme = theme;
         localStorage.setItem(STORAGE_KEY, theme);
         updateIcon(theme);
-        updateCodeBlocks(theme);
+        updateSyntaxStylesheets(theme);
     }
     
     function updateIcon(theme) {
@@ -20,21 +19,37 @@
         if (icon) icon.textContent = theme === 'dark' ? 'light' : 'dark';
     }
     
-    function updateCodeBlocks(theme) {
-        const codeBlocks = document.querySelectorAll('pre.giallo');
-        codeBlocks.forEach(function(block) {
-            block.style.colorScheme = theme;
-        });
+    function updateSyntaxStylesheets(theme) {
+        const lightSheet = document.getElementById('giallo-light');
+        const darkSheet = document.getElementById('giallo-dark');
+        
+        if (lightSheet && darkSheet) {
+            if (theme === 'dark') {
+                lightSheet.disabled = true;
+                darkSheet.disabled = false;
+            } else {
+                lightSheet.disabled = false;
+                darkSheet.disabled = true;
+            }
+        }
     }
     
-    // Set theme immediately to prevent flash
-    setTheme(getPreferredTheme());
+    // Set theme on documentElement immediately (prevents flash)
+    const initialTheme = getPreferredTheme();
+    document.documentElement.setAttribute('data-theme', initialTheme);
+    localStorage.setItem(STORAGE_KEY, initialTheme);
     
-    // Also update code blocks after DOM is ready
+    // Update icon and stylesheets after DOM is ready
+    function onReady() {
+        const theme = getPreferredTheme();
+        updateIcon(theme);
+        updateSyntaxStylesheets(theme);
+    }
+    
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            updateCodeBlocks(getPreferredTheme());
-        });
+        document.addEventListener('DOMContentLoaded', onReady);
+    } else {
+        onReady();
     }
     
     // Expose toggle function globally

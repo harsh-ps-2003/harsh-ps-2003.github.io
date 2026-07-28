@@ -14,6 +14,7 @@ feed_filenames = ["atom.xml", "rss.xml"]
 smart_punctuation = true
 
 [markdown.highlighting]
+style = "class"
 light_theme = "github-light"
 dark_theme = "github-dark"
 
