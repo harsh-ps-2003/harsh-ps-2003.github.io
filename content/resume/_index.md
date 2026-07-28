@@ -47,7 +47,7 @@ as a *Google Summer of Code* mentee
 
 > Skills involved - Go, Rust Typescript, React.js, Docker, Kubernetes, Helm, Prometheus, Grafana 
 
-Check out my [blog](/writes/istio-lfx/) on contributing to Istio to learn more.
+Check out my [blog](/writes/2025-05-23-istio-lfx/) on contributing to Istio to learn more.
 
 ---
 
@@ -70,7 +70,7 @@ Check out my [blog](/writes/istio-lfx/) on contributing to Istio to learn more.
 * [Upgraded the module template](https://github.com/fedimint/fedimint-custom-modules-example/pull/18) to support latest long term stable Fedimint protocol, while maintaining the backward compatibility, for easing the process of module creation for the Fedimint ecosystem
 * Refactored the codebase for reducing redundant dependencies and improving maintainability and added some UI features.
 
-Checkout my journey of contributing to Fedimint in my blog - [Spent my Summers with Fedimint](/writes/sob/)!
+Checkout my journey of contributing to Fedimint in my blog - [Spent my Summers with Fedimint](/writes/2024-07-12-sob/)!
 
 > Skills involved - Rust, TypeScript, Docker, Prometheus, OpenTelemetry, WASM, Bitcoin, Lightening Network
 
