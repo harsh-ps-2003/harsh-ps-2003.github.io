@@ -1,0 +1,44 @@
+# Zola configuration
+# https://www.getzola.org/documentation/getting-started/configuration/
+
+base_url = "https://harsh-ps-2003.github.io"
+title = "HARSH PRATAP SINGH"
+description = "Just another crazy philomath who follows the Turtle Hermit Way"
+default_language = "en"
+
+# Build settings
+compile_sass = true
+build_search_index = true
+minify_html = true
+generate_feeds = false
+
+[markdown]
+smart_punctuation = true
+
+[markdown.highlighting]
+theme = "github-dark"
+
+[search]
+include_title = true
+include_description = true
+include_path = false
+include_content = true
+
+[slugify]
+paths = "on"
+taxonomies = "on"
+anchors = "on"
+
+[[taxonomies]]
+name = "tags"
+feed = false
+
+[extra]
+author = "Harsh Pratap Singh"
+
+main_menu = [
+    { name = "home", url = "/" },
+    { name = "writes", url = "/writes/" },
+    { name = "reads", url = "/reads/" },
+    { name = "resume", url = "/resume/" },
+]

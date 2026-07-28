@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section.title }} | {{ config.title }}{% endblock title %}
+
+{% block description %}{{ section.description | default(value=config.description) }}{% endblock description %}
+
+{% block content %}
+{% if section.content %}
+<div class="section-intro">
+    {{ section.content | safe }}
+</div>
+{% endif %}
+
+{% if section.pages | length > 0 %}
+<ul class="blog-posts with-dates">
+    {% for page in section.pages %}
+    <li data-title="{{ page.title | lower }}">
+        <span>{{ page.date | date(format="%d %b, %Y") }}</span>
+        <a href="{{ page.permalink | safe }}">{{ page.title }}</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock content %}

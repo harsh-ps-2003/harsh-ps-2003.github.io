@@ -1,0 +1,361 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+:root {
+    --width: 720px;
+    --font-main: 'Roboto Mono', monospace;
+    --font-secondary: 'Roboto Mono', monospace;
+    --font-scale: .9em;
+    --background-color: #ffffff;
+    --heading-color: #232333;
+    --text-color: #232333;
+    --link-color: #232333;
+    --visited-color: #232333;
+    --main-color: #ff0000;
+    --code-background-color: #f2f2f2;
+    --code-color: #222;
+    --blockquote-color: #222;
+}
+
+// Dark mode - system preference
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --background-color: #1a1a2e;
+        --heading-color: #eaeaea;
+        --text-color: #d4d4d4;
+        --link-color: #eaeaea;
+        --visited-color: #d4d4d4;
+        --code-background-color: #2d2d44;
+        --code-color: #d4d4d4;
+        --blockquote-color: #d4d4d4;
+    }
+}
+
+// Dark mode - manual toggle
+[data-theme="dark"] {
+    --background-color: #1a1a2e;
+    --heading-color: #eaeaea;
+    --text-color: #d4d4d4;
+    --link-color: #eaeaea;
+    --visited-color: #d4d4d4;
+    --code-background-color: #2d2d44;
+    --code-color: #d4d4d4;
+    --blockquote-color: #d4d4d4;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-secondary);
+    font-size: var(--font-scale);
+    margin: auto;
+    padding: 20px;
+    max-width: var(--width);
+    text-align: left;
+    background-color: var(--background-color);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.5;
+    color: var(--text-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-main);
+    color: var(--heading-color);
+}
+
+a {
+    color: var(--link-color);
+    font-family: var(--font-main);
+    cursor: pointer;
+    text-decoration: none;
+    border-bottom: 3px solid var(--main-color);
+}
+
+a:hover {
+    background-color: var(--main-color);
+    color: white;
+    text-decoration: none;
+}
+
+// Header styling - centered title, left-aligned nav like Bear
+header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+nav {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 30px;
+}
+
+nav a {
+    margin-right: 8px;
+}
+
+.theme-toggle {
+    margin-left: auto;
+    background: none;
+    border: 2px solid var(--heading-color);
+    color: var(--text-color);
+    font-family: var(--font-main);
+    font-size: 0.8em;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.theme-toggle:hover {
+    background-color: var(--heading-color);
+    color: var(--background-color);
+}
+
+strong, b {
+    color: var(--heading-color);
+}
+
+button {
+    margin: 0;
+    cursor: pointer;
+}
+
+main {
+    line-height: 1.6;
+}
+
+table {
+    width: 100%;
+    border-spacing: 0;
+}
+
+th, td {
+    padding: 6px 13px;
+    border: 1px solid #dfe2e5;
+    font-size: 1em;
+}
+
+hr {
+    border: 0;
+    border-top: 1px dashed var(--heading-color);
+}
+
+img {
+    max-width: 100%;
+}
+
+code {
+    font-family: monospace;
+    padding: 2px;
+    background-color: var(--code-background-color);
+    color: var(--code-color);
+    border-radius: 3px;
+}
+
+pre {
+    padding: 1px 15px;
+    background-color: var(--code-background-color);
+    color: var(--code-color);
+    border-radius: 3px;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    overflow-x: auto;
+
+    code {
+        background: none;
+        padding: 0;
+    }
+}
+
+blockquote {
+    border-left: 3px solid var(--main-color);
+    color: var(--blockquote-color);
+    padding-left: 20px;
+    font-style: italic;
+    margin-left: 0;
+}
+
+footer {
+    margin-top: 40px;
+    padding: 25px 0;
+    text-align: center;
+    font-size: 0.85em;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+// Title styling - big, bold, centered like Bear
+.title {
+    border-bottom: none;
+    
+    &:hover {
+        background-color: transparent;
+        color: var(--heading-color);
+    }
+
+    h1 {
+        font-size: 2.8em;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: 0.00em;
+        white-space: nowrap;
+        text-transform: uppercase;
+        
+        @media (min-width: 600px) {
+            font-size: 4.2em;
+        }
+    }
+}
+
+.inline {
+    width: auto !important;
+}
+
+.highlight, .code {
+    padding: 1px 15px;
+    background-color: var(--code-background-color);
+    color: var(--code-color);
+    border-radius: 3px;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    overflow-x: auto;
+}
+
+// Blog post list - tighter spacing like Bear
+ul.blog-posts {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin: 0;
+}
+
+ul.blog-posts li {
+    margin-bottom: 4px;
+    padding-left: 0;
+}
+
+ul.blog-posts li a {
+    // Just the link, no date display in list style
+}
+
+ul.blog-posts li a:visited {
+    color: var(--visited-color);
+}
+
+// Date-style list (for writes section with dates)
+ul.blog-posts.with-dates {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+ul.blog-posts.with-dates li {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 2px;
+
+    @media (min-width: 600px) {
+        flex-direction: row;
+        align-items: baseline;
+    }
+}
+
+ul.blog-posts.with-dates li span {
+    flex: 0 0 130px;
+    font-style: normal;
+    opacity: 0.7;
+    font-size: 0.9em;
+}
+
+// Tags
+.tags {
+    margin-top: 10px;
+    font-size: 0.85em;
+}
+
+.tag {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 2px 6px;
+    background-color: var(--code-background-color);
+    border-radius: 3px;
+    border-bottom: none;
+
+    &:hover {
+        background-color: var(--main-color);
+        color: white;
+    }
+}
+
+// Search
+.search-container {
+    margin-bottom: 20px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 15px;
+    font-family: var(--font-main);
+    font-size: 0.9em;
+    border: 2px solid var(--heading-color);
+    border-radius: 3px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+
+    &:focus {
+        outline: none;
+        border-color: var(--main-color);
+    }
+
+    &::placeholder {
+        color: var(--text-color);
+        opacity: 0.5;
+    }
+}
+
+// Post meta
+.post-meta {
+    margin-bottom: 30px;
+    opacity: 0.8;
+    font-size: 0.9em;
+}
+
+.post-date {
+    font-style: italic;
+}
+
+// Back link
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+}
+
+// Section intro
+.section-intro {
+    margin-bottom: 20px;
+}
+
+// Dotted separator - single line with proper spacing
+.dotted-separator {
+    border: none;
+    border-top: 3px dotted var(--heading-color);
+    margin: 30px 0;
+}
+
+// Taxonomy list styling
+.taxonomy-list {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+.taxonomy-list li {
+    margin-bottom: 4px;
+}
+
+.taxonomy-list .count {
+    opacity: 0.6;
+    font-size: 0.9em;
+}
