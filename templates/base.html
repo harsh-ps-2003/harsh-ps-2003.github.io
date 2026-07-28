@@ -91,7 +91,62 @@
     </main>
 
     <footer>
+        <span class="view-counter">
+            ԅ(≖‿≖ԅ) <span id="view-count">...</span>
+        </span>
     </footer>
+
+    <script>
+    (function() {
+        const namespace = 'harsh-ps-2003';
+        const path = window.location.pathname;
+        const key = path.replace(/\//g, '-') || 'home';
+        
+        // Page offsets for initial counts
+        const offsets = {
+            '/': 842,
+            '/writes/': 692,
+            '/reads/': 689,
+            '/resume/': 804,
+            // Blog posts (sorted by date, newest first)
+            '/writes/missing-writing-go/': 101,
+            '/writes/all-sorts-of-famous-attention-layers/': 35,
+            '/writes/i-should-have-paid-a-closer-look-at-tokenizer/': 89,
+            '/writes/cutting-that-inference-cost/': 119,
+            '/writes/some-insights-on-hnsw/': 65,
+            '/writes/pubgrub-for-dependency-resolution/': 43,
+            '/writes/the-longer-you-chat-the-worse-your-agents-response/': 297,
+            '/writes/db-joins-on-gpus/': 28,
+            '/writes/which-prompts-actually-work-for-your-agents/': 185,
+            '/writes/the-chronicles-of-training-fbpinns/': 389,
+            '/writes/istio-lfx/': 139,
+            '/writes/do-i-officially-qualify-as-a-software-engineer/': 188,
+            '/writes/building/': 206,
+            '/writes/working-at-a-early-stage-startup/': 177,
+            '/writes/nix/': 239,
+            '/writes/sob/': 62
+        };
+        const offset = offsets[path] || 0;
+        
+        // Skip API call on localhost but show preview
+        if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+            document.getElementById('view-count').innerText = offset || '∞';
+            return;
+        }
+        
+        fetch('https://api.countapi.xyz/hit/' + namespace + '/' + key)
+            .then(res => res.json())
+            .then(data => {
+                const el = document.getElementById('view-count');
+                let count = (data.value || 1) + offset;
+                if (el) el.innerText = count;
+            })
+            .catch(() => {
+                const el = document.getElementById('view-count');
+                if (el) el.innerText = offset || '?';
+            });
+    })();
+    </script>
 
     {% block scripts %}{% endblock scripts %}
 </body>

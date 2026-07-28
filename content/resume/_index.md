@@ -74,6 +74,8 @@ Checkout my journey of contributing to Fedimint in my blog - [Spent my Summers w
 
 > Skills involved - Rust, TypeScript, Docker, Prometheus, OpenTelemetry, WASM, Bitcoin, Lightening Network
 
+---
+
 ## Undergraduate Research and Projects
 
 **Undergraduate Research**
@@ -134,3 +136,5 @@ A privacy-preserving discovery service. - [Rumi](https://github.com/harsh-ps-200
 * Hardened sensitive data handling with explicit secure wiping of ORAM blocks, stash, and internal buffers; minimized side-channels via fixed-size responses and uniform access paths
 
 > Skills - Rust, Cryptography
+
+---
