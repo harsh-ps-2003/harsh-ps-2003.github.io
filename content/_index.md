@@ -5,7 +5,7 @@ template = "index.html"
 
 Just another crazy philomath ʘ‿ʘ  
 who follows the [Turtle Hermit Way](https://dragonball.fandom.com/wiki/Turtle_School) ...c~oつ  
-and <u>who never does anything half-heartedly!</u>
+and [who never does anything half-heartedly!](https://www.goodreads.com/quotes/1213937-do-not-love-half-lovers-do-not-entertain-half-friends)
 
 Juggling between **Math**, **Physics**, **Computer Science** and **Philosophy** and a sucker for sexy **books**, **anime** and **music**
 
