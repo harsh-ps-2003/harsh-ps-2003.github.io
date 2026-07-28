@@ -16,7 +16,7 @@
     
     function updateIcon(theme) {
         const icon = document.getElementById('theme-icon');
-        if (icon) icon.textContent = theme === 'dark' ? 'light' : 'dark';
+        if (icon) icon.textContent = theme === 'dark' ? '☀' : '☾';
     }
     
     function updateSyntaxStylesheets(theme) {
