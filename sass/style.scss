@@ -10,7 +10,7 @@
     --text-color: #232333;
     --link-color: #232333;
     --visited-color: #232333;
-    --main-color: #ff0000;
+    --main-color: #ff5f1f;
     --code-background-color: #f2f2f2;
     --code-color: #222;
     --blockquote-color: #222;
@@ -19,7 +19,7 @@
 // Dark mode - system preference
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-        --background-color: #1a1a2e;
+        --background-color: #000000;
         --heading-color: #eaeaea;
         --text-color: #d4d4d4;
         --link-color: #eaeaea;
@@ -32,7 +32,7 @@
 
 // Dark mode - manual toggle
 [data-theme="dark"] {
-    --background-color: #1a1a2e;
+    --background-color: #000000;
     --heading-color: #eaeaea;
     --text-color: #d4d4d4;
     --link-color: #eaeaea;
@@ -49,7 +49,7 @@
     --text-color: #232333;
     --link-color: #232333;
     --visited-color: #232333;
-    --main-color: #ff0000;
+    --main-color: #ff5f1f;
     --code-background-color: #f2f2f2;
     --code-color: #222;
     --blockquote-color: #222;
