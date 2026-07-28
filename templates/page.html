@@ -47,12 +47,6 @@
 {% endblock structured_data %}
 
 {% block content %}
-{% if page.ancestors | length > 1 %}
-{% set parent_path = page.ancestors | last %}
-{% set parent_section = get_section(path=parent_path) %}
-<a class="back-link" href="{{ parent_section.permalink }}">← back to {{ parent_section.title }}</a>
-{% endif %}
-
 <article>
     <h1>{{ page.title }}</h1>
     
