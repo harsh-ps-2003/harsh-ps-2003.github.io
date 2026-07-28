@@ -177,14 +177,75 @@ pre {
     padding: 1px 15px;
     background-color: var(--code-background-color);
     color: var(--code-color);
-    border-radius: 3px;
-    margin-block-start: 1em;
+    border-radius: 0 0 3px 3px;
+    margin-block-start: 0;
     margin-block-end: 1em;
     overflow-x: auto;
 
     code {
         background: none;
         padding: 0;
+    }
+}
+
+// Code block wrapper with header
+.code-block-wrapper {
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.code-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 15px;
+    background-color: var(--code-background-color);
+    border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+    font-size: 0.8em;
+}
+
+.code-lang {
+    color: var(--text-color);
+    opacity: 0.7;
+    font-family: var(--font-main);
+    text-transform: lowercase;
+}
+
+.copy-btn {
+    background: none;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    color: var(--text-color);
+    padding: 2px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-size: 0.85em;
+    opacity: 0.7;
+    transition: opacity 0.2s, border-color 0.2s;
+
+    &:hover {
+        opacity: 1;
+        border-color: var(--text-color);
+    }
+
+    &.copied {
+        color: #22863a;
+        border-color: #22863a;
+        opacity: 1;
+    }
+}
+
+[data-theme="dark"] .copy-btn.copied {
+    color: #7ee787;
+    border-color: #7ee787;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .copy-btn.copied {
+        color: #7ee787;
+        border-color: #7ee787;
     }
 }
 
