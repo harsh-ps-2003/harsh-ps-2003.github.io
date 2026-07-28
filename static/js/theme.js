@@ -4,12 +4,12 @@
     function getPreferredTheme() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) return stored;
-        // Default to light mode
         return 'light';
     }
     
     function setTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.style.colorScheme = theme;
         localStorage.setItem(STORAGE_KEY, theme);
         updateIcon(theme);
     }
