@@ -1,16 +1,14 @@
-# Zola configuration
-# https://www.getzola.org/documentation/getting-started/configuration/
-
 base_url = "https://harsh-ps-2003.github.io"
 title = "HARSH PRATAP SINGH"
-description = "Just another crazy philomath who follows the Turtle Hermit Way"
+description = "Engineer focused on Distributed Systems, Machine Learning, Databases and Cryptography."
 default_language = "en"
 
 # Build settings
 compile_sass = true
 build_search_index = true
 minify_html = true
-generate_feeds = false
+generate_feeds = true
+feed_filenames = ["atom.xml", "rss.xml"]
 
 [markdown]
 smart_punctuation = true

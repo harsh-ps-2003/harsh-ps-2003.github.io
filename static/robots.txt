@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://harsh-ps-2003.github.io/sitemap.xml

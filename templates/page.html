@@ -1,8 +1,50 @@
 {% extends "base.html" %}
 
 {% block title %}{{ page.title }} | {{ config.title }}{% endblock title %}
+{% block meta_title %}{{ page.title }} | {{ config.title }}{% endblock meta_title %}
 
 {% block description %}{{ page.description | default(value=page.summary | default(value=config.description)) }}{% endblock description %}
+
+{% block og_type %}article{% endblock og_type %}
+{% block og_url %}{{ page.permalink }}{% endblock og_url %}
+{% block og_title %}{{ page.title }}{% endblock og_title %}
+{% block og_description %}{{ page.description | default(value=page.summary | default(value=config.description)) }}{% endblock og_description %}
+
+{% block twitter_title %}{{ page.title }}{% endblock twitter_title %}
+{% block twitter_description %}{{ page.description | default(value=page.summary | default(value=config.description)) }}{% endblock twitter_description %}
+
+{% block canonical %}{{ page.permalink }}{% endblock canonical %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "{{ page.title }}",
+    "description": "{{ page.description | default(value=page.summary | default(value='')) }}",
+    "url": "{{ page.permalink }}",
+    "datePublished": "{{ page.date | date(format='%Y-%m-%dT%H:%M:%S+00:00') }}",
+    {% if page.updated %}"dateModified": "{{ page.updated | date(format='%Y-%m-%dT%H:%M:%S+00:00') }}",{% endif %}
+    "author": {
+        "@type": "Person",
+        "name": "{{ config.extra.author }}",
+        "url": "{{ config.base_url }}"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "{{ config.extra.author }}",
+        "url": "{{ config.base_url }}"
+    },
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ page.permalink }}"
+    }
+    {% if page.taxonomies.tags %}
+    ,"keywords": "{{ page.taxonomies.tags | join(sep=', ') }}"
+    {% endif %}
+}
+</script>
+{% endblock structured_data %}
 
 {% block content %}
 {% if page.ancestors | length > 1 %}

@@ -1,0 +1,50 @@
+# Harsh Pratap Singh
+
+> Personal blog about Engineering, Research, and building things.
+
+## About
+
+Harsh Pratap Singh is a software engineer and researcher focused on Distributed Systems, Machine Learning, Databases, and Cryptography. This site contains technical writeups, reading lists, and a resume.
+
+## Site Structure
+
+- `/` - Home page with bio and links
+- `/writes/` - Technical blog posts about engineering and research
+- `/reads/` - Curated reading lists for CS, Philosophy, Startups, and Finance
+- `/resume/` - Professional experience and work history
+
+## Featured Content
+
+### Recent Writes
+- Accepting that shiny job offer?
+- Exploring 1brc
+- Missing writing some concurrency in Go
+- All sorts of famous Attention Layers
+- I should have paid a closer look at tokenizer
+- Cutting that Inference Cost
+- Some Insights on HNSW
+- How package managers use PubGrub for Dependency Resolution
+- The longer you chat, the worse your agent's response
+- DB Joins on GPUs
+- Which Prompts Actually Work for your Agents?
+- The Chronicles of Training FBPINNs
+- The Rusty Path to Secure Metrics in Istio
+
+### Reading Lists
+- Computer Science - Systems, databases, distributed computing
+- Philosophy - Epistemology, ethics, metaphysics
+- Startups - Building companies, product development
+- Finance - Wealth, investing, economics
+
+## Contact
+
+- GitHub: https://github.com/harsh-ps-2003
+- Email: harshpratapsingh2003@gmail.com
+- Twitter: https://twitter.com/harsh_ps_2003
+- LinkedIn: https://linkedin.com/in/harsh-ps-2003
+
+## Technical Details
+
+- Built with Zola static site generator
+- Hosted on GitHub Pages
+- Source: https://github.com/harsh-ps-2003/harsh-ps-2003.github.io
