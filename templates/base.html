@@ -138,12 +138,14 @@
             return;
         }
         
-        // Using Meevix CountAPI (drop-in replacement for defunct countapi.xyz)
-        fetch('https://meevix.com/api/count/' + namespace + '/' + key)
+        // Using countapi.mileshilliard.com (drop-in replacement for defunct countapi.xyz)
+        // No namespaces - fold namespace and key into one unique key
+        const uniqueKey = namespace + '-' + key;
+        fetch('https://countapi.mileshilliard.com/api/v1/hit/' + uniqueKey)
             .then(res => res.json())
             .then(data => {
                 const el = document.getElementById('view-count');
-                let count = (data.value || data.count || 1) + offset;
+                let count = (parseInt(data.value) || 1) + offset;
                 if (el) el.innerText = count;
             })
             .catch(() => {
