@@ -28,7 +28,7 @@ And dont be lured with just money (if you are a good engineer, you are making mo
 
 Again a sidenote, the networking word is thrown around for new grads quite a lot. it just means that you meet people who at some point can do things for you (and hopefully vice versa) and making a favorable impression on them. Help people, don't be a selfish jerk (especially when it comes to someone's employment, it's serious shit). If you ever can’t help someone but know someone who can, pass them to the appropriate person with a recommendation. Be a nice guy/gal. Trust and relationships compound faster than money.
 
-Also, you can forget your GPA after your resume shortlisting. Like forget it after your first job tbh. When someone says you to introduce yourself, dont say GPA is the best thing about me. They are not looking at it, until it's some quant or some wannabe-elite firm. I dont mean fuck up your CGPA, but nobody really gives a damn about difference in 8.3/10 and 8.9/10 tbh. Dont over-optimize it. 
+Also, you can forget your GPA after your resume shortlisting. Like forget it after your first job tbh. When someone says you to introduce yourself, dont say GPA is the best thing about me. They are not looking at it, until it's some quant or some wannabe-elite firm. I dont mean fuck up your CGPA, but nobody really gives a damn about difference in 8.3/10 and 8.9/10 tbh. Dont over-optimize it.
 
 Its a weird time for a new grad or early engineer. Companies are evaluating whether they are needed or they are better off blowing that money on a bigger token budget. Maybe I am a bit biased here, but I believe in the value proposition of good engineers. If you are a slopmachine, you are not a good engineer. A good engineer :
 * Never needs to be taught the same thing twice
@@ -37,6 +37,12 @@ Its a weird time for a new grad or early engineer. Companies are evaluating whet
 * Maybe a bit of an truly forward thinking elitist? 
 
 Needless to say, the bar to hire is significantly higher. In my personal experience, its easier to get into big tech once you get the interviews, than startups. As I am joining startup, I will write about that. The keything is initiative. Founders dont look for people who need a lot of direction (and oversight) to be productive. They want hungry people (not 996) who have their eyes open and look for opportunities themselves to contribute and have an impact.
+
+When it comes to senior people, I can see a lot of hiring of leadership roles in 2026 is :
+* Trying to fix fundamental PMF lost in AI era. They are like, oh lord, please fix our company that is being fucked left right center in this AI era. Our top-tier talent are leaving. Please come and do the AI magic. Its all responsibilities with no ppower. And we can pay you the same as a Staff Engineer at Big Tech, but there is major upside if you literally fix everything single thing
+* A much better option, please make our shitty wayy too much overvalued AI startup actually do real AI things. We never had a real Eng culture on the team. We raised at $1B valuation on $5M revenue with a Claude wrapper. We never had a real CTO or Eng team, just a 26 YOE founders, who was the only one of us who knew how to launch an EC2 instance. We can pay you the same as a Staff Engineer at Big Tech, but there’s an actual major upside if you literally fix everything.
+
+To get hired, be that Waterloo guy ;)
 
 ## LUCK and its anti
 
@@ -77,15 +83,19 @@ Now, practically, some companies want you to send them competing offer letters. 
 
 ## Startups vs BigTech 
 
-If someday you think you want to do a startup, then join one! 
+If someday you think you want to do a startup, then join one sometime in your career. I see a lot of very good eng leaders doing their own company, as its easier than before now. They have core team in US, raise funds their, and often hire in India.
 
 This fundamentally is an old way of looking at things. Startups are not as bad as people think of them. Yeah, ESOP are paper money, I am not disagreeing there. But there are things beyond money in careers. 
 
-These days, there is an AI research+product lab (which I joined), there is a big tech giant which works with all sorts of things, and some other startups which I dont care about. At least in 2026, a startup is more stable and gives more job security compared to big tech in my personal experience. Big Tech was for stability + brand on resume, but given how many layoffs and how much uncertainty have started to emerge in Big Tech, it's no longer the only thing that you should be considering at all. The best place to work these days is an AI research lab or something like that. It is better to work at Google DeepMind or Microsoft Research or some small AI lab than a company that is still working in the old ways and hiring software engineers and has rigid systems. Also, your big tech tag is not gonna help you much apart from resume screening if you didn't work on something that is worthwhile. I personally know people who just took Google's offer and worked with some goddamn Kotlin instead of taking an offer in a startup, which would have given them a very interesting agentic AI experience that is in much more demand right now. Quality of work really matters. You cant just live with a tag can you? Also, at higher levels, getting into big tech is less competitive (does not mean easier) than SDE-1s. Senior people are less willing to go through interview grinds. You wanna do leetcode instead of having good times with your wife? 
+These days, there is an AI research+product lab (which I joined), there is a big tech giant which works with all sorts of things, and some other startups which I dont care about cuz they have PMF issues. To thrive in the new world, you need AI-native experience. If you are not getting it, its career suicide.
+
+At least in 2026, a startup is more stable and gives more job security compared to big tech in my personal experience. Big Tech was for stability + brand on resume, but given how many layoffs and how much uncertainty have started to emerge in Big Tech, it's no longer the only thing that you should be considering at all. The best place to work these days is an AI research lab or something like that. It is better to work at Google DeepMind or Microsoft Research or some small AI lab than a company that is still working in the old ways and hiring software engineers and has rigid systems. Also, your big tech tag is not gonna help you much apart from resume screening if you didn't work on something that is worthwhile. I personally know people who just took Google's offer and worked with some goddamn Kotlin instead of taking an offer in a startup, which would have given them a very interesting agentic AI experience that is in much more demand right now. Quality of work really matters. You cant just live with a tag can you? Also, at higher levels, getting into big tech is less competitive (does not mean easier) than SDE-1s. Senior people are less willing to go through interview grinds. You wanna do leetcode instead of having good times with your wife? 
 
 I am not saying to go work at startups. There are [tradeoffs](https://danluu.com/startup-tradeoffs/). But there is no shame in doing that if your offer from Oracle got revoked suddenly. Its better to be employed, then take a stupid masters in US hoping that you will do better next time. Maybe you look desperate when you join startups, but indeed [startups are act of some desperation](https://blog.eladgil.com/p/startups-are-an-act-of-desperation). 
 
 Personally, I had very competitive offers in India. I actually have taken a pay cut to join Sqwish in UK! I am not even sure whether we will survive beyond 2 years. Thats the difference that I myself will have to make. And I personally think, its an experience worth having. I will grow at the speed of light, will get opportunity to work with awesome people and shape culture of the company, and solve some really fucking hard technical problems. What else to ask for? 
+
+Choosing the right company is very important now, and its extremely hard as well. Its time to accelerate. We dont know what the next 6 months will look like, and I cant even imagine the next decade. Its a quantum leap that humans are going to make with AI.
 
 ## Looking for unicorns
 

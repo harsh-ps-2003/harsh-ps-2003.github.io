@@ -3,7 +3,7 @@ title = "cutting that inference cost"
 date = 2026-04-23
 +++
 
-Who doesn't want lightning fast AI responses? You don't really want to serve responses slower than human typing speeds. Inference is hard. And, it's not a model problem, it doesn't differentiate between 1 and 1M requests, its scheduling problem. 
+Who doesn't want lightning fast AI responses? You don't really want to serve responses slower than human typing speeds. Inference is hard. And, it's not a model problem, it doesn't differentiate between 1 and 1M requests, its scheduling problem, revolving back to depths of engineering.
 
 When the model is downloaded, we get list of artifacts, and using those ingredients and recipe we make inference out of it. Depending on what inference engine we use (vLLM, SGLang, TensorRT), they have different ways to load and serve the model. The biggest file (atleast in case of Gemma 4 that I downloaded) was [model.safetensors](https://github.com/safetensors/safetensors) which actually holds the model weights (it's a bloody large JSON file). The config.json has models entire architecture (like number of attention heads, number of layers, what kind of attention, size of vocabulary, etc).  The inference engine takes the artifacts and put them to GPU (cudamemcpy shit). so lamma is pretty fast. vLLM can take some minutes as it compiles the model, a large import overhead and also a much heavier initialization for better scheduling and concurrency (important for the pre-filled decoding and the serving part). vLLM is pretty cool as it has [PagedAttension which is adopted from OS](https://arxiv.org/pdf/2309.06180) so it boasts nearly zero memory waste. 
 
@@ -13,6 +13,34 @@ In lamma.cpp, they use mmap (OS manages the memory by holding weights in SSD and
 * Next-Token Prediction - Decoder-only models are structurally optimized for autoregressive text generation
 * Seamless Context - Instead of using an encoder to process a prompt and a decoder to respond, decoder-only models handle both by treating your prompt as the beginning of the sequence and simply letting the model continue writing
 * Better Scaling - Empirical evidence and industry scaling laws (like those that built GPT models) have shown that decoder-only models scale incredibly well in performance as you increase their parameters and training data
+
+Typical GPT-2 decoder-only architecture :
+```python
+tok_emb = self.transformer.wte(idx) # token embeddings of shape (b, t, n_embd)
+pos_emb = self.transformer.wpe(pos) # position embeddings of shape (t, n_embd)
+x = self.transformer.drop(tok_emb + pos_emb)
+for block in self.transformer.h:
+    x = block(x)
+x = self.transformer.ln_f(x)
+logits = self.lm_head(x)
+return logits
+```
+
+A zoomed in transformer block :
+```python
+class Block(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.ln_1 = LayerNorm(config.n_embd, bias=config.bias)
+        self.attn = CausalSelfAttention(config)
+        self.ln_2 = LayerNorm(config.n_embd, bias=config.bias)
+        self.mlp = MLP(config)
+
+    def forward(self, x):
+        x = x + self.attn(self.ln_1(x))
+        x = x + self.mlp(self.ln_2(x))
+        return x
+```
 
 ## Anistropy
 

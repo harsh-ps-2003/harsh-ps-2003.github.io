@@ -12,24 +12,24 @@ I just saw an [awesome Go concurrency visualization](https://divan.dev/posts/go_
 When [Communicating Sequential Processes](https://www.cs.cmu.edu/~crary/819-f09/Hoare78.pdf) came, the main thing it did was making communication the foundation of concurrent programming. So, if you want to communicate with 2 processes, you should always do it using fixed defined channel, instaed of directly sharing memory. It was one of the core ideas of the paper. There were many languages born out of the paper. [Go’s concurrency model is influenced by Communicating Sequential Processes](https://go.dev/doc/faq#csp), where independently executing processes coordinate through communication. [Go makes channels first-class values](https://go.dev/ref/spec#Channel_types), although channels are not the only synchronization mechanism available. mutexes and atomics are also valid tools.
 
 ```
-goroutine                                          goroutine
-        │                                                  │
-        ▼                                                  ▼
-┌──────────────┐    ┌──────────────┐              ┌──────────────┐    ┌──────────────┐
-│  Process P1  │    │  Channel C1  │              │  Process P2  │    │  Channel C2  │
-└──────┬───────┘    └──────┬───────┘              └──────┬───────┘    └──────┬───────┘
-       │                   │                             │                   │
-       │─── Sends data ───>│                             │                   │
-       │                   │                             │                   │
-       │                   │── Passes data to Process P2 ─>│                   │
-       │                   │                             │                   │
-       │                   │                             │─── Sends data ───>│
-       │                   │                             │                   │
-       │<── Passes data back to Process P1 ──────────────│                   │
-       │                   │                             │                   │
-┌──────┴───────┐    ┌──────┴───────┐              ┌──────┴───────┐    ┌──────┴───────┐
-│  Process P1  │    │  Channel C1  │              │  Process P2  │    │  Channel C2  │
-└──────────────┘    └──────────────┘              └──────────────┘    └──────────────┘
+goroutine                                    goroutine
+    │                                            │
+    ▼                                            ▼
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│  Process P1  │    │  Channel C1  │    │  Process P2  │    │  Channel C2  │
+└──────┬───────┘    └──────┬───────┘    └──────┬───────┘    └──────┬───────┘
+       │                   │                   │                   │
+       │── Sends data ────>│                   │                   │
+       │                   │                   │                   │
+       │                   │── Passes data ───>│                   │
+       │                   │                   │                   │
+       │                   │                   │── Sends data ────>│
+       │                   │                   │                   │
+       │<───────────────── Passes data back ───│                   │
+       │                   │                   │                   │
+┌──────┴───────┐    ┌──────┴───────┐    ┌──────┴───────┐    ┌──────┴───────┘
+│  Process P1  │    │  Channel C1  │    │  Process P2  │    │  Channel C2  │
+└──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
 ```
 
 ## Some basics
