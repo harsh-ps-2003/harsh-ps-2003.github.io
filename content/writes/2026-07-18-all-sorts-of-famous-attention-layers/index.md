@@ -118,6 +118,37 @@ output = weights @ V     # n×d
 ```
 The softmax sits between the two matrix multiplications. You can't skip computing the n×n scores matrix because softmax needs all n scores in each row to produce each normalized weight.
 
+```python
+# Standard softmax attention (for comparison)
+def forward(self, x, mask=None, past_kv=None):
+    b, t, d = x.shape
+    d_head = d // self.num_heads
+    h = self.num_heads
+    qkv = self.qkv_proj(x)
+
+    q = qkv[:, :, :d].view(b, t, h, d_head).transpose(1, 2)
+    k = qkv[:, :, d:2*d].view(b, t, h, d_head).transpose(1, 2)
+    v = qkv[:, :, 2*d:].view(b, t, h, d_head).transpose(1, 2)
+
+    # KV cache: concat past keys/values
+    if past_kv is not None:
+        k = torch.cat((past_kv[0], k), dim=2)
+        v = torch.cat((past_kv[1], v), dim=2)
+
+    # O(t²) attention computation
+    scores = (q @ k.transpose(-1, -2)) / math.sqrt(d_head)
+    
+    if past_kv is None:  # prefill needs causal mask
+        causal_mask = torch.triu(torch.ones(t, t, dtype=bool, device=q.device), diagonal=1)
+        scores = scores.masked_fill(causal_mask, float('-inf'))
+
+    attn = scores.softmax(-1)  # this breaks associativity
+    o = attn @ v
+    o = o.transpose(1, 2).contiguous().view(b, t, d)
+
+    return self.o_proj(o), (k, v)
+```
+
 ### Self-Attension
 
 It's at the core of transformer models.  Clearly, as HBM (around 1.5 TB/s) is not the fastest thing off GPU (its not on GPU, its a chip nearby), the K,V being stored in it are problematic. So, its quadratic complexity for HBM accesses with respect to sequence length at inference is clearly bad at scale.  Lots of techniques to reduce the amount of KV data transferred between the GPU and the HBM. 
@@ -211,14 +242,21 @@ The coupling in softmax gave it expressiveness. the competition between keys (vi
 
 ### Linear Attention
 
-As softmax applied nonlinearity after Q·K product, coupling every query to every key, we have O(n^2^), that is full N×N attention matrix before applying softmax, as I explained earlier.
+As softmax applied nonlinearity after Q·K product, coupling every query to every key, we have O(n^2^), that is full N×N attention matrix before applying softmax, as I explained earlier. Linear attention trades expressiveness for efficiency. Softmax attention can express arbitrary attention patterns, any token can attend strongly to any other token. Linear attention's feature map constrains what patterns are representable. This is why modern hybrids (Kimi K3, Qwen3) use both! softmax layers for complex reasoning, linear layers for efficient long-range propagation.
 
-Linear attention flips this. It applies a feature map φ (such as ELU+1, or simply ReLU) to Q and K separately, before the dot product:
+Linear attention applies a feature map φ (such as ELU+1, or simply ReLU) to Q and K separately, before the dot product:
 
 ```
 Softmax:  Attention = softmax(QK^T / √d) V     # must compute N×N first
 Linear:   Attention = φ(Q)(φ(K)^T V)           # associativity trick
 ```
+
+I had an obvious question, why ELU+1 is used as the feature map and how linear attention still preserves the attention contract despite removing softmax? Both softmax and linear attention preserve the same fundamental contract, they just implement it differently:
+1. Make QK scores non-negative - Attention weights can't be negative (obviously). Softmax uses exp(x) which is always positive. Linear attention uses ELU+1, since ELU(x) ≥ -1 for all x, adding 1 guarantees non-negativity.
+2. Normalize by dividing by sum - We still divide by Σ φ(q)·φ(k_j) to get proper weights. This is often omitted from diagrams but it's there.
+3. Compute weighted average of values - Same as softmax
+
+Also, ELU(x) is smooth unlike ReLU which helps gradients. It approximates the exponential kernel that softmax uses. Softmax's exp() function creates a sharper distribution, small differences in scores become large differences in weights. ELU+1 is flatter, so the attention distribution is more diffuse. The model can't say "attend ONLY to this token" as sharply. This is interesting kernel trick. 
 
 Its the game of association. (AB)C = A(BC) from your Linear Algebra class. With softmax, you're forced into (QK^T^)V because softmax breaks associativity. Without softmax, you can compute (K^T^ V) first, that's a (d×N) × (N×d) = d×d matrix, independent of sequence length. Then multiply by Q. This means the growing history of K and V vectors can be folded into a fixed D×D state matrix S:
 ```python
@@ -228,9 +266,97 @@ for t in range(seq_len):
     S = S + φ(k_t).outer(v_t)      # update state: O(d²)
     o_t = φ(q_t) @ S               # query state: O(d²)
 ```
-You get it right! Constant memory, constant compute per token. No KV cache that grows with context.
+You get it right? Constant memory, constant compute per token. No KV cache that grows with context.
 
-If you see original paper, 
+```python
+
+# Linear attention equivalent
+def forward_linear(self, x, state=None):
+    b, t, d = x.shape
+    d_head = d // self.num_heads
+    h = self.num_heads
+    qkv = self.qkv_proj(x)
+
+    q = qkv[:, :, :d].view(b, t, h, d_head).transpose(1, 2)
+    k = qkv[:, :, d:2*d].view(b, t, h, d_head).transpose(1, 2)
+    v = qkv[:, :, 2*d:].view(b, t, h, d_head).transpose(1, 2)
+
+    # Apply feature map (ELU+1 is common)
+    q = F.elu(q) + 1
+    k = F.elu(k) + 1
+
+    if state is None:
+        state = torch.zeros(b, h, d_head, d_head, device=x.device)
+
+    # For each position, update state and compute output
+    outputs = []
+    for i in range(t):
+        # S += k_t ⊗ v_t  (outer product update)
+        state = state + torch.einsum('bhd,bhe->bhde', k[:, :, i], v[:, :, i])
+        # o_t = q_t @ S
+        o_t = torch.einsum('bhd,bhde->bhe', q[:, :, i], state)
+        outputs.append(o_t)
+
+    o = torch.stack(outputs, dim=2)  # b, h, t, d
+    o = o.transpose(1, 2).contiguous().view(b, t, d)
+
+    return self.o_proj(o), state  # state is fixed d×d, not growing KV cache
+```
+> Notice the difference! softmax attention returns (k, v) that grow with sequence length. Linear attention returns a fixed-size state matrix.
+
+If you see [original paper](tab:https://arxiv.org/pdf/2006.16236), they say `the cost per time-step for transformers scales with the square of the current sequence length` which might trip you up! Today we know Flash Attention makes softmax attention practical. Well the paper was released in 2020 (a different world altogether). 
+```python
+# 2020-era: recompute everything, no KV cache
+def generate_token(model, all_previous_tokens):
+    # Re-run full forward pass on ALL tokens
+    q, k, v = model.qkv_proj(all_previous_tokens)  # O(t × d)
+    
+    # Materialize full t×t attention matrix
+    attn_matrix = q @ k.T  # O(t² × d) compute, O(t²) memory
+    attn_matrix = softmax(attn_matrix)
+    output = attn_matrix @ v
+    
+    return output[-1]  # only need last token's output
+```
+Per-token decode cost was O(t²) without cache in 2020 which became O(t) with cache, and full sequence generation was O(N³) which now is O(N²). Rememeber, algorithmic complexity is not implementation complexity.
+
+### DeltaNet
+
+Look at Linear Attention State update :
+> S = S + φ(k_t).outer(v_t) # additive update
+
+Softmax Attention (KV Cache) :
+```
+Cache = [k₁, k₂, k₃, ..., kₙ]  # each token gets its own slot
+        [v₁, v₂, v₃, ..., vₙ]  # perfect isolation, O(N) memory
+```
+Linear attention (state matrix):
+```
+S = k₁⊗v₁ + k₂⊗v₂ + k₃⊗v₃ + ... + kₙ⊗vₙ  # all compressed into D×D
+```
+When you query with q_t, softmax can retrieve v₅ in isolation by attending only to k₅. Linear attention retrieves:
+```
+o_t = q_t @ S = q_t @ (k₁⊗v₁ + k₂⊗v₂ + ... + kₙ⊗vₙ)
+```
+The information from ALL previous tokens is superimposed. If k₃ and k₇ are similar, their values interfere, you can't cleanly separate them. This is called retrieval interference or memory interference. The D×D state matrix has finite capacity. With N tokens compressed into D² slots, information must overlap when N > D². Even before that limit, similar keys cause interference.
+
+[DeltaNet](tab:https://arxiv.org/pdf/2102.11174) addresses this by using the delta rule from associative memory literature, instead of pure addition. the insightful thing here is, instead of blindly adding k⊗v to the state, subtract what's already there for that key first:
+```
+# Linear attention (naive additive)
+S = S + k_t ⊗ v_t
+
+# DeltaNet (delta rule)
+S = S + k_t ⊗ (v_t - S @ k_t)
+#              ↑ this is the "delta" - the error/correction
+```
+The term (v_t - S @ k_t) is the delta, the difference between what we want to store (v_t) and what we'd currently retrieve for this key (S @ k_t).
+
+### Gated DeltaNet
+
+## Kimi Linear
+
+## Kimi K3
+
 ## What happens after for text generation? 
 
 Yeah, so the model actually did the job. The job of the model is to give out out probabilities. That's it. Generally, GPT architectures and all sorts of modern LLM architectures are decode-only, so there is no real encoder. The inputs are the prompts, and it simply generates the probabilities. It has nothing to do with text generation. After that, we have to pick those tokens that the model has generated. 
@@ -247,4 +373,6 @@ A fancier way of making the models' output more creative
 
 ## hybrid attention models need their kernels
 
-This is a practical titbit. Qwen3.5-2B uses a hybrid architecture, some layers are full quadratic attention (standard softmax), some are linear attention (avoiding the n² computation). Sounds great for efficiency. But without the flash-linear-attention CUDA kernels installed, the linear attention layers will fall back to a naive sequential torch loop, processing tokens one by one instead of in the efficient chunked/parallel form. The result is fuked up 5-6x worse speed loss. The linear attention layers are theoretically O(n) instead of O(n²). But the naive implementation is worse than a well-optimized O(n²) Flash Attention because Flash Attention's tiled memory access pattern is so cache-friendly that it beats an algorithmic advantage destroyed by poor memory access patterns. algorithmic complexity means nothing without implementation quality. A well-kernelized O(n²) beats a poorly-implemented O(n) every time on real hardware. This is why Flash Attention dominates! not because quadratic is somehow better, but because [Tri Dao spent years making the memory access pattern perfect for GPU cache hierarchies](https://web.stanford.edu/class/archive/cs/cs224n/cs224n.1244/slides/cs224n-2024-lecture18-deployment-and-efficiency.pdf).
+The code example shows the naive sequential loop for clarity. In practice, you'd use chunked parallel computation (which is what flash linear attention kernels do). The sequential form is pedagogically useful but would be slow without proper kernelization.
+
+To make this clearer, a practical titbit. Qwen3.5-2B uses a hybrid architecture, some layers are full quadratic attention (standard softmax), some are linear attention (avoiding the n² computation). Sounds great for efficiency. But without the flash-linear-attention CUDA kernels installed, the linear attention layers will fall back to a naive sequential torch loop, processing tokens one by one instead of in the efficient chunked/parallel form. The result is fuked up 5-6x worse speed loss. The linear attention layers are theoretically O(n) instead of O(n²). But the naive implementation is worse than a well-optimized O(n²) Flash Attention because Flash Attention's tiled memory access pattern is so cache-friendly that it beats an algorithmic advantage destroyed by poor memory access patterns. algorithmic complexity means nothing without implementation quality. A well-kernelized O(n²) beats a poorly-implemented O(n) every time on real hardware. This is why Flash Attention dominates! not because quadratic is somehow better, but because [Tri Dao spent years making the memory access pattern perfect for GPU cache hierarchies](https://web.stanford.edu/class/archive/cs/cs224n/cs224n.1244/slides/cs224n-2024-lecture18-deployment-and-efficiency.pdf).
