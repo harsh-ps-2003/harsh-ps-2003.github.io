@@ -101,7 +101,7 @@ Choosing the right company is very important now, and its extremely hard as well
 
 ## Looking for unicorns
 
-And all the best to people hiring FDEs! The overlap between a great engineer and someone you’d confidently put in front of a customer is too small. The tech worlds hottest new role is hardest to hire. There interview process is beyond broken. 
+And all the best to people hiring FDEs! The overlap between a great engineer and someone you’d confidently put in front of a customer is too small. The tech worlds hottest new role is hardest to hire. There interview process is beyond broken.
 
 https://www.kalzumeus.com/2011/10/28/dont-call-yourself-a-programmer/
 https://www.kalzumeus.com/2012/01/23/salary-negotiation/
