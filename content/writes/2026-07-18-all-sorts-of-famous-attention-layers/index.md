@@ -77,6 +77,10 @@ Attention Mechanisms
     └── Mamba-2
 ```
 
+![Attention patterns comparison](attention-patterns.png)
+
+The visualization makes the differences clear. Dense attention fills the entire matrix (O(n²)). Linear attention only tracks a diagonal state that grows with sequence position. Sparse attention skips positions. Flash Attention computes the same dense pattern but tiles it for better memory access. Paged Attention handles variable-length sequences with dynamic allocation. Local/Sliding Window attention restricts each token to only attend to nearby tokens.
+
 ## where to look? 
 Memory is the bottleneck in inference :
 * For every single token generated, the model must stream billions of parameters (weights) through the memory bus. The GPU spends more time moving data in and out of memory than doing actual mathematical calculations.
@@ -166,9 +170,15 @@ Require: Matrices Q, K, V e RNxd in HBM.
 
 You can [refer Multi-Head Attention in BERT for reference](https://github.com/huggingface/transformers/blob/f208766a6551d381475cd8eeed1256f9a5af7b65/src/transformers/models/bert/modeling_bert.py#L143). 
 
+![MQA vs GQA vs MHA vs MLA comparison](mqa-gqa-mha-mla.png)
+
+The diagram shows the progression. In MHA every head has its own K and V. In GQA groups of heads share K and V. In MQA all heads share a single K and V. In MLA the K and V are compressed through a latent projection before being used.
+
 ### Multi-Query Attention
 
 It's almost like Self-Attension. Just that Vi and Ki (i being used by each head) is not required. We can use same set of K and V across heads. So, just one K and one V tensor shared across all heads. Thus, [one head is all you need!](https://arxiv.org/pdf/1911.02150) So, a great optimization wrt to amount of data that would be required to be loaded via HBM. As the KV is cached as well, we need much less cache. Awesome! Less memory pressure (so you can batch more) and faster decoding on inference. But, there is a small accuracy drop as we have few params. Also, you have to train the model with MQA, can't just a MHA trained model and use MQA on inference. And, no Tensor parallelism as then we will kinda defeat the purpose by having KV replicated across clusters. 
+
+The tradeoff is clear. MQA gives you efficiency by sharing keys and values but you lose some of the nuanced token level interactions that separate heads would capture. Each head still has its own queries so it can focus on different aspects of the input but the shared keys and values mean less diversity in what gets attended to.
 
 You can [refer Falcon 7B for reference for MQA](https://github.com/huggingface/transformers/blob/f208766a6551d381475cd8eeed1256f9a5af7b65/src/transformers/models/falcon/modeling_falcon.py#L274)
 
@@ -176,17 +186,28 @@ You can [refer Falcon 7B for reference for MQA](https://github.com/huggingface/t
 
 Well, it's between MHA and MQA. Just adding another hyparam to the equation, pairing up (K, V) to some heads. This gives best of both world, a nice compromise balance between speed and accuracy.  4 and 8 were quite good. Interesting thing here is that MHA models can be uptrained (not really fine-tuning, just an upgrade) to GQA.  And clearly a better fit to tensor parallelism. 
 
+The way it works is that input queries get divided into groups. For each group a shared set of key and value representations is computed. Attention scores are calculated between the grouped queries and the shared key representations. The final output is a weighted sum of the shared value representations based on those attention scores. Then outputs of all query groups get combined to produce the final representation.
+
+GQA scales more effectively with sequence length than MHA. Llama and Mistral both use it. The grouping preserves more diversity than MQA while still being more efficient than full MHA.
+
 This can be [referenced from Llama 2](https://github.com/huggingface/transformers/blob/f208766a6551d381475cd8eeed1256f9a5af7b65/src/transformers/models/llama/modeling_llama.py#L209)
 
 ### Sliding Window Attention
 
 In vanilla attention, we compute attention score from all token, and at inference time we mask becuase we dont want decoding to look at the future. We have a [triangle shaped attention mask](https://medium.com/@sayedebad.777/mastering-mistral-ai-from-sliding-window-attention-to-efficient-inference-22d944384788) which is quadratic. What SWA does is that it limits the self attention computation to a fixed window so we get a fixed cached size. So, we can't see more than window size from previous token. KV cache becomes a rotating buffer. So, the max context size would be window size * number of layers, reducing attention complexity to linear. So, we are shortening the attention span. 
 
+Sliding window is just one type of sparse attention pattern. There are others worth knowing about. Strided attention has each token attend to every kth token which is useful for capturing periodic patterns. Reformer uses locality sensitive hashing to cluster similar queries and keys into buckets so queries only attend to keys in the same bucket giving O(n log n) complexity. BigBird combines random attention with local attention with global attention. Longformer uses local sliding window attention with task specific global attention where some tokens like CLS attend to all tokens while others use local attention.
+
+The tradeoff with sparse patterns is loss of global context. Fixed patterns may miss long range dependencies. Choosing the right sparsity pattern is task dependent. But for long sequences the memory savings are worth it. Reformer can handle 64K tokens. Longformer works well for summarizing legal contracts or books.
+
 You can refer [Mistral 7B paper](https://arxiv.org/pdf/2310.06825) and reference [sliding window causal mask code](https://github.com/huggingface/transformers/blob/f208766a6551d381475cd8eeed1256f9a5af7b65/src/transformers/masking_utils.py#L1118). 
 
 ### Flash Attenstion
 
 As we know, HBM memory is slower to on-GPU memory. Wouldn't it be better to run the Self-Attension computation on GPU itself (with minimal HBM accesses)? Thats exactly what flash attention does.
+
+The key insight is understanding the GPU memory hierarchy. Small SRAM has extremely high bandwidth around 19 TB/s but limited size around 20MB. HBM has higher capacity around 40GB but lower bandwidth around 1.5 TB/s. CPU DRAM has massive capacity over 1TB but much slower bandwidth around 12.8 GB/s. Flash Attention exploits this hierarchy by keeping intermediate results in fast SRAM instead of writing them to slow HBM.
+
 ```
 Load Q and K from HBM once
 Multiply Q and K, keep S in SRAM
@@ -197,6 +218,10 @@ And, parallize over batch size and number of heads.
 Taking N as sequence length, d as embedding length and M as size of SRAM (d<=M<=Nd),
 Flash Attention requires O(N^2^d^2^M^-1^) HBM accesses which still looks quadratic. But if M=N, then its O(Nd^2) HBM accesses, so linear wrt sequence length. This optimizes for forward and backward passes, so accelerate training. 
 
+The tiling strategy is clever. It divides Q, K, V into blocks sized to fit GPU SRAM. The outer loop loads blocks of K and V from slow HBM into fast SRAM. The inner loop processes Q blocks against the loaded K and V blocks. This enables processing sequences up to 4x longer than conventional attention because you never materialize the full N by N attention matrix.
+
+The fused kernel execution replaces the traditional multi step attention with a unified operation. It combines matrix multiply then scaling then masking then softmax then dropout then matrix multiply into one CUDA kernel. Intermediate results like QK transpose and softmax outputs stay in SRAM and registers. Only final attention outputs get written to HBM. This reduces HBM accesses by 10 to 20x compared to standard PyTorch implementations.
+
 Later, there was FlashAttension-2 that did some rewriting to reduce number of non-matmul operations to maximize GPU throughput. Also, it optimize operations for Multi-Query Attention and Grouped-Query Attention. Even more sequence parallelism. Its over staggering 9x faster than standard attention. 
 
 Refer the [FlashAttension Paper-1](https://arxiv.org/pdf/2205.14135) and [paper 2](https://arxiv.org/pdf/2307.08691). 
@@ -205,13 +230,29 @@ Refer the [FlashAttension Paper-1](https://arxiv.org/pdf/2205.14135) and [paper 
 
 It's a [famous vLLM optimization which enables the KV cache memory grows and shrinks dynamically for each inference request](https://www.youtube.com/watch?v=5ZlavKF_98U). 
 
+The problem with standard KV caching is that each request gets its own dedicated KV cache block. Tokens are appended sequentially forming a contiguous memory block. There is no sharing between sequences even if parts of their content are the same. This leads to memory waste due to fixed and unshared allocation and poor handling of varying prompt lengths across sequences.
+
+Paged Attention draws inspiration from virtual memory paging in operating systems. It introduces a separation between logical KV cache blocks which is the abstract token layout that each sequence sees and physical KV cache blocks which is the actual memory pages storing keys and values that may be shared across sequences. Each token's data is stored in small fixed size memory pages. Pages are dynamically allocated and mapped via a page table. Multiple logical sequences can share the same physical memory if their tokens match like a common prefix. This enables non contiguous memory access through logical to physical translation.
+
+Think of it like OS virtual memory where different processes see the same memory contents using their own mappings.
+
+During generation the attention mechanism gathers keys and values for a sequence by following its page table. Sequences with shared prefixes map to the same physical cache blocks. When a sequence diverges Paged Attention uses copy on write. The shared page is cloned. Only the diverging sequence gets the new page. Reference count for shared pages is decremented. This ensures efficient memory use while allowing flexibility in generation.
+
 THe KV cache without pagedAttention is a rectangle with batch vs max seq length. a lot of space wasted in the rectangle, because users dont really use the seq length to its max. we wanted to improve upon this device memory issue. pagedAttention allocates blocks in GPU memory. so you first load your model and see how much space you have left, and then everything else is filled with memory blocks. when new sequence comes in, we allocate as many blocks it needs for the prompt, and slowly grow them as needed.  The management of cache was kinda an old school OS problem in the hindsight. GPU memory fragmentation wastes memory and makes it difficult to increase batch size. So, Paged Attention simply divides the KV cache into fixed-size memory-aligned blocks (pages dont have memory between them), similar to virtual memory pages in operating systems and allocating pages reduces internal and external memory fragmentation.
 
 Refer the [paper](https://arxiv.org/pdf/2309.06180).
 
 ### Multi-Head Latent Attention
 
-GOt introduced in Deepseek v2 (also used in v3). This literally avoids caching K, V altogether. A low-rank representation of K and V learned during training is cached instead (LoRA like). This gives us much less KV cache use (90%+ savings). Also, as metrix size is also reduced, a good 5-6x inference speedup is there. And interestingly higher accuracy than MHA is achieved.
+Got introduced in Deepseek v2 (also used in v3). This literally avoids caching K, V altogether. A low-rank representation of K and V learned during training is cached instead (LoRA like). This gives us much less KV cache use (90%+ savings). Also, as metrix size is also reduced, a good 5-6x inference speedup is there. And interestingly higher accuracy than MHA is achieved.
+
+The key innovation is introducing learnable latent embeddings that act as intermediaries between queries keys and values. These latent embeddings capture high level abstract patterns and enable more efficient cross token interactions. Instead of attending to all input tokens the attention focuses on these latent embeddings leading to faster computation.
+
+The mechanics work like this. A fixed number of latent embeddings are initialized as part of the model. Input queries attend to these latent embeddings instead of the entire sequence which drastically reduces the number of pairwise interactions. The latent embeddings then attend to the original keys and values acting as intermediaries that distill context into meaningful patterns. Finally the results get projected back to the token space preserving critical token level information.
+
+Compared to MHA which suffers from quadratic complexity MLA achieves linear or near linear complexity by compressing the attention space. Compared to MQA which uses a single shared key value pair MLA maintains diversity by having latent embeddings act as a middle layer allowing richer context capture. Compared to GQA which focuses on groups and can miss global dependencies MLA's latent embeddings inherently capture global patterns acting as global summaries.
+
+The tradeoff is that compressing input tokens into latent embeddings may lose fine grained details critical for some tasks. The performance also depends on how effectively the latent embeddings are initialized and trained.
 
 ## Linear Magic
 
@@ -594,7 +635,27 @@ Kimi Linear doesn't use KDA alone. It interleaves KDA layers with Multi-Head Lat
 * Up to 6× decoding throughput at 1M context length
 * Better quality than pure MLA on benchmarks
 
-The paper also replaces the standard MLP with Mixture-of-Experts (MoE), but that's orthogonal to the attention innovation.
+The paper also replaces the standard MLP with [Mixture-of-Experts (MoE)](https://arxiv.org/abs/1701.06538), but that's orthogonal to the attention innovation.
+
+### The MoE Landscape
+
+Speaking of MoE, here's where things get interesting. Kimi K3 isn't just big, it's efficiently big.
+
+![MoE activation comparison](moe-landscape.png)
+
+The activation percentage tells you how much of the model actually runs per token:
+* Kimi K3: 1.8% activation (104B of 2.8T parameters)
+* MiniMax M3: 3.1% activation
+* Inkling (Thinking Machines): 3.1% activation  
+* Nemotron 3 Ultra (NVIDIA): 4.3% activation
+
+K3 is currently the biggest open MoE model, but what's more impressive is the small activation ratio. Lower activation means faster inference and lower memory bandwidth requirements. The 1.8% figure means K3 activates roughly half the proportion of parameters that competitors do, while still achieving competitive quality.
+
+The scaling from K2 to K3 tells the story:
+
+![Kimi K2 to K3 scaling](kimi-k2-k3-scaling.png)
+
+K2 had 1T parameters with 384 experts, activating 8 per token (2% activation). K3 scaled to 2.8T with 896 experts, activating 16 per token. The math: they nearly tripled the total parameters but only doubled the activated parameters. More experts, sparser activation, better efficiency. This is the MoE scaling playbook - grow the expert pool faster than you grow the activation budget.
 
 This worked reasonably well but had a problem: the transition between linear and softmax layers created a representation mismatch. Information compressed into the D×D state matrix had to be "unpacked" for softmax layers to use effectively.
 
@@ -604,6 +665,10 @@ Previous hybrid approaches (like the early Kimi experiments) stacked linear and 
 
 K3 scales the Kimi Linear architecture to 2.8 trillion parameters with 104 billion activated (it's an MoE model). To put that in perspective: one K3 contains roughly 22,580 GPT-2 models worth of parameters.
 But the interesting part isn't the scale. It's what they scaled. K3 uses the same KDA + MLA hybrid from Kimi Linear, but with several additions:
+
+![Kimi K3 architecture](kimi-k3-architecture.png)
+
+The diagram shows the full picture. On the left, the overall architecture: 93 transformer blocks with the 3:1 KDA/MLA ratio (layers 1-3 use KDA, layer 4 uses MLA, repeat). Layer 1 is dense, layers 2-93 use LatentMoE. On the right, the two attention mechanisms side by side - Gated MLA (softmax-based with latent compression) and KDA (the delta rule with per-channel gating via α and β).
 
 ### Native Multimodality
 
