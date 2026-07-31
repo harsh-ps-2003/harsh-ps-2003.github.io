@@ -10,7 +10,7 @@ This is a long virtual resume that contains everything I did since I chose Softw
 *Member of Technical Staff*                                                         
 **Sqwish AI**                                            
 Building low-latency contextual bandit inference for enabling sub-50ms routing decisions for AI agents.
-> Skills involved - Python, Rust, vLLM, Docker, Kubernetes, Helm, Prometheus, OpenTelemetry, Grafana, ArgoCD, Redis, RL, Inference Optimizations
+> Skills involved - Python, Rust, vLLM, Docker, Kubernetes, Helm, Prometheus, OpenTelemetry, Grafana, ArgoCD, Teleport, Redis, RL, Inference Optimizations
 
 ---
 
