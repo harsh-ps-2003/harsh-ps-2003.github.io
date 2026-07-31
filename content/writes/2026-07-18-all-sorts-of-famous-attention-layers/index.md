@@ -149,6 +149,8 @@ def forward(self, x, mask=None, past_kv=None):
     return self.o_proj(o), (k, v)
 ```
 
+> Softmax Attention has perfect recoverability. Query k₅, get v₅.
+
 ### Self-Attension
 
 It's at the core of transformer models.  Clearly, as HBM (around 1.5 TB/s) is not the fastest thing off GPU (its not on GPU, its a chip nearby), the K,V being stored in it are problematic. So, its quadratic complexity for HBM accesses with respect to sequence length at inference is clearly bad at scale.  Lots of techniques to reduce the amount of KV data transferred between the GPU and the HBM. 
@@ -320,6 +322,8 @@ def generate_token(model, all_previous_tokens):
 ```
 Per-token decode cost was O(t²) without cache in 2020 which became O(t) with cache, and full sequence generation was O(N³) which now is O(N²). Rememeber, algorithmic complexity is not implementation complexity.
 
+> Linear Attention has no recoverability guarantee. Query k₅, get a mixture influenced by all tokens with similar keys.
+
 ### DeltaNet
 
 Look at Linear Attention State update :
@@ -338,9 +342,9 @@ When you query with q_t, softmax can retrieve v₅ in isolation by attending onl
 ```
 o_t = q_t @ S = q_t @ (k₁⊗v₁ + k₂⊗v₂ + ... + kₙ⊗vₙ)
 ```
-The information from ALL previous tokens is superimposed. If k₃ and k₇ are similar, their values interfere, you can't cleanly separate them. This is called retrieval interference or memory interference. The D×D state matrix has finite capacity. With N tokens compressed into D² slots, information must overlap when N > D². Even before that limit, similar keys cause interference.
+The information from all previous tokens is superimposed. If k₃ and k₇ are similar, their values interfere, you can't cleanly separate them. This is called retrieval interference or memory interference. The D×D state matrix has finite capacity. With N tokens compressed into D² slots, information must overlap when N > D². Even before that limit, similar keys cause interference.
 
-[DeltaNet](tab:https://arxiv.org/pdf/2102.11174) addresses this by using the delta rule from associative memory literature, instead of pure addition. the insightful thing here is, instead of blindly adding k⊗v to the state, subtract what's already there for that key first:
+DeltaNet addresses this by using the delta rule from associative memory literature, instead of pure addition. the insightful thing here is, instead of blindly adding k⊗v to the state, subtract what's already there for that key first:
 ```
 # Linear attention (naive additive)
 S = S + k_t ⊗ v_t
@@ -351,11 +355,280 @@ S = S + k_t ⊗ (v_t - S @ k_t)
 ```
 The term (v_t - S @ k_t) is the delta, the difference between what we want to store (v_t) and what we'd currently retrieve for this key (S @ k_t).
 
+Why this helps:
+
+* If k_t is similar to a previous key, S @ k_t already contains that value
+* We only add the correction, not the full value
+* This reduces interference from similar keys
+* It's inspired by Hopfield networks and fast weight programmers
+
+> This has better recoverability. The delta rule acts like an error correcting update, it tries to make S @ k = v hold for each stored (k, v) pair
+
+As we see in [Fast Weight Programmers](https://arxiv.org/abs/2102.11174): 
+
+> "when the sequence length exceeds storage capacity, the model may end up in an overcapacity regime. To properly operate under such a regime, the model should learn to dynamically interact with the memory contents and selectively decide which key-value associations to keep and which ones to delete. The purely additive instruction may be inappropriate for this purpose… endlessly adding new associations to a memory of finite size, as in Eq. 17, inevitably will reach a limit."
+
+The regime that makes linear attention attractive (N >> D) also exposes its main limitation. Once the state exceeds its effective capacity, associations begin to interfere because the update is purely additive, nothing ever leaves the cache.
+
+```python
+def forward(self, x, mask=None, cache=None):
+    b, t, d = x.shape
+    d_head = d // self.num_heads
+    h = self.num_heads
+    qkv = self.qkv_proj(x)
+
+    q = qkv[:, :, :d].view(b, t, h, d_head).transpose(1, 2)
+    k = qkv[:, :, d:2*d].view(b, t, h, d_head).transpose(1, 2)
+    v = qkv[:, :, 2*d:].view(b, t, h, d_head).transpose(1, 2)
+
+    q = F.normalize(F.silu(q), dim=-1)     
+    k = F.normalize(F.silu(k), dim=-1)     
+    beta = torch.sigmoid(self.w_beta(x)).view(b, 1, t, 1)  # per-token write strength
+
+    S = cache if cache is not None else 0.0  
+
+    v_old = k @ S              # read what's currently stored at this key
+    u = beta * (v - v_old)     # the delta: only what's actually new
+    S = S + k.transpose(-1, -2) @ u  # write the correction
+
+    o = q @ S                  # read with query
+    o = o.transpose(1, 2).contiguous().view(b, t, d)
+    return self.o_proj(o), S
+```
+
+The update first asks what information the current key retrieves from the cache (v_old = k @ S). It subtracts that existing information from the value we want to store, multiplies by beta (write strength), and adds the result back. Old information is removed and new information is written in its place.
+
 ### Gated DeltaNet
+
+[Gated DeltaNet](https://arxiv.org/abs/2406.06484) adds gating to control how much of the old state to retain vs. overwrite:
+```python
+# Gated DeltaNet
+β = sigmoid(gate_proj(x))  # forget gate, per-token
+S = β * S + k_t ⊗ (v_t - β * S @ k_t)
+```
+The gate β controls:
+* β ≈ 1 - retain most of old state (long-term memory)
+* β ≈ 0 - forget old state (fresh start)
+
+This is analogous to LSTM's forget gate. it lets the model learn when to forget rather than accumulating everything forever. The model can now selectively decide which associations to keep and which to delete, addressing the overcapacity problem Schlag identified.
+
+### RetNet
+
+While DeltaNet was figuring out the delta rule, Microsoft was working on a different angle. [RetNet](https://arxiv.org/abs/2307.08621) (Retentive Network) came out in 2023 with a bold claim, they literally called it a successor to Transformer.
+
+The core idea is the retention mechanism, which is basically linear attention with exponential decay. Instead of the ELU+1 feature map, RetNet uses a decay factor γ that makes older tokens contribute less:
+
+```python
+# RetNet retention (simplified)
+S_t = γ * S_{t-1} + k_t ⊗ v_t
+o_t = q_t @ S_t
+```
+
+The γ (typically 0.9-0.99) acts like a built-in forgetting mechanism. Older associations naturally fade away, which addresses the overcapacity problem without needing the delta rule's explicit correction.
+
+What made RetNet interesting was the three computation paradigms:
+- Parallel mode: For training, unfold the recurrence into a matrix form (like standard attention but with a decay mask)
+- Recurrent mode: For inference, O(1) per token like linear attention
+- Chunkwise mode: Hybrid for long sequences - parallel within chunks, recurrent across chunks
+
+Sound familiar? This is exactly the chunking trick that DeltaNet later formalized. RetNet got there first, though with a simpler (non-delta) update rule.
+
+In practice, RetNet showed up in Microsoft's TorchScale library and influenced later work like YOCO (You Only Cache Once). The Gated RetNet variant added gating similar to Gated DeltaNet. But RetNet never quite took off in production the way the authors hoped, the successor to Transformer claim was kinda premature. Still, the multi-paradigm formulation was influential.
+
+### RWKV
+
+[RWKV](https://arxiv.org/abs/2305.13048) is the weird one. It's not quite attention, not quite an RNN, but somehow both. The name comes from its four main parameters, Receptance, Weight, Key, Value.
+
+The project started as a community effort by BlinkDL and grew into something surprisingly capable. RWKV-4 was the first version that really worked, scaling up to 14B parameters - the largest dense RNN ever trained at the time.
+
+The core mechanism is time-mixing with learned decay:
+```python
+# RWKV time-mixing (simplified)
+wkv_t = Σ_{i=1}^{t-1} e^{-(t-1-i)w + k_i} * v_i + e^{u + k_t} * v_t
+o_t = sigmoid(r_t) * wkv_t
+```
+
+The `w` is a learned decay (like RetNet's γ but in log-space), `u` is a bonus for the current token, and `r` (receptance) gates the output. It's inspired by Apple's AFT (Attention Free Transformer) but with crucial modifications that make it actually trainable.
+
+What's cool about RWKV:
+- 100% attention-free: No QK^T computation at all
+- Parallelizable training: Can be formulated as a convolution
+- RNN inference: O(1) memory and compute per token
+- Actually deployed: There's a whole ecosystem RWKV-Runner for local inference, rwkvserve for production APIs
+
+The architecture kept evolving:
+- RWKV-5 "Eagle" and RWKV-6 "Finch": Added matrix-valued states and dynamic recurrence
+- RWKV-7 "Goose": Incorporated a generalized delta rule (yes, the same delta rule from DeltaNet!)
+
+From the [RWKV-7 paper](https://arxiv.org/abs/2503.14456):
+> "RWKV-7 introduces a newly generalized formulation of the delta rule with vector-valued gating and in-context learning rates"
+
+So the field is converging, RWKV started from RNNs and added delta-rule-like updates, while DeltaNet started from linear attention and added gating. They're meeting in the middle.
+
+RWKV is actually used in production. The community has trained models up to 14B parameters, there are multilingual variants, music generation models, and even edge deployment with quantization. It's one of the few non-Transformer architectures that has a real user base beyond research papers.
+
+#### The Prefill Problem
+
+All the code I've shown so far has a dirty secret - it's sequential. Look at the linear attention loop:
+
+```python
+for i in range(t):
+    S = S + k[:, :, i] @ v[:, :, i]  # can't parallelize - each step depends on previous S
+    o = q[:, :, i] @ S
+```
+Each step depends on the previous state. GPUs hate this. They want big parallel matrix multiplies, not tiny sequential ones. This is why naive linear attention is slower than Flash Attention in practice despite being O(n) vs O(n²).
+
+The [DeltaNet](tab:https://arxiv.org/pdf/2406.06484) paper solves this with chunking. Split the sequence into chunks of size C, then within each chunk, do normal quadratic attention (parallel, GPU-friendly) and across chunks, use the recurrent state update (sequential, but only T/C steps instead of T)
+
+```python
+S = torch.zeros(b, h, dh, dh) if cache is None else cache
+outs = []
+for i in range(t // C):
+    q_c = q[:, :, i*C:(i+1)*C]  
+    k_c = k[:, :, i*C:(i+1)*C]  
+    v_c = v[:, :, i*C:(i+1)*C]
+
+    # contribution from all previous chunks (recurrent)
+    o_prev = q_c @ S
+    
+    # contribution from within this chunk (parallel attention)
+    attn = (q_c @ k_c.transpose(-1, -2)).tril()  # masked
+    o_curr = attn @ v_c
+        
+    o = o_prev + o_curr
+    
+    # update state for next chunk
+    S = S + k_c.transpose(-1, -2) @ v_c
+    outs.append(o)
+
+o = torch.cat(outs, dim=2)
+```
+The cost splits into two parts:
+* Fixed: 2Ld² for state updates (doesn't depend on C)
+* Growing: 2LCd for the within-chunk attention matrices
+
+Setting C=N recovers full O(N²) attention. Setting C=1 gives pure sequential linear attention. In practice, C=64 or C=128 works well because that's the granularity where tensor cores (UMMA instructions) operate efficiently.
+
+#### Chunking DeltaNet is Harder
+
+The chunking trick doesn't directly work for DeltaNet because the delta correction needs the current state:
+
+```
+v_old = k_i @ S  # need S at this exact moment
+u_i = beta * (v - v_old)
+```
+
+You can't batch this naively. The paper's solution is a mathematical reparameterization that rewrites the delta update as a matrix recurrence with Householder-like transition matrices. This allows computing all C deltas within a chunk simultaneously using a forward substitution trick.
+
+I won't pretend I understood this tbh. It took me hours to grasp a little. The key insight is that the sequential dependency can be "unrolled" into a form where you solve a triangular system once per chunk, then everything else parallelizes.
+
+The full chunked DeltaNet forward pass looks something like:
+```python
+def chunk_delta_rule_forward(Q, K, V, beta, C):
+    L, d = Q.shape
+    Q, K, V = map(lambda x: x.reshape(-1, C, d), [Q, K, V])
+    beta = beta.reshape(-1, C)
+    
+    K_beta = K * beta.unsqueeze(-1)
+    V_beta = V * beta.unsqueeze(-1)
+    
+    # Forward substitution for the correction terms
+    T = -(K_beta @ K.t()).tril(-1)
+    for i in range(1, C):
+        T[i, :i] = T[i, :i] + (T[i, :, None] * T[:, :i]).sum(-2)
+    T += torch.eye(C)
+    
+    W = T @ K_beta
+    U = T @ V_beta
+
+    # Chunked parallel computation
+    S = torch.zeros(d, d)
+    O = torch.empty_like(V)
+    
+    for i in range(L // C):
+        q_i, k_i, w_i = Q[i], K[i], W[i]
+        u_i = U[i] - w_i @ S  # corrections for this chunk
+        
+        o_inter = q_i @ S  # cross-chunk contribution
+        A_i = (q_i @ k_i.t()).tril()
+        o_intra = A_i @ u_i  # within-chunk contribution
+        
+        S += k_i.t() @ u_i  # update state
+        O[i] = o_intra + o_inter
+        
+    return O.reshape(L, d)
+```
+The forward substitution (the T matrix computation) is the magic that makes this work. It precomputes how each position's delta affects subsequent positions within the chunk.
+
+####  Kimi Delta Attention (KDA)
+
+The core innovation is Kimi Delta Attention (KDA), which extends Gated DeltaNet with fine-grained gating. Instead of a single scalar decay β, KDA learns a separate decay value for each channel:
+```python
+# Gated DeltaNet: single scalar gate
+β = sigmoid(gate_proj(x))  # shape: (batch, seq, 1)
+S = β * S + k_t ⊗ (v_t - β * S @ k_t)
+# KDA: per-channel gate (fine-grained)
+α = sigmoid(alpha_proj(x))  # shape: (batch, seq, d_head)
+# each dimension of the state decays at its own rate
+```
+Why does this matter? The D×D state matrix has limited capacity. With a single scalar decay, all channels forget at the same rate. With per-channel decay, the model can:
+* Keep some channels as long-term memory (high α)
+* Use other channels as short-term scratch space (low α)
+* Learn which information needs persistence vs. which can be overwritten
 
 ## Kimi Linear
 
+This was Moonshot AI's approach before K3. The idea was simple, if softmax attention is expensive at long contexts and linear attention loses expressiveness, why not use both?
+
+[Kimi Linear](tab:https://arxiv.org/abs/2510.26692) made a bold claim :
+> "We introduce Kimi Linear, a hybrid linear attention architecture that, for the first time, outperforms full attention under fair comparisons across various scenarios—including short-context, long-context, and reinforcement learning (RL) scaling regimes."
+
+They used a hybrid architecture:
+- Early layers: Linear attention (cheap, handles long-range dependencies)
+- Later layers: Softmax attention (expensive, but more expressive for final reasoning)
+The intuition is that early layers do broad gathering of information across the context, while later layers do precise reasoning that benefits from softmax's sharp attention patterns.
+
+
+Kimi Linear doesn't use KDA alone. It interleaves KDA layers with Multi-Head Latent Attention (MLA) layers in a 3:1 ratio. The obvious question that would come to anyones mind is why MLA? MLA (from DeepSeek) is a softmax-based attention that uses low-rank projections to reduce KV cache size. By mixing KDA (linear, O(1) state) with MLA (softmax, but compressed), Kimi Linear gets:
+* 75% reduction in KV cache compared to full MLA
+* Up to 6× decoding throughput at 1M context length
+* Better quality than pure MLA on benchmarks
+
+The paper also replaces the standard MLP with Mixture-of-Experts (MoE), but that's orthogonal to the attention innovation.
+
+This worked reasonably well but had a problem: the transition between linear and softmax layers created a representation mismatch. Information compressed into the D×D state matrix had to be "unpacked" for softmax layers to use effectively.
+
+Previous hybrid approaches (like the early Kimi experiments) stacked linear and softmax layers in separate sections. Kimi Linear interleaves them throughout, which helps maintain representation compatibility. The 3:1 ratio was determined empirically, enough KDA for efficiency, enough MLA for expressiveness.
+
 ## Kimi K3
+
+K3 scales the Kimi Linear architecture to 2.8 trillion parameters with 104 billion activated (it's an MoE model). To put that in perspective: one K3 contains roughly 22,580 GPT-2 models worth of parameters.
+But the interesting part isn't the scale. It's what they scaled. K3 uses the same KDA + MLA hybrid from Kimi Linear, but with several additions:
+
+### Native Multimodality
+
+K3 is natively multimodal - vision is built into the architecture from the start, not bolted on. The linear attention layers handle the massive context that images require (a single high-res image can be thousands of tokens), while MLA layers do the cross-modal reasoning
+
+### Stable LatentMoE
+Training a 2.8T parameter model is hard. K3 uses a Stable LatentMoE framework that combines:
+- The MuonClip optimizer (from [Kimi K2](tab:https://arxiv.org/pdf/2507.20534)) for training stability
+- Careful expert routing to prevent collapse
+- Latent representations that compress the expert outputs
+
+### 1M+ Context Window
+The combination of KDA's O(1) state and MLA's compressed KV cache enables a 1 million token context window that's actually usable in practice. At 1M tokens, full softmax attention would require ~1TB of KV cache memory. K3's hybrid approach reduces this to something that fits on a single node
+
+### The Progression
+Looking at the evolution:
+| Model | Attention | Key Innovation |
+|-------|-----------|----------------|
+| Linear Attention | Additive state | O(1) memory, but interference |
+| DeltaNet | Delta rule | Better recoverability |
+| Gated DeltaNet | Scalar gate | Selective forgetting |
+| KDA (Kimi Linear) | Per-channel gate | Fine-grained memory control |
+| K3 | KDA + MLA hybrid | Scale + multimodality |
+
+Each step adds capacity to address a concrete limitation in the preceding system. This isn't "make it bigger and hope" - it's targeted architectural improvements that compound.
 
 ## What happens after for text generation? 
 
@@ -373,6 +646,13 @@ A fancier way of making the models' output more creative
 
 ## hybrid attention models need their kernels
 
-The code example shows the naive sequential loop for clarity. In practice, you'd use chunked parallel computation (which is what flash linear attention kernels do). The sequential form is pedagogically useful but would be slow without proper kernelization.
+The code example I have shared shows the naive sequential loop for clarity. In practice, you'd use chunked parallel computation (which is what flash linear attention kernels do). The sequential form is pedagogically useful but would be slow without proper kernelization.
+
+K3 demonstrates that linear attention variants can scale to frontier model sizes when combined thoughtfully with softmax attention. The hybrid approach isn't a compromise, it's genuinely better than either pure approach for long-context workloads. The catch? You need the kernels. All of this efficiency is theoretical without optimized CUDA implementations. Moonshot open-sourced their KDA kernel and vLLM integration, which is why Kimi Linear actually achieves the claimed speedups in practice.
 
 To make this clearer, a practical titbit. Qwen3.5-2B uses a hybrid architecture, some layers are full quadratic attention (standard softmax), some are linear attention (avoiding the n² computation). Sounds great for efficiency. But without the flash-linear-attention CUDA kernels installed, the linear attention layers will fall back to a naive sequential torch loop, processing tokens one by one instead of in the efficient chunked/parallel form. The result is fuked up 5-6x worse speed loss. The linear attention layers are theoretically O(n) instead of O(n²). But the naive implementation is worse than a well-optimized O(n²) Flash Attention because Flash Attention's tiled memory access pattern is so cache-friendly that it beats an algorithmic advantage destroyed by poor memory access patterns. algorithmic complexity means nothing without implementation quality. A well-kernelized O(n²) beats a poorly-implemented O(n) every time on real hardware. This is why Flash Attention dominates! not because quadratic is somehow better, but because [Tri Dao spent years making the memory access pattern perfect for GPU cache hierarchies](https://web.stanford.edu/class/archive/cs/cs224n/cs224n.1244/slides/cs224n-2024-lecture18-deployment-and-efficiency.pdf).
+
+## Conclusion
+
+Softmax → Linear (efficiency, but interference) → DeltaNet (correction) 
+→ Gated (forgetting) → KDA (fine-grained) → Hybrids (best of both)
