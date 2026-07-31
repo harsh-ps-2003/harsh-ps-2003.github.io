@@ -12,6 +12,7 @@ feed_filenames = ["atom.xml", "rss.xml"]
 
 [markdown]
 smart_punctuation = true
+insert_anchor_links = "heading"
 
 [markdown.highlighting]
 style = "class"
