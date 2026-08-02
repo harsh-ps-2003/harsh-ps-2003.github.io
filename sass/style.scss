@@ -80,7 +80,7 @@ body {
     font-family: var(--font-secondary);
     font-size: var(--font-scale);
     margin: auto;
-    padding: 20px;
+    padding: 15px;
     max-width: var(--width);
     text-align: left;
     background-color: var(--background-color);
@@ -88,6 +88,10 @@ body {
     overflow-wrap: break-word;
     line-height: 1.5;
     color: var(--text-color);
+    
+    @media (min-width: 600px) {
+        padding: 20px;
+    }
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -112,7 +116,11 @@ a:hover {
 // Header styling - centered title, left-aligned nav like Bear
 header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
+    
+    @media (min-width: 600px) {
+        margin-bottom: 40px;
+    }
 }
 
 nav {
@@ -121,7 +129,11 @@ nav {
     align-items: center;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 30px;
+    margin-top: 20px;
+    
+    @media (min-width: 600px) {
+        margin-top: 30px;
+    }
 }
 
 nav a {
@@ -375,15 +387,19 @@ footer {
     }
 
     h1 {
-        font-size: 2.8em;
+        font-size: 1.8em;
         font-weight: 700;
         margin: 0;
         letter-spacing: 0.00em;
-        white-space: nowrap;
         text-transform: uppercase;
+        
+        @media (min-width: 400px) {
+            font-size: 2.4em;
+        }
         
         @media (min-width: 600px) {
             font-size: 4.2em;
+            white-space: nowrap;
         }
     }
 }
@@ -430,12 +446,13 @@ ul.blog-posts.with-dates {
 
 ul.blog-posts.with-dates li {
     display: flex;
-    flex-direction: column;
-    margin-bottom: 2px;
+    flex-direction: column-reverse;
+    margin-bottom: 1.5em;
 
     @media (min-width: 600px) {
         flex-direction: row;
         align-items: baseline;
+        margin-bottom: 2px;
     }
 }
 
@@ -443,7 +460,7 @@ ul.blog-posts.with-dates li span {
     flex: 0 0 130px;
     font-style: normal;
     opacity: 0.7;
-    font-size: 0.9em;
+    font-size: 0.85em;
     white-space: nowrap;
 }
 
