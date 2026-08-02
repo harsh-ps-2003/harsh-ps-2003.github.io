@@ -603,6 +603,8 @@ The forward substitution (the T matrix computation) is the magic that makes this
 
 ####  Kimi Delta Attention (KDA)
 
+![Kimi Delta Attention architecture](kda-architecture.png)
+
 The core innovation is Kimi Delta Attention (KDA), which extends Gated DeltaNet with fine-grained gating. Instead of a single scalar decay β, KDA learns a separate decay value for each channel:
 ```python
 # Gated DeltaNet: single scalar gate
@@ -612,6 +614,9 @@ S = β * S + k_t ⊗ (v_t - β * S @ k_t)
 α = sigmoid(alpha_proj(x))  # shape: (batch, seq, d_head)
 # each dimension of the state decays at its own rate
 ```
+
+The diagram shows the full KDA block. Q and K go through L2 normalization and convolutions. V goes through a convolution as well. The α and β parameters come from separate linear projections with sigmoid gates. Everything feeds into the Gated Delta Rule which is the core state update. The output goes through RMSNorm and a final linear projection. The 3:1 ratio at the bottom shows how layers are arranged in Kimi Linear and K3. Three KDA layers followed by one Gated Multi-head Latent Attention layer then repeat.
+
 Why does this matter? The D×D state matrix has limited capacity. With a single scalar decay, all channels forget at the same rate. With per-channel decay, the model can:
 * Keep some channels as long-term memory (high α)
 * Use other channels as short-term scratch space (low α)

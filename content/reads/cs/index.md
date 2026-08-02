@@ -3,14 +3,9 @@ title = "Computer Science"
 date = 2024-07-12
 +++
 
-*Disclaimer - This is incomplete and not properly arranged! When I will be graduating, I will write about which sections of these materials I loved, and why the material is mentioned is present in my bookshelf at the first place.*
-
-**I am no CS god, I can't recall all of these in an blink of an eye in an intense interview! This will help me (and others) in revision of fundamental concepts. Just a collection I enjoyed persoanlly. I am a normal human being, don't paint an exaggerated picture of me.**
-
 Well, I used to hop around and read many CS books for passing my time in boring undergrad classes. It was fun, and I am not the best sort of a student. Here I am listing my favorite reads till now and, what and why would I pick them up for if I wanted to read again. They have helped me enjoy in the midst of boring lectures in IITK and I want to sincerely thank the authors for putting in the work. Also, I have shared the CS lectures I watched to grasp the concepts better so that people can have reference material and broader understanding of the interesting topics. The best way to learn these concepts is to implement some intriguing idea that you have while slowly and sensually reading these beauties!
 
 *The resources are in no particular order, I just enjoyed them, and you might also love them!*
-*Also, don't stress on the research papers much, even I don't understand half of it! I just explored them out of curiosity*
 
 ### Intro to Programming
 
@@ -40,7 +35,7 @@ Lectures:
 * [Introduction to Algorithms](https://www.youtube.com/playlist?list=PLUl4u3cNGP61Oq3tWYp6V_F-5jb5L2iHb)
 * [Design and Analysis of Algorithms](https://www.youtube.com/playlist?list=PLUl4u3cNGP6317WaSNfmCvGym2ucw3oGp)
 
-Just go [Neetcode](https://neetcode.io/) for those stupid Leetcode Medium/Hards that you are going to get in your interviews. Leetcode preparation is unnecessary if you don't want to work in Big Tech giants, but deep knowledge of Data Structures and Algorithms is crucial for crafting clever software! 
+Just go [Neetcode](https://neetcode.io/) for those stupid Leetcode Medium/Hards that you are going to get in your interviews. Leetcode preparation is unnecessary if you don't want to work in Big Tech giants, but deep knowledge of Data Structures and Algorithms is crucial for crafting clever software!
 
 If you are really into puzzles, Competitive Programming is a cool sport to be in! [CP Handbook is excellent to get started](https://cses.fi/book/book.pdf) along with [this](https://www.youtube.com/watch?v=oWgLjhM-6XE&list=PLrS21S1jm43igE57Ye_edwds_iL7ZOAG4&t) lecture series. Try ICPC :) Not required for simple DSA rounds at tech companies though! Its fun, really fun once you get the hang of it.
 
@@ -205,21 +200,6 @@ Lectures:
 
 Reads:
 * [Deep Learning](https://www.deeplearningbook.org/)
-
-### Blockchain
-
-Lecture:
-* [Introduction to Bitcoin](https://youtube.com/playlist?list=PL8Vt-7cSFnw2LZ0o-YRAMNIRW5CrAWJfk&si=eCG7YJSKglkDEhiA)
-* [Intro to Web3](https://www.youtube.com/playlist?list=PLoROMvodv4rOUC9tTF3wKaif0oFx13EJJ)
-* [Cryptocurrency Engineering and Design](https://youtube.com/playlist?list=PLUl4u3cNGP61KHzhg3JIJdK08JLSlcLId&si=jolqx7NAaxE5Wlzg)
-* [Blockchain and Money](https://www.youtube.com/playlist?list=PLUl4u3cNGP63UUkfL0onkxF6MYgVa04Fn)
-* [Foundations of Blockchain Protocols](https://www.youtube.com/playlist?list=PLEGCF-WLh2RLOHv_xUGLqRts_9JxrckiA)
-
-Reads:
-* [Foundations of Blockchain Protocols](http://timroughgarden.org/notes.html)
-* [Survey on Cryptocurrency Networking](https://arxiv.org/pdf/2008.08412)
-* [Evolution of Proof of Stake](https://github.com/ethereum/pos-evolution/blob/master/pos-evolution.md)
-* [GHOST](https://eprint.iacr.org/2013/881.pdf)
 
 ### Programming Languages
 
