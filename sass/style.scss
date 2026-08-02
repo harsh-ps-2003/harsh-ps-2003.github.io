@@ -447,7 +447,7 @@ ul.blog-posts.with-dates {
 ul.blog-posts.with-dates li {
     display: flex;
     flex-direction: column-reverse;
-    margin-bottom: 1.5em;
+    margin-bottom: 0.75em;
 
     @media (min-width: 600px) {
         flex-direction: row;
@@ -460,8 +460,14 @@ ul.blog-posts.with-dates li span {
     flex: 0 0 130px;
     font-style: normal;
     opacity: 0.7;
-    font-size: 0.85em;
+    font-size: 0.8em;
     white-space: nowrap;
+    margin-top: 2px;
+    
+    @media (min-width: 600px) {
+        margin-top: 0;
+        font-size: 0.85em;
+    }
 }
 
 // Tags
