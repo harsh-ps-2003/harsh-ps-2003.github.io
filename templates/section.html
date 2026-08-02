@@ -25,7 +25,7 @@
 <ul class="blog-posts with-dates">
     {% for page in section.pages %}
     <li data-title="{{ page.title | lower }}">
-        <span>{{ page.date | date(format="%d %b, %Y") }} · {{ page.reading_time }} min</span>
+        <span>{{ page.date | date(format="%d %b, %Y") }}</span>
         <a href="{{ page.permalink | safe }}">{{ page.title }}</a>
     </li>
     {% endfor %}
