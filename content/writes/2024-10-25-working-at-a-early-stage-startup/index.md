@@ -49,10 +49,8 @@ Also, discuss everything over emails, not on telegram, discord, slack, etc. And 
 
 ## I dropped the thought of building company being in college
 
-Don't trying building a company when in university! Either drop-out or take a year gap to iterate. Otherwise you will have a lot on your plate. Always work in a startup before starting one. Organizing an engineering team is really hard, and you will have to give them an optimal employee experience as well. They are an employee, you are a founder. So you cant expect them to work like a founder. Building accountability systems should be a priority. Raising VC money is extremely hard as a student. An accelerator program is not real progress (even if its YC). Do you really wanna do this, are you obsessed enough?
-
-I was not. Period. Maybe some other day, some other time. 
+Don't trying building a company when in university! One of my friends tried doing that, ended up failing courses here and there (but buisness going brr...). Either drop-out or take a year gap to iterate. Otherwise you will have a lot on your plate tbh. I would say, always work in a startup before starting one. Organizing an engineering team is really fucking hard, and you will have to give them an optimal employee experience as well. They are an employee, you are a founder. Repeat it 100 times, because you might be expecting founder level dedication from them, which is completely unrealistic. Building accountability systems should be a priority. Raising VC money is extremely hard as a student (even as a PHD). An accelerator program is not real progress (even if its YC). Most of the times you will be ignored/rejected warmly. Investors are in for their profits, and helping you is for that. It's not the most helpful world out there when you are not branded. I have heard horror stories about VCs stealing real user insights from early stage founders and giving away to the companies in their own portfolio's. So yeah, beware.  
 
 ## What I learnt about myself
 
-Atleast for the time being, research will be on my cards. I really underestimated managing people. *I am the god's chosen IC*
+Atleast for the time being, research will be on my cards. I really underestimated managing people. Enjoying Computational Sciences quite a lot!
