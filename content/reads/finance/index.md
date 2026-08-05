@@ -3,7 +3,7 @@ title = "Wealth"
 date = 2024-09-04
 +++
 
-Its hard to earn money, and harder to keep it with you. 
+Its hard to earn money, and harder to keep it with you.
 
 Books :
 * The Little Book of Common Sense Investing
