@@ -11,7 +11,6 @@ Juggling between **Math**, **Physics**, **Computer Science** and **Philosophy** 
 
 [Engineer](https://github.com/harsh-ps-2003) passionate about *Open Source* and *Open Science*, and focused on **Distributed Systems**, **Machine Learning**, **Databases** and **Cryptography**
 
-Have an eternal crush on girls who have studied Maths or Physics.  
 I sometimes obsess over random Applied Epistemology ;)
 
 A crazy generalist (for now) who loves deleting code (´⊙ω⊙`)
