@@ -4,9 +4,9 @@ date = 2026-07-31
 draft = false
 +++
 
-There is something deeply frustrating about watching a CI pipeline spin for 45 minutes when you know the actual work takes maybe 3 minutes. You push a one line fix, grab coffee, check Slack, and the build is still churning away. The green checkmark feels less like validation and more like a hostage release. I have mass cancelled CI runs more times than I can count, and every time I do it I wonder why we collectively decided this was acceptable.
+Personally, for me its deeply frustrating when I watch a CI pipeline spin for 45 minutes when I know the actual work takes maybe 3 minutes. You push a one line fix, grab coffee, check Slack, and the build is still chugging away. The green checkmark feels less like validation and more like a hostage release. I have mass cancelled CI runs more times than I can count, and every time I do it I wonder why we collectively decided this was acceptable.
 
-This post is my attempt to document everything I have learned about making Docker builds fast, GitHub Actions efficient, and CI pipelines that do not make you want to mass cancel runs. We will go deep on how Docker layers actually work, why BuildKit changed everything, the dark arts of caching, the Arm situation that everyone is suddenly dealing with, and why Rust builds are their own special circle of CI hell. Along the way I will share the tricks that actually work and the ones that sound good but do not.
+This post is my attempt to document everything I have learned about making Docker builds fast, GitHub Actions efficient, and CI pipelines that do not make you want to mass cancel runs. We will go deep on how Docker layers actually work, why BuildKit changed everything, the dark arts of caching, the Arm situation that everyone is suddenly dealing with, and why Rust builds are thier own special circle of CI hell. Along the way I will share the tricks that actually work and the ones that sound good but dont.
 
 ## What even is a Docker layer?
 
@@ -16,21 +16,21 @@ The [OCI image specification](https://github.com/opencontainers/image-spec) defi
 
 When Docker builds an image, it checks if it already has a layer with the same hash before building it. This is the foundation of Docker caching. If you have already built a layer and nothing has changed, Docker can skip rebuilding it and just reuse the existing one. The problem is that layers form a chain, and if any layer in the chain changes, every layer after it must be rebuilt. This is why the order of instructions in your Dockerfile matters so much.
 
-Think of it like a stack of pancakes where each pancake depends on the one below it. If you want to change the third pancake from the bottom, you have to remove and remake all the pancakes above it. This is why putting your `COPY . .` instruction early in the Dockerfile is such a disaster for caching. Every time any file in your project changes, that layer changes, which invalidates every layer after it. A change invalidates its layer and every layer after it, a wave that propagates to the end of the chain. How far that wave travels decides how much of the build reruns on every single change.
+This is why putting your `COPY . .` instruction early in the Dockerfile is such a disaster for caching. Every time any file in your project changes, that layer changes, which invalidates every layer after it. A change invalidates its layer and every layer after it, a wave that propagates to the end of the chain. How far that wave travels decides how much of the build reruns on every single change.
 
 The union filesystem that Docker uses to combine these layers is clever but has its own quirks. When you delete a file in a later layer, the file is not actually removed from the earlier layer. Instead, a whiteout marker is added that hides the file. This means your image can be larger than you expect if you install something and then delete it in a later layer. The bytes are still there, just hidden.
 
 ## Why BuildKit changed everything
 
-For years, Docker used what is now called the legacy builder. It was simple and it worked, but it had a fundamental limitation. It processed your Dockerfile sequentially, one instruction at a time. Even if two instructions had no dependency on each other, the builder would wait for the first to complete before starting the second. Multi-stage builds helped by letting you define separate build stages, but the builder still processed them one at a time.
+For years, Docker used what is now called the legacy builder. It was simple and it worked, but it had a fundamental limitation. It processed your Dockerfile sequentially, one instruction at a time. Even if two instructions had no dependency on each other, the builder would wait for the first to complete before starting the second. Multi-stage builds helped by letting you define separate build stages, but the builder still processed them one at a time. Obviously this is bad
 
-[BuildKit](https://github.com/moby/buildkit) changed this by treating the Dockerfile as a directed acyclic graph rather than a linear sequence. It analyzes the dependencies between instructions and figures out which ones can run in parallel. If your Dockerfile has two independent RUN commands, BuildKit can execute them simultaneously. If you have multiple stages that do not depend on each other, they can build concurrently. This alone can cut build times dramatically for complex Dockerfiles.
+[BuildKit](https://github.com/moby/buildkit) changed this by treating the Dockerfile as a DAG rather than a linear sequence. It analyzes the dependencies between instructions and figures out which ones can run in parallel. If your Dockerfile has two independent RUN commands, BuildKit can execute them simultaneously. If you have multiple stages that do not depend on each other, they can build concurrently. This alone can cut build times dramatically for complex Dockerfiles.
 
-At the heart of BuildKit lies a DAG solver that transforms your Dockerfile into an optimized execution plan. BuildKit parses build instructions into something called LLB, which stands for Low Level Build format, creating a dependency graph of all the operations needed to produce your final image. The DAG solver examines each instruction and determines what it depends on. If instruction B needs the output of instruction A, they run sequentially. But if instructions B and C both only depend on A, they can run at the same time once A completes. This dependency analysis happens before any actual building starts, allowing BuildKit to create the most efficient execution plan possible.
+At the heart of BuildKit lies a [solver](https://github.com/moby/buildkit/blob/master/docs/dev/solver.md) that transforms your Dockerfile into an optimized execution plan. BuildKit parses build instructions into something called [LLB](https://docs.docker.com/build/buildkit/), which stands for Low Level Build format, creating a content-addressable dependency graph of all the operations needed to produce your final image. The solver is responsible for parsing the build definition and scheduling operations to workers for execution. It is heavily optimized for deduplication of work, concurrent requests, and different per-vertex caching modes. The solver examines each instruction and determines what it depends on. If instruction B needs the output of instruction A, they run sequentially. But if instructions B and C both only depend on A, they can run at the same time once A completes. This dependency analysis happens before any actual building starts, allowing BuildKit to create the most efficient execution plan possible.
 
-This graph based approach is what enables BuildKit to be fully concurrent. Every node in the graph represents a build operation, and BuildKit can execute any nodes that do not have unmet dependencies. It is constantly looking for work it can parallelize, which is why modern container builds can be surprisingly fast when structured properly.
+This graph based approach is what enables BuildKit to be fully concurrent. The [scheduler](https://github.com/moby/buildkit/blob/master/docs/dev/solver.md#scheduler) is implemented as a single threaded non-blocking event loop that solves edges in the build graph. While the build definition is defined with vertexes, the scheduler solves edges, where a result of a solved edge is associated with a snapshot. Every node in the graph represents a build operation, and BuildKit can execute any nodes that do not have unmet dependencies. It is constantly looking for work it can parallelize, which is why modern container builds can be surprisingly fast when structured properly.
 
-Parallelism happens at three distinct levels. Stage parallelism is the most visible form. When you have multiple stages in a multi-stage Dockerfile that do not depend on each other, BuildKit recognizes this and runs them simultaneously. Consider a typical web application with both frontend and backend components. While your Node.js dependencies are installing and your React app is building, BuildKit is simultaneously compiling your Go backend on a separate thread or CPU core. The final stage waits for both to complete, but you have effectively cut your build time by running these independent workloads in parallel.
+Parallelism happens at threex levels. Stage parallelism is the most visible form. When you have multiple stages in a multi-stage Dockerfile that do not depend on each other, BuildKit recognizes this and runs them simultaneously. Consider a typical web application with both frontend and backend components. While your Node.js dependencies are installing and your React app is building, BuildKit is simultaneously compiling your Go backend on a separate thread or CPU core. The final stage waits for both to complete, but you have effectively cut your build time by running these independent workloads in parallel.
 
 Instruction parallelism happens even within a single stage. When you have multiple COPY instructions that do not depend on each other, or when different branches of your build graph can be resolved independently, BuildKit executes them concurrently. This is particularly noticeable when you are copying multiple directories or files that will be processed separately later. BuildKit can fetch all these resources in parallel rather than sequentially, shaving precious seconds off your build time.
 
@@ -48,7 +48,7 @@ The Rust scenario makes this concrete. A dependency change costs about 4 seconds
 
 The fundamental problem is that cache mounts cannot be exported. BuildKit does not support saving or loading cache mounts, so they cannot be persisted across builds in CI providers with ephemeral runners. The cache mount directory lives on the Docker host itself and is made available to any build step that needs it in the future. But when the runner is destroyed after the job, the cache mount goes with it.
 
-There is a workaround called the [buildkit-cache-dance](https://github.com/reproducible-containers/buildkit-cache-dance) pattern. The idea is to extract the cache from the previous build and inject it into the current build. You use the GitHub Actions cache to store the contents of your cache mount directories, then restore them before the build and extract them after. It is hacky but it works.
+There is a workaround called the [buildkit-cache-dance](https://github.com/reproducible-containers/buildkit-cache-dance) pattern. The idea is to extract the cache from the previous build and inject it into the current build. You use the GitHub Actions cache to store the contents of your cache mount directorys, then restore them before the build and extract them after. It is hacky but it works.
 
 ```yaml
 - name: Cache
@@ -212,7 +212,7 @@ Results:
 Result:FAIL [Total:3] [Passed:0] [Failed:2] [Skipped:1]
 ```
 
-The best practice is to start with lenient thresholds and tighten them over time. Begin with 90 percent efficiency and gradually increase as you optimize your Dockerfiles. This prevents the CI gate from becoming a blocker while still catching regressions.
+The KISS way is to start with lenient thresholds and tighten them over time. Begin with 90 percent efficiency and gradually increase as you optimize your Dockerfiles. This prevents the CI gate from becoming a blocker while still catching regressions.
 
 A common mistake is failing to clear out the apt cache after installing packages. While the packages themselves are necessary for your image to build and run, the intermediate tarballs and package lists are not. The apt update step alone can add 20MB to your image. The traditional fix is to combine the update, install, and cleanup into a single RUN command so the cache files never make it into a layer.
 
@@ -356,7 +356,7 @@ For interpreted languages like Python or Node, multi-platform is simpler because
 
 ## What happens when you push to GitHub?
 
-Understanding what GitHub Actions actually does when you trigger a workflow helps explain why things are slow and what you can do about it. When you push a commit, GitHub receives the webhook, evaluates which workflows should run based on your trigger conditions, and queues jobs for execution. Each job gets assigned to a runner, which is a virtual machine that will execute your workflow steps.
+Understanding what GitHub Actions actualy does when you trigger a workflow helps explain why things are slow and what you can do about it. When you push a commit, GitHub receives the webhook, evaluates which workflows should run based on your trigger conditions, and queues jobs for execution. Each job gets assigned to a runner, which is a virtual machine that will execute your workflow steps.
 
 For GitHub-hosted runners, this means spinning up a fresh VM from a base image. The VM has a bunch of common tools preinstalled like Docker, Node, Python, and various build tools, but it starts with no knowledge of your project. Every workflow run begins from scratch. Your repository gets cloned, your dependencies get installed, your caches get downloaded, and only then does your actual work begin. This cold start overhead is why even simple workflows take a minute or two before they do anything useful.
 
@@ -811,13 +811,15 @@ linker = "clang"
 rustflags = ["-C", "link-arg=-fuse-ld=mold"]
 ```
 
-The performance difference with mold is dramatic for large projects. Benchmarks on a simulated 16 core machine show mold linking MySQL 8.3 in 0.46 seconds compared to 10.84 seconds for GNU ld, 7.47 seconds for GNU gold, and 1.64 seconds for LLVM lld. For Clang 19, mold takes 1.35 seconds versus 42.07 seconds for GNU ld and 5.20 seconds for LLVM lld. Mold is so fast that it is only 2x slower than a simple `cp` command copying the same amount of data.
+The performance difference with mold is dramatic for large projects. [Benchmarks from the mold repository](https://github.com/rui314/mold) on a simulated 16 core machine show mold linking MySQL 8.3 in 0.46 seconds compared to 10.84 seconds for GNU ld, 7.47 seconds for GNU gold, and 1.64 seconds for LLVM lld. For Clang 19, mold takes 1.35 seconds versus 42.07 seconds for GNU ld and 5.20 seconds for LLVM lld. Mold is so fast that it is only 2x slower than a simple `cp` command copying the same amount of data.
 
 The reason mold is so much faster comes down to aggressive parallelization. Unlike other linkers that have sequential bottlenecks, mold uses Intel TBB to parallelize nearly all operations. It uses a data parallelism pattern where threads process data independently without communication, which scales efficiently across cores. For operations like build-id computation, mold splits work into parallel chunks and combines results using a map-reduce pattern.
 
-However, mold only supports Linux. It cannot link macOS or Windows binaries. For macOS, there is a separate project called sold, but it is less mature. If your CI runs on Linux and you are building Linux binaries, mold is an easy win. If you need cross-platform support, you are stuck with lld.
+However, mold only supports Linux. It cannot link macOS or Windows binaries. For macOS, there was a commercial version called sold, but it has been [discontinued](https://github.com/rui314/mold/issues/189) since Apple shipped a faster linker in Xcode 15. If your CI runs on Linux and you are building Linux binaries, mold is an easy win. If you need cross-platform support, you are stuck with lld or the platform native linkers.
 
-In practice though, the mold linker showed negligible results for some codebases. Testing on the Zed editor codebase, mold was actually 0.7 percent slower than baseline when applied only to release builds. The linking phase is not always the bottleneck. For projects where compilation dominates, mold will not help much. Measure before assuming it will speed things up.
+There is also a newer linker called [Wild](https://github.com/davidlattimore/wild) that is written in Rust and aims to eventually support incremental linking. Even without incremental linking, Wild is showing competitive performance. On the Zed editor codebase, [benchmarks from the Zed team](https://github.com/zed-industries/zed/pull/37717) showed Wild was 5 percent faster than mold on clean workspace builds and 22 percent faster on incremental rebuilds. The Zed team now recommends Wild for local Linux development while keeping mold for CI stability.
+
+In practice though, the mold linker showed mixed results for some codebases. The same Zed benchmarks showed that for certain build configurations, the differences between linkers were in the noise. The linking phase is not always the bottleneck. For projects where compilation dominates, faster linkers will not help much. Measure before assuming it will speed things up.
 
 ## Nightly compiler features for faster builds
 
@@ -832,21 +834,21 @@ The `-Z share-generics` flag allows the compiler to share generic code across di
   run: cargo +nightly build --release
 ```
 
-Testing on the Zed codebase, nightly features provided a 7.3 percent overall improvement with build times dropping by 22.7 percent. The total time went from 28 minutes 36 seconds to 26 minutes 30 seconds. Test execution time stayed about the same, but the actual compilation was dramatically faster.
+Testing on the Zed codebase, [benchmarks showed](https://github.com/depot/zed-test/actions/runs/16731664175) nightly features provided a 7.3 percent overall improvement with build times dropping by 22.7 percent. The total time went from 28 minutes 36 seconds to 26 minutes 30 seconds. Test execution time stayed about the same, but the actual compilation was dramatically faster.
 
 The key is that you must pass these flags via RUSTFLAGS, not just install the nightly toolchain. Simply switching to nightly without the flags gives you nothing.
 
 ## Cranelift is not ready for most projects
 
-Cranelift is an alternative compiler backend for Rust that trades runtime performance for faster compilation. It is designed for JIT compilation scenarios where compilation latency matters more than the speed of the generated code. The Rust compiler has experimental support for Cranelift via the `rustc_codegen_cranelift` component.
+[Cranelift](https://cranelift.dev/) is an alternative compiler backend for Rust that trades runtime performance for faster compilation. It is designed for JIT compilation scenarios where compilation latency matters more than the speed of the generated code. The Rust compiler has experimental support for Cranelift via the [rustc_codegen_cranelift](https://github.com/rust-lang/rustc_codegen_cranelift) component.
 
 The appeal is obvious. Cranelift compiles about 20 to 40 percent faster than LLVM. For debug builds and test runs where you do not care about runtime performance, this sounds like a free speedup. But in practice, Cranelift fails to compile many real-world codebases.
 
-The most common failure is inline assembly. Cranelift does not fully support `asm!` and `global_asm!` sym operands. Any project that depends on crates using inline assembly will fail to compile. This includes wasmtime, many crypto crates, and anything doing low-level system programming.
+The most common failure is inline assembly. Cranelift does not fully support `asm!` and `global_asm!` sym operands. Any project that depends on crates using inline assembly will fail to compile. This includes wasmtime, many crypto crates, and anything doing low-level system programming. The [issue tracking full asm support](https://github.com/rust-lang/rustc_codegen_cranelift/issues/1204) shows that while most inline assembly features are now stable, sym operands remain unsupported for global_asm when functions are made private to the codegen unit.
 
-Testing on the Zed codebase, Cranelift failed with the error `asm! and global_asm! sym operands are not yet supported` when trying to compile wasmtime-fiber. This is a known limitation that exists regardless of whether you use stable or nightly Rust.
+Testing on the Zed codebase, Cranelift failed with the error `asm! and global_asm! sym operands are not yet supported` when trying to compile wasmtime-fiber. This is a [known limitation](https://github.com/rust-lang/rustc_codegen_cranelift/issues/1204) that exists regardless of whether you use stable or nightly Rust, as reported by developers trying to build codebases that depend on wasmtime.
 
-Other limitations include incomplete debugger support where local variables cannot be inspected, partial SIMD intrinsics support, and ABI compatibility issues when mixing Cranelift and LLVM compiled code. The Cranelift team is targeting production readiness for late 2025, but for now it is not a viable option for most projects.
+Other limitations include incomplete debugger support where local variables cannot be inspected, partial SIMD intrinsics support, and ABI compatibility issues when mixing Cranelift and LLVM compiled code. The [Rust project goal for production-ready Cranelift](https://github.com/rust-lang/rust-project-goals/issues/397) was closed in late 2025 after failing to secure funding, so there is currently no active roadmap to bring the backend to production readiness.
 
 The safe use cases for Cranelift are projects without inline assembly dependencies, without heavy SIMD usage, and where you do not need debugger support. For everything else, stick with LLVM.
 
@@ -854,9 +856,9 @@ The safe use cases for Cranelift are projects without inline assembly dependenci
 
 If you only make one change to your Rust CI, make it [cargo-nextest](https://nexte.st/). It is a next-generation test runner that can be up to 3x faster than `cargo test`. The speedup comes from a fundamentally different execution model.
 
-With `cargo test`, test binaries run serially. Each binary runs its tests in parallel internally, but if one binary has a slow test, everything waits. If you have 20 tests where 19 take less than 5 seconds but one takes 60 seconds, the entire binary takes 60 seconds. Cargo cannot start other binaries during those idle 55 seconds.
+With `cargo test`, test binaries run serially. Each binary runs its tests in parallel internally, but if one binary has a slow test, everything waits. If you have 20 tests where 19 take less then 5 seconds but one takes 60 seconds, the entire binary takes 60 seconds. Cargo cannot start other binaries during those idle 55 seconds.
 
-Nextest runs each test in a separate process. It first queries all test binaries to enumerate every test, then runs them all in parallel across all binaries simultaneously. While that 60 second test runs, all other tests from all binaries can execute in parallel. This eliminates the long-pole test problem that plagues large test suites.
+Nextest runs each test in a seperate process. It first queries all test binaries to enumerate every test, then runs them all in parallel across all binaries simultaniously. While that 60 second test runs, all other tests from all binaries can execute in parallel. This eliminates the long-pole test problem that plagues large test suites.
 
 ```yaml
 - name: Install nextest
@@ -866,7 +868,7 @@ Nextest runs each test in a separate process. It first queries all test binaries
   run: cargo nextest run
 ```
 
-Testing on the Zed codebase with warm sccache, nextest delivered a 35 percent speedup. Total time dropped from 28 minutes 36 seconds to 18 minutes 34 seconds. Test execution specifically went from 15 minutes 10 seconds to 10 minutes 46 seconds, a 28.9 percent improvement.
+Testing on the Zed codebase with warm sccache, [nextest delivered a 35 percent speedup](https://github.com/depot/zed-test/actions/runs/16733819334). Total time dropped from 28 minutes 36 seconds to 18 minutes 34 seconds. Test execution specifically went from 15 minutes 10 seconds to 10 minutes 46 seconds, a 28.9 percent improvement. Zed's own CI uses nextest extensively, as you can see in their [release workflows](https://github.com/zed-industries/zed/blob/main/.github/workflows/release_nightly.yml).
 
 Beyond raw speed, nextest has features designed for CI. It outputs JUnit XML for test reporting integrations. It supports test partitioning for sharding across multiple runners. It can archive test binaries for running on different machines. It has configurable retries with exponential backoff for flaky tests. It can identify and terminate slow tests that exceed a timeout.
 
@@ -890,7 +892,7 @@ One more thing that helps is being strategic about what you build in CI. Do you 
 
 ## Fuzzing in CI
 
-With agents writing more code, I have found myself adding more sophisticated testing strategies like fuzzing. This technique helped me find several bugs that unit tests would never have caught. Fuzzing is automated testing with weird inputs. You ask the fuzzer to exercise some code, prime it with a few seed inputs, and let it mutate them forever. Most of the inputs are garbage, and that is the whole point. The fuzzer keeps the cases that reach new code paths and keeps pushing on whatever looks interesting or seems to take more time.
+With agents writing more code, I have been thinking about more sophisticated testing strategies like fuzzing. This technique helped me find several bugs that unit tests would never have caught. Fuzzing is automated testing with weird inputs. You ask the fuzzer to exercise some code, prime it with a few seed inputs, and let it mutate them forever. Most of the inputs are garbage, and that is the whole point. The fuzzer keeps the cases that reach new code paths and keeps pushing on whatever looks interesting or seems to take more time.
 
 Fuzzing is great for parsers, decoders, protocol handlers, and anything else that sees untrusted input. It can find problems like bad lengths, duplicate fields, giant counts, and broken UTF-8. These are not typically written in run of the mill unit tests. The fuzzer will continually try out new inputs forever.
 
@@ -1344,7 +1346,7 @@ The fundamental challenge remains the same though. We want fast feedback on code
 
 ## The merge queue trap
 
-If you want to keep your main branch clean, you need a merge queue. The idea is simple. Before a PR merges, it gets rebased onto the latest main and CI runs again. This ensures that what you tested is actually what gets merged, not some stale version that might conflict with changes that landed while your PR was in review.
+If you want to keep your main branch clean, you need a merge queue. The idea is simple. Before a PR merges, it gets rebased onto the latest main and CI runs again. This ensures that what you tested is actualy what gets merged, not some stale version that might conflict with changes that landed while your PR was in review.
 
 GitHub has a merge queue feature that handles this automatically. Sounds great until you try to set it up. The problem is that you often want CI to run twice. Once when the PR is opened to catch obvious issues and auto-fix trivial problems like formatting. And again inside the merge queue to verify the final merge. GitHub Actions makes this weirdly difficult.
 
@@ -1487,7 +1489,7 @@ The practical implication is that self hosting no longer lets you avoid paying G
 
 ## Debugging without access
 
-Sometimes debugging a failing CI job is like being a mechanic looking at a car that will not start. You poke and prod from the outside, but until you have popped the hood, all you can do is guess. A job fails. Is a flaky test to blame? Did the VM run out of memory? Or is it something else entirely? Without real access, you are stuck troubleshooting in the dark, relying on logs at best.
+Debugging a failing CI job without proper access is frustrating. A job fails. Is a flaky test to blame? Did the VM run out of memory? Or is it something else entirely? Without real access, you are stuck troubleshooting in the dark, relying on logs at best.
 
 Some third party runner services have built SSH access into their platforms. The idea is to let you connect directly to a running CI job and poke around. This requires solving three problems. Network tunneling to route external connections to the right VM. DNS registration so you can connect with a human readable hostname instead of an IP and port. And SSH key management to ensure only the right people can access the VM.
 
@@ -1499,9 +1501,7 @@ This kind of access is not available on GitHub hosted runners. You can add a ste
 
 ## The push wait guess loop
 
-Debugging CI feels like mailing a car mechanic instructions for a single turn of a wrench, waiting three days, and getting mailed back a polaroid of a burning car with the caption exit code 1.
-
-The old CI debugging experience goes like this. You edit a workflow file, hope you have not committed some ancient YAML war crime, commit, push, wait, and then squint at the logs to parse the useful from the haystack. Was I in the right working directory? Did checkout happen the way I thought? Did the file actually exist? Did the variable get set in this context? Did the artifact land where I assumed it would? Who knows. Certainly not me.
+The CI debugging experience is painful. You edit a workflow file, hope you have not committed some ancient YAML war crime, commit, push, wait, and then squint at the logs to parse the useful from the haystack. Was I in the right working directory? Did checkout happen the way I thought? Did the file actually exist? Did the variable get set in this context? Did the artifact land where I assumed it would? Who knows. Certainly not me.
 
 If the failing step sits at the end of a long job, even better. Now you get to wait 15 minutes to learn that your latest guess was also wrong. That old loop is more hope filled finger crossing than debugging.
 
@@ -1517,7 +1517,7 @@ Once CI debugging becomes a loop of CLI commands, it becomes something an agent 
 
 ## The bottleneck has shifted
 
-For decades, the biggest bottleneck to innovation was writing code. But that is no longer true. Code and ideas can now iterate as fast as you can articulate them to an AI agent with a powerful model. Iteration can be done in seconds instead of hours. A new generation of tools, services, and products are being imagined faster than ever.
+For decades, the biggest bottleneck to innovation was writing code. But that is no longer true. Code and ideas can now iterate as fast as you can articulate them to an AI agent with a powerful model. Iteration can be done in seconds instead of hours. A new generation of tools, services, and products are being imagined faster then ever.
 
 The bottleneck has shifted from writing code to integrating it.
 
