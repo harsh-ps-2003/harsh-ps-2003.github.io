@@ -1,3 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <text y=".9em" font-size="70">(???)</text>
+  <!-- Left parenthesis -->
+  <text x="5" y="65" font-size="60" font-family="Arial">(</text>
+  <!-- Left eye - circle with dot -->
+  <circle cx="30" cy="45" r="12" fill="none" stroke="currentColor" stroke-width="3"/>
+  <circle cx="30" cy="45" r="4" fill="currentColor"/>
+  <!-- Smile -->
+  <path d="M 38 55 Q 50 70 62 55" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <!-- Right eye - circle with dot -->
+  <circle cx="70" cy="45" r="12" fill="none" stroke="currentColor" stroke-width="3"/>
+  <circle cx="70" cy="45" r="4" fill="currentColor"/>
+  <!-- Right parenthesis -->
+  <text x="80" y="65" font-size="60" font-family="Arial">)</text>
 </svg>
