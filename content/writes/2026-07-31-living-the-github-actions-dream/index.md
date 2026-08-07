@@ -34,11 +34,11 @@ Parallelism happens at threex levels. Stage parallelism is the most visible form
 
 Instruction parallelism happens even within a single stage. When you have multiple COPY instructions that do not depend on each other, or when different branches of your build graph can be resolved independently, BuildKit executes them concurrently. This is particularly noticeable when you are copying multiple directories or files that will be processed separately later. BuildKit can fetch all these resources in parallel rather than sequentially, shaving precious seconds off your build time.
 
-The third level is deduplication across concurrent builds. This is perhaps the most clever optimization. BuildKit uses content addressable storage and checksums to identify when different build contexts would produce identical layers. Imagine you are building multiple services that all start from the same base image and run npm ci with identical package.json files. Without deduplication, each service would run its own npm ci, even if they are building simultaneously. But BuildKit is smarter than that. When it detects this situation, the first build starts computing the layer while the others wait. Once the first build completes that npm ci, all the waiting builds immediately use that result and move on. The same operation that would have run three times runs only once. This deduplication happens automatically across concurrent builds on the same runner, whether they are triggered by different developers pushing to the same repository or a docker bake command building multiple targets at once.
+The third level is deduplication across concurrent builds. This is perhaps the most clever optimization. BuildKit uses content addressable storage and checksums to identify when different build contexts would produce identical layers. Imagine you are building multiple services that all start from the same base image and run pnpm install with identical package.json files. Without deduplication, each service would run its own pnpm install, even if they are building simultaneously. But BuildKit is smarter than that. When it detects this situation, the first build starts computing the layer while the others wait. Once the first build completes that pnpm install, all the waiting builds immediately use that result and move on. The same operation that would have run three times runs only once. This deduplication happens automatically across concurrent builds on the same runner, whether they are triggered by different developers pushing to the same repository or a docker bake command building multiple targets at once.
 
 But the parallelism is just the beginning. BuildKit introduced a completely new caching model that is far more sophisticated than the legacy builder. The old builder could only cache layers locally or pull them from a registry. BuildKit supports multiple cache backends including local directories, registry images, inline cache metadata, and the GitHub Actions cache. You can even use multiple cache sources simultaneously, falling back from one to another.
 
-The cache mount feature is particularly powerful for builds that download dependencies. Instead of downloading your npm packages or pip dependencies fresh every time, you can mount a persistent cache directory that survives between builds. The syntax looks like `RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt`. The cache directory is not part of the final image, so it does not bloat your image size, but it persists between builds so you do not have to redownload everything.
+The cache mount feature is particularly powerful for builds that download dependencies. Instead of downloading your pnpm packages or pip dependencies fresh every time, you can mount a persistent cache directory that survives between builds. The syntax looks like `RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt`. The cache directory is not part of the final image, so it does not bloat your image size, but it persists between builds so you do not have to redownload everything.
 
 Here is the thing that explains a large fraction of "we enabled caching and it is still slow" complaints. Docker caching is not one cache, it is at least three. There is the layer cache, which is the chain of instructions. There are mount caches, which are directories that persist across builds and cushion the invalidation wave. And there is the image store at `/var/lib/docker`, which holds pulled base images and built images. The layer cache is what export backends like `type=gha` or `type=registry` handle. Mount caches are not part of any layer, so they are never in the export bundle.
 
@@ -108,7 +108,7 @@ The docker-container builder is what you want when you need to specify BuildKit 
 
 The single most impactful thing you can do for Docker build performance is to order your Dockerfile instructions correctly. The rule is simple but often violated. Put things that change rarely at the top and things that change frequently at the bottom. Your base image and system dependencies change rarely. Your application code changes constantly. Structure your Dockerfile accordingly.
 
-The payoff of layer ordering equals the cost of the step it protects. Benchmarks across different stacks show the difference between manifest first ordering and putting `COPY . .` before the install. For Go, source change builds take 1.1 seconds with manifest first versus 5.7 seconds with copy first, about a 5x difference. For Python with numpy and pandas and scipy, it is 0.9 seconds versus 22.7 seconds, a 24x difference. Node with express shows 0.8 seconds versus 2.6 seconds, about 3x. Rust with axum shows 2.1 seconds versus 10.3 seconds, about 5x. Java with Spring Boot shows 3.2 seconds versus 15.9 seconds, about 5x. The gap is exactly the cost of your dependency step. Cheap npm ci gives 3x, Python native wheels give 24x.
+The payoff of layer ordering equals the cost of the step it protects. Benchmarks across different stacks show the difference between manifest first ordering and putting `COPY . .` before the install. For Go, source change builds take 1.1 seconds with manifest first versus 5.7 seconds with copy first, about a 5x difference. For Python with numpy and pandas and scipy, it is 0.9 seconds versus 22.7 seconds, a 24x difference. Node with express shows 0.8 seconds versus 2.6 seconds, about 3x. Rust with axum shows 2.1 seconds versus 10.3 seconds, about 5x. Java with Spring Boot shows 3.2 seconds versus 15.9 seconds, about 5x. The gap is exactly the cost of your dependency step. Cheap pnpm install gives 3x, Python native wheels give 24x.
 
 Here is the pattern that works. Start with your base image and install system level dependencies. These almost never change, so this layer gets cached forever. Then copy only your dependency manifest files like package.json, requirements.txt, Cargo.toml, or go.mod. Install your dependencies based on those files. This layer only rebuilds when your dependencies change, not when your code changes. Finally, copy your application code and build it. This layer rebuilds on every code change, but by this point all the expensive dependency installation is already cached.
 
@@ -123,11 +123,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Dependency manifest (changes when deps change)
 COPY package.json package-lock.json ./
-RUN npm ci --only=production
+RUN pnpm install --frozen-lockfile --prod
 
 # Application code (changes frequently)
 COPY . .
-RUN npm run build
+RUN pnpm run build
 ```
 
 The .dockerignore file is criminally underused. Without it, `COPY . .` copies everything in your build context including node_modules, .git, build artifacts, and whatever else is lying around. This makes the COPY layer huge and slow, and it can invalidate your cache when files change that have nothing to do with your build.
@@ -147,7 +147,7 @@ README.md
 .env*
 ```
 
-This excludes files that are recreated as part of your Dockerfile, like node_modules which are installed via npm ci. It also excludes unnecessary folders like .git and dist which will be regenerated by the build. The README and editor config have nothing to do with your application runtime. With this small change, a COPY layer that was 134MB can drop to under 150KB.
+This excludes files that are recreated as part of your Dockerfile, like node_modules which are installed via pnpm install. It also excludes unnecessary folders like .git and dist which will be regenerated by the build. The README and editor config have nothing to do with your application runtime. With this small change, a COPY layer that was 134MB can drop to under 150KB.
 
 The .dockerignore also prevents cache invalidation from irrelevant changes. If you edit your README, that should not trigger a rebuild of your entire application. Without a .dockerignore, it will. With one, Docker never even sees the README change.
 
@@ -178,7 +178,7 @@ The cache invalidation behavior for bind mounts is different from regular RUN in
 
 The `COPY --link` flag is a newer optimization that can prevent cascading cache invalidation. Normally when you copy files into a layer, that layer depends on all the layers below it. If any of those layers change, your COPY layer must be rebuilt even if the files you are copying have not changed. With `--link`, BuildKit uses a MergeOp that efficiently merges filesystems without creating interdependencies. The copied files become their own independent layer that can be reused even when the base layers change. Netflix reported builds going from over an hour to three minutes after adopting this pattern for their large monorepo builds.
 
-When your images start getting large and you are not sure why, the open source tool [dive](https://github.com/wagoodman/dive) is invaluable for analyzing what is inside them. It shows you each layer of an image, including the layer size and what files are inside. You can see what files were added, removed, or modified between layers. This makes it easy to spot problems like copying in node_modules before running npm install, or forgetting to clean up apt caches.
+When your images start getting large and you are not sure why, the open source tool [dive](https://github.com/wagoodman/dive) is invaluable for analyzing what is inside them. It shows you each layer of an image, including the layer size and what files are inside. You can see what files were added, removed, or modified between layers. This makes it easy to spot problems like copying in node_modules before running pnpm install, or forgetting to clean up apt caches.
 
 Dive also has a CI mode that can fail builds when images exceed efficiency thresholds. You enable it by setting `CI=true` or passing the `--ci` flag. It calculates three metrics. The efficiency score measures how much of the image is actually used versus wasted on duplicate or unnecessary files. The wasted bytes metric counts the absolute size of inefficient layers. The user wasted percent measures wasted space relative to what you added on top of the base image.
 
@@ -653,8 +653,8 @@ You can also run a cleanup command before each retry, which is useful for tests 
   with:
     timeout_seconds: 15
     max_attempts: 3
-    command: npm run some-flaky-script-that-outputs-something
-    on_retry_command: npm run cleanup-flaky-script-output
+    command: pnpm run some-flaky-script-that-outputs-something
+    on_retry_command: pnpm run cleanup-flaky-script-output
 ```
 
 The [marocchino/sticky-pull-request-comment](https://github.com/marocchino/sticky-pull-request-comment) action is used by 4 percent of organizations. It updates a single comment on PRs instead of creating new ones. This is nice as it can help reviewers get context from a PR instead of digging through CI logs.
@@ -846,7 +846,7 @@ The appeal is obvious. Cranelift compiles about 20 to 40 percent faster than LLV
 
 The most common failure is inline assembly. Cranelift does not fully support `asm!` and `global_asm!` sym operands. Any project that depends on crates using inline assembly will fail to compile. This includes wasmtime, many crypto crates, and anything doing low-level system programming. The [issue tracking full asm support](https://github.com/rust-lang/rustc_codegen_cranelift/issues/1204) shows that while most inline assembly features are now stable, sym operands remain unsupported for global_asm when functions are made private to the codegen unit.
 
-Testing on the Zed codebase, Cranelift failed with the error `asm! and global_asm! sym operands are not yet supported` when trying to compile wasmtime-fiber. This is a [known limitation](https://github.com/rust-lang/rustc_codegen_cranelift/issues/1204) that exists regardless of whether you use stable or nightly Rust, as reported by developers trying to build codebases that depend on wasmtime.
+Testing on the Zed codebase, Cranelift failed with the error `asm! and global_asm! sym operands are not yet supported` when trying to compile wasmtime-fiber. This is a [known limitation](https://github.com/rust-lang/rustc_codegen_cranelift/issues/1204) that exists regardless of whether you use stable or nightly Rust, as reported by devs trying to build codebases that depend on wasmtime.
 
 Other limitations include incomplete debugger support where local variables cannot be inspected, partial SIMD intrinsics support, and ABI compatibility issues when mixing Cranelift and LLVM compiled code. The [Rust project goal for production-ready Cranelift](https://github.com/rust-lang/rust-project-goals/issues/397) was closed in late 2025 after failing to secure funding, so there is currently no active roadmap to bring the backend to production readiness.
 
@@ -884,9 +884,9 @@ path = "junit.xml"
 
 The main limitation is that nextest does not support doctests due to limitations in stable Rust. You need to run doctests separately with `cargo test --doc`. For most projects this is a minor inconvenience compared to the speedup on unit and integration tests.
 
-One thing to watch out for is that nextest with a cold sccache is actually 16.8 percent slower than baseline. The cache warming strategy matters. With a warm cache, you get the 35 percent speedup. With a cold cache, you pay the overhead of the process-per-test model without the caching benefits. Make sure your CI is actually getting cache hits before celebrating the nextest migration.
+One thing to watch out for is that nextest with a cold cache can actually be slower than baseline. The [nextest documentation](https://nexte.st/docs/design/why-process-per-test/) explains that the process-per-test model has overhead, particularly on Windows and macOS where process creation is slower. The cache warming strategy matters. With a warm cache, you get significant speedups. With a cold cache, you pay the overhead of spawning a separate process for every test without the caching benefits. Make sure your CI is actually getting cache hits before celebrating the nextest migration.
 
-Profile-guided optimization is another technique that can help, though it is more complex to set up. The idea is to compile your code with instrumentation, run your test suite to collect profiling data, then recompile with that data to guide optimization decisions. This can produce faster binaries, but it also means your CI needs to do two compilation passes.
+Profile-guided optimization is another technique that can help, though it is more complex to set up tbh. The idea is to compile your code with instrumentation, run your test suite to collect profiling data, then recompile with that data to guide optimization decisions. This can produce faster binaries, but it also means your CI needs to do two compilation passes. You have to be a bit sadistic to go this way.
 
 One more thing that helps is being strategic about what you build in CI. Do you really need to run `cargo build --release` on every PR? Release builds are much slower than debug builds because of all the optimization passes. For most CI purposes, a debug build plus running tests is sufficient. Save the release build for when you are actually deploying.
 
@@ -1015,7 +1015,7 @@ For very large repositories, even cloning can be slow. Git sparse checkout lets 
     fetch-depth: 1
 ```
 
-The polyrepo approach avoids these problems by keeping repositories small and focused. Each repository has its own CI that only cares about that code. The tradeoff is coordination. Cross-repository changes require multiple PRs, and keeping dependencies in sync becomes a versioning problem. You need good tooling for dependency management, and changes that span repositories are harder to review atomically.
+The polyrepo approach avoids these problems by keeping repositories small and focused. Each repository has its own CI that only cares about that code. But the tradeoff is coordination. Cross-repository changes require multiple PRs, and keeping dependencies in sync becomes a versioning problem. You need good tooling for dependency management, and changes that span repositories are harder to review atomically.
 
 There is no universally right answer. Small teams often do fine with a monorepo and simple CI. Large organizations with many teams often benefit from polyrepos with clear ownership boundaries. The worst situation is a monorepo without the tooling to make it work, where every PR triggers a full build of everything.
 
@@ -1025,7 +1025,7 @@ CI bottlenecks have always dragged on team velocity, but agentic coding raised t
 
 The test suite is usually the first bottleneck teams hit. There are two ways to speed it up that sound similar but mean different things. Parallel testing runs tests across multiple CPUs on a single machine. You scale the tests horizontally by scaling the box vertically with a bigger runner and more workers. Sharded testing breaks the suite into slices and runs each slice on its own machine. Twelve shards means twelve runners, each running a twelfth of the suite.
 
-Parallel testing is the most underrated option in CI. It needs no infrastructure, no matrix, and no result merging, yet most suites do not use it fully. Playwright for example does not run tests in parallel on CI by default. The config that npm init playwright generates sets workers to 1 when the CI environment variable is set. Every test runs one at a time on exactly the machines where speed matters most.
+Parallel testing is the most underrated option in CI. It needs no infrastructure, no matrix, and no result merging, yet most suites do not use it fully. Playwright for example does not run tests in parallel on CI by default. The config that pnpm create playwright generates sets workers to 1 when the CI environment variable is set. Every test runs one at a time on exactly the machines where speed matters most.
 
 The default exists to keep shared state tests from flaking. Two tests that touch the same database row or the same signed in user can step on each other when they run simultaneously. Tests that do not share mutable state are isolated, and isolated tests can safely run with as many workers as the machine has cores. A similar pattern hides in Go. The command `go test ./...` runs packages in parallel, but tests inside a package run serially unless they opt in with `t.Parallel()`. A serial suite on a 16 core runner leaves fifteen cores idle.
 
@@ -1067,16 +1067,16 @@ You can go further by running the lint, unit tests, and integration work concurr
     set -euo pipefail
 
     run_lint() {
-      npm run lint
+      pnpm run lint
     }
 
     run_unit_tests() {
-      npm test
+      pnpm test
     }
 
     run_integration_tests() {
       ./wait-for-db.sh
-      npm run test:integration
+      pnpm run test:integration
     }
 
     run_lint &
@@ -1193,7 +1193,7 @@ One pattern that helps with flaky tests is automatic retries with different stra
   with:
     timeout_minutes: 10
     max_attempts: 3
-    command: npm test
+    command: pnpm test
 ```
 
 The danger with retries is that they can mask real problems. A test that fails 30% of the time is not fine just because it eventually passes. You should track flaky tests and fix them, not just retry until they pass. Flaky tests are especially painful with merge queues because a flake in a five PR group evicts the entire batch and rebuilds it.
@@ -1302,17 +1302,18 @@ CircleCI has a built in Docker layer caching feature that uses volumes instead o
 
 Google Cloud Build supports BuildKit but has no persistent cache between builds. You have to use registry based caching, which means pulling the latest image and using the cache-from parameter on every build. This works but is slow because you are transferring layers over the network every time. There is also no ARM compute, so multi platform builds require emulation.
 
-Bitbucket Pipelines is the most limited option. It does not fully support buildx or BuildKit, which means it cannot handle multi platform builds at all. The cache limit is only 1GB, which is almost useless for Docker builds. The only workaround is registry based caching, which has the same network transfer problems as Google Cloud Build.
-
 GitLab CI/CD has different tradeoffs depending on whether you use their SaaS hosted runners or self hosted runners. The SaaS runners support BuildKit with privileged Docker daemon access, but there is no persistent Docker layer cache. You are stuck with the registry approach. Self hosted runners can have persistent caches, but they come with security risks. The shell executor requires granting the gitlab-runner user full root permissions. Docker in Docker gives each job its own Docker Engine instance with no layer caching between them. Binding to the Docker socket exposes the underlying host to privilege escalation.
 
 Jenkins and Buildkite are self hosted options that give you full control but require you to manage the infrastructure. The security risks are the same as GitLab self hosted. You have to choose between accepting those risks or accepting slower build times from isolated builds.
+
+[Blacksmith](https://blacksmith.sh/) (my fav) takes a different approach as a drop in replacement for GitHub Actions runners. Instead of using object storage for caching, they use persistent NVMe backed sticky disks stored in Ceph clusters. The difference is dramatic. GitHub Actions cache downloads at around 90 MB/s, Blacksmith's regular cache hits 400 MB/s, and sticky disks provide access in about 3 seconds regardless of size because there is no download at all. The disk is simply mounted into the runner. For Docker builds specifically, you swap out the standard actions for their equivalents and remove all the cache-from and cache-to directives. The builder state persists on disk between jobs, so there is nothing to serialize or deserialize. They also offer native ARM runners, so you can run multi platform builds on actual ARM hardware instead of emulating through QEMU. The pricing model is different too, around 60 to 67 percent cheaper than GitHub hosted runners for compute, with sticky disks charged at 0.50 dollars per GB per month. The tradeoff is vendor lock in to their specific actions and the fact that running jobs inside containers requires privileged mode and special environment variables to coordinate with their control plane.
 
 The cost differences add up quickly. A team running 100 builds per day with 3 jobs of 8 minutes each on GitHub Actions 32 core runners at 0.128 dollars per minute spends about 6900 dollars per month on compute alone. Add 700 dollars for 3TB of cache storage and 280 dollars for data transfer between Azure and AWS, and you are at nearly 8000 dollars per month. Indirect costs like slow cache operations and per minute billing rounding can add another 800 dollars.
 
 The per minute billing rounding is particularly sneaky. GitHub rounds up to the nearest minute per job. Three jobs of 20 seconds each get billed as 3 minutes, not 1 minute. This 300 percent increase affects workflows with many short jobs.
 
-The fundamental insight is that none of the major CI providers offer native multi platform builds without emulation or running your own BuildKit instance. The trade off is between security with isolated builds and performance with persistent caches and native architectures. Teams that need both usually end up with third party services that specialize in Docker builds, running dedicated infrastructure with persistent NVMe caches and native builders for both Intel and ARM.
+The fundamental insight is that most major CI providers still struggle with native multi platform builds. GitHub Actions, CircleCI, and Google Cloud Build all require emulation for ARM builds. The exception is Blacksmith, which offers native ARM runners alongside x86, letting you build both architectures on real hardware. The trade off is between security with isolated builds and performance with persistent caches and native architectures. Teams that need both usually end up with third party services that specialize in Docker builds, running dedicated infrastructure with persistent NVMe caches and native builders for both Intel and ARM.
+
 
 ## Where is this all going?
 
@@ -1330,9 +1331,9 @@ Compression is getting better too. [Zstd](https://github.com/facebook/zstd) comp
 
 The line between CI and development environment is blurring. Tools like [Gitpod](https://www.gitpod.io/) and [GitHub Codespaces](https://github.com/features/codespaces) give you a cloud development environment that is essentially the same as your CI environment. If your code works in Codespaces, it will work in CI, because they are running the same thing. This eliminates the "works on my machine" problem at its root.
 
-Nix is gaining traction as a way to define reproducible build environments. Instead of hoping that your CI runner has the right versions of everything installed, you declare exactly what you need and Nix provides it. The appeal is that you can run the exact same build locally that runs in CI. No more debugging the difference between Ubuntu as set up in GitHub Actions and Arch as it is on your laptop. I wrote about [getting started with Nix](/writes/2024-07-31-nix/) a while back, and the more I use it the more I appreciate what it offers for CI.
+Nix is gaining traction as a way to define reproducible build environments. Instead of hoping that your CI runner has the right versions of everything installed, you declare exactly what you need and Nix provides it. The appeal is that you can run the exact same build locally that runs in CI. No more debugging the difference between Ubuntu as set up in GitHub Actions and Arch as it is on your laptop. I wrote about [getting started with Nix](/writes/2024-07-31-nix/) a while back and you can check out Fedimint codebase to see what it can offer.
 
-The insight from the Hacker News discussion around these pain points was compelling. One commenter pointed out that strongly isolated systems like Nix and Bazel are amazing for giving no-fuss local reproducibility. Every CI platform is trying to seduce you into breaking things out into steps so that you can see their little visualizations of what is running in parallel. But that is the tail wagging the dog. The underlying build tool should be what is managing and ordering the build, not the GUI.
+The insight from the [Hacker News discussion](https://news.ycombinator.com/item?id=43427996) around these pain points was compelling. One commenter pointed out that strongly isolated systems like Nix and Bazel are amazing for giving no-fuss local reproducibility. Every CI platform is trying to seduce you into breaking things out into steps so that you can see their little visualizations of what is running in parallel. But that is the tail wagging the dog. The underlying build tool should be what is managing and ordering the build, not the GUI.
 
 What people really want for next generation CI is a system that can get deep hooks into local-first tools. Do not make me define a bunch of steps for you to run. Instead talk to my build tool and just display for me what the build tool is doing. Show me the order of things it built, show me the individual logs of everything it did.
 
@@ -1340,7 +1341,7 @@ With Nix, your GitHub Actions workflow can be just a thin wrapper that calls `ni
 
 The security story is also better with Nix. Everything is pinned by default, that is the whole point of Nix. And Nix sandboxes builds, removing most network access. The cases where network access is allowed are made explicit. A dependency can request network access without your knowledge, but it is built without access to your code, making it irrelevant that it has that network access.
 
-[Garnix](https://garnix.io/) and [Cachix](https://www.cachix.org/) provide CI services built around Nix, with aggressive caching of build artifacts. The main downside has always been that you have to learn Nix, which has a steep learning curve. But increasingly there are tools to help with that, and the payoff in reproducibility and debuggability is real.
+[Cachix](https://www.cachix.org/) provide CI services built around Nix, with aggressive caching of build artifacts. The main downside has always been that you have to learn Nix, which has a steep learning curve. But increasingly there are tools to help with that, and the payoff in reproducibility and debuggability is real.
 
 The fundamental challenge remains the same though. We want fast feedback on code changes, and we want confidence that what works in CI will work in production. The tools and techniques keep improving, but the goal is unchanged. The dream is a CI pipeline that runs in seconds, catches all the bugs, and never gives false positives. We are not there yet, but we are getting closer.
 
@@ -1559,9 +1560,9 @@ Third is all context behind an API. Most CI systems were designed for humans cli
 
 Fourth is speed and orchestration at scale. A single engineer can be operating tens of agents simultaneously. Several agents, several branches, all needing CI at the same time. The latency, queueing, and run time of your CI pipelines and their backing providers matter a lot more when you have 20 agents all trying to validate changes at once.
 
-GitHub is aware of this shift. In February 2026, they launched [Agentic Workflows](https://github.blog/ai-and-ml/automate-repository-tasks-with-github-agentic-workflows/) in technical preview. The idea is what they call Continuous AI, the integration of AI into the software development lifecycle. You define intent in Markdown with YAML frontmatter, compile it into a hardened GitHub Actions lock file, and let AI agents handle jobs that require judgment. Issue triage, code review, documentation drift detection, CI failure investigation.
+Obviously, GitHub is aware of this shift. In February 2026, they launched [Agentic Workflows](https://github.blog/ai-and-ml/automate-repository-tasks-with-github-agentic-workflows/) in technical preview. The idea is what they call Continuous AI, the integration of AI into the software development lifecycle. You define intent in Markdown with YAML frontmatter, compile it into a hardened GitHub Actions lock file, and let AI agents handle jobs that require judgment. Issue triage, code review, documentation drift detection, CI failure investigation. Havent tried it yet, but lets see where things go.
 
-The architecture is interesting. When you run `gh aw compile`, it generates a lock file that is a full GitHub Actions workflow with multiple jobs, trust boundaries, and permission gates. The Markdown stays the human readable source of truth. The lock file is the security hardened executable. When the agent wants to add a label, post a comment, or create a PR, it does not do it directly. Those write operations execute in separate, permission controlled jobs after the agent finishes. Each safe output has hard limits like max 3 labels or max 1 comment, plus sanitization and policy checks.
+The architecture seems interesting. When you run `gh aw compile`, it generates a lock file that is a full GitHub Actions workflow with multiple jobs, trust boundaries, and permission gates. The Markdown stays the human readable source of truth. The lock file is the security hardened executable. When the agent wants to add a label, post a comment, or create a PR, it does not do it directly. Those write operations execute in separate, permission controlled jobs after the agent finishes. Each safe output has hard limits like max 3 labels or max 1 comment, plus sanitization and policy checks.
 
 This is not replacing your build test deploy pipeline. It is adding a new layer on top that handles the judgment heavy work that was too messy to automate before. Agentic workflows run on GitHub Actions because that is where GitHub provides the necessary infrastructure for permissions, logging, auditing, sandboxed execution, and rich repository context.
 
@@ -1571,7 +1572,7 @@ But this is still early days. The fundamental problem remains that CI was design
 
 ## The Buildkite exodus
 
-At some point, usually around 75 engineers, teams start looking for alternatives. The pattern is consistent. CI costs grow almost quadratically with the number of engineers because the test suite grows and more engineers run it more often. GitHub Actions starts feeling slow and unreliable. The merge queue breaks in mysterious ways. And then someone mentions Buildkite.
+At some point, teams start looking for alternatives. The pattern is consistent. CI costs grow almost quadratically with the number of engineers because the test suite grows and more engineers run it more often. GitHub Actions starts feeling slow and unreliable. The merge queue breaks in mysterious ways. And then someone mentions Buildkite.
 
 The reliability difference is stark. One engineer on Twitter put it bluntly. At his last job they self hosted GitLab and used its CI features. In nearly five years he did not remember a single outage. In the year and change he had been back on GitHub, random features or more commonly GitHub Actions had been down repeatedly. Looking at the numbers, GitHub Actions had 57 outages tracked between May 2025 and April 2026, making it the most affected GitHub service. That works out to roughly one significant disruption per week. The [Buildkite status page](https://www.buildkitestatus.com/) tells a different story. Their web service shows 100 percent uptime over 90 days. Agent API at 99.98 percent. REST API at 100 percent. Job queue at 99.94 percent. The architectural difference is that Buildkite decouples the control plane from execution. Builds run on your infrastructure, so you are not affected by multi tenant contention or GitHub's infrastructure failures.
 
@@ -1640,7 +1641,7 @@ Scaling discussions consume engineering time. Getting scaling curves right is co
 
 AWS Savings Plans can secure significant discounts but they also create financial lock in. You might end up paying for weekend capacity you do not actually use. Unused commitment in any hour is wasted. It cannot be saved for a busier hour, cannot offset earlier on demand charges, cannot become an account credit, and is not refunded. A big financial commitment to one vendor can make it harder to experiment with other solutions even when your current setup is not working well. The guidance is to commit at 70 to 80 percent of your minimum 60 day baseline, not average or peak, and to layer commitments in smaller incremental blocks rather than one large multi year plan.
 
-The egress cost blindside is real. Without careful network architecture, data transfer costs can easily hit six figures annually. Every DevOps team has a story of learning this the expensive way when a surprisingly large AWS bill shows up. NAT Gateway charges 0.045 dollars per GB on every byte that crosses it, on top of hourly gateway costs and standard internet egress. One team discovered their CI pipeline was running 340 times per day instead of 12, with each run pulling a 400MB Docker image, 200MB of npm packages, and pushing 400MB to ECR. That added up to 61TB through NAT over 180 days, resulting in over 10000 dollars per month in NAT Gateway charges alone. The fixes include using free VPC Gateway Endpoints for S3 and DynamoDB, Interface Endpoints for ECR and CloudWatch and Secrets Manager, auditing CI triggers to remove unnecessary ones, and Docker layer caching to reduce image pull sizes.
+The egress cost blindside is real. Without careful network architecture, data transfer costs can easily hit six figures annually. Every DevOps team has a story of learning this the expensive way when a surprisingly large AWS bill shows up. NAT Gateway charges 0.045 dollars per GB on every byte that crosses it, on top of hourly gateway costs and standard internet egress. One team discovered their CI pipeline was running 340 times per day instead of 12, with each run pulling a 400MB Docker image, 200MB of pnpm packages, and pushing 400MB to ECR. That added up to 61TB through NAT over 180 days, resulting in over 10000 dollars per month in NAT Gateway charges alone. The fixes include using free VPC Gateway Endpoints for S3 and DynamoDB, Interface Endpoints for ECR and CloudWatch and Secrets Manager, auditing CI triggers to remove unnecessary ones, and Docker layer caching to reduce image pull sizes.
 
 The real question is not self hosting versus managed CI. It is about where you want your engineering team to spend its time. If you enjoy tuning CI performance, have a platform team ready to support it, and want full control, self hosting might be the right call. But if your team would rather focus on building product and moving fast, the hidden costs of running your own CI stack can slow you down. GitHub hosted runner prices dropped 39 percent in January 2026. For most small teams, hosted runners now offer the best value. Self hosting only makes sense for teams with specific compliance, security, or complex autoscaling requirements.
 
@@ -1718,6 +1719,6 @@ GitHub Actions usage reporting does not tell the full story. If you are running 
 
 Despite all the pain, GitHub Actions is still the most practical CI system for many projects. It is integrated with GitHub, it scales automatically, and the ecosystem of actions is huge. But it is not the only option anymore. Buildkite offers better reliability, easier self hosting, and features like test analytics and automatic retries that GitHub Actions lacks. For teams that have outgrown GitHub Actions, the migration is worth considering.
 
-To be fair, the 75 engineer threshold is anecdotal. No rigorous study backs this number. Some 200 person teams run fine on Actions while some 30 person teams hit walls due to monorepo size or build complexity. And the migration cost is real. Rewriting all workflows from GitHub Actions YAML to Buildkite's format is nontrivial. The ecosystem of Marketplace actions does not transfer. GitHub is also actively improving. Their stated priority is now availability first, capacity second, features third. Whether they execute remains to be seen.
+To be fair, some 200 person teams run fine on Actions while some 30 person teams hit walls due to monorepo size or build complexity. And the migration cost is real. Rewriting all workflows from GitHub Actions YAML to Buildkite's format is nontrivial. The ecosystem of Marketplace actions does not transfer. GitHub is also actively improving. Their stated priority is now availability first, capacity second, features third. Whether they execute remains to be seen.
 
 The dream is a CI pipeline that runs in seconds, catches all the bugs, and never gives false positives. We are not there yet. But understanding how the pieces fit together, from Docker layers to BuildKit caching to runner architecture to security gotchas, at least gives you a fighting chance. The green checkmark should feel like validation, not a hostage release. With enough optimization and enough understanding of the system, it can.
