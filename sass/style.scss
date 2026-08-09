@@ -387,20 +387,12 @@ footer {
     }
 
     h1 {
-        font-size: 1.8em;
+        font-size: clamp(2em, 5vw + 1.4em, 4.2em);
         font-weight: 700;
         margin: 0;
-        letter-spacing: 0.00em;
+        letter-spacing: 0;
         text-transform: uppercase;
-        
-        @media (min-width: 400px) {
-            font-size: 2.4em;
-        }
-        
-        @media (min-width: 600px) {
-            font-size: 4.2em;
-            white-space: nowrap;
-        }
+        line-height: 1.05;
     }
 }
 
