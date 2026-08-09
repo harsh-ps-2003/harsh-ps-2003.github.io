@@ -11,3 +11,4 @@ Books :
 * Big Debt Crisis
 * The Mastery of Capital
 * Lets talk Money
+* Die with Zero

@@ -209,6 +209,10 @@ Books:
 * [Concurrency in Go](https://www.oreilly.com/library/view/concurrency-in-go/9781491941294/)
 * [A Gentle Introduction to Nim](https://nimprogrammingbook.com/book/nimprogramming_molokai.pdf)
 
+### History of computing
+
+* [The Dream Machine](https://press.stripe.com/the-dream-machine)
+
 ### Random
 
 * [Robust De-anonymization of Large Sparse Datasets](https://www.cs.utexas.edu/~shmat/shmat_oak08netflix.pdf)
