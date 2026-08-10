@@ -1,6 +1,10 @@
 +++
 title = "i should have paid a closer look at tokenizer"
 date = 2026-05-30
+description = "What tokenizers actually do, how BPE training works, and why token boundaries matter for cost, latency, and model behavior."
+
+[taxonomies]
+tags = ["llm", "tokenizers", "nlp"]
 +++
 
 Well, I gave an interview sometime ago, and wasn't able to explain tokenizer properly, missed some points on tokenizer training, and got the sweet rejection I deserved (along with some great advices). But, I got an interested in tokenizer because of that, and damnn I found insights that I didn't have maturity to see when I used [tiktoken](https://github.com/openai/tiktoken) for the first time in my 2nd year. So going back the basics. 

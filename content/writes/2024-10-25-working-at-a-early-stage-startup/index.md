@@ -1,6 +1,10 @@
 +++
 title = "Working at a early-stage startup!"
 date = 2024-10-25
+description = "What early-stage startup work feels like versus internships: ownership, communication, unblocking people, and timeline estimation."
+
+[taxonomies]
+tags = ["startups", "career"]
 +++
 
 So, I got hired at a startup at the end of my 2nd year at IITK, and man it was an intense experience working at a high growth startup! I was working, managing my academic workload and later started doing some cryptography research project under a cool prof as well, so hectic as fuck. But I loved every single moment of it. I learned about the experience of working in a startup, and some nuggets on what it takes to actually run a high-growth startup.

@@ -1,6 +1,10 @@
 +++
 title = "Spent my summers exploring Bitcoin 💸"
 date = 2024-07-12
+description = "Summer of Bitcoin 2024 notes on Fedimint, escrow modules, and learning Bitcoin by verifying the tech before investing."
+
+[taxonomies]
+tags = ["bitcoin", "cryptography", "open-source"]
 +++
 
 Anyone who is into investing their hard earned money knows about Bitcoin, it's one thing that has gained significant traction over the years due to its phenomenal returns and dependability. I was too enthusiastic about it, but wanted to accumulate some technical knowledge before pouring in my money! I dont trust, I verify :) Then I stumbled upon [Summer of Bitcoin](https://www.summerofbitcoin.org/) which was a summer internship for university students around globe to learn about Bitcoin and earn a stipend for their OSS work after learning! Now thats what I can being at the right place at the right time! Less than 1% applications are accepted, its extremely competitive and the [challenge](https://github.com/harsh-ps-2003/haikyu) that I had to solve was mind numbing to say the least, especially because I had no knowledge of Bitcoin technical details, so I learnt on the go ([Programming Bitcoin](https://www.oreilly.com/library/view/programming-bitcoin/9781492031482/) and [Grokking Bitcoin](https://www.oreilly.com/library/view/grokking-bitcoin/9781617294648/?_gl=1*cceq5o*_ga*MTMzMDQxNzY2MC4xNzIwNzg4Nzgz*_ga_092EL089CH*MTcyMDg2NDM1OC40LjEuMTcyMDg2NDM5Ny4yMS4wLjA.) were a big help)!

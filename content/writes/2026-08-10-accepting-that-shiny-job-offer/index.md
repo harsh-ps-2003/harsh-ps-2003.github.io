@@ -2,6 +2,10 @@
 title = "Accepting that shiny job offer?"
 date = 2026-08-10
 draft = true
+description = "Career notes from accepting a new-grad offer in 2026: interviews, negotiation, ghosting, and advice that still holds today."
+
+[taxonomies]
+tags = ["career", "startups", "interviews"]
 +++
 
 Okay, so finally I have accepted a full-time offer from an early stage startup. During my journey of talking to founders, HRs, giving 50ish interviews, I have realized a lot. Like a lot for a naive out of uni kid! Also, was helping bunch of folks (internships to new grads to seniors) to clear interviews, so have some third-party perspective as well. I have received lots of mails of people who have been reading the stuff I write and it helping them (thanks for reading guys). So, I am writing this blog, according to 2026 reality. I hope the upcoming generation of engineering and researchers have it better than me ;(

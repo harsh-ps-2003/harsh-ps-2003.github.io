@@ -1,6 +1,10 @@
 +++
 title = "The frenzy of building and observing seniors!"
 date = 2024-11-26
+description = "Why rebuilding systems from scratch helps debugging, decision-making, and owning the tech that powers a product."
+
+[taxonomies]
+tags = ["engineering", "learning"]
 +++
 
 I have started to experiment with a tons of pretty projects whenever I get some free time, I just love building some stuff. I recently tried making small local projects from [build-your-own-x](https://github.com/codecrafters-io/build-your-own-x). At first it doesn't make much sense why somebody is trying to minimally re-implementing every other cool piece of technology he sees, but it just enlightening (feels cool basically) to me (although my frenzy lost its heat after some time, just wrote too much code, burned out). 

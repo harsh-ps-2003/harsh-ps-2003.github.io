@@ -2,6 +2,10 @@
 title = "Preparing for wild interview rounds"
 date = 2025-06-26
 draft = true
+description = "Interview revision notes for DSA and foundational CS concepts when LeetCode-style rounds get brutal."
+
+[taxonomies]
+tags = ["interviews", "career", "dsa"]
 +++
 
 > This is interview-focused writeup!

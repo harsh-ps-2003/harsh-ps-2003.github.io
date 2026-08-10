@@ -1,6 +1,10 @@
 +++
 title = "The Rusty path to Secure Metrics in Ambient Mesh"
 date = 2025-05-23
+description = "Building secure metrics for Istio Ambient Mesh ztunnel in Rust during an LFX internship, and what that taught me about service meshes."
+
+[taxonomies]
+tags = ["istio", "rust", "service-mesh", "cncf"]
 +++
 
 [Istio](https://istio.io/) is widely recognized as the most popular, powerful, and trusted [service mesh](https://www.solo.io/topics/service-mesh/service-mesh-architecture) in the cloud native ecosystem and is [extensively used in Production since it's inception](https://youtu.be/cV6JFq8XNZQ?si=wmSUz605Dl4km4Az). Fortunately, I got the opportunity to intern at Istio (managed CNCF and spun out of Google), and man my brain transitioned from a code-monkey to a divine architect in mere span of 3 months. 

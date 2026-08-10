@@ -1,6 +1,10 @@
 +++
 title = "DB Joins on GPUs!!"
 date = 2026-02-26
+description = "Why SQL joins run fast on GPUs: hash joins, radix partitioning, and how GPU parallelism beats CPU for OLAP join workloads."
+
+[taxonomies]
+tags = ["databases", "gpus", "hpc", "sql"]
 +++
 
 I was studying for my High Performance Computing Exams sometime ago, and interestingly, I stumbled upon a slide stating that H100 GPU can do 15 queries/sec and [GB200NVL72](https://www.nvidia.com/en-in/data-center/gb200-nvl72/) can do whopping 90 queries/sec compared to just 5 queries/sec on typical x86 architectures. Never thought about this, so digged deep out of curiosity.

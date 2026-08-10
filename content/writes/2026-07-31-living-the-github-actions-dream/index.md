@@ -2,6 +2,10 @@
 title = "Living the GitHub Actions Dream"
 date = 2026-07-31
 draft = false
+description = "Making Docker builds and GitHub Actions CI fast: BuildKit, layer caching, Arm runners, and why Rust builds hurt."
+
+[taxonomies]
+tags = ["ci", "github-actions", "docker", "devops"]
 +++
 
 Personally, for me its deeply frustrating when I watch a CI pipeline spin for 45 minutes when I know the actual work takes maybe 3 minutes. You push a one line fix, grab coffee, check Slack, and the build is still chugging away. The green checkmark feels less like validation and more like a hostage release. I have mass cancelled CI runs more times than I can count, and every time I do it I wonder why we collectively decided this was acceptable.

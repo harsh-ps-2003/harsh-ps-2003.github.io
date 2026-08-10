@@ -1,6 +1,10 @@
 +++
 title = "Starting to pick up Nix a bit!"
 date = 2024-07-31
+description = "A headstarter on Nix for reproducible systems: lockfiles at OS scale, flakes, Nixpacks, and useful resources for getting started."
+
+[taxonomies]
+tags = ["nix", "devops", "reproducibility"]
 +++
 
 Well, most modern programming languages come with package managers that help manage dependencies, and among other things they do their best to ensure that they aren’t altered without the user knowing. There are always more sources of variability than you can count. If you are dealing with systems software, the surface area increases even more as now you have to worry about native libs, compilers, OS, might be kernel as well! More often that not, figuring out what the previous state of the system was is a herculean task. Only if you are unlucky that the burden of hunting for differences can land upon you like a divine punishment. 

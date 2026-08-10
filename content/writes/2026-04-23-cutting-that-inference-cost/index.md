@@ -1,6 +1,10 @@
 +++
 title = "cutting that inference cost"
 date = 2026-04-23
+description = "Practical notes on cutting LLM inference cost and latency: vLLM, SGLang, PagedAttention, KV cache, and serving tradeoffs."
+
+[taxonomies]
+tags = ["llm", "inference", "vllm", "performance"]
 +++
 
 Who doesn't want lightning fast AI responses? You don't really want to serve responses slower than human typing speeds. Inference is hard. And, it's not a model problem, it doesn't differentiate between 1 and 1M requests, its scheduling problem, revolving back to depths of engineering.

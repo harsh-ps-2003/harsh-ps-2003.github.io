@@ -1,6 +1,10 @@
 +++
 title = "Which Prompts Actually Work for your Agents?"
 date = 2026-02-22
+description = "How prompt saliency analysis finds which phrases in an agent system prompt actually drive behavior, so you can prune the rest."
+
+[taxonomies]
+tags = ["agents", "prompt-engineering", "llm", "interpretability"]
 +++
 
 I was wondering on a lazy sunday, which parts of my prompt actually matter? 

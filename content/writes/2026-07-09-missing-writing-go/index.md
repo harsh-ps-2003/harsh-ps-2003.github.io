@@ -1,6 +1,10 @@
 +++
 title = "missing writing some concurrency in Go"
 date = 2026-07-09
+description = "Go concurrency patterns from production: channels, CSP ideas, and synchronization beyond the happy path."
+
+[taxonomies]
+tags = ["go", "concurrency", "systems"]
 +++
 
 It has been a long since I wrote Go. I still remember doing FOSS for CNCF folks and was deep in Go, until I got distracted by Rust ;)

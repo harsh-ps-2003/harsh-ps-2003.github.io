@@ -1,6 +1,10 @@
 +++
 title = "All sorts of famous Attention Layers"
 date = 2026-07-18
+description = "A tour of attention variants from classic softmax attention through modern efficient and sparse designs after Kimi K3."
+
+[taxonomies]
+tags = ["transformers", "attention", "ml", "llm"]
 +++
 
 Well, we had a bomb of Kimi K3 launch, and I writing this after going through it. So, we will trace this pokemon evolution.

@@ -1,6 +1,10 @@
 +++
 title = "the longer you chat, the worse your agent's response"
 date = 2026-03-19
+description = "Why long agent chats degrade: context collapse, memory layers, compaction, evals, and how to keep agent state correct over time."
+
+[taxonomies]
+tags = ["agents", "llm", "context", "memory"]
 +++
 
 ## Just for the sake of basics, whats an agent?

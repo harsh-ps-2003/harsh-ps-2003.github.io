@@ -1,6 +1,10 @@
 +++
 title = "how package managers use PubGrub for Dependency Resolution"
 date = 2026-04-11
+description = "How PubGrub dependency resolution works in package managers like uv: CDCL, conflict explanations, and smart backtracking."
+
+[taxonomies]
+tags = ["rust", "package-managers", "dependency-resolution"]
 +++
 
 There are [all sorts of dependency resolution methods](https://nesbitt.io/2026/02/06/dependency-resolution-methods.html) used by [various package managers](https://github.com/ecosyste-ms/package-manager-resolvers), but I am specifically writing on PubGrub as it's used in uv package manager which I used to contribute to get some insights on how pro peps write Rust. In short, PubGrub is popular as :

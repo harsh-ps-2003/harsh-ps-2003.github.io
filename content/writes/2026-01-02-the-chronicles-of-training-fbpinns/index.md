@@ -1,6 +1,10 @@
 +++
 title = "The chronicles of training FBPINNs"
 date = 2026-01-02
+description = "Notes from training FBPINNs on a supercomputer: GPU quirks, distributed training headaches, and squeezing V100 resources."
+
+[taxonomies]
+tags = ["ml", "gpus", "distributed-training", "pinns"]
 +++
 
 Right now I am training FBPINNs on a supercomputer. yay!. This distributed training is a total headache, so this is a writeup about how I see am optimizing the resources I have been bestowed upon. I wanna have some bitter sweet memories of GPUs when I graduate ;)

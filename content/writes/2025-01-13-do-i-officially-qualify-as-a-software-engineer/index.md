@@ -1,6 +1,10 @@
 +++
 title = "Do I officially qualify as a Software Engineer now?"
 date = 2025-01-13
+description = "Reflections after a year of systems programming internships, plus how I think about writing Rust applications going forward."
+
+[taxonomies]
+tags = ["career", "rust", "systems"]
 +++
 
 With another internship coming to end, I officially have around 1 year systems programming experience (internship experience tbh) and I am quite sad, because I still don't seem to have much knowledge ( ͡° ʖ̯ ͡°) 

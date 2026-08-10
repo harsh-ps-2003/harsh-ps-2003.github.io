@@ -8,29 +8,34 @@ Harsh Pratap Singh is a software engineer and researcher focused on Distributed 
 
 ## Site Structure
 
-- `/` - Home page with bio and links
-- `/writes/` - Technical blog posts about engineering and research
-- `/reads/` - Curated reading lists for CS, Philosophy, Startups, and Finance
-- `/resume/` - Professional experience and work history
+- https://harsh-ps-2003.github.io/ - Home page with bio and links
+- https://harsh-ps-2003.github.io/writes/ - Technical blog posts about engineering and research
+- https://harsh-ps-2003.github.io/reads/ - Curated reading lists for CS, Philosophy, Startups, and Finance
+- https://harsh-ps-2003.github.io/resume/ - Professional experience and work history
 
-## Featured Content
+## Writes
 
-### Recent Writes
-- Accepting that shiny job offer?
-- Exploring 1brc
-- Missing writing some concurrency in Go
-- All sorts of famous Attention Layers
-- I should have paid a closer look at tokenizer
-- Cutting that Inference Cost
-- Some Insights on HNSW
-- How package managers use PubGrub for Dependency Resolution
-- The longer you chat, the worse your agent's response
-- DB Joins on GPUs
-- Which Prompts Actually Work for your Agents?
-- The Chronicles of Training FBPINNs
-- The Rusty Path to Secure Metrics in Istio
+- [Living the GitHub Actions Dream](https://harsh-ps-2003.github.io/writes/living-the-github-actions-dream/): Making Docker builds and GitHub Actions CI fast with BuildKit, caching, Arm runners, and Rust build tips
+- [All sorts of famous Attention Layers](https://harsh-ps-2003.github.io/writes/all-sorts-of-famous-attention-layers/): A tour of attention variants from classic softmax attention through modern efficient designs
+- [missing writing some concurrency in Go](https://harsh-ps-2003.github.io/writes/missing-writing-go/): Go concurrency patterns from production, channels, CSP, and synchronization beyond the happy path
+- [i should have paid a closer look at tokenizer](https://harsh-ps-2003.github.io/writes/i-should-have-paid-a-closer-look-at-tokenizer/): What tokenizers do, how BPE training works, and why token boundaries matter for cost and behavior
+- [cutting that inference cost](https://harsh-ps-2003.github.io/writes/cutting-that-inference-cost/): Practical notes on LLM inference cost and latency with vLLM, SGLang, PagedAttention, and KV cache
+- [some insights on HNSW](https://harsh-ps-2003.github.io/writes/some-insights-on-hnsw/): How HNSW approximate nearest neighbor search works for RAG and the recall versus latency tradeoff
+- [how package managers use PubGrub for Dependency Resolution](https://harsh-ps-2003.github.io/writes/pubgrub-for-dependency-resolution/): PubGrub dependency resolution in package managers like uv, CDCL, conflicts, and backtracking
+- [the longer you chat, the worse your agent's response](https://harsh-ps-2003.github.io/writes/the-longer-you-chat-the-worse-your-agents-response/): Why long agent chats degrade, context collapse, memory layers, compaction, and evals
+- [DB Joins on GPUs!!](https://harsh-ps-2003.github.io/writes/db-joins-on-gpus/): Why SQL joins run fast on GPUs via hash joins, radix partitioning, and massive parallelism
+- [Which Prompts Actually Work for your Agents?](https://harsh-ps-2003.github.io/writes/which-prompts-actually-work-for-your-agents/): Prompt saliency analysis to find which system-prompt phrases actually drive agent behavior
+- [The chronicles of training FBPINNs](https://harsh-ps-2003.github.io/writes/the-chronicles-of-training-fbpinns/): Training FBPINNs on a supercomputer, GPU quirks, and distributed training resource constraints
+- [The Rusty path to Secure Metrics in Ambient Mesh](https://harsh-ps-2003.github.io/writes/istio-lfx/): Secure metrics for Istio Ambient Mesh ztunnel in Rust from an LFX internship
+- [Do I officially qualify as a Software Engineer now?](https://harsh-ps-2003.github.io/writes/do-i-officially-qualify-as-a-software-engineer/): Reflections after systems programming internships and writing Rust applications
+- [The frenzy of building and observing seniors!](https://harsh-ps-2003.github.io/writes/building/): Why rebuilding systems from scratch helps debugging and owning product technology
+- [Working at a early-stage startup!](https://harsh-ps-2003.github.io/writes/working-at-a-early-stage-startup/): Early-stage startup work versus internships: ownership, communication, and unblocking people
+- [Starting to pick up Nix a bit!](https://harsh-ps-2003.github.io/writes/nix/): A headstarter on Nix for reproducible systems, flakes, Nixpacks, and getting started resources
+- [Spent my summers exploring Bitcoin](https://harsh-ps-2003.github.io/writes/sob/): Summer of Bitcoin 2024 notes on Fedimint, escrow modules, and learning Bitcoin by verifying the tech
 
-### Reading Lists
+## Reading Lists
+
+- https://harsh-ps-2003.github.io/reads/ - Index of curated reading lists
 - Computer Science - Systems, databases, distributed computing
 - Philosophy - Epistemology, ethics, metaphysics
 - Startups - Building companies, product development
@@ -39,7 +44,7 @@ Harsh Pratap Singh is a software engineer and researcher focused on Distributed 
 ## Contact
 
 - GitHub: https://github.com/harsh-ps-2003
-- Email: harshpratapsingh2003@gmail.com
+- Email: harshpratapsingh8210@gmail.com
 - Twitter: https://twitter.com/harsh_ps_2003
 - LinkedIn: https://linkedin.com/in/harsh-ps-2003
 
@@ -47,4 +52,6 @@ Harsh Pratap Singh is a software engineer and researcher focused on Distributed 
 
 - Built with Zola static site generator
 - Hosted on GitHub Pages
-- Source: https://github.com/harsh-ps-2003/harsh-ps-2003.github.io
+- Source: https://github.com/harsh-ps-2003/harsh-ps-2003
+- Sitemap: https://harsh-ps-2003.github.io/sitemap.xml
+- Feeds: https://harsh-ps-2003.github.io/atom.xml , https://harsh-ps-2003.github.io/rss.xml

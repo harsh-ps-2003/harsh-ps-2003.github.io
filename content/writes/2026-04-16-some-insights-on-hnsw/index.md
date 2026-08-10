@@ -1,6 +1,10 @@
 +++
 title = "some insights on HNSW"
 date = 2026-04-16
+description = "How HNSW approximate nearest neighbor search works for RAG: small-world graphs, skip lists, and the recall versus latency tradeoff."
+
+[taxonomies]
+tags = ["vector-search", "rag", "hnsw", "ann"]
 +++
 
 Suppose your RAG pipeline has embedded millions of docs. A user asks a question, and the system converts that query into a high-dimensional vector and needs to find the closest matches. The brute-force approach would be an exact kNN, just computes the distance between the query vector and every vector in the database. That's O(N·d). With 10 million vectors at 1,536 dimensions, you're looking at ~15 billion floating-point operations per query. Not viable at production latency.
