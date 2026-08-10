@@ -19,7 +19,7 @@ Generally prefer roles involving *Research and Engineering* both!
 
 *A generalist startup guy at heart!*
 
-Go through my work at [Github](https://github.com/harsh-ps-2003) and for any query you can shoot me an [email](mailto:harshps2003@gmail.com). You can also find me on [Twitter](https://twitter.com/harsh_ps2003) and [LinkedIn](https://www.linkedin.com/in/harshps2003/). I prefer being emailed!
+Go through my work at [Github](https://github.com/harsh-ps-2003) and for any query you can shoot me an [email](mailto:harshpratapsingh8210@gmail.com). You can also find me on [Twitter](https://twitter.com/harsh_ps2003) and [LinkedIn](https://www.linkedin.com/in/harshps2003/). I prefer being emailed!
 
 I do believe in [work-life balance](https://en.wikipedia.org/wiki/Work%E2%80%93life_balance) and have enjoyed [working remotely](https://en.wikipedia.org/wiki/Remote_work) as it makes it easier to get into the [Flow State](https://en.wikipedia.org/wiki/Flow_(psychology)), but also appreciate in-office work because I get to socialize more! And, I love talking to new people ;)
 
