@@ -156,6 +156,7 @@ nav a {
     align-items: center;
     justify-content: center;
     opacity: 0.6;
+    flex-shrink: 0;
 }
 
 .theme-toggle:hover {
@@ -472,28 +473,72 @@ ul.blog-posts.with-dates li span {
 }
 
 // Search
-.search-container {
-    margin-bottom: 20px;
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.search-container--inline {
+    position: relative;
+    margin: 0 0 18px;
+    max-width: 280px;
 }
 
 .search-input {
     width: 100%;
-    padding: 10px 15px;
+    padding: 4px 0;
     font-family: var(--font-main);
     font-size: 0.9em;
-    border: 2px solid var(--heading-color);
-    border-radius: 3px;
-    background-color: var(--background-color);
+    border: none;
+    border-bottom: 1px dashed var(--text-color);
+    border-radius: 0;
+    background: transparent;
     color: var(--text-color);
+    opacity: 0.55;
+
+    &:hover {
+        opacity: 0.8;
+    }
 
     &:focus {
         outline: none;
-        border-color: var(--main-color);
+        opacity: 1;
+        border-bottom-color: var(--main-color);
+        border-bottom-style: solid;
     }
 
     &::placeholder {
         color: var(--text-color);
         opacity: 0.5;
+        text-transform: lowercase;
+    }
+}
+
+.search-status {
+    margin: 6px 0 0;
+    font-size: 0.8em;
+    opacity: 0.55;
+}
+
+ul.blog-posts.with-dates li.is-hidden,
+ul.blog-posts li.is-hidden {
+    display: none;
+}
+
+.search-status a {
+    border-bottom: 1px solid var(--main-color);
+    opacity: 1;
+
+    &:hover {
+        background-color: transparent;
+        color: var(--main-color);
     }
 }
 

@@ -4,7 +4,7 @@
 
 ## About
 
-Harsh Pratap Singh is a software engineer and researcher focused on Distributed Systems, Machine Learning, Databases, and Cryptography. This site contains technical writeups, reading lists, and a resume.
+Harsh Pratap Singh is a competent software engineer and researcher focused on Distributed Systems, Machine Learning, Databases, and Cryptography. This site contains technical writeups, reading lists, and a resume.
 
 ## Site Structure
 

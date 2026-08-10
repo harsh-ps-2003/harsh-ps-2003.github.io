@@ -22,9 +22,22 @@
 {% endif %}
 
 {% if section.pages | length > 0 %}
-<ul class="blog-posts with-dates">
+<div class="search-container search-container--inline">
+    <label class="visually-hidden" for="search">Search writes</label>
+    <input
+        type="search"
+        id="search"
+        class="search-input"
+        placeholder="filter writes"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Filter writes"
+    >
+    <p id="search-status" class="search-status" hidden></p>
+</div>
+<ul class="blog-posts with-dates" id="posts-list">
     {% for page in section.pages %}
-    <li data-title="{{ page.title | lower }}">
+    <li data-title="{{ page.title | lower }}" data-url="{{ page.permalink }}">
         <span>{{ page.date | date(format="%d %b, %Y") }}</span>
         <a href="{{ page.permalink | safe }}">{{ page.title }}</a>
     </li>
@@ -32,3 +45,7 @@
 </ul>
 {% endif %}
 {% endblock content %}
+
+{% block scripts %}
+<script src="{{ get_url(path='js/search.js') }}" defer></script>
+{% endblock scripts %}

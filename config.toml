@@ -23,7 +23,8 @@ dark_theme = "github-dark"
 include_title = true
 include_description = true
 include_path = false
-include_content = true
+include_content = false
+index_format = "elasticlunr_javascript"
 
 [slugify]
 paths = "on"

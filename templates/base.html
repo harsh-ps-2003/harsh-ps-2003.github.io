@@ -153,6 +153,12 @@
     })();
     </script>
 
+    <script>
+        window.ZOLA_SEARCH = {
+            elasticlunrUrl: "{{ get_url(path='elasticlunr.min.js') }}",
+            indexUrl: "{{ get_url(path='search_index.en.js') }}"
+        };
+    </script>
     {% block scripts %}{% endblock scripts %}
 </body>
 </html>
