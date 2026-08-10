@@ -532,16 +532,6 @@ ul.blog-posts li.is-hidden {
     display: none;
 }
 
-.search-status a {
-    border-bottom: 1px solid var(--main-color);
-    opacity: 1;
-
-    &:hover {
-        background-color: transparent;
-        color: var(--main-color);
-    }
-}
-
 // Post meta
 .post-meta {
     margin-bottom: 30px;

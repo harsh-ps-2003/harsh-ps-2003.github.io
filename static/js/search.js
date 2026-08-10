@@ -96,18 +96,7 @@
             status.textContent = "no matches";
             return;
         }
-        if (count === 1 && visibleItems[0]) {
-            const href = firstLink(visibleItems[0]);
-            const title = visibleItems[0].querySelector("a");
-            status.innerHTML =
-                '1 match · <a href="' +
-                href +
-                '">open ' +
-                (title ? title.textContent : "post") +
-                "</a> · enter";
-            return;
-        }
-        status.textContent = count + " matches · enter opens first";
+        status.textContent = "enter opens first";
     }
 
     function applyVisibility(matcher) {
