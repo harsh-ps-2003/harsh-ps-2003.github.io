@@ -1,6 +1,8 @@
 +++
 title = "Life"
 date = 2026-08-10
+in_search_index = false
+
 +++
 
 Psychology, identity, parenting, work, love, aging, and the messy business of being a person.

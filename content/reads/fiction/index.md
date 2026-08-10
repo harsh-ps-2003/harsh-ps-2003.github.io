@@ -1,6 +1,8 @@
 +++
 title = "Fiction"
 date = 2026-08-10
+in_search_index = false
+
 +++
 
 Novels and stories that stayed with me. Some are philosophical without being philosophy textbooks. Some are just brutal and beautiful on their own terms.

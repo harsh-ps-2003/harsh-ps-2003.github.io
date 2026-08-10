@@ -1,6 +1,8 @@
 +++
 title = "Philosophy"
 date = 2024-07-12
+in_search_index = false
+
 +++
 
 When I am talking about Philosophy, don't confuse it with Theology. I have a love affair with life, not with beliefs.

@@ -1,6 +1,7 @@
 +++
 title = "education"
 template = "single_section.html"
+in_search_index = false
 +++
 
 ## Education

@@ -2,6 +2,7 @@
 title = "reads"
 template = "single_section.html"
 sort_by = "title"
+in_search_index = false
 +++
 
 A small library of [Computer Science](/reads/cs/) material that I have enjoyed till now!

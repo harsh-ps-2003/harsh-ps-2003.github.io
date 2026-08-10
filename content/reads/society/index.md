@@ -1,6 +1,8 @@
 +++
 title = "Society"
 date = 2026-08-10
+in_search_index = false
+
 +++
 
 Books about how power, institutions, inequality, and collective stories shape the world we live in.

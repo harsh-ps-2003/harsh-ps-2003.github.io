@@ -1,6 +1,8 @@
 +++
 title = "Computer Science"
 date = 2024-07-12
+in_search_index = false
+
 +++
 
 Well, I used to hop around and read many CS books for passing my time in boring undergrad classes. It was fun, and I am not the best sort of a student. Here I am listing my favorite reads till now and, what and why would I pick them up for if I wanted to read again. They have helped me enjoy in the midst of boring lectures in IITK and I want to sincerely thank the authors for putting in the work. Also, I have shared the CS lectures I watched to grasp the concepts better so that people can have reference material and broader understanding of the interesting topics. The best way to learn these concepts is to implement some intriguing idea that you have while slowly and sensually reading these beauties!

@@ -1,6 +1,8 @@
 +++
 title = "Wealth"
 date = 2024-09-04
+in_search_index = false
+
 +++
 
 Its hard to earn money, and harder to keep it with you.

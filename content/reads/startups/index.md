@@ -1,6 +1,8 @@
 +++
 title = "Startups"
 date = 2024-07-12
+in_search_index = false
+
 +++
 
 The collection of most impactful startup execution texts I have gone through. Whether you want to work on an indie company or a scaled startups, these are some good reads for general perspectives :
