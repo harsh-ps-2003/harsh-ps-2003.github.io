@@ -409,6 +409,15 @@ If you do only three things, reconcile your percentage against a fully diluted c
 
 So when you are evaluating an offer, do not just look at the total comp number. Look at the mix. A 400K offer that is 60 percent equity is a very different bet than a 350K offer that is 80 percent cash. The first one is a bet on the company. The second one is a paycheck. Both are valid. But know which one you are taking.
 
+## Some notes on hiring in India in 2026 
+
+This is from my personal experience being in India, so take it with a grain of salt.
+* There is abundace of job. Like, really good enery especially in Banglore.
+* The early engineers are totally world class! If you know how to hire, you should spin up junior teams. I might be a bit parital, but the ambitious juniors are rocking
+* Unfortunately, world class seniors/staffs/EMs and + are rare breed, so spinning up engineering orgs for scale is difficult. Most of these people ended up working in some grunt org, never did any foundational work, and never realized their potential.
+* Culture issue is there. Meritocracy hasent creeped in yet, its seniority all the way. I am not sure what to do about this.
+
+
 ## Me?
 
 Personally, I had very competitive offers in India. I actually have taken a pay cut to join Sqwish in UK, that is the equity bet. I am not even sure whether we will survive beyond 2 years. Thats the difference that I myself will have to make. And I personally think, its an experience worth having. I will grow at the speed of light, will get opportunity to work with really really awesome people and shape culture of the company, and solve some really fucking hard technical problems. What else to ask for? The EMI scheme makes the tax situation much better than it would be in the US.

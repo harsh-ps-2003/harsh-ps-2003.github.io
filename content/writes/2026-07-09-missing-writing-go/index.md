@@ -9,7 +9,7 @@ tags = ["go", "concurrency", "systems"]
 
 It has been a long since I wrote Go. I still remember doing FOSS for CNCF folks and was deep in Go, until I got distracted by Rust ;)
 
-I just saw an [awesome Go concurrency visualization](https://divan.dev/posts/go_concurrency_visualize/). So as I got some free time today, I am gonna write about some concurrency patterns in Go I saw being used in prod. 
+I just saw an [awesome Go concurrency visualization](https://divan.dev/posts/go_concurrency_visualize/). So as I got some free time today, I am gonna write about some concurrency patterns in Go I saw being used in prod.
 
 ## Background
 
