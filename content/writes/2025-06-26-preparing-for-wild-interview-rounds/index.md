@@ -609,36 +609,6 @@ Although nodes is just a Python list, each element in nodes is still a reference
     return head
 ```
 * If we are working on the problems where we are asked to remove head node only and there are no other nodes in the linkedlist the dummy node can handle this case and our logic will work fine else we will need to add extra if conditions to handle this special case. Beware of `.next.next` giving null pointer exception.
-* Reverse Sublist
-```python
-"""
-Time - O(n) and Space - O(1)
-"""
-class Solution:
-    def reverseBetween(self, head: Optional[ListNode], left: int, right: int) -> Optional[ListNode]:
-        if not head or left == right:
-            return head
-
-        dummy = ListNode(0, head)
-        prev, head = dummy, dummy.next
-         
-        # Move `prev` to node before `left`
-        for _ in range(left - 1):
-            prev = prev.next
-
-        # `start` is the first node to reverse
-        start = prev.next
-        then = start.next
-
-        # Reverse the sublist using head-insertion
-        for _ in range(right - left):
-            start.next = then.next
-            then.next = prev.next
-            prev.next = then
-            then = start.next
-
-        return dummy.next
-```
 * Loop Detection and Removal from LinkedList (Fast and Slow pointers)
 ```python
 def detect_and_remove_cycle(head: ListNode) -> ListNode:
@@ -1103,130 +1073,9 @@ def height(root):
 * [Minimum Number of Operations to Sort a Binary Tree by Level](https://leetcode.com/problems/minimum-number-of-operations-to-sort-a-binary-tree-by-level)
 * [Count Good Nodes in Binary Tree](https://leetcode.com/problems/count-good-nodes-in-binary-tree/description/) and [Count Nodes Equal to Average of Subtree](https://leetcode.com/problems/count-nodes-equal-to-average-of-subtree/)
 * [Add One Row at a given Level in a binary Tree](https://leetcode.com/problems/add-one-row-to-tree/)
-* Boundary Traversal
-```python
-def boundary_traversal(root: TreeNode) -> List[int]:
-        """
-        Boundary Traversal of Binary Tree
-        
-        Intuition:
-        - Traverse tree boundary in anti-clockwise direction
-        - Three parts: left boundary, leaves, right boundary
-        - Need to avoid duplicate nodes
-        
-        Algorithm steps:
-        1. Add root
-        2. Add left boundary (excluding leaves)
-        3. Add leaves from left to right
-        4. Add right boundary (excluding leaves) in reverse
-        
-        Helper functions:
-        - add_left_boundary: Adds nodes on leftmost path
-        - add_leaves: Adds all leaf nodes
-        - add_right_boundary: Adds nodes on rightmost path (bottom-up)
-        
-        Use cases:
-        1. Printing tree perimeter
-        2. Finding external nodes
-        3. Tree visualization
-        
-        Time: O(n), Space: O(h) where h is height of tree
-        """
-        def add_left_boundary(node: TreeNode, result: List[int]):
-            if not node or (not node.left and not node.right):
-                return
-            result.append(node.val)
-            if node.left:
-                add_left_boundary(node.left, result)
-            elif node.right:
-                add_left_boundary(node.right, result)
-        
-        def add_leaves(node: TreeNode, result: List[int]):
-            if not node:
-                return
-            if not node.left and not node.right:
-                result.append(node.val)
-                return
-            add_leaves(node.left, result)
-            add_leaves(node.right, result)
-        
-        def add_right_boundary(node: TreeNode, result: List[int]):
-            if not node or (not node.left and not node.right):
-                return
-            if node.right:
-                add_right_boundary(node.right, result)
-            elif node.left:
-                add_right_boundary(node.left, result)
-            result.append(node.val)
-        
-        if not root:
-            return []
-        
-        result = [root.val]
-        if not root.left and not root.right:
-            return result
-        
-        if root.left:
-            add_left_boundary(root.left, result)
-        add_leaves(root.left, result)
-        add_leaves(root.right, result)
-        if root.right:
-            add_right_boundary(root.right, result)
-        
-        return result
-```
 * [House Robber](https://leetcode.com/problems/house-robber/)
 * The total number of paths between any two nodes in a binary tree with n nodes is n×(n−1) ​/2 as for each starting node, there are n−1 other nodes in the tree to which it can connect, forming n−1 paths. [Longest Univalue Path](https://leetcode.com/problems/longest-univalue-path/description/), [Path Sum](https://leetcode.com/problems/path-sum-iii/description/) and [Maximum Path Sum](https://leetcode.com/problems/binary-tree-maximum-path-sum/description/)
 * [Maximum Product of Splitted Binary Tree](https://leetcode.com/problems/maximum-product-of-splitted-binary-tree/description/)
-* Distance between 2 Nodes
-```python
-def lowestCommonAncestor(self, root: TreeNode, node1: TreeNode, node2: TreeNode) -> TreeNode:
-        """
-        Recursively finds the lowest common ancestor (LCA) of node1 and node2 in the binary tree.
-        """
-        if not root or root == node1 or root == node2:
-            return root
-
-        left_subtree = self.lowestCommonAncestor(root.left, node1, node2)
-        right_subtree = self.lowestCommonAncestor(root.right, node1, node2)
-
-        if left_subtree and right_subtree:
-            return root  # current node is LCA if node1 and node2 are found in left and right
-        return left_subtree if left_subtree else right_subtree
-
-    def findDepthFromAncestor(self, ancestor: TreeNode, target: TreeNode, current_depth: int = 0) -> int:
-        """
-        Finds the depth of the target node starting from the ancestor node.
-        Returns -1 if the target is not found in the subtree rooted at ancestor.
-        """
-        if not ancestor:
-            return -1
-        if ancestor == target:
-            return current_depth
-
-        # Search left subtree
-        left_depth = self.findDepthFromAncestor(ancestor.left, target, current_depth + 1)
-        if left_depth != -1:
-            return left_depth
-
-        # Search right subtree
-        return self.findDepthFromAncestor(ancestor.right, target, current_depth + 1)
-
-    def distanceBetweenNodes(self, root: TreeNode, node1: TreeNode, node2: TreeNode) -> int:
-        """
-        Computes the distance (number of edges) between node1 and node2 in a binary tree.
-Time - O(n) and Space - O(h)
-        """
-        # Step 1: Find LCA of the two nodes
-        lca = self.lowestCommonAncestor(root, node1, node2)
-
-        # Step 2: Find depth of each node from the LCA
-        depth1 = self.findDepthFromAncestor(lca, node1)
-        depth2 = self.findDepthFromAncestor(lca, node2)
-
-        # Step 3: Distance = depth1 + depth2
-        return depth1 + depth2
-```
 * [Insufficient Nodes in Root to Leaf Paths](https://leetcode.com/problems/insufficient-nodes-in-root-to-leaf-paths/)
 * [Maximum Difference between Node and Ancestor](https://leetcode.com/problems/maximum-difference-between-node-and-ancestor/)
 * [Count Complete Tree Nodes](https://leetcode.com/problems/count-complete-tree-nodes/description/)
@@ -1237,45 +1086,6 @@ Time - O(n) and Space - O(h)
 * [Lowest Common Ancestor in BST](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree)
 * [Search in BST](https://leetcode.com/problems/search-in-a-binary-search-tree) and [Balance BST](https://leetcode.com/problems/balance-a-binary-search-tree/description/)
 * [Range Sum of BST](https://leetcode.com/problems/range-sum-of-bst/) 
-* Insert and Delete Node in BST
-```python
-def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
-        # If the tree is empty, create a new node with the value and return it
-        if not root:
-            return TreeNode(val)
-        
-        # If the value is less than the current node, go to the left subtree
-        if val < root.val:
-            root.left = self.insertIntoBST(root.left, val)
-        else:
-            # If the value is greater than or equal to the current node, go to the right subtree
-            root.right = self.insertIntoBST(root.right, val)
-        
-        # Return the root as the tree structure is updated bottom-up
-        return root
-
-def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
-        if not root:
-            return root
-
-        if key > root.val:
-            root.right = self.deleteNode(root.right, key)
-        elif key < root.val:
-            root.left = self.deleteNode(root.left, key)
-        else:
-            if not root.left:
-                return root.right
-            elif not root.right:
-                return root.left
-
-            cur = root.right
-            while cur.left:
-                cur = cur.left
-            root.val = cur.val
-            root.right = self.deleteNode(root.right, root.val)
-
-        return root
-```
 * [kth smallest element in BST](https://leetcode.com/problems/kth-smallest-element-in-a-bst)
 * [BST to sorted DLL](https://leetcode.com/problems/convert-binary-search-tree-to-sorted-doubly-linked-list/description/)
 * [Minimum Absolute Difference in BST](https://leetcode.com/problems/minimum-absolute-difference-in-bst/)
@@ -1410,72 +1220,6 @@ The outer loop ensures all components are checked, even if the graph is disconne
                         # Found a back edge (cycle)
                         return True
     return False
-```
-```python
-from collections import defaultdict
-
-class Solution:
-    def detectCycleInDirectedGraph(self, V: int, adj: list[list[int]]) -> bool:
-        """
-        Detects if a directed graph contains a cycle using DFS.
-
-        Args:
-            V: The number of vertices in the graph.
-            adj: An adjacency list representation of the graph.
-                 adj[i] contains a list of neighbors of vertex i.
-
-        Returns:
-            True if a cycle is detected, False otherwise.
-        """
-        # visited array: This array keeps track of all nodes that have been part of any DFS traversal at some point. Once a node is marked visited, it means we've explored it from at least one path. This prevents redundant processing of nodes and helps optimize the traversal.
-        # visited[i] = True if node i has been visited in any DFS traversal.
-        visited = [False] * V
-
-        # path_visited array: This is the key for cycle detection in a directed graph. It keeps track of all nodes that are currently in the current recursion stack of the DFS traversal. If we encounter a node that is already in our path_visited array, it means we've found a back edge, which indicates a cycle. Think of it as: "I'm currently exploring this path, and I just tried to go to a node I've already visited on this exact path.
-        # path_visited[i] = True if node i is currently in the recursion stack.
-        path_visited = [False] * V
-
-        # The DFS helper function
-        def dfs(node: int) -> bool:
-            """
-            Performs DFS starting from 'node' to detect cycles.
-
-            Args:
-                node: The current node being visited.
-
-            Returns:
-                True if a cycle is detected starting from this node's path, False otherwise.
-            """
-            visited[node] = True      # Mark current node as globally visited
-            path_visited[node] = True # Mark current node as part of the current path
-
-            # Explore all neighbors of the current node
-            for neighbor in adj[node]:
-                if not visited[neighbor]:
-                    # If neighbor is not visited, recursively call DFS
-                    if dfs(neighbor):
-                        # If a cycle is detected in the subtree, propagate True upwards
-                        return True
-                elif path_visited[neighbor]:
-                    # If neighbor is already in the current recursion stack (path_visited is True),
-                    # it means we found a back edge, hence a cycle.
-                    return True
-
-            # Backtrack: Remove the current node from the current path
-            # as we are done exploring all paths from this node.
-            path_visited[node] = False
-            return False # No cycle found from this node's path
-
-        # Iterate through all nodes to handle disconnected components
-        for i in range(V):
-            if not visited[i]:
-                # If a node hasn't been visited, start a new DFS traversal
-                if dfs(i):
-                    # If DFS from this node finds a cycle, return True immediately
-                    return True
-
-        # No cycle found after checking all components
-        return False
 ```
 * Topological Sort
 ```python
@@ -1644,114 +1388,10 @@ def FindSquare(N, W, H):
 * [Rotten Oranges](https://leetcode.com/problems/rotting-oranges/)
 * [01 Matrix](https://leetcode.com/problems/01-matrix/)
 * [Tic Tac Toe](https://leetcode.com/problems/design-tic-tac-toe/) (Winning Conditions and Board State)
-```python
-class TicTacToe:
-    def __init__(self, n: int):
-        self.n = n
-        self.rows = [0] * n
-        self.cols = [0] * n
-        self.diag = 0
-        self.anti_diag = 0
-
-"""
-Time - O(1) per move 
-Space - O(N)
-"""
-
-    def move(self, row: int, col: int, player: int) -> int:
-        value = 1 if player == 1 else -1
-
-        self.rows[row] += value
-        self.cols[col] += value
-        
-        if row == col:
-            self.diag += value
-        if row + col == self.n - 1:
-            self.anti_diag += value
-
-        if (abs(self.rows[row]) == self.n or 
-            abs(self.cols[col]) == self.n or 
-            abs(self.diag) == self.n or 
-            abs(self.anti_diag) == self.n):
-            return player
-        
-        return 0  # No winner yet
-
-```
 * [Shortest path in matrix with Obstacles](https://leetcode.com/problems/shortest-path-in-a-grid-with-obstacles-elimination/)
 * [Sudoku solving](https://leetcode.com/problems/sudoku-solver/) (Backtracking with constraints)
 * [N-queens](https://leetcode.com/problems/n-queens/) (Backtracking with column AND diagonal tracking)
 * [Number of Distinct Islands](https://leetcode.com/problems/number-of-distinct-islands/description/)
-```python
-class Solution:
-    def numDistinctIslands(self, grid: list[list[int]]) -> int:
-        m, n = len(grid), len(grid[0])
-        
-        # A set to store the unique shapes of islands.
-        # We'll store shapes as frozensets of relative coordinates (tuples).
-        distinct_islands = set()
-        
-        # 8 Directions for DFS:
-        # (dr, dc)
-        # Horizontal: (0, 1), (0, -1)
-        # Vertical:   (1, 0), (-1, 0)
-        # Diagonal:   (1, 1), (1, -1), (-1, 1), (-1, -1)
-        # directions = [
-        #     (0, 1), (0, -1),  # Right, Left
-        #     (1, 0), (-1, 0),  # Down, Up
-        #     (1, 1), (1, -1),  # Down-Right, Down-Left
-        #     (-1, 1), (-1, -1) # Up-Right, Up-Left
-        # ]
-
-        # Generate 8 directions using nested loops
-        # dr will go from -1, 0, 1 (for up, current row, down)
-        # dc will go from -1, 0, 1 (for left, current col, right)
-        # We exclude (0, 0) as that's the current cell itself.
-        directions = []
-        for dr in range(-1, 2):
-            for dc in range(-1, 2):
-                if dr == 0 and dc == 0:
-                    continue # Skip the current cell itself
-                directions.append((dr, dc))
-
-        # DFS helper function to explore an island and record its shape
-        def dfs(r: int, c: int, island_shape: list, row_offset: int, col_offset: int):
-            # Mark the current cell as visited by changing it from 1 to 0
-            grid[r][c] = 0 # Change land to water (or a distinct visited marker)
-            
-            # Add the relative coordinates of the current cell to the island_shape list
-            # Normalized relative to the top-leftmost point of the island.
-            island_shape.append((r - row_offset, c - col_offset))
-            
-            # Explore neighbors in all 8 directions
-            for dr, dc in directions:
-                nr, nc = r + dr, c + dc
-                
-                # Check bounds and if it's an unvisited land cell
-                if 0 <= nr < m and 0 <= nc < n and grid[nr][nc] == 1:
-                    dfs(nr, nc, island_shape, row_offset, col_offset)
-
-        # Iterate through the grid to find islands
-        for r in range(m):
-            for c in range(n):
-                if grid[r][c] == 1: # Check if it's land
-                    # Found a new island, start DFS from here
-                    current_island_shape = []
-                    # Pass the starting coordinates as offsets to normalize future coordinates
-                    dfs(r, c, current_island_shape, r, c)
-                    
-                    # Add the unique shape (as a frozenset for immutability) to our set
-                    # Using frozenset handles cases where the points might be visited
-                    # in different orders but represent the same shape.
-                    # If maintaining a specific order within the shape is crucial (e.g., for
-                    # a path-based signature), then sorting current_island_shape and then
-                    # converting to a tuple would be more appropriate:
-                    # current_island_shape.sort()
-                    # distinct_islands.add(tuple(current_island_shape))
-                    distinct_islands.add(frozenset(current_island_shape))
-        
-        return len(distinct_islands)
-```
 
 ### Dynamic Programming
 * [Word Break](https://leetcode.com/problems/word-break) and [Check if There is a Valid Partition For The Array](https://leetcode.com/problems/check-if-there-is-a-valid-partition-for-the-array)
@@ -1875,68 +1515,18 @@ Technical things :
 * Short Polling (scheduled HTTP request) is almost always a bad idea, but It's still everywhere even now. A lot of front end applications talk to back end applications, sometimes in real time, getting feedback from the back end application via polling. You will be continously bugging the server but most of the times get no data, so there is an unnecessary load on the backend because of our aggressive polling without much benefit. Also, waste clients bandwidth! Another approach is long polling, where the data is not sent empty, that is only make the request when there is data to send. Incase of timeout, process will be repeated. So, it's an HTTP request which completes only when data is available. Connection is open until data is available, thus we can have a lot of open connections. Repeated opening and closing HTTP connections also puts load on the server. A preffered way is using Websockets, where a bi-directional channel is kept open (persistent TCP), and server pro-actively sends messages, client doesn't need to ask. Useful for real-time data transfer (live-streaming, interaction, chat, collaboration, etc). We can pass any data in Websockets. Though it's pretty expensive. If we have idle time when sending data, better not use sockets. Websockets suffers from Thundering Herd problem due to overhead of establishing socket connections if number of servers changes (balancing load after failures or new nodes being added). Another often used choice is Server Sent Events, which is again one directional (server to client). Unlike long polling it uses persistent HTTP connections as opposed to killing and reconnecting. Also unlike websockts, it establishes failed connections automatically. But again, a lot of concurrent connections can add load on the server if they are not needed.
 * Its a [common misconception that a client-server setup can have max 65k connections](https://www.youtube.com/watch?v=o-EkdZW4zbA), but TCP connections are actually identified by a unique combination of four elements - Source IP address, Source port, Destination IP address and Destination port. Since each client connects from a different IP address and port combination to the server's IP and port, millions of unique connections can be established to a single server. [WhatsApp scaled upto 3 million connections!](﻿https://youtu.be/vQ5o4wPvUXg?si=cBMWr14CUTjcNXIl﻿)
 
-#### Basic Things
+### Basic Things
 This [video](https://youtu.be/FxAom29OEKE?si=rr_igso2iq0vdnCd) summarizes perfectly.
 
 Latency is end to end time taken by request. throughput is how many requests were processed per second (QPS). P50, P75, P90, P95 and P100. These refer to the percentiles, which gives us a better sense of how the response times are being distributed. So, P50 is 50th percentile, that is the median. So basically, half of the requests are faster and half of the requests are slower than set benchmark. P99 is tail latency. If P99 is 40 minutes, the 99% of people got their response in less than 40 minutes, but for 1% of people took more than 40 minutes.
 
-The holy grail of non-functional requirements in CAP Theorem.
-We can only have 2 out of 3 :
-* Consistency - all nodes see same data at the same time, so the reads align with most recent writes i.e every read gets the latest write
-* Availability - every request gets some respose, successful or not. its uptime/total_time
-* Partition Tolerance - system should work despite network failures between nodes
-
-High Availability is necessity these days. For that there has to be failover and automatic recovery, fault tolerance, data consistency, and nice dev tooling for this to happen smoothly without human intervention. Recovery Time Objective (max objective downtime after a failure, ie time between system failure and recovery) and Recovery Point Objective (maximum acceptable data loss measured in time, ie how much time of data loss can we take) are key metrics here. 
-
-Popular availability numbers :
-* 2-9 99% is ~3.65 days/year
-* 3-9 99.9% is ~8.7 hours/year
-* 4-9 99.99% is ~52 minutes/year
-* 5-9 99.999% is ~5 minutes/year
-
-Unfortunately, CA never really exists in distributed systems because:
-* The network partitions will happen. You can't really opt out of it.
-* The real choice is CP or AP, during a partition
-* when the network is healthy, you can have all three of them.
-
-Well, we surely need Partition Tolerance in Distributed Systems, so we get to choose between Availability and Consistency. Simple question to ask yourself, will it be catastrophic if two users see different state of the system at the same time? If yes, you need strong consistency over availability. Eventual Consistency means that the user can see stale data for some time (no restrictions on the order in which data updates are delivered or viewed). Strong consistencysimply means that the data has to be updated for all users as soon as it is available. But with eventual consistency, another user can see the data after some time. And that's fine. There is also Casual Consistency, for causea and effect order preservation (comments should appear after post). And the very common read-your-writes which means that users see their own updates immediately, but other people see it at the later point of time. It's very very common as you can understand.
-
 Now, little law can generally be used to estimate the resources that would be required when at any moment a number of requests come. So if you want to know how many requests are sitting inside your system right now, we can use this law. This matters because every request consumes CPU memory threads, database connections, and if it's too many requests per moment, per every moment, the system will crash. So the law is L equals to lambda W, where L is the average number of requests in the system. Lambda is the arrival rate, that is a throughput, and W is the average time spent in the system, that is latency. So if you do some calculations, for an example, if there are 5,000 requests per second that are arriving and the average latency is around 200 milliseconds, then from Little's law, we can say that average number of requests in the system would be 5,000 multiplied by 0.2 seconds, which is like 1,000. So at any moment, approximately 1,000 requests are being processed. And this immediately tells us how many threads may be needed, how many database connections might be required, the memory requirements. So it's a very important thing. It's the calculations that you should be doing when designing the system quite early.
-
-Tools that you could be using in an interview would be:
-1. DynamoDB: AP (availability and partition tolerance). DynamoDB is always available, and it always responds. It's eventually consistent by default, meaning the reads might return stale data. We often use it in situations like shopping carts, user sessions, and activity feeds, where stale data for like 100 ms is fine.
-2. Postgres: a very famous thing with a single primary setup, which is CP (consistent and partition-tolerant). Here, the consistency is strong, so the reads always get the latest data, but if the primary goes down, writes are unavailable until failover. Generally, these are used in situations like banking, inventory, and booking systems, where we need strong consistency, because stale data means there is some loss of money involved.
-3. Cassandra: interestingly tunable. You can configure consistency per query. It could be one, it could be quorum, it could be all. The quorum reads plus quorum writes gives a strong consistency. One read plus one write is eventual consistency, but it's pretty fast.
-
-If you want to discuss more practically, suppose we have a situation where our e-commerce app has orders plus product catalogs. Would we want to use the same database here? No, we would want to use a Polyglot Persistence setup in this situation. The orders could be in PostgreSQL because we want strong consistency, so PostgreSQL gives us that, and we can't lose an order. The product catalog could be in DynamoDB because showing a slightly stale price for 100 ms is fine. Practically, to understand eventual consistency, when we write data for a brief window (milliseconds to seconds maximum), some reads might return the old value. Eventually, all nodes will converge to the same value, and the question you have to ask in this situation is: can our business tolerate that window?
-
-### Large Scale Infra
-
-You dont want to over/under provision your systems. When it comes to ML systems, you need to manage GPUs as well. Also, backups stores will have to be maintained as well. Geography is an important factor to consider as well. So, we do extensive Capacity Planning when designing our systems. We will need to scale down and up depending on the traffic!
-
-The DB strategy could be a primary–replica architecutre, having primary DBs (write) and read replicas. Writes go to the primary, while read-only queries can be distributed across one or more read replicas. The problem here would be the replication lag leading to eventual consistency. This improves write throughput, as slow queries affect writes more. Read replicas do not directly improve write throughput. They remove read work, lock contention and CPU pressure from the primary, leaving more capacity for writes. We dont want too many read requests on one primary DB. So, we are improving availability (replicas can be promoted or serve degraded reads). The read replicas are handled by application code, load balancer or DB proxy. Generally the replication model is asyncronous (write operations are fast as we are not waiting for read relicas confirmation, but the tradeoff is replication lag) i.e. the primary acknowledges a write without waiting for replicas to replay it, and semi sync (waits for atleast one read replica for ACK, so slower writes but better safety). Sync also is there, but thats when high latency is fine and we want really strong consistency, used pretty less.
-
-Another strategy would be to use a Distributed/Sharded DB for scaling writes, wherein the data is splitted among the DBs. A sharded approach is much simpler to manage compared to a multi-master setup (write conflicts, auto- incremental IDs clashing, etc). Also, now with advent of great NoSQL DBs, we get sharding my default and it scales pretty well. Each shard has same schema, and stores subset of rows. Consistency is strong per shard. Hash based sharding is the most common, so no hot shard, even distribution. But range queries is hard, and adding shards can also be difficult. Querying using the shard key is pretty fast as hits the shard directly in O(1), without shard key its quite high latency. If a shard becomes too big, then resharding is another pain in ass using consistent hashing. Generally, we do replication (read scaling) + sharding (write scaling). 
-
-SQL horizontal sharding tradeoffs :
-* Sharding breaks joins. Cross shard joins are horrendously expensive
-* Transactions become hard as ACID across shards is complex (2PC, SAGAS pattern, god knows what)
-* Application logic for resharding and all adds a lot of operational complexity. Changing shard key is painful
-
-NoSQL handles sharding at DB level, not at application level. 
-
-Even if we are on AWS or some other cloud provider, crashes will always be there when the number of machines increase. And also you can have various target groups for different requirements managed by the Load Balancer. Another crucial this is to have deep monitoring memory, cache hits, CPU, etc, for creating target groups initially. Also, dont forget to scale DBs via the Load Balancer. It can keep a limited number of connections. Bloddy hell, overprovison the shared resources (DB, cache, elastic search, etc) a bit, wont hurt you much, but can be life-daving when using god knows what deployment strategy.
-
-We generally use Active-Active Load balancers for improved throughput.
-
-In case of horizontal scaling, the deployment becomes a bit tideous as it happens on all machines, some will pass and some might fail in the CI. Flakes everywhere.
 
 ### Operating Systems
 
 A process has its own memeory, pages. [Multi-processing is different from multi-threading](https://www.youtube.com/watch?v=AZnGRKFUU0c). Inter-process communication is hard, so naturally we use mult-threading more.
 #### System Calls
 #### Process Scheduling and Page Replacement Algorithms
-#### Syncronization and Deadlocks
 #### Multi-threading and Concurrency
 
 Another crucial thing to focus on is concurrency (running multiple threads/processes at the same time, even on single CPU core not necessarily multiple cores, by interleaving there executions) context switching in the user space), parallelism (exploiting multiple cores for performance i.e multiple processes/threads running over different CPU cores parallely) and asyncronous programming (non-blocking coroutine). Even in the absence of parallelism, concurrency of threads ensures effective use of CPU when one of the thread blocks (for I/O). Most Python devs using async/await don’t really know what’s going on under the hood. async/await is an asynchronous mechanism, NOT a concurrency model. It lets you write non-blocking code that looks like sequential code. It (by itself) does NOT make tasks run concurrently or in parallel on its own. We get concurrency only when we initiate multiple async operations together. It involves delegating I/O to event loop.
@@ -1956,6 +1546,8 @@ There are other ways to handle asynchronous logic as well - Callbacks that are h
 It is very evident that asynchronous execution is the way to go when the application involves operations with external resources – network requests, database queries, I/O, etc. In such scenarios, the CPU would be less loaded whereby it can pick up other tasks that require its attention. For CPU-bound tasks or blocking I/O, Python asyncio can be used with [ThreadPoolExecutor](https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor) for offloading tasks from the asyncio event loop. Also, Python asyncio with [ProcessPoolExecutor](https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor) offers the benefits of parallelism by making the best use of multi-CPU cores.
 
 Using async in the code may result in some unexpected behavior as global objects and singletons can share state.
+
+#### Syncronization and Deadlocks
 
 But multiple threads working on same data at same time can create race condition, so use Mutexs cautiously (when one thread is in a cirtical section, another should wait outside i.e. atomicity). We want our locks to be as Granular as possible, as the locks make our program syncronous for some time. In case of read/write heavy applications, shared lock help. Suppose there are a lot of reads, then shared lock will allow multiple reads to happen, but mutex on write. 
 
@@ -1997,6 +1589,47 @@ Interestingly, there are some cute problems on LeetCode revolving around these c
 
 *
 
+### Distributed Systems
+
+The holy grail of non-functional requirements in CAP Theorem.
+We can only have 2 out of 3 :
+* Consistency - all nodes see same data at the same time, so the reads align with most recent writes i.e every read gets the latest write
+* Availability - every request gets some respose, successful or not. its uptime/total_time
+* Partition Tolerance - system should work despite network failures between nodes
+
+High Availability is necessity these days. For that there has to be failover and automatic recovery, fault tolerance, data consistency, and nice dev tooling for this to happen smoothly without human intervention. Recovery Time Objective (max objective downtime after a failure, ie time between system failure and recovery) and Recovery Point Objective (maximum acceptable data loss measured in time, ie how much time of data loss can we take) are key metrics here.
+
+Popular availability numbers :
+* 2-9 99% is ~3.65 days/year
+* 3-9 99.9% is ~8.7 hours/year
+* 4-9 99.99% is ~52 minutes/year
+* 5-9 99.999% is ~5 minutes/year
+
+Unfortunately, CA never really exists in distributed systems because:
+* The network partitions will happen. You can't really opt out of it.
+* The real choice is CP or AP, during a partition
+* when the network is healthy, you can have all three of them.
+
+Well, we surely need Partition Tolerance in Distributed Systems, so we get to choose between Availability and Consistency. Simple question to ask yourself, will it be catastrophic if two users see different state of the system at the same time? If yes, you need strong consistency over availability. Eventual Consistency means that the user can see stale data for some time (no restrictions on the order in which data updates are delivered or viewed). Strong consistencysimply means that the data has to be updated for all users as soon as it is available. But with eventual consistency, another user can see the data after some time. And that's fine. There is also Casual Consistency, for causea and effect order preservation (comments should appear after post). And the very common read-your-writes which means that users see their own updates immediately, but other people see it at the later point of time. It's very very common as you can understand.
+
+The CAP theorem states a distributed system can simultaneously provide only two of {Consistency, Availability, Partition Tolerance}. In practice, partitions (network failures) are a fact, so systems choose between strong consistency (always agree on a single value) and availability (always respond, possibly stale). Strong consistency (as in traditional RDBMS or Paxos-based systems) ensures every read sees the latest committed write, but can block or fail under partition. Eventual consistency (as in many NoSQL stores) allows reads to return outdated data but guarantees convergence when nodes reconcile. Many modern distributed DBs offer tunable consistency (e.g. Quorum reads/writes in Cassandra, linearizable reads vs timeline in DynamoDB).
+
+Fault-tolerant systems use consensus protocols to agree on state changes. Paxos is the original consensus protocol for agreeing on a value among unreliable nodes. It guarantees safety (consistency) but is complex. Raft is a later protocol designed for understandability: it decomposes consensus into leader election, log replication, and safety rules. In Raft, one leader handles all log appends; if the leader fails, a new election is held. Both Paxos and Raft require a majority of replicas and can tolerate node failures (but not network partitions beyond a majority). These protocols underlie many systems (e.g. etcd, Consul, TiKV) to manage a replicated log or state machine, ensuring that updates (schema changes, metadata commits) occur atomically across nodes
+
+Beyond MVCC, distributed systems use patterns like distributed locking (e.g. ZooKeeper/etcd locks), leader-follower sharding (each partition has a single writer leader), and CRDTs (conflict-free replicated data types) to handle concurrent updates. Many data lake systems use optimistic concurrency: readers get snapshot views and writers append updates; conflicts are resolved via atomic replace or merge (as with Delta Lake’s transaction log.
+
+Just to add on, distributed locks are extremely costly as they are over network with multiple applications and processes. Always prefer other locks in DB as its holy purpose is to ensure consistency. 
+
+### Large Scale Infra
+
+You dont want to over/under provision your systems. When it comes to ML systems, you need to manage GPUs as well. Also, backups stores will have to be maintained as well. Geography is an important factor to consider as well. So, we do extensive Capacity Planning when designing our systems. We will need to scale down and up depending on the traffic!
+
+Even if we are on AWS or some other cloud provider, crashes will always be there when the number of machines increase. And also you can have various target groups for different requirements managed by the Load Balancer. Another crucial this is to have deep monitoring memory, cache hits, CPU, etc, for creating target groups initially. Also, dont forget to scale DBs via the Load Balancer. It can keep a limited number of connections. Bloddy hell, overprovison the shared resources (DB, cache, elastic search, etc) a bit, wont hurt you much, but can be life-daving when using god knows what deployment strategy.
+
+We generally use Active-Active Load balancers for improved throughput.
+
+In case of horizontal scaling, the deployment becomes a bit tideous as it happens on all machines, some will pass and some might fail in the CI. Flakes everywhere.
+
 ### Databases
 
 File stirage is just for blobs of data. There is no querying, no indexnig, no concurreny control, and thus its quite cheap. In contrast, DBs have structured data storage, querying (SQL, filters), indexing, locks/MVCC so is expensive. 
@@ -2017,18 +1650,6 @@ There are a variety of DBs :
 * Storages for text-based search (ElasticSearch for fuzzy searching, etc)
 * Search DB (neither SQL nor NoSQL)
 
-First of all, SQL can scale and NoSQL is not some magic scaling solution. Yes, a kind of DB might not scale with a particular constraint. 
-
-There is always a [discussion of choosing between SQL and NoSQL DB](https://www.youtube.com/watch?v=ufCvXzGSQ_M). Relational DBs hold many rows of unstructured data via a predefined schema and those rows can have relations to others if they share a common key. There are built in query optimizers that return results using declarative SQL. Row-based SQL storage excels in normalized schemas due to B-tree data locality for joins and cross-table ACID transactions (ensure atomicity across tables), optimizing OLTP (Online Transaction processing) workloads where full-row access (its row-based storage) and consistency across relations are critical. is nice when we are consistently writing new data on a per record basis (any user facing application). Generally speaking, they use B-Trees thus reading and writing on disk, along with supporting transactions with two phase locking. 
-
-NoSQL DBs are not opposite of SQL or anything. In reality, NoSQL databases are more stripped down that relational databases, and give the developer more opportunities to choose one that fits the needs for their application, because sometimes it is better at huge scale to abandon some of the features of relational databases in exchange for greater performance. NoSQL generally has objects self contained in document to have more locality on the disk (good for both read and writes and also accessing the whole document, easier to shard, schemaless, only issue is possible data duplication that can be tackled in the application code, no need of complex JOINs). The relational DBs are very well used as they have intutive data models and momemtum. However, they tend to scale poorly when sharded. On writes to many shards may need distributed transactions and on reads to many shards involves many network. Transaction abstraction and locking is slow. B-Tree are also slow for writes (compared to LSTM Trees in memory) as they directly go to disk. We need to set a rigid schema which makes things a bit less maintainable. For high write thorughput, we generally prefer NoSQL. SQL is biased towards using relational and normalized data as data model with ACID transactions, typically using B-Trees with fast reads and slow writes. Its great when correctness is of more importance than speed. Can use for user profiles, product cataloges, event metadata, and more.
-
-Doc DB stores data in JSON/BSON format. MongoDB is document DB where data is written in large nested documents, better data locality (if you choose to organize your data in a way that takes advantage of this), but denormalized (limited joins). They have flexible schema, nested data, horizontal scaling. Doc DBs have richer queries compared to KV, but not as rich as SQL. The unit of storage is collection, which has document inside it. Its stored on disk, indexed on ID, and often compressed.
-
-Cassandra is a wide column data store (NoSQL), has a shard key and a sort key and allows for flexible schemas, ease of partitioning. Multileader/Leaderless replication (configurable) wiht super fast writes (LSM Trees + SSTables) , albeit uses last write wins for conflict resolution (lack of data integrity), but may clobber existing writes if they were not the winner of last write wins condition (timestamps are not relaiable in distributed systems). Great for applications with high write volume, consistency is not as important (some data can be overwritten or lost), all writes and reads go to the same shard (no transactions). 
-
-KV stores have boring queries (only by key). Riak is a key-value store that has an improvement of using CRDTs (conflict free replicated data types) making it eventually consistent. Cassandra doesnt support full ACID though! When you need data integrity of a SQL DB with schema flexibility, use MongoDB (quite popular when transitioning from SQL to NoSQL world) if document data model works for you. Cassendra gives us extremely high single partition high throughput and read throughput but with poor data gaurantees (a good use could be chat applications).
-
 OLTP (MySQL, Postgres is mainly OLTP + light OLAP, Cassandra, MongoDB, DynamoDB) is for handling day to day operations in real time where end user is using the product, row-based storage with normalized schema, follows ACID, strong consistency, good concurreny support. Properties are :
 * Many small reads and writes
 * Small queries
@@ -2037,7 +1658,7 @@ OLTP (MySQL, Postgres is mainly OLTP + light OLAP, Cassandra, MongoDB, DynamoDB)
 
 Another important paradigm is Analytics DB like Clickhouse (column based), Snowflake (SQL OLAP), Elastic search, Timescale (Time series), etc mostly used by devs, (OLAP - Online Analytics Processing) as businesses often need to do run large queries across their historical data, that do full table scans. However, doing such a thing can take a huge performance hit on their database that deals with client interaction. OLAP queries are long running, heavy CPU and disk usage, and large scans, wiht mostly read operations. Hence, they will typically have a second database, for analytics processing, where data is copied some period of time after the fact using an ETL (Extract, Transform, Load) process which is typically scheduled as a batch job. OLTP acts as source of truth. It has denormalized schema (star schema) to have fewer joins, faster reads, and simpler queries. 
 
-We never mix OLTP and OLAP. 
+We never mix OLTP and OLAP.
 Running analytics on OLTP means unnecessary lock tables, slow production traffic, and bad user experience. Running transactions on OLAP means slow writes, no transactions, and poor concurrency. 
 
 ```
@@ -2051,12 +1672,181 @@ Very useful to decouple analytics databases from transactional ones as analytics
 
 When we have big immutable files to play with, DBs are not exactly a good fit as they are primarily for writing and modifying data in small granularity. Object storage is extremely scalable and cheap. S3 supports strong consistency! We can upload and read (parallized multi-part put and read operations) to S3 using the pre-signed URL (authenticared URL directly interacting with S3) while also maintaining a metadata DB for mapping URL to content directly. You can even store Parquet files in S3, a lot of things. Thats why its so famous and useful.
 
-Normal DBs are not really built for searh. THey can do wildcard matching, but not really built for proper saerch usecases which would require tokenization, ranking, scoring, fuzzy matching. Search DBs care about text relevance, partial matches, ranking. They are able to do these things due to inverted index. Normal index is for a specific row we have values. For inverted index, for a word there is list of docs (list of docs where the word is present). This makes search fastt. Types of search queries supported :
-* Full text search
-* Partial Match (iph*)
-* Fuzzy saerch (iphne)
-* Phrase search ('iphone pro' in some sentence)
-* filters (price < 50000) and aggregations ()
+#### Storage engines
+
+Every storage engine is really juggling three things — persistence, efficient retrieval, and efficient ingestion. Embedded KV stores (SQLite, RocksDB, etc) do all three in one process on one disk. Servered and distributed DBs wrap the same local patterns, then add replication on top. When someone says a DB is durable, read optimized, or write optimized, question the claim.
+
+##### Persistence (WAL + fsync)
+
+Persistence is all about ensuring that once data is written and acknowledged as stored, it remains safely persisted and will not be lost, even in the event of a system crash, power failure, or other disruptions. This pattern has WAL and the fsync system call (flush changes to disk).
+
+WAL is an append-only log. Client writes to KV stores, change written to WAL, and once written there it will be written to KV state (hashmap, BTree, whatever). It gives durability and recoverability. fsync — `file.write` gets data to page cache (not to disk directly). Transfer all the modified buffered pages of the file to the disk via fsync. As far as durability is considered, we need fsync on WAL content.
+
+So when some DB claims durable, first question to ask is — does the DB implement WAL? do you do an fsync, because if you dont do it data is only with OS page cache, and yes OS will periodically flush the changes, but that does not mean 100% durability. if the fsync is performed, do you do it after every write?, do you batch those fsync?, or do you schedule those fsync? (chance that data could be lost).
+
+How the claims hold up (commit log / journal / AOF count as WAL-ish):
+* [PostgreSQL](https://www.postgresql.org/docs/current/runtime-config-wal.html): WAL yes. Default waits for local WAL flush before success. Turn synchronous_commit off and you can lose recent commits on crash — DB wont corrupt, but those commits are gone. Turn fsync off and you can corrupt. Group commit batches fsync so per-commit flush isnt as brutal as it sounds.
+* [SQLite](https://sqlite.org/wal.html): default is a [rollback journal](https://sqlite.org/pragma.html), not WAL — WAL is opt-in. synchronous FULL fsyncs every commit. WAL + NORMAL skips per-commit fsync — survives app crash, not power loss.
+* [MySQL InnoDB](https://dev.mysql.com/doc/refman/8.4/en/innodb-parameters.html#sysvar_innodb_flush_log_at_trx_commit): redo log. Default flushes and fsyncs every commit. innodb_flush_log_at_trx_commit at 2 or 0 batches to about once a second — faster, you can lose that window.
+* [MongoDB WiredTiger](https://www.mongodb.com/docs/manual/core/journaling/): journal + checkpoints every ~60s. Background journal sync every 100ms or when the journal file rolls (~100MB). Default [write concern](https://www.mongodb.com/docs/manual/reference/write-concern/) waits for majority + journal. Standalone without j can lose about the last 100ms.
+* [Cassandra](https://cassandra.apache.org/doc/5.0.8/cassandra/architecture/storage-engine.html): commitlog. Default acks before fsync on a 10s schedule — you can lose up to that window on one node. batch mode waits for fsync. Real durability is RF + how many replicas actually flushed, not one nodes fsync.
+* [RocksDB](https://github.com/facebook/rocksdb/wiki/Write-Ahead-Log-(WAL)): WAL hits OS page cache after every write — fine for process crash. WriteOptions.sync defaults to [false](https://github.com/facebook/rocksdb/wiki/WAL-Performance) — power loss can eat the last updates. Opposite of Pebble.
+* [Redis](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/): AOF off by default, RDB snapshots instead. Turn AOF on with everysec and you can lose ~1s. always is safer, no is fastest and riskiest.
+* DynamoDB: AWS docs dont spell out WAL or fsync. HTTP 200 means persisted across three AZs. The [USENIX ATC 2022 paper](https://www.usenix.org/system/files/atc22-elhemali.pdf) describes per-replica WAL + quorum ack — cite the paper, not the product page.
+* [CockroachDB / Pebble](https://www.cockroachlabs.com/docs/stable/architecture/storage-layer): Pebble WAL sync defaults true, plus Raft quorum. WAL failover if fsync stalls. Same LSM family as RocksDB, opposite default on fsync.
+
+fsync on the WAL file is not the same as a durable ack. Cassandra acks before fsync on the default 10s schedule. RocksDB flushes to OS but sync defaults to false. Redis AOF everysec can lose about a second. All prove the point — WAL alone is not enough.
+
+##### Efficient retrieval
+
+Efficient retrieval refers to the design strategies and structures implemented to minimize the latency and cost of data retrieval operations. This pattern includes indexing structures (BTree), filtering mechanisms (bloom filters), data layouts (sorted or not), and search methods (binary search if sorted).
+
+Disk reads are expensive. Hard disk reads on average take 8-10ms (thats tooo much). So we need data structures to minimize read latencies (yea you can cache the data, thats fine). SSDs shrink the sequential vs random gap, but you still want fewer disk reads.
+
+B+ Tree
+* Self balancing, ordered tree. Read-optimized data structure.
+* Internal nodes contain keys and pointers to child nodes. Leaf nodes contain keys and values.
+* Every node in tree contains multiple keys, and each key is ordered, so every page is sorted by keys. And every page contains K+1 child pages. The values lie in the leaf page. I am using term node but thats page, typically sized 4/8KB (InnoDB uses 16KB). Its read optimized data structure as the height of B+ tree is small even for large amounts of data (fitting multiple keys in one node). If height is less, i need to read lesser number of pages from disk.
+
+So if someone says i am read optimized, have they used B+ trees or its variant?
+
+What if i dont have to read the data at all? Thats where bloom filters come in. Its a probabilistic data structure used to test whether an element is a set member. Can give one of the two possible answers — Definitely No, or Maybe. For example, if you wanna read a key from your file of 1GB, one option is to scan the file piece by piece (a block). Or ask bloom filter, do you think this key may be present in a file? if not, clear no. if maybe, we have to read the file (how we do it is a different concern).
+
+So for read optimized claim —
+* Does the database use B-tree, B+Tree or its variant?
+* Does the database cache disk blocks? What is the default size of block cache? What is the eviction strategy in the cache?
+* Are bloom filters used on data files?
+* Does the database keep data sorted in files?
+
+How the claims hold up:
+* [SQLite](https://sqlite.org/arch.html): B-tree, 4KB pages by default, cache_size about 2MB — tiny. No bloom filters on data files.
+* [PostgreSQL](https://www.postgresql.org/docs/current/btree.html): B-tree indexes, 8KB pages, shared_buffers ~128MB default. No bloom on heap files — bloom index type exists separately if you opt in.
+* [MySQL InnoDB](https://dev.mysql.com/doc/refman/9.1/en/innodb-physical-structure.html): clustered B-tree, 16KB pages, 128MB buffer pool. Midpoint insertion eviction, not strict LRU.
+* [MongoDB / WiredTiger](https://www.mongodb.com/docs/manual/core/wiredtiger/): product docs say B-tree, library docs say B+. Cache defaults to max(256MB, half your RAM minus 1GB). WiredTiger library has an LSM+bloom path, but MongoDB collections sit on B-tree files.
+* [RocksDB](https://github.com/facebook/rocksdb/wiki/Block-Cache): 4KB SST blocks, 32MB LRU block cache default. Bloom filters exist but you opt in — not on by default.
+* [Cassandra](https://cassandra.apache.org/doc/5.0.8/cassandra/managing/operating/bloom_filters.html): LSM SSTables, bloom on by default, data sorted on disk. ~1% false positive rate (~10% with leveled compaction).
+* Redis: its all in RAM — dict and encodings. Not a disk B+ tree at all, just pointer chasing in memory.
+* DynamoDB: AWS wont tell you page size, cache size, or bloom setup. ATC paper says B-tree per replica, not LSM.
+* CockroachDB / Pebble: LSM with bloom on SST blocks. Cache defaults to 128MiB in docs.
+
+##### Efficient ingestion
+
+Efficient ingestion refers to the design strategies and structures implemented to minimize the latency and cost of data write operations. This pattern includes sequential disk IO (continuous writes) and LSM-tree (write-optimized).
+
+LSM
+* Write-optimized data structure, contrary to BTree.
+* Involves sequential IO — writing to file one after another. Obviously contiguous write is much faster on disk than random write (the difference is not that high in SSD though).
+* Involves writing to WAL, followed by write to memtable (in-mem store which is a buffer. zset in redis are built on skip list, same way memtables are built upon skip lists, layered list sorted in order). Once in-mem data is full, its flushed to disk.
+* On-disk immutable files are called SSTable files.
+* Background compaction merges SSTables. That is the write-amp and latency tax if you dont throttle it.
+
+So when making write optimized claim —
+* Does the database use LSM?
+* How is load handled during compaction?
+* Does the database perform sequential writes?
+
+If answer to such questions is yes, its write optimized.
+
+How the claims hold up:
+
+B-tree camp — WAL, dirty pages, in-place-ish updates
+
+Postgres, SQLite, InnoDB, WiredTiger, DynamoDB local replica (per the ATC paper). The write path looks like — append to WAL, then locate the right B-tree leaf page, modify it (or allocate a new page version), mark the page dirty in buffer pool / page cache, ack the client (maybe after WAL fsync). Actual data pages hit disk later at checkpoint or eviction. That is random IO when pages finally flush — fine for OLTP with moderate write rates, painful when ingest is sustained and random.
+
+* Postgres — WAL record first, heap + index pages updated in shared_buffers. Checkpoint and background writer push dirty pages out. Every index you touch on a write gets updated too — write amp shows up as multiple dirty pages per logical insert.
+* SQLite — WAL or rollback journal, then B-tree page rewrite. Single writer, so no concurrent page latch storm, but still random page writes when checkpoint runs.
+* InnoDB — redo log + change buffer + buffer pool dirty pages. Clustered index means secondary index updates are extra random writes. doublewrite buffer adds sequential safety before random page commit.
+* WiredTiger (MongoDB) — journal + in-memory cache, B-tree pages dirtied, checkpoint every ~60s flushes stable snapshot to data files. Journal syncs more often (~100ms) but data files lag — two different flush rhythms.
+* DynamoDB (paper) — leader appends to WAL, quorum acks, then applies to local B-tree on that replica. Write optimized at the replication layer (sequential WAL), but local apply still touches tree pages.
+
+So write optimized claim for B-tree engines is weaker unless write rate is low or everything hot stays cached and checkpoints are smooth. Ask about checkpoint pressure, fsync policy, and how many index pages one insert dirties.
+
+LSM camp — WAL, memtable, SSTable, compaction
+
+RocksDB, Cassandra, CockroachDB / Pebble. The write path looks like — append to WAL (sequential), insert into in-memory memtable (skip list / concurrent skiplist), ack once WAL is safe enough for your sync setting. No in-place update on disk yet. When memtable fills, flush creates a new immutable SSTable file — another sequential write burst. Reads later merge memtable + multiple SST levels.
+
+Compaction is the tax — background job reads old SSTables, merges/sorts, writes new SSTables, deletes inputs. Same logical byte gets rewritten multiple times = write amplification. Can steal disk bandwidth and spike latency if unthrottled.
+
+* RocksDB — memtable flush + leveled/universal compaction. You tune write_buffer_size, level targets, compaction threads. Bloom filters and block cache help reads; compaction hurts writes under load.
+* Cassandra — commitlog (sequential) + memtable per table, flush to SSTable on threshold. Compaction strategy matters — STCS vs LCS vs TWCS changes rewrite cost and read amplification. Throttled to about 64MiB/s on 4.x by default so compaction does not starve foreground writes entirely.
+* CockroachDB / Pebble — Raft log is sequential at the replication layer; Pebble still does LSM flush + compaction locally. Large values can use value separation to cut write amp on Raft-sized payloads. Compaction + WAL together — but most write bandwidth in steady state is compaction, not WAL.
+
+So yes, LSM is write optimized for ingest — sequential WAL + append-only SSTables. But interview follow-up is always compaction — what happens when L0 piles up, what throttle exists, does read latency spike during major compaction.
+
+Redis — memory first, disk is backup not ingest
+
+Redis is not trying to optimize disk ingest at all. Writes go straight into in-memory structures — dict, skiplist (sorted sets), listpack/intset encodings depending on size. That is the hot path. Disk only shows up if you enabled persistence — AOF appends each write (or batches with everysec), RDB forks a snapshot periodically. Neither path is an LSM memtable → SSTable design. You are not sequentially ingesting into sorted on-disk files for query speed — you are logging or snapshotting whatever is already in RAM.
+
+So Redis belongs in neither camp for storage-engine ingest. It is write optimized in memory. Durability is a separate knob (AOF/RDB), not the core ingest structure.
+
+Do column based DBs use B+ Trees? [ClickHouse](https://clickhouse.com/docs/best-practices/use-data-skipping-indices-where-appropriate) is the counterexample that breaks both read and write assumptions in one engine. I used to think every database for read optimization has to use some variant of B+ Tree — column stores dont.
+
+* Reads — sparse primary index (8192-row granules by default), skip indexes (minmax, set, bloom). No row-level B-trees because columns are stored together, not as individual rows on disk.
+* Writes — each INSERT lands as immutable sorted parts, background merges stitch them. Write-new-file-merge-later like LSM, but no KV memtable in the middle.
+
+So ClickHouse is neither B-tree camp nor classic LSM camp — its own column-store layout on both sides.
+
+##### Embedded KV vs distributed
+
+Everything above — WAL, B+ tree, LSM — describes what happens on one machine, in one process, on one disk. Embedded KV is exactly that. SQLite, RocksDB, WiredTiger-as-a-library, Pebble — they ship as a library you link into your app or your database binary. No network hop to fetch a page. No quorum. No replication factor. Durability is whatever WAL + fsync policy you (or the default) chose on that one disk.
+
+Distributed systems do not replace the local engine. They wrap it. Cassandra still has commitlog + memtable + SSTables on each node. MongoDB still runs WiredTiger locally. CockroachDB still runs Pebble locally. DynamoDB still has a local B-tree + WAL on each replica (per the [USENIX ATC 2022 paper](https://www.usenix.org/system/files/atc22-elhemali.pdf)). The difference is what durable means when the client gets success.
+
+For embedded, durable means the write survived on this disk according to your fsync rules.
+For distributed, durable usually means a quorum of nodes accepted the write into their replication log — and maybe fsynced, maybe not, depending on the product.
+
+Two layers, two questions. Dont mix them up in interviews.
+
+What embedded KV is good for
+
+* [SQLite](https://sqlite.org/wal.html) — in-process SQL. Mobile apps, browsers, edge devices, single-server web apps. WAL mode gives concurrent readers + one writer on one host. The wal-index lives in shared memory, so WAL mode does not work over network filesystems — all readers must sit on the same machine. Still a single-writer bottleneck even in WAL mode. Durability is PRAGMA synchronous + whether you fsync every commit or only at checkpoint. [SQLite docs](https://sqlite.org/wal.html) are explicit — WAL + NORMAL skips per-commit fsync, survives app crash, not power loss.
+* [RocksDB](https://github.com/facebook/rocksdb/wiki/Write-Ahead-Log-(WAL)) — embeddable LSM library. Kafka Streams state stores, custom services, TiKV runs two RocksDB instances per node (raft log db + user kv db). You pick sync per write. Default sync=false — process-crash safe, power-loss can bite. Transaction log iterator exists to replicate WAL records to followers — the library assumes something upstream might replay your log.
+* [Pebble](https://github.com/cockroachdb/pebble) — RocksDB-inspired, Go-native, built for CockroachDB. Default sync=true on writes — opposite of RocksDB. Still just a local engine. Raft lives above it.
+* [WiredTiger](https://source.wiredtiger.com/develop/basic_api.html) — key/value library MongoDB wraps. Supports B-tree and LSM-style paths, row and column store modes. Connection + session + cursor API. MongoDB adds journal, oplog, replica set election on top.
+
+If the app and the DB live in the same process, a DB crash usually means the app crashed too. SQLite on a single VPS — if the process dies, the database dies with it. No separate failover. That changes how you think about HA.
+
+When embedded is not enough
+
+You need a distributed layer when multiple machines must serve writes, one node dying should not take the service down, users in different regions need low-latency access without one SQLite file, or dataset / write rate exceeds what one disk + one writer handles.
+
+SQLite is not built for HA by itself. [Litestream](https://litestream.io/) streams WAL frames to object storage for backup and disaster recovery — different problem than live clustering. [rqlite](https://rqlite.io/docs/faq/) and [dqlite](https://github.com/canonical/dqlite/) add Raft over SQLite for real clustering — rqlite as a standalone server, dqlite as an embeddable C library. Same SQLite engine underneath, but the durability contract shifts from one disk to quorum. rqlite FAQ puts it cleanly — Litestream restores from backup after node loss; rqlite/dqlite keep serving if a node dies because other nodes take over.
+
+The wrapper pattern
+
+Think of a distributed DB as two stacks — client write hits consensus / replication layer (Raft, Multi-Paxos, primary-secondary, gossip), then each node runs the local embedded engine (WAL, memtable/SST or B-tree pages), then disk.
+
+The replication layer decides when the client gets OK.
+The local engine decides how bytes land on disk on each node.
+
+Same RocksDB family, opposite defaults — RocksDB sync=false by default, Pebble sync=true. Same interview topic, different durability story on the same hardware.
+
+How distributed systems actually ack
+
+* [Cassandra](https://cassandra.apache.org/doc/5.0.8/cassandra/architecture/storage-engine.html) — write hits commitlog in memory on each replica, client gets OK at QUORUM once enough replicas buffered it. Default fsync every 10s on each node. Official docs warn you can lose up to the sync period on unexpected shutdown. RF=3 + QUORUM means you need correlated failure across multiple nodes in that window to lose data — not impossible, just rarer than one node dying alone. batch mode fsyncs per write but kills throughput. Production bets on replication + periodic sync, not single-node batch mode.
+* [MongoDB](https://www.mongodb.com/docs/manual/core/journaling/) — WiredTiger journal locally, write replicated via oplog. Default w:majority waits for majority of data-bearing voters. writeConcernMajorityJournalDefault=true (default) means majority also waited for on-disk journal — stronger than Cassandra's default periodic ack. Standalone w:1 without j can lose about the last 100ms of journal not yet synced. [Write concern docs](https://www.mongodb.com/docs/manual/reference/write-concern/) spell out when majority can roll back if journal default is turned off.
+* [CockroachDB](https://www.cockroachlabs.com/docs/stable/architecture/replication-layer) — SQL/KV layer → Raft quorum → Pebble WAL with sync on each store. [Replication layer](https://www.cockroachlabs.com/docs/stable/architecture/replication-layer) commits Raft entries once majority acks. [Storage layer](https://www.cockroachlabs.com/docs/stable/architecture/storage-layer) persists through Pebble WAL + SSTables — WAL is where the freshest updates from the replication layer land on disk. Pebble team is paranoid about partial fsync — corrupt WAL/SST prefixes get truncated on recovery. Distributed consensus + strict local sync. Both layers matter.
+* DynamoDB — [AWS resilience docs](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/disaster-recovery-resiliency.html) say data replicated across three AZs. ATC paper — Multi-Paxos per partition, leader appends to WAL, write quorum (2 of 3) before ack, local B-tree updated after. Can spin up log replicas fast when a replica is unhealthy to restore write quorum without copying the whole B-tree. You dont tune fsync — you trust the managed contract (and read the paper for internals).
+
+Interview traps
+
+* RF does not fix a bad local fsync policy by magic — if QUORUM acks before fsync and all three replicas lose power in the same 10s window, data is gone.
+* Replication does not erase RocksDB sync=false — if every replica in the quorum runs sync=false and all lose power together, same problem.
+* Embedded can be faster for local reads partly because no network — SQLite in-process avoids round-trips that even localhost Postgres pays. Different tool, not a free durability upgrade.
+* Litestream / dqlite / rqlite prove embedded engines get stretched into distributed territory — the engine stays SQLite, the contract changes above it.
+* TiKV (if asked) — same wrapper pattern. Two RocksDB instances per node, Raft log in one, user MVCC data in the other. Replication layer is Raft, local engine is RocksDB.
+
+One write, two stories
+
+Embedded RocksDB with sync=false — client Put → WAL to page cache → memtable → OK. Power loss before fsync → last writes gone. Your problem on one disk.
+
+Cassandra QUORUM with periodic commitlog — client → coordinator → 3 replicas buffer commitlog → 2 ack → OK. All 3 nodes lose power before 10s fsync → those acknowledged writes gone. Correlated failure problem.
+
+MongoDB w:majority with journal default — primary journal fsync + secondary oplog ack from majority → OK. Survives single node death if majority had journaled. Quorum + per-node journal.
+
+The point from the persistence section still holds — ask what OK actually means. Embedded = one disk's fsync rules. Distributed = quorum + each node's local flush schedule + product-specific journal requirements. Question both layers separately.
+
+[Sarthak Makhija — Questioning Database Claims: Design Patterns of Storage Engine](https://youtu.be/_55OM23zhUo?si=sFD-d4VrQ2nINQGe)
 
 #### Normalization
 
@@ -2112,54 +1902,13 @@ Its crucial to monitor the index performance, so use EXPLAIN or ANALYZE to check
 
 The simplest indexes would be made of hashmaps with both O(1) reads and writes, but the range queries are not possible here as the data is stored randomly. Traditional relational engines use B-tree indexes to organize a balanced tree on disk where each node holds sorted key ranges. B-trees allow efficient point queries and range scans by traversing from root to leaf requiring O(log N) but slower reads and writes (have to write to disk as opposed to memory) compared to hash indexes. In contrast, LSM-tree (Log-Structured Merge-tree) engines (used in Cassandra, RocksDB, HBase) along with SSTables (sorted string table - both are inherently sorted, so this index also supports range queries well), batch writes in memory (memtables) and periodically merge to disk in sorted runs. Writes go to an in-memory BST, which is flushed to immutable sorted tables on disk in SSTable when it gets too big. LSM-trees optimize write throughput by sequentializing disk writes and trading some read complexity (reads may need to check multiple levels as its first performed on tree, and if not available we check SSTables from new to old), but it has faster writes in memory. Also, as there will be lots of duplication in the append-only logs as we update the values in indexes, we can compress the SSTables. When reading, we just query the memtable (BST) and then move towards finding in the SSTables until (slow reads). Its not that brutal if key doesnt exist due to Bloom Filter. As SSTables are sorted, we can binary search on it as well using a in-memory sparse hashmap.
 
-#### Replication
-
-Our database can (and will fail). Additionally, if we only have one database, our read/write throughput is limited to that single node.
-We should have multiple copies of the data! Replication can allow us to:
-* Withstand hardware failures
-* Improve our database performance
-* Proximity to user base
-
-Now, we can have:
-* Strong Consistency (Linearizability) - On a write, all replicas must process the data before the write is considered committed. Thus, any read to a replica will return up to date data. But, if a single replica is down, we cannot commit any writes. Huge performance hit as consensus hard. This is syncronous replication.
-* Eventual Consistency - On a write, only a subset of replicas must process the data before the write is considered committed. Other replicas will be backfilled in the background. But the problem is that reading from certain nodes can return stale data and sometimes its fine!
-
-Stale Reads occur when a replica has not yet received the latest write :
-* Clients may read outdated values from replicas
-* Common in asynchronous replication
-* Can cause temporary inconsistency, especially in distributed systems with high latency
-
-How are we going to replicate? Replicas will send data to one another via a "replication log", which is very similar to a write ahead log (requires same DB engine and version, not portable):
-* Captures row-level changes (e.g., via Change Data Capture)
-* Flexible, supports partial replication and cross-DB setups
-* Adds some overhead and setup complexity
-
-#### Sharding
-
-Replication horizontally scales reads but not writes. Its quite literally always important to have to increase availability. Sharding helps with both by splitting data horizontally, but adds a ton of complexity to the system and should only be used when data is big enough. When a table is under too much load (too big tables with too many queries), or simply storing too much data, we need to split it across multiple computers. We want majority of read and write queries to interact with one shard (if suppose they go to 10 different shards, then the operation can be considered completed only when slowest of them is done), as we want to ensure that the majority of our queries just go to one node. We also want to ensure that none of the nodes are responsible for handling a disproportionately large amount of the load. On each node, we want relatively small and similar amount of reads/writes on the data to avoid hotspots.
-
-When doing distributed transactions, we need to make sure that either succeeds on both partitions, or fails on both partitions. Such cross partition writes are slow.
-
-We can shard/partition :
-* Using key ranges where similar keys live on same node, effective for range queries. But there are possibility of hotspots
-* Also, we can range based on key hashes, but then there is no way of doing range queries
-* Consistent Hashing (range of hash of keys) that allows us to distribute keys by their hash range, while ensuring minimal data rebalancing when the number of shards changes.
-
-It's very much used in Stock Exchanges using Range Partitions.
-
-The caveat is that the data must be shardable. If we need cross DB joins, cross DB consistency requriements, etc then we can't do this. Cross DB joins are extremely expensive and should be done on the application side.
-
-2PC is the classic protocol for atomic commits in a distributed DB, ensuring all nodes commit or all abort. 2PC is simple but can be blocking: if the coordinator fails after sending “prepare” but before final decision, participants may wait indefinitely. To mitigate this, some systems use consensus (e.g. Raft) to coordinate commit logs or use asynchronous replication with conflict detection. Another approach is optimistic concurrency + transaction logs (as in Delta Lake/Iceberg) where readers always see a consistent snapshot and writers append new versions atomically, sidestepping classic 2PC among data nodes.
-
-As mentioned earlier, SQL databases tend to support transactions, which includes transactions across shards. These can be extremely slow due to two phase commit! On the contrary, most NoSQL databases encourage their user to keep their data organized in a way that most operations can be performed on a single shard (no cross shard writes and reads), hence the misnomer that they "scale better". For example, in Cassandra, we have partioning key and all of the shards need to be on that key.
-
-SQL query optimizers use cost-based planning: they enumerate possible join orders, access paths, and choose the lowest-cost plan. Heuristics (e.g. join reordering, predicate pushdown) and statistics (table/cardinalities) guide the planner. Common optimization strategies include transforming subqueries to joins, combining filters, and choosing efficient join algorithms (see below). Indexes dramatically speed up queries by allowing lookups instead of full scans. The most common index is the B-tree index, which stores keys in sorted tree nodes. B-tree indexes offer logarithmic lookup time and support efficient range queries (e.g. all rows between values). For example, a B-tree index on a date column can quickly return all rows within a date range. Hash indexes, by contrast, map keys via a hash function and allow O(1) exact-match lookups, but do not support ordered or range scans (they lose the key order). In analytical engines, columnar indexes and bloom-filters are used: Parquet files, for instance, record per-column dictionary or min/max stats to skip non-matching row-groups. Parquet can also embed Bloom filters per page to quickly exclude pages that do not contain a value
-
 #### Joins
 
 We need to combine rows from two or more tables using a relationship. Without joins and normalization there will be duplicate data, inconsistency, huge ass tables. With joins we have normalized data, single source of truth, and flexible queries. 
 
 SQL has ACID transactions, strong consistency, and supports JOINs (SQL has structured tables and is good in connecting multiple tables using foreign keys). In NoSQL, we dont use much of normalization, and its not good for joins.  
+
+SQL query optimizers use cost-based planning: they enumerate possible join orders, access paths, and choose the lowest-cost plan. Heuristics (e.g. join reordering, predicate pushdown) and statistics (table/cardinalities) guide the planner. Common optimization strategies include transforming subqueries to joins, combining filters, and choosing efficient join algorithms (see below). Indexes dramatically speed up queries by allowing lookups instead of full scans. The most common index is the B-tree index, which stores keys in sorted tree nodes. B-tree indexes offer logarithmic lookup time and support efficient range queries (e.g. all rows between values). For example, a B-tree index on a date column can quickly return all rows within a date range. Hash indexes, by contrast, map keys via a hash function and allow O(1) exact-match lookups, but do not support ordered or range scans (they lose the key order). In analytical engines, columnar indexes and bloom-filters are used: Parquet files, for instance, record per-column dictionary or min/max stats to skip non-matching row-groups. Parquet can also embed Bloom filters per page to quickly exclude pages that do not contain a value
 
 SQL supports several join types:
 
@@ -2182,7 +1931,71 @@ Join types (from best to worst): const, eq_ref, ref, range, index, and ALL. ALL 
 
 Joins are extremely expensive even with the right set of incides! If you have heavily normalized data, then scaling will become difficult. Upto a certain level Joins work really well, but after a limit, we would have to give up on 3NF and add redundancy to the system. So, denormalization helps in scaling SQL.
 
+#### Replication
+
+Our database can (and will fail). Additionally, if we only have one database, our read/write throughput is limited to that single node.
+We should have multiple copies of the data! Replication can allow us to:
+* Withstand hardware failures
+* Improve our database performance
+* Proximity to user base
+
+Now, we can have:
+* Strong Consistency (Linearizability) - On a write, all replicas must process the data before the write is considered committed. Thus, any read to a replica will return up to date data. But, if a single replica is down, we cannot commit any writes. Huge performance hit as consensus hard. This is syncronous replication.
+* Eventual Consistency - On a write, only a subset of replicas must process the data before the write is considered committed. Other replicas will be backfilled in the background. But the problem is that reading from certain nodes can return stale data and sometimes its fine!
+
+Stale Reads occur when a replica has not yet received the latest write :
+* Clients may read outdated values from replicas
+* Common in asynchronous replication
+* Can cause temporary inconsistency, especially in distributed systems with high latency
+
+How are we going to replicate? Replicas will send data to one another via a "replication log", which is very similar to a write ahead log (requires same DB engine and version, not portable):
+* Captures row-level changes (e.g., via Change Data Capture)
+* Flexible, supports partial replication and cross-DB setups
+* Adds some overhead and setup complexity
+
+The DB strategy could be a primary–replica architecutre, having primary DBs (write) and read replicas. Writes go to the primary, while read-only queries can be distributed across one or more read replicas. The problem here would be the replication lag leading to eventual consistency. This improves write throughput, as slow queries affect writes more. Read replicas do not directly improve write throughput. They remove read work, lock contention and CPU pressure from the primary, leaving more capacity for writes. We dont want too many read requests on one primary DB. So, we are improving availability (replicas can be promoted or serve degraded reads). The read replicas are handled by application code, load balancer or DB proxy. Generally the replication model is asyncronous (write operations are fast as we are not waiting for read relicas confirmation, but the tradeoff is replication lag) i.e. the primary acknowledges a write without waiting for replicas to replay it, and semi sync (waits for atleast one read replica for ACK, so slower writes but better safety). Sync also is there, but thats when high latency is fine and we want really strong consistency, used pretty less.
+
+#### Sharding
+
+Replication horizontally scales reads but not writes. Its quite literally always important to have to increase availability. Sharding helps with both by splitting data horizontally, but adds a ton of complexity to the system and should only be used when data is big enough. When a table is under too much load (too big tables with too many queries), or simply storing too much data, we need to split it across multiple computers. We want majority of read and write queries to interact with one shard (if suppose they go to 10 different shards, then the operation can be considered completed only when slowest of them is done), as we want to ensure that the majority of our queries just go to one node. We also want to ensure that none of the nodes are responsible for handling a disproportionately large amount of the load. On each node, we want relatively small and similar amount of reads/writes on the data to avoid hotspots.
+
+When doing distributed transactions, we need to make sure that either succeeds on both partitions, or fails on both partitions. Such cross partition writes are slow.
+
+We can shard/partition :
+* Using key ranges where similar keys live on same node, effective for range queries. But there are possibility of hotspots
+* Also, we can range based on key hashes, but then there is no way of doing range queries
+* Consistent Hashing (range of hash of keys) that allows us to distribute keys by their hash range, while ensuring minimal data rebalancing when the number of shards changes.
+
+It's very much used in Stock Exchanges using Range Partitions.
+
+The caveat is that the data must be shardable. If we need cross DB joins, cross DB consistency requriements, etc then we can't do this. Cross DB joins are extremely expensive and should be done on the application side.
+
+2PC is the classic protocol for atomic commits in a distributed DB, ensuring all nodes commit or all abort. 2PC is simple but can be blocking: if the coordinator fails after sending “prepare” but before final decision, participants may wait indefinitely. To mitigate this, some systems use consensus (e.g. Raft) to coordinate commit logs or use asynchronous replication with conflict detection. Another approach is optimistic concurrency + transaction logs (as in Delta Lake/Iceberg) where readers always see a consistent snapshot and writers append new versions atomically, sidestepping classic 2PC among data nodes.
+
+As mentioned earlier, SQL databases tend to support transactions, which includes transactions across shards. These can be extremely slow due to two phase commit! On the contrary, most NoSQL databases encourage their user to keep their data organized in a way that most operations can be performed on a single shard (no cross shard writes and reads), hence the misnomer that they "scale better". For example, in Cassandra, we have partioning key and all of the shards need to be on that key.
+
+Another strategy would be to use a Distributed/Sharded DB for scaling writes, wherein the data is splitted among the DBs. A sharded approach is much simpler to manage compared to a multi-master setup (write conflicts, auto- incremental IDs clashing, etc). Also, now with advent of great NoSQL DBs, we get sharding my default and it scales pretty well. Each shard has same schema, and stores subset of rows. Consistency is strong per shard. Hash based sharding is the most common, so no hot shard, even distribution. But range queries is hard, and adding shards can also be difficult. Querying using the shard key is pretty fast as hits the shard directly in O(1), without shard key its quite high latency. If a shard becomes too big, then resharding is another pain in ass using consistent hashing. Generally, we do replication (read scaling) + sharding (write scaling).
+
+SQL horizontal sharding tradeoffs :
+* Sharding breaks joins. Cross shard joins are horrendously expensive
+* Transactions become hard as ACID across shards is complex (2PC, SAGAS pattern, god knows what)
+* Application logic for resharding and all adds a lot of operational complexity. Changing shard key is painful
+
+NoSQL handles sharding at DB level, not at application level. 
+
 ### SQL vs NoSQL
+
+First of all, SQL can scale and NoSQL is not some magic scaling solution. Yes, a kind of DB might not scale with a particular constraint. 
+
+There is always a [discussion of choosing between SQL and NoSQL DB](https://www.youtube.com/watch?v=ufCvXzGSQ_M). Relational DBs hold many rows of unstructured data via a predefined schema and those rows can have relations to others if they share a common key. There are built in query optimizers that return results using declarative SQL. Row-based SQL storage excels in normalized schemas due to B-tree data locality for joins and cross-table ACID transactions (ensure atomicity across tables), optimizing OLTP (Online Transaction processing) workloads where full-row access (its row-based storage) and consistency across relations are critical. is nice when we are consistently writing new data on a per record basis (any user facing application). Generally speaking, they use B-Trees thus reading and writing on disk, along with supporting transactions with two phase locking. 
+
+NoSQL DBs are not opposite of SQL or anything. In reality, NoSQL databases are more stripped down that relational databases, and give the developer more opportunities to choose one that fits the needs for their application, because sometimes it is better at huge scale to abandon some of the features of relational databases in exchange for greater performance. NoSQL generally has objects self contained in document to have more locality on the disk (good for both read and writes and also accessing the whole document, easier to shard, schemaless, only issue is possible data duplication that can be tackled in the application code, no need of complex JOINs). The relational DBs are very well used as they have intutive data models and momemtum. However, they tend to scale poorly when sharded. On writes to many shards may need distributed transactions and on reads to many shards involves many network. Transaction abstraction and locking is slow. B-Tree are also slow for writes (compared to LSTM Trees in memory) as they directly go to disk. We need to set a rigid schema which makes things a bit less maintainable. For high write thorughput, we generally prefer NoSQL. SQL is biased towards using relational and normalized data as data model with ACID transactions, typically using B-Trees with fast reads and slow writes. Its great when correctness is of more importance than speed. Can use for user profiles, product cataloges, event metadata, and more.
+
+Doc DB stores data in JSON/BSON format. MongoDB is document DB where data is written in large nested documents, better data locality (if you choose to organize your data in a way that takes advantage of this), but denormalized (limited joins). They have flexible schema, nested data, horizontal scaling. Doc DBs have richer queries compared to KV, but not as rich as SQL. The unit of storage is collection, which has document inside it. Its stored on disk, indexed on ID, and often compressed.
+
+Cassandra is a wide column data store (NoSQL), has a shard key and a sort key and allows for flexible schemas, ease of partitioning. Multileader/Leaderless replication (configurable) wiht super fast writes (LSM Trees + SSTables) , albeit uses last write wins for conflict resolution (lack of data integrity), but may clobber existing writes if they were not the winner of last write wins condition (timestamps are not relaiable in distributed systems). Great for applications with high write volume, consistency is not as important (some data can be overwritten or lost), all writes and reads go to the same shard (no transactions). 
+
+KV stores have boring queries (only by key). Riak is a key-value store that has an improvement of using CRDTs (conflict free replicated data types) making it eventually consistent. Cassandra doesnt support full ACID though! When you need data integrity of a SQL DB with schema flexibility, use MongoDB (quite popular when transitioning from SQL to NoSQL world) if document data model works for you. Cassendra gives us extremely high single partition high throughput and read throughput but with poor data gaurantees (a good use could be chat applications).
 
 SQL :
 * we need strong ACID
@@ -2208,15 +2021,12 @@ WideColumn DB (cassendra) :
 * Scales to billions of rows
 * But very limited queries, no joins and hard data modelling 
 
-### Distributed Systems
+Tools that you could be using in an interview would be:
+1. DynamoDB: AP (availability and partition tolerance). DynamoDB is always available, and it always responds. It's eventually consistent by default, meaning the reads might return stale data. We often use it in situations like shopping carts, user sessions, and activity feeds, where stale data for like 100 ms is fine.
+2. Postgres: a very famous thing with a single primary setup, which is CP (consistent and partition-tolerant). Here, the consistency is strong, so the reads always get the latest data, but if the primary goes down, writes are unavailable until failover. Generally, these are used in situations like banking, inventory, and booking systems, where we need strong consistency, because stale data means there is some loss of money involved.
+3. Cassandra: interestingly tunable. You can configure consistency per query. It could be one, it could be quorum, it could be all. The quorum reads plus quorum writes gives a strong consistency. One read plus one write is eventual consistency, but it's pretty fast.
 
-The CAP theorem states a distributed system can simultaneously provide only two of {Consistency, Availability, Partition Tolerance}. In practice, partitions (network failures) are a fact, so systems choose between strong consistency (always agree on a single value) and availability (always respond, possibly stale). Strong consistency (as in traditional RDBMS or Paxos-based systems) ensures every read sees the latest committed write, but can block or fail under partition. Eventual consistency (as in many NoSQL stores) allows reads to return outdated data but guarantees convergence when nodes reconcile. Many modern distributed DBs offer tunable consistency (e.g. Quorum reads/writes in Cassandra, linearizable reads vs timeline in DynamoDB).
-
-Fault-tolerant systems use consensus protocols to agree on state changes. Paxos is the original consensus protocol for agreeing on a value among unreliable nodes. It guarantees safety (consistency) but is complex. Raft is a later protocol designed for understandability: it decomposes consensus into leader election, log replication, and safety rules. In Raft, one leader handles all log appends; if the leader fails, a new election is held. Both Paxos and Raft require a majority of replicas and can tolerate node failures (but not network partitions beyond a majority). These protocols underlie many systems (e.g. etcd, Consul, TiKV) to manage a replicated log or state machine, ensuring that updates (schema changes, metadata commits) occur atomically across nodes
-
-Beyond MVCC, distributed systems use patterns like distributed locking (e.g. ZooKeeper/etcd locks), leader-follower sharding (each partition has a single writer leader), and CRDTs (conflict-free replicated data types) to handle concurrent updates. Many data lake systems use optimistic concurrency: readers get snapshot views and writers append updates; conflicts are resolved via atomic replace or merge (as with Delta Lake’s transaction log.
-
-Just to add on, distributed locks are extremely costly as they are over network with multiple applications and processes. Always prefer other locks in DB as its holy purpose is to ensure consistency. 
+If you want to discuss more practically, suppose we have a situation where our e-commerce app has orders plus product catalogs. Would we want to use the same database here? No, we would want to use a Polyglot Persistence setup in this situation. The orders could be in PostgreSQL because we want strong consistency, so PostgreSQL gives us that, and we can't lose an order. The product catalog could be in DynamoDB because showing a slightly stale price for 100 ms is fine. Practically, to understand eventual consistency, when we write data for a brief window (milliseconds to seconds maximum), some reads might return the old value. Eventually, all nodes will converge to the same value, and the question you have to ask in this situation is: can our business tolerate that window?
 
 ### Cache
 
@@ -2265,6 +2075,13 @@ Some keys can become hot in cache (like you pick ronaldo) getting huge amount of
 
 ### Search Indexes
 
+Normal DBs are not really built for searh. THey can do wildcard matching, but not really built for proper saerch usecases which would require tokenization, ranking, scoring, fuzzy matching. Search DBs care about text relevance, partial matches, ranking. They are able to do these things due to inverted index. Normal index is for a specific row we have values. For inverted index, for a word there is list of docs (list of docs where the word is present). This makes search fastt. Types of search queries supported :
+* Full text search
+* Partial Match (iph*)
+* Fuzzy saerch (iphne)
+* Phrase search ('iphone pro' in some sentence)
+* filters (price < 50000) and aggregations ()
+
 Generally speaking, in order to optimize for search use cases, which can be a very intense query (since we may have to scan through millions or more documents), it can be helpful to use a search index! Lucene (used by ElasticSearch) uses LSM tree + SSTable for its format. It has lot of search capabilities for text, geospatial data, numbers, etc. ElasticSearch is a service that takes the capability of an individual Lucene index and allows it to run over a distributed cluster. ElasticSearch is able to ensure availability through replication, but the major point here is to be able to hold index shards on different machines which are mapped based on the ID of the document. In this sense, ElasticSearch basically creates a bunch of local inverted indexes for the documents on a given node. Ideally, you keep documents that are frequently searched together on the same shard to avoid cross shard queries. ElasticSearch is able to provide extremely fast performance on reads thanks to caching! Caching of index pages in memory by the operating system, cached queries on a shard level in memory (not just the index itself but the actual result of the computation done). Query caches also cache only parts of certain queries to be used again by different queries in the future if they require some data in common (use the same filters).
 
 Ultimately, search indexes are an incredibly important part of many large applications, and are capable of finding strings of text in a manner that is much faster than a typical database query.
@@ -2282,6 +2099,24 @@ There are two sorts of message brokers :
 ### Kafka
 
 If you haven't mentioned Kafka in a system design interview, is it even an interview? It's a log based message broker, that is each piece of data is appended to end of log file on disk (as writes are sequential, they are fast). A topic is just similar set of related events, a kindof logical partitioning of data. A cluster contains multiple brokers. The events are stored in brokers and partitions. Partitions are actual physical partition. A broker can contain multiple partitions. Multiple such brokers exist to avoid single point of failure. A topic partitioning in Kafka can handle more than 50MB/s. It also has replicas
+
+Kafka is a distributed system that stores and buffers messages, called “events”, which are stored on disk in numbered “partitions” within named “topics”. Each topic can be multiple partitions decided by the message key. Kafka “producers” append events to partitions, and Kafka “consumers” read events from partitions. Consumer groups allow us to specify a list of subscribed topic partitions, and then divide them across consumers in the same group. Consumer groups also keep track of commited transaction offserts accross all of subscribed topic partitions, if one consumer fails, we it comes back we start from last commited offset. There is an internal consumer offsets topic to keep track of the last known offset consumed by a variety of consumers on all topics. There is leader consensus used to manage these nodes. Kafka transactions give us an option of achieving exactly once, least once, and most once messaging processes. But when (and when not) to use Kafka?
+* Its a message broker, transacitonal, high volume big data, etc
+* Its an event store as well! We have retension ability within topics which can be replayed, while keeping things decoupled. Yes we can store even PB of data in Kafka, its not for analytics. Also, when backfilling, we can use Data Lake which is optimized for throughput instead of Kafka as we dont really need latency.
+* Its an integration layer. We can push events from Mainframe, CDC, etc and push to consumers from Snowlfake to MongoDB
+* Also for stream processing with Flink
+
+Kafka producers are generally thread-safe, and it is a common practice to use a single producer instance across multiple threads in an application. This allows for efficient batching of records, which improves throughput. The standard Apache Kafka consumer is not thread-safe and is typically designed to run in a single thread per consumer instance. he primary reasons for this design choice are: 
+* By processing records from a partition in a single thread, Kafka guarantees that messages within a given partition are processed in the exact order they were written. This simplifies client-side logic.
+* Parallel processing is primarily achieved by adding more partitions to a topic and running multiple consumer instances (or threads within a concurrent container in frameworks like Spring Kafka), where each consumer instance handles one or more unique partitions. The maximum number of concurrent consumers in a consumer group is limited by the number of partitions. 
+So, Kafka provides per-partition backpressure to prevent slow processing from overwhelming memory. In conclusion :
+* Single-threaded per partition preserves order, prevents chaos.
+* Partitions = horizontal threads → throughput scales linearly.
+* Per-partition backpressure isolates slow messages.
+* Consumer groups distribute load automatically.
+In-memory message brokers make sense only when we want maximal throughput and having out of order events dont matter with no durability and fault tolerance! A good use case for this could be video encoding as the data is huge and we dont really care which user's video got encoded first.
+
+Single-leader replication is preferred over multi-leader or leaderless schemes in systems like Kafka and Flink for strong consistency, simplicity, and ordered processing, especially where total event ordering matters more than maximum write throughput.​
 
 ### Data Engineering
 
@@ -2339,22 +2174,6 @@ Streaming is hard :
 * Recovery from failures is tricky. When it fails, the data gets backedup and pressure gets more and more. As the system is stateful, checkpointing (or savepoints if external systems are involved) jobs at schedule is the main way Flink manages failures, also offsets from Kafka help (early, latest, specifc failure timestamp)
 * Also if we don't process messages quickly enough we may run out of memory on the broker. So, messages need to be persisted sequentially on disk in the form of write-ahead log, instead of being kept in memory. So, messages are not deleted upon consumption, so can be replayed down the line using last read offset.
 
-Kafka is a distributed system that stores and buffers messages, called “events”, which are stored on disk in numbered “partitions” within named “topics”. Each topic can be multiple partitions decided by the message key. Kafka “producers” append events to partitions, and Kafka “consumers” read events from partitions. Consumer groups allow us to specify a list of subscribed topic partitions, and then divide them across consumers in the same group. Consumer groups also keep track of commited transaction offserts accross all of subscribed topic partitions, if one consumer fails, we it comes back we start from last commited offset. There is an internal consumer offsets topic to keep track of the last known offset consumed by a variety of consumers on all topics. There is leader consensus used to manage these nodes. Kafka transactions give us an option of achieving exactly once, least once, and most once messaging processes. But when (and when not) to use Kafka?
-* Its a message broker, transacitonal, high volume big data, etc
-* Its an event store as well! We have retension ability within topics which can be replayed, while keeping things decoupled. Yes we can store even PB of data in Kafka, its not for analytics. Also, when backfilling, we can use Data Lake which is optimized for throughput instead of Kafka as we dont really need latency.
-* Its an integration layer. We can push events from Mainframe, CDC, etc and push to consumers from Snowlfake to MongoDB
-* Also for stream processing with Flink
-
-Kafka producers are generally thread-safe, and it is a common practice to use a single producer instance across multiple threads in an application. This allows for efficient batching of records, which improves throughput. The standard Apache Kafka consumer is not thread-safe and is typically designed to run in a single thread per consumer instance. he primary reasons for this design choice are: 
-* By processing records from a partition in a single thread, Kafka guarantees that messages within a given partition are processed in the exact order they were written. This simplifies client-side logic.
-* Parallel processing is primarily achieved by adding more partitions to a topic and running multiple consumer instances (or threads within a concurrent container in frameworks like Spring Kafka), where each consumer instance handles one or more unique partitions. The maximum number of concurrent consumers in a consumer group is limited by the number of partitions. 
-So, Kafka provides per-partition backpressure to prevent slow processing from overwhelming memory. In conclusion :
-* Single-threaded per partition preserves order, prevents chaos.
-* Partitions = horizontal threads → throughput scales linearly.
-* Per-partition backpressure isolates slow messages.
-* Consumer groups distribute load automatically.
-In-memory message brokers make sense only when we want maximal throughput and having out of order events dont matter with no durability and fault tolerance! A good use case for this could be video encoding as the data is huge and we dont really care which user's video got encoded first.
-
 [Apache Flink](https://youtu.be/9YLOA-8UijI?si=cLpLxrPSTgNFnkmz) is a exactly-once fault-tolerant stateful consumer quite common for stream processing. In case of having multiple applications, producers can publish data into Kafka topics (message broker to decouple producer and consumer, making the interaction async) by APIs, websockets, etc, which then is passed on to the stream processor (Flink) which then joins the inputs of kafka topics into a common key that they both contain, processing the data real-time, and then finally save to storage (S3, Delta Lakes, and more as data warehousing) for long term analysis and end with data sink. Flink also does checkpointing the offset to input and output topics, internal state corresponding to offsets.  Even if the consumer fails, Kafka can store the data, so its replayable making it scalable and fault-tolerant. We would also have a monitoring setup for real-time alerts about the data we processed. The thing is, we might be processing messages out of order. 
 
 State in stream processing is crucial for maintaining context from past events, enabling operations like aggregations, joins, and enrichments that process each incoming event independently while referencing historical data locally for efficiency and fault tolerance. Flink state can be stored in in-memory hashmap or an embedded key-value like RocksDB. Flink computations are performed as a task unit, where the tasks can run in parallel within a node or across many nodes. These tasks send data to one another via streams. It uses watermarking to make sure things are in order. Local state avoids slow remote lookups by storing data (e.g., table changes from a Change Data Capture stream) in-memory or persistently on the processing node. This ensures high throughput, as each event queries or updates state directly without network latency, scaling with parallelism in frameworks like Flink. Fault tolerance uses checkpoints to snapshot and restore state, preventing data loss during failures. The JobManager periodically injects "checkpoint barrier" messages into data streams, which flow through operators in order within log-based input queues (e.g., from Kafka), using the Chandy-Lamport algorithm variant, give consistent global view. Operators align on barriers from all inputs (non-blocking background snapshots), take local state snapshots to durable storage like S3, and acknowledge completion back to the JobManager. A checkpoint succeeds only when all nodes confirm, enabling restarts from that consistent state without duplicates. Upon failure, Flink restores state from the latest completed checkpoint across all nodes and resumes processing subsequent records, pausing in-flight messages until consistency. This prevents events from being processed multiple times, as barriers ensure snapshots capture exactly the state at barrier points. Background non-blocking snapshots minimize latency while maintaining causal ordering. Flink prioritizes immediate correctness over availability trade-offs. Exactly-once processing enforces linearizability-like guarantees for state updates, coordinating barriers across inputs to align snapshots precisely, preventing reprocessing of committed events. In contrast, eventual consistency might allow temporary divergences that resolve later, which Flink avoids to support reliable aggregations and joins in stateful streaming. For an example, consider ingesting database changes (inserts/updates/deletes) via CDC into a stream, holding a local copy of the "users" table keyed by user ID. Incoming transaction events join against this state: if a transaction for user "123" arrives and matches a local entry (e.g., enriched with user details like email), Flink outputs the enriched record immediately. Updates to the users table propagate incrementally, keeping state current without reprocessing the entire stream.​​
@@ -2374,8 +2193,6 @@ Choice of DBs:
 * You need strong transactional guarantees on the stream-processed results. You need strong transactional guarantees on the stream-processed results. Survives sharding + multi-region chaos while giving you full ACID on the final enriched data. Use when money or inventory is involved.
 
 First thing is to think about the data source, is it a time-series, a simple point-in-time DB for state of application, etc? We can use Spark clusters for simaltaneous data processing, thus horizontally scaling our ETL pipeline, thus the batch job is distributed. 
-
-Single-leader replication is preferred over multi-leader or leaderless schemes in systems like Kafka and Flink for strong consistency, simplicity, and ordered processing, especially where total event ordering matters more than maximum write throughput.​
 
 ### MLOps
 
