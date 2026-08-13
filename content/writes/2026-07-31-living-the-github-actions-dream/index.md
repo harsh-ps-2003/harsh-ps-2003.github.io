@@ -1,16 +1,18 @@
 +++
 title = "Living the GitHub Actions Dream"
 date = 2026-07-31
-draft = false
+draft = true
 description = "Making Docker builds and GitHub Actions CI fast: BuildKit, layer caching, Arm runners, and why Rust builds hurt."
 
 [taxonomies]
 tags = ["ci", "github-actions", "docker", "devops"]
 +++
 
-Personally, for me its deeply frustrating when I watch a CI pipeline spin for 45 minutes when I know the actual work takes maybe 3 minutes. You push a one line fix, grab coffee, check Slack, and the build is still chugging away. The green checkmark feels less like validation and more like a hostage release. I have mass cancelled CI runs more times than I can count, and every time I do it I wonder why we collectively decided this was acceptable.
+> This turned out to be quite a lot of content! Be assured, its human written.
 
-This post is my attempt to document everything I have learned about making Docker builds fast, GitHub Actions efficient, and CI pipelines that do not make you want to mass cancel runs. We will go deep on how Docker layers actually work, why BuildKit changed everything, the dark arts of caching, the Arm situation that everyone is suddenly dealing with, and why Rust builds are thier own special circle of CI hell. Along the way I will share the tricks that actually work and the ones that sound good but dont.
+Personally, for me its deeply frustrating when I watch a CI pipeline spin for 45 minutes when I know the actual work takes maybe 3 minutes. You push a one line fix, grab coffee, check Slack, and the build is still chugging away. The green checkmark feels less like validation and more like a hostage release tbh. I have mass cancelled CI runs more times than I can count during my internship, and every time I do it I wonder why we collectively decided this was acceptable.
+
+I did lot of to-and-fro with CI during internship at Sqwish. This post is my attempt to document everything I have learned about making Docker builds fast, GitHub Actions efficient, and CI pipelines that do not make you want to mass cancel runs. We will go deep on how Docker layers actually work, why BuildKit changed everything, the dark arts of caching, the Arm situation that everyone is suddenly dealing with, and why Rust builds are thier own special circle of CI hell. Along the way I will share the tricks that actually work and the ones that sound good but dont.
 
 ## What even is a Docker layer?
 
@@ -1310,7 +1312,7 @@ GitLab CI/CD has different tradeoffs depending on whether you use their SaaS hos
 
 Jenkins and Buildkite are self hosted options that give you full control but require you to manage the infrastructure. The security risks are the same as GitLab self hosted. You have to choose between accepting those risks or accepting slower build times from isolated builds.
 
-[Blacksmith](https://blacksmith.sh/) (my fav) takes a different approach as a drop in replacement for GitHub Actions runners. Instead of using object storage for caching, they use persistent NVMe backed sticky disks stored in Ceph clusters. The difference is dramatic. GitHub Actions cache downloads at around 90 MB/s, Blacksmith's regular cache hits 400 MB/s, and sticky disks provide access in about 3 seconds regardless of size because there is no download at all. The disk is simply mounted into the runner. For Docker builds specifically, you swap out the standard actions for their equivalents and remove all the cache-from and cache-to directives. The builder state persists on disk between jobs, so there is nothing to serialize or deserialize. They also offer native ARM runners, so you can run multi platform builds on actual ARM hardware instead of emulating through QEMU. The pricing model is different too, around 60 to 67 percent cheaper than GitHub hosted runners for compute, with sticky disks charged at 0.50 dollars per GB per month. The tradeoff is vendor lock in to their specific actions and the fact that running jobs inside containers requires privileged mode and special environment variables to coordinate with their control plane.
+[Blacksmith](https://blacksmith.sh/) (my fav) takes a different approach as a drop in replacement for GitHub Actions runners. Instead of using object storage for caching, they use persistent NVMe backed sticky disks stored in Ceph clusters. GitHub Actions cache downloads at around 90 MB/s, Blacksmith's regular cache hits 400 MB/s, and sticky disks provide access in about 3 seconds regardless of size because there is no download at all. The disk is simply mounted into the runner. For Docker builds specifically, you swap out the standard actions for their equivalents and remove all the cache-from and cache-to directives. The builder state persists on disk between jobs, so there is nothing to serialize or deserialize. They also offer native ARM runners, so you can run multi platform builds on actual ARM hardware instead of emulating through QEMU. The pricing model is different too, around 60 to 67 percent cheaper than GitHub hosted runners for compute, with sticky disks charged at 0.50 dollars per GB per month. The tradeoff is vendor lock in to their specific actions and the fact that running jobs inside containers requires privileged mode and special environment variables to coordinate with their control plane.
 
 The cost differences add up quickly. A team running 100 builds per day with 3 jobs of 8 minutes each on GitHub Actions 32 core runners at 0.128 dollars per minute spends about 6900 dollars per month on compute alone. Add 700 dollars for 3TB of cache storage and 280 dollars for data transfer between Azure and AWS, and you are at nearly 8000 dollars per month. Indirect costs like slow cache operations and per minute billing rounding can add another 800 dollars.
 
@@ -1333,11 +1335,9 @@ The container image format itself is evolving. [eStargz](https://github.com/cont
 
 Compression is getting better too. [Zstd](https://github.com/facebook/zstd) compression is faster and achieves better ratios than gzip for many workloads. BuildKit supports zstd for layer compression, and more registries are adding support. Smaller layers mean faster pushes and pulls.
 
-The line between CI and development environment is blurring. Tools like [Gitpod](https://www.gitpod.io/) and [GitHub Codespaces](https://github.com/features/codespaces) give you a cloud development environment that is essentially the same as your CI environment. If your code works in Codespaces, it will work in CI, because they are running the same thing. This eliminates the "works on my machine" problem at its root.
-
 Nix is gaining traction as a way to define reproducible build environments. Instead of hoping that your CI runner has the right versions of everything installed, you declare exactly what you need and Nix provides it. The appeal is that you can run the exact same build locally that runs in CI. No more debugging the difference between Ubuntu as set up in GitHub Actions and Arch as it is on your laptop. I wrote about [getting started with Nix](/writes/2024-07-31-nix/) a while back and you can check out Fedimint codebase to see what it can offer.
 
-The insight from the [Hacker News discussion](https://news.ycombinator.com/item?id=43427996) around these pain points was compelling. One commenter pointed out that strongly isolated systems like Nix and Bazel are amazing for giving no-fuss local reproducibility. Every CI platform is trying to seduce you into breaking things out into steps so that you can see their little visualizations of what is running in parallel. But that is the tail wagging the dog. The underlying build tool should be what is managing and ordering the build, not the GUI.
+The nerdy [Hacker News discussion](https://news.ycombinator.com/item?id=43427996) around these pain points is something I can relate to. Strongly isolated systems like Nix and Bazel are amazing for giving no-fuss local reproducibility. Every CI platform is trying to seduce you into breaking things out into steps so that you can see their little visualizations of what is running in parallel. But that is the tail wagging the dog. The underlying build tool should be what is managing and ordering the build, not the GUI.
 
 What people really want for next generation CI is a system that can get deep hooks into local-first tools. Do not make me define a bunch of steps for you to run. Instead talk to my build tool and just display for me what the build tool is doing. Show me the order of things it built, show me the individual logs of everything it did.
 

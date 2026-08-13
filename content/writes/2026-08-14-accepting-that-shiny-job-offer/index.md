@@ -34,15 +34,19 @@ Most jobs (that you actually want to get) are never available publicly (it's mos
 
 And dont be lured with just money (if you are a good engineer, you are making money in long run dont sweat it), pay very close attention to culture. CULTURE is the singlemost important thing that decides your experience in the company. You dont want to be that person who keeps on leaving companies in 6 months collecting stupid joining bonuses. I dont recommend taking money over culture. Just becuase the team seems technically smart, the founders are MIT PHDs (and other things that VCs love like Olympiad medalists, and more), does not mean they are good at managing people (its really hard). I have talked to founder who were Directors and VPs at almost all big tech (FAANG+other big ones) while interviewing, and unfortunately, I haven't had much nice experience with some of them (some expect 996, some want me to forward them competing offer letters which is not something you can do tbh, some with 90days notice period, and really common one is getting late to meetings and no remorse for that at all). For some reason, I think as new grad, people consider you really desperate? I was not. I clearly had no problems clearing interviews and getting offers. Just because someone has a big title, in this capitalistic world, does not mean they have your best interests in mind. On the contrary, the new generation founders were much better as humans.
 
-Again a sidenote, the networking word is thrown around for new grads quite a lot. it just means that you meet people who at some point can do things for you (and hopefully vice versa) and making a favorable impression on them. Help people, don't be a selfish jerk (especially when it comes to someone's employment, it's serious shit). If you ever can’t help someone but know someone who can, pass them to the appropriate person with a recommendation. Be a nice guy/gal. Trust and relationships compound faster than money.
+Again a sidenote, the networking word is thrown around for new grads quite a lot. it just means that you meet people who at some point can do things for you (and hopefully vice versa) and making a favorable impression on them. I personally like giving conference talks. Help people, don't be a selfish jerk (especially when it comes to someone's employment, it's serious shit). If you ever can’t help someone but know someone who can, pass them to the appropriate person with a recommendation. Be a nice guy/gal. Trust and relationships compound faster than money.
 
-Also, you can forget your GPA after your resume shortlisting. Like forget it after your first job tbh. When someone says you to introduce yourself, dont say GPA is the best thing about me, thats stupid is in day and age. They are not looking at it, until it's some quant or some wannabe-elite firm. I dont mean fuck up your CGPA, but nobody really gives a damn about difference in 8.3/10 and 8.9/10 tbh. Dont over-optimize it. Focus on research, high quality internship work, cool FOSS work, and more that differentiates you.
+Also, you can forget your GPA after your resume shortlisting. Like forget it after your first job tbh. When someone says you to introduce yourself, dont say GPA is the best thing about me , thats stupid is in day and age. They are not looking at it, until it's some quant or some wannabe-elite firm. I dont mean fuck up your CGPA, but nobody really gives a damn about difference in 8.3/10 and 8.9/10 tbh. Dont over-optimize it. Focus on research, high quality internship work, cool FOSS work, and more that differentiates you.
 
 Its a weird time for a new grad or early engineer. Companies are evaluating whether they are needed or they are better off blowing that money on a bigger token budget. Maybe I am a bit biased here, but I believe in the value proposition of good engineers. If you are a slopmachine, you are not a good engineer. Saying this as a somewhat privileged and maybe a bit entitled new grad, a lot of folks, especially my hardworking friends who want to break into this 2026 cursed tech industry or switch for better roles, and juniors who are more often than not smarter than me, hop on the first offer they can get out of desperation and fear (sometimes excitement as well). It takes courage and leverage to negotiate for sure. I feel it's quite similar to dating girls you don't know much, one wrong move and and you are a gone case (now live with that embarassement boyyy), but if things go right (things will reallly go nice after that).
 
+Joining a pre-PMF lab with long work weeks and equity-heavy comp is a bet that's easier to make at 24 than at 40 for obvious reasons. AI startup culture intensity filters the applicant pool before recruiting even starts.
+
 ![Companies that spend more on AI also increase worker numbers](ai-adoption-headcount.png)
 
-Companies spending the most on AI are actually hiring more people, not fewer. Companies with low AI adoption are kinda stuck. In my experience talking to founders and interviewing at AI first companies, this tracks. They are genuinely more open to hiring early grads than traditional companies. The reasoning is simple. If you are building with AI from day one, you want people who grew up with these tools, not people who need to unlearn 15 years of habits. A new grad who has been prompting models since freshman year appears more valuable than a senior engineer who still thinks of AI as a fancy autocomplete.
+In my experience talking to founders and interviewing at AI first companies, companies spending the most on AI are actually hiring more people, not fewer. Companies with low AI adoption are kinda stuck. They are genuinely more open to hiring early grads than traditional companies. The reasoning is simple. If you are building with AI from day one, you want people who grew up with these tools, not people who need to unlearn 15 years of habits. A new grad who has been prompting models since freshman year appears more valuable than a senior engineer who still thinks of AI as a fancy autocomplete.
+
+AI company recruiting overindexes on cracked talent from new grads, PhD dropouts, and competitive-programming talent pools. They are also running AI-native in ways that require far fewer of the functions and levels that skew older folks.
 
 When it comes to research startups (labs), they go two ways from what I have seen :
 * Credentialmaxxers - hire PHDs, deepmind, FAIR, etc folk. High profile people. THey most probably wanna do novel pretraining architectures, new maths, you get the point.
@@ -69,7 +73,7 @@ When it comes to senior people, I can see a lot of hiring of leadership roles in
 
 ![Is the career ladder flattening from the middle](career-ladder-flattening.png)
 
-Middle management is the layer being removed first. Leadership stays. ICs stay. The middle gets squeezed out. If you are aiming for management, there are fewer rungs. If you are staying IC, the path is clearer. Companies need people who do the work more than people who measure it. Restructurings are narrowing focus onto fewer, higher leverage initiatives. The org is flattening and concentrating around the people who do the work.
+If you are aiming for management, there are fewer rungs. If you are staying IC, the path feels better. Companies need people who do the work more than people who measure it. Restructurings are narrowing focus onto fewer, higher leverage initiatives. The org is flattening and concentrating around the people who do the work.
 
 ### Performance is the only currency now
 
@@ -107,7 +111,7 @@ The trap is that refresh grants reset the handcuff clock. Accepting new 4 year g
 
 So high impact talent stays put, lower paid roles churn more, and movement becomes uneven. That dynamic is reinforcing specialization even further.
 
-The tech sector, which built its global dominance on hiring smartass 22 year old kids and betting on their trajectory, has retired that playboo i guess. Top CS grads in 2025 are twice as likely to call themselves a founder compared to the 2022 class, and 45 percent less likely to land a job at a major tech company. Whatever comes next will be built largely by the generation that managed to cross the threshold before the door slammed shut on their faces.
+The tech sector, which built its global dominance on hiring smartass 22 year old kids and betting on their trajectory, has retired that playbook i guess. Top CS grads in 2025 are twice as likely to call themselves a founder compared to the 2022 class, and 45 percent less likely to land a job at a major tech company. Whatever comes next will be built largely by the generation that managed to cross the threshold before the door slammed shut on their faces.
 
 Stepping back and reflecting now at the start of 2026, this feels like a real inflection point. Compensation is no longer just a function of level, title, or geography. It is increasingly a function of how capital intensive your company is, how scarce the talent is, and how much leverage a single individual can exert on that capital.
 
@@ -290,7 +294,9 @@ This is why I think the obsession with years of experience in job postings is mo
 
 If someday you think you want to do a startup, then join one sometime in your career. The 0->1 exp of starting from scratch and building something and then seeing customers use it, to scaling it, that experience is valuable. tbh, if you can be part of early founding team (before 5-10 customers), the amount of freedom and thrill will make you crazy. Its fucking spiritual. And if that company is what you think excites you (what people call true calling), then it will make you personally very happy.
 
-I see a lot of very good eng leaders doing their own company, as its easier than before now. They have core team in US, raise funds there, and often hire in other tech hubs.
+I see a lot of very good eng leaders doing their own company, as its easier than before now. They have core team in US, raise funds there, and often hire in other tech hubs. Directionally, its time to build.
+
+![US search interest for startups hit a decade high in 2026](startup-interest-google-trends.png)
 
 Dont join a startup for money. You are much more likey to make better money at a larger company, doing 9-to-5 at already proven product.
 
