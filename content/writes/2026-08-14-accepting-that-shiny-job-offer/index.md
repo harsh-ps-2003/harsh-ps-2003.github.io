@@ -1,7 +1,7 @@
 +++
 title = "Accepting that shiny job offer?"
 date = 2026-08-14
-draft = true
+draft = false
 description = "Career notes from accepting a new-grad offer in 2026: interviews, negotiation, ghosting, and advice that still holds today."
 
 [taxonomies]
