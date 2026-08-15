@@ -140,13 +140,13 @@ The consensus from people who study this stuff is that the first 2 to 3 years of
 ## Interviewing
 When you interview as a new grad, you don't have much leverage, unfortunately. Most of the time, you will be lowballed. Even if you have a lot of internships and very good work experience, it's not really considered very seriously. As a new grad, I have given:
 - data structures and algorithms round (leetcode, and sometimes random applied algorithm)
-- low-level design rounds
+- low-level design rounds or API design rounds
 - high-level design rounds
-- ML rounds
-- AI engineering rounds
+- AI/ML rounds
+- bug bash rounds
 - math puzzles, probabilities, and statistics
 
-For big tech, they still care about DSA rounds. For startups, its LLD + HLD thats most common. 
+For big tech, they still care about DSA rounds. For startups, its LLD + HLD thats most common. For DSA, the rounds seems to be getting easier, I was asked simple Binary Searches in most interviews for some reason? Companies are kinda moving away from it. I think basic DSA skill is crucial, but its true that it was overemphasized earlier in the interview process, so its a good change I guess. The LLD and HLD rounds are still a bit traditional. The bug bash rounds are also common in startups, often involving Agents to navigate codebase fast.
 
 I have literally built god knows what, 10,000 QPS distributed systems, agent sandboxing, more in a bloody 45-minute interview. How well you perform in those interviews is simply not the only factor when deciding whether to give you an offer or not. It is also dependent upon other factors which are not controlled by you. There is always somebody who is willing to work for less money than you are. There might be somebody who has one specific experience and one specific thing that the company wants, which you don't have. There could be a thing where the company has a bias towards graduates of a certain university compared to other universities (unfortunate thing in India). There could be a plethora of things that could make them reject you for someone else, even if you are really, really good. There is a lot of luck involved, whether you like it or not.
 
@@ -154,11 +154,11 @@ Almost all the hiring managers, the founders, CEOs, and CTOs shout out of their 
 
 ## The research scientist premium
 
-I have a few friends who finished their PhDs recently. One of them walked into an industry job with zero prior work experience and started earning what I would make after 5 years as a software engineer. No internships, no industry connections, just a dissertation and some papers. That blew my mind when I first heard it.
+I have a few friends who finished their PhDs recently. One of them walked into an industry job with zero prior work experience and started earning what I would make after 5 years as a software engineer. No internships, no industry connections whatsoever, just a dissertation and some papers. Apart from that he lived in Zurich which is such a beautiful place. Man I am jealous. 
 
 ![Research scientists are paid a level ahead](research-scientist-pay.png)
 
-The role is Research Engineers/Scientist. A few years back, almost nobody outside of academia knew what this job was (I leterally knew only some REs in UCL who do cool physics). Now every AI company is fighting over these people like they are the last engineers on earth.
+A few years back, almost nobody outside of academia knew what this job was (I leterally knew only some REs in UCL who do cool physics). Now every AI company is fighting over these people like they are the last engineers on earth.
 
 What changed? The product changed. When the model is the product, the people who can make the model better become the most valuable people in the building. It is not about shipping features anymore. It is about whether your model can do something it could not do last month. The researchers who can push that boundary went from being a nice to have to being the entire competitive advantage.
 
@@ -176,7 +176,7 @@ The traditional path is a strong PhD plus internships at top labs, then a resear
 
 Here is something that surprised me though. Anthropic says about half their technical staff have PhDs, but plenty of brilliant colleagues never went to college. The PhD is not strictly required. What matters is whether you can do original research. If you have a strong public portfolio, open source work that gets cited, papers you published independently, that can substitute for formal credentials. The PhD signals capacity for self directed research over long time horizons. If you can demonstrate that capacity another way, the door is not closed.
 
-One misconception I had was that research is purely theoretical. In 2026, frontier AI research is heavily empirical. You are not sitting in a room with a whiteboard deriving equations. You are running experiments on thousands of GPUs, debugging distributed training, iterating on ideas that might take weeks to validate. The line between research and engineering has blurred a lot.
+One misconception I had when I was in undergrad was that research is purely theoretical. In 2026, frontier AI research is heavily empirical. You are not sitting in a room with a whiteboard deriving equations. You are running experiments on thousands of GPUs, debugging distributed training, iterating on ideas that might take weeks to validate. The line between research and engineering has blurred a lot.
 
 For my research friends still in academia or thinking about industry, this is probably the best time to make the jump. The premium for research talent has never been higher. But I am not sure the window stays open forever. Once foundation models mature and the field shifts from capability research to deployment and optimization, the balance might shift back toward engineers. Right now though, if you can do the work, the market will pay you like it.
 
