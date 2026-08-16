@@ -64,7 +64,7 @@ It keeps happening. [Hidden Slack channel instructions exfiltrated private data 
 
 4. Workloads are stateless or explicitly stateful. Agents live in the gray zone. Files created, packages installed, env vars set, OAuth tokens, API keys, SSH keys, session cookies, all accumulating mid session. Scale to zero? Snapshot captures all of it. Keys in memory, keys on disk, keys in env. Restore later and creds come back, maybe expired, maybe not, sitting in whatever storage holds your snapshots. Nobody talks about this enough and its scary.
 
-5. One workload, one trust boundary. One container, one service, one IAM role, nice and clean. One agent session might hit GitHub with a PAT, Postgres with DB creds, S3 with AWS keys, Slack with a bot token, SMTP for email. Five blast radii in one process. Malicious `npm` postinstall script reads env? It gets everything, not just the GitHub token.
+5. One workload, one trust boundary. One container, one service, one IAM role, nice and clean. One agent session might hit GitHub with a PAT, Postgres with DB creds, S3 with AWS keys, Slack with a bot token, SMTP for email. Five blast radii in one process. Malicious `pnpm` postinstall script reads env? It gets everything, not just the GitHub token.
 
 ## What a cage actually is
 

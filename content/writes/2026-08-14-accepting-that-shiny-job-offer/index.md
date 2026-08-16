@@ -30,9 +30,11 @@ The job of engineer is solving business problem with code. But you will most pro
 
 ## Who is getting hired in this fucked up market? And how is the experience?
 
-Most jobs (that you actually want to get) are never available publicly (it's mostly useless to apply to job openings in this day and age, dont do LinkedIn open to work shit), just like most top-tier candidates are simply not available publicly to hire. It's really really [fucking hard to hire](https://paulgraham.com/hiring.html)! competent people just have too many options. and a lot of people (and companies) are shady (i am not hinting towards people not being able to explain their own resume, like literally, people do fake info). Even as a normal person, I am not joking, the number of LinkedIn DMs and emails I get on monthly basis is weird. If you are competent (publicly and anyways tech is small, people know people), founders will throw money at you like a fucking gambler.
+There is no how it get hiring tbh. Most jobs (that you actually want to get) are never available publicly (it's mostly useless to apply to job openings in this day and age, dont do LinkedIn open to work shit), just like most top-tier candidates are simply not available publicly to hire. It's really really [fucking hard to hire](https://paulgraham.com/hiring.html)! competent people just have too many options. and a lot of people (and companies) are shady (i am not hinting towards people not being able to explain their own resume, like literally, people do fake info). Even as a normal person, I am not joking, the number of LinkedIn DMs and emails I get on monthly basis is weird. If you are competent (publicly and anyways tech is small, people know people), founders will throw money at you like a fucking gambler.
 
 And dont be lured with just money (if you are a good engineer, you are making money in long run dont sweat it), pay very close attention to culture. CULTURE is the singlemost important thing that decides your experience in the company. You dont want to be that person who keeps on leaving companies in 6 months collecting stupid joining bonuses. I dont recommend taking money over culture. Just becuase the team seems technically smart, the founders are Stanford PHDs (and other things that VCs love like Olympiad medalists, and more), does not mean they are good at managing people (its really hard). I have talked to founder who were Directors and VPs at almost all big tech (FAANG+other big ones) while interviewing, and unfortunately, I haven't had much nice experience with some of them (some expect 996, some want me to forward them competing offer letters which is not something you can do tbh, some with 90days notice period, and really common one is getting late to meetings and no remorse for that at all). For some reason, I think as new grad, people consider you really desperate? I was not fortunately. I clearly had no problems clearing interviews and getting offers. Just because someone has a big title, in this capitalistic world, does not mean they have your best interests in mind. On the contrary, the new generation founders were much better as humans.
+
+So, how to work with awesome people? I am not saying how to get hired, its how to work with cool weirdos. My take is to knock on doors, often outside your league, to get access to competent people. Then, work your living ass of to be actually useful to them while being nice to work with (dont be a zombie man). Follow your heart. You will get knowledge (and some great wisdom) and relationships, and boy o boy compounding is 9th wonder of the world.
 
 Again a sidenote, the networking word is thrown around for new grads quite a lot. it just means that you meet people who at some point can do things for you (and hopefully vice versa) and making a favorable impression on them. I personally like giving conference talks. Help people, don't be a selfish jerk (especially when it comes to someone's employment, it's serious shit). If you ever can’t help someone but know someone who can, pass them to the appropriate person with a recommendation. Be a nice guy/gal. Trust and relationships compound faster than money.
 
@@ -42,21 +44,21 @@ Its a weird time for a new grad or early engineer. Companies are evaluating whet
 
 Joining a pre-PMF lab with long work weeks and equity-heavy comp is a bet that's easier to make at 24 than at 40 for obvious reasons. AI startup culture intensity filters the applicant pool before recruiting even starts.
 
+### Is AI bad for your job?
+
 ![Companies that spend more on AI also increase worker numbers](ai-adoption-headcount.png)
 
 In my experience talking to founders and interviewing at AI first companies, companies spending the most on AI are actually hiring more people, not fewer. Companies with low AI adoption are kinda stuck. They are genuinely more open to hiring early grads than traditional companies. The reasoning is simple. If you are building with AI from day one, you want people who grew up with these tools, not people who need to unlearn 15 years of habits. A new grad who has been prompting models since freshman year appears more valuable than a senior engineer who still thinks of AI as a fancy autocomplete.
 
 AI company recruiting overindexes on cracked talent from new grads, PhD dropouts, and competitive-programming talent pools. They are also running AI-native in ways that require far fewer of the functions and levels that skew older folks.
 
+### What are startups hiring rn thinking?
+
 When it comes to research startups (labs), they go two ways from what I have seen :
 * Credentialmaxxers - hire PHDs, deepmind, FAIR, etc folk. High profile people. THey most probably wanna do novel pretraining architectures, new maths, you get the point.
 * Rigourmaxxers - hire excellent engineers and hand them research problem and then pray to god. Nous Research literally started with a bunch of Discord buddies! Post-training, RL, envs, evals, harness, data pipelines, and more and mostly bound by experiments, not mathematical derivations. This throughput is kindof an engineering trait.
 
 But the problem is, these AI first companies work you into the ground. The pace is relentless, they are tokenmaxxing to the moon. Ship fast, iterate faster, burn through problems at a rate that would make a traditional company's head spin. I have talked to friends at AI startups who describe it as exhilarating for the first six months and exhausting by month nine. The burnout rate is real. When every engineer is expected to do the work of three because AI is supposed to multiply their output, the pressure compounds. *You are not just competing with other engineers. You are competing with the theoretical version of yourself that the founders imagined when they said AI would 10x productivity.*
-
-The tradeoff is stark. Traditional companies are not hiring new grads much. AI first companies are hiring them, but burning them out fast. Neither option is great. But at least with the AI first path, you are building skills that will matter in five years. The traditional path might be more sustainable, but good luck finding a traditional company that will take a chance on you right now.
-
-Karpathy built a [US Job Market Visualizer](https://karpathy.ai/jobs/) scoring 342 occupations by AI exposure. Software developers score 9 out of 10. But a high score does not mean the job disappears. Demand could grow as each developer becomes more productive. The takeaway is not that software engineering is dying, its just being hit first. It is being reshaped faster than almost any other profession, i.e other crafts are gonna get hit soon as the tech matures (opportunity alert, CS + domain knowledge is gonna be lit, so take that EE, ME, BSBE, ES, pure sciences, and more cool things, dont be a CS maxxer). If you are not adapting, you are falling behind. If you are adapting, you are becoming more valuable than ever tbh.
 
 They all want top-tier engineers. As per my observations, a good engineer :
 * Uses AI to learn before going to a human. And ideally never needs to be taught the same thing twice
@@ -111,31 +113,11 @@ The tech sector, which built its global dominance on hiring smartass 22 year old
 
 Stepping back and reflecting now at the start of 2026, this feels like a real inflection point. Compensation is no longer just a function of level, title, or geography. It is increasingly a function of how capital intensive your company is, how scarce the talent is, and how much leverage a single individual can exert on that capital.
 
-## LUCK and its anti
+### Failure modes
 
-Luck really matters in life man! Try to make yourself more lucky. Have high AGENCY. Just be bad at making excuses, there are no ends to buts in life tbh. Just get what you want out of life. Intensity at right times have exponential value. *An underrated aspect of hardwork is that it induces trust before results.* Reliability as a human being goes a long way. You can engineer luck sometimes. Everybody at the end has is a salesperson. We are just selling different things. Its the magnitude of achievements that matter more than frequency of achievements, so take those audacious projects.
-
-But i cant neglect that there is bad luck as well. Its when you are doing everything right, but getting dragged out due to factors beyond your control. This is really common in 2026. People complanining about no luck factor are sitting at 0, which is atleast better than bad luck.
-
-After Meta layoofs, zuck apologized, but people pay with their lives. Losing their paycheck, healtcare, visa (lord help US immigrants), years of career momentum, etc. The leaders dont take accountability of their actions. [Meta is literally involved in child sexual abuse in India?!](https://www.nytimes.com/2026/07/07/world/asia/india-meta-child-abuse-imagery.html) No remorse I guess.
-
-### There are severe location advantages
-
-The best job markets are generally in US/UK. If you are based out of New Zealand, its hard for you to land impactful roles. Immigration is a horrendous challenge in 2026! For example, if you are in Swiss studying in ETH Zurich, there are strict laws for remote work (given you wanna work at US/UK based firms are there are comparatively less companies in swiss). So, if possible, stay in US/UK/Europe to maximize your opportunity surface area. India also has a really nice job market for SWE at the top of the hierarchy.
-
-![Global senior SWE total compensation by country](global-senior-swe-compensation.png)
-
-![European SWEs new offer pay ranges by country](european-swe-compensation.png)
-
-For me, joining Sqwish AI in the UK made sense because of the EMI tax benefits, the access to the UK tech ecosystem, and the fact that early stage startups in the UK can offer competitive packages when you factor in the equity upside. The nominal salary might be lower than a US offer, but the tax treatment on equity is genuinely better. And being in UK means I am in the same timezone as most of Europe, which matters for an early stage company building relationships across the continent.
-
-### The remote work problem
-
-![Remote work became a junior tax](remote-work-junior-tax.png)
-
-I decided to join onsite for a reason. There is a price to working remotely, and that price is not the same at every level. When you are early in your career, you are harder to evaluate without in person signals. Your output is more tied to your environment. Mentorship happens through osmosis, watching how senior people behave, how they handle meetings, how they debug problems, how they navigate politics. That kind of learning does not transfer well over Zoom tbh. The career advice buried in this is simple. Early on, being in office is not just a financial decision, it's a compounding one.
-
-The consensus from people who study this stuff is that the first 2 to 3 years of your career are the period of maximum tacit knowledge acquisition. This is when you are building your fundamental mental models of how work happens. Fully remote during this window is a genuine disadvantage. Hybrid is fine. Fully remote is risky.
+* I deserve better than this company/role - nah man, you deserve what market gives you rn. And, this thought process is just gonna make you bitter. Dont choose to be in this state.
+* This is a boring shitty role and I am not even getting promoted, I will just collect paychecks - shortsighted. You dont get promoted cuz you dont deserve it rn. You will get it. People who try to be useful wherever they are do well in long term. ANd respect the trust people put on you. ANd, dont hold grudges. Things do make sense eventually.
+* Everyone is an idiot around me - maybe they are? or you are going to discover that your worldview is wrong. But, you can learn from everyone. And idiots have surprised me more than smart people a lot of times.
 
 ## Interviewing
 When you interview as a new grad, you don't have much leverage, unfortunately. Most of the time, you will be lowballed. Even if you have a lot of internships and very good work experience, it's not really considered very seriously. As a new grad, I have given:
@@ -152,7 +134,7 @@ I have literally built god knows what, 10,000 QPS distributed systems, agent san
 
 Almost all the hiring managers, the founders, CEOs, and CTOs shout out of their lungs that they want the best talent, that they want the smartest people, the top 1% of engineers and whatnot. To be very frank and very honest, most of these people themselves are not that smart, they are very normal people with a lot of privilege and the right place at the right time effect. I don't know why software engineering has such ego issues. I know some guys in aerospace and some biotech folks who are extremely competent (they are translating signals from brains to help patients speak, truly noble use of AI), but you will never see them speaking such bullshit with such deep confidence. I guess its VC language. I have talked to people who consider themselves humble, which is paradoxical as a truly humble individual simply cannot internalize that they are humble, otherwise humility will become another garden that ego waters, and indeed a beautiful looking garden it would be.
 
-## The research scientist premium
+## The research premium
 
 I have a few friends who finished their PhDs recently. One of them walked into an industry job with zero prior work experience and started earning what I would make after 5 years as a software engineer. No internships, no industry connections whatsoever, just a dissertation and some papers. Apart from that he lived in Zurich which is such a beautiful place. Man I am jealous. 
 
@@ -184,7 +166,7 @@ But keep in mind, [an academic brain is quite different from a founder's brain a
 
 ## New unicorn FDEs
 
-One AI company builds forward deployed engineering and then everyone decides they need an FDE team too. Forward deployed engineering works when your contracts are seven figures and integration takes 6+ months. It's unlikely a fit it you're selling a product at $20/month.
+One AI company builds forward deployed engineering and then everyone decides they need an FDE team too. Forward deployed engineering works when your contracts are seven figures and integration takes 6+ months. It's unlikely a fit it you're selling a product at $20/month. Its just unending tech hype.
 
 And all the best to people hiring FDEs! The overlap between a great engineer and someone you’d confidently put in front of a customer is too small. The tech worlds hottest new role is hardest to hire. There interview process is beyond broken.
 
@@ -242,12 +224,6 @@ At least in 2026, a startup is more stable and gives more job security compared 
 
 I am not saying to go work at startups. There are [tradeoffs](https://danluu.com/startup-tradeoffs/). But there is no shame in doing that if your offer from Oracle got revoked suddenly. I know people laid of from Microsoft XBox team who are unwilling to work at startup whatsoever. They are kinda scared as they have never functioned in an env thats intense (MSFT used to be chill mostly, people would literally go there to retire). Its better to be employed, then take a stupid masters in US hoping that you will do better next time. Maybe you look desperate when you join startups, but indeed [startups are act of some desperation](https://blog.eladgil.com/p/startups-are-an-act-of-desperation).
 
-## Too much talking
-
-Dont believe in verbal confirmations, sweet talks, we are gonna be a generational company, we are elite and hire from MIT, Oxford, Harvard, IITs only (this is shit practice, dont be too proud over past achievements, there is only the present). I mean I am not joking every US founder repeats the same script, it's the same damn thing repeated over and over again. Understand what you are signing up for. Like genuinely, take time to understand. Its better that you intern at the company to see what there culture is actually like, and then sign full time offer if possible. This is hard and anxiety driven process, but read the shit paperwork that they are giving, and [ask howsoever stupid questions that you want to ask from them](https://jvns.ca/blog/2013/12/30/questions-im-asking-in-interviews/).
-
-I know lot of junior and mid career people thinking stock options are gonna make them rich if they join Series A+. They are up for a rude awakening. Joining a startup (at any bloody stage) is like buying a lottery ticket (or even less, a scratch off ticker that you never really get to scratch). Those who join Series B+ are facing as much uncertainity as pre-seed employees in 2026. Joining at hypergrowth phase guarantees nothing. So, dont fall for the sweet talks.
-
 ### Everything is negotiable
 
 Engineers with high perceived value make more than those with low perceived value. So, network (and write interesting blogs, so that people come into your emails and DMs offering you an interesting roles, not just Amazon HR DMs). People working in high-cost areas typically make more than people in low-cost areas. People who are [skilled in negotiation](https://www.kalzumeus.com/2012/01/23/salary-negotiation/) make more than those who are not. 
@@ -256,7 +232,7 @@ Overconfidence (not uncontrolled ego) is somewhat a virtue if used consciously. 
 
 Now, practically, some companies want you to send them competing offer letters. They are shit HRs (or founders), and without second thought run in opposite direction, if possible. Some ask for previous salary slips to find out your market value. Ideally, you should not send them your competing offers. If they are from some famous companies like Coinbase, Google, etc they already know the numbers. But, if people are asking you to forward sensitive emails, you get the culture of the company. Look for better options.
 
-## The equity game
+### The equity game
 
 This is a complex game, and lack of information here can mess you up.
 
@@ -277,8 +253,6 @@ But here is the catch. Not every company can play this game. To offer equity hea
 The companies stuck in the bottom left of that chart, traditional enterprises and defense contractors, are not there because they are cheap. They are there because they cannot credibly offer equity that anyone would value. A 0.01 percent stake in a company with no growth story is worth nothing in the minds of people. So they compete on base salary, which puts them in a narrow band, which means they can never reach the total comp numbers that equity heavy companies can.
 
 This kindof creates a sorting mechanism. The engineers who understand equity and believe in a company's trajectory will take the equity heavy offer. The engineers who need cash now or do not trust the equity story will take the higher base offer. Neither is wrong at all, the startup person is trying to gamble. But the equity heavy path is where the outlier outcomes live, positive and mostly negative.
-
-### in trenches
 
 Startup equity fails in a few predictable ways.
 
@@ -335,13 +309,42 @@ If you do only three things, reconcile your percentage against a fully diluted c
 
 So when you are evaluating an offer, do not just look at the total comp number. Look at the mix. A 400K offer that is 60 percent equity is a very different bet than a 350K offer that is 80 percent cash. The first one is a bet on the company. The second one is a paycheck. Both are valid. But know which one you are taking.
 
-## Some notes on hiring in India in 2026 
+## Some notes on hiring 
 
-This is from my personal experience being in India, so take it with a grain of salt.
+Great people (for you specifically) are rare, and have options. And if they reject you, dont be mad at them (its silly that I am saying this). Maybe its not a great fit right now, but people change and grow, and it might be a great fit later (or sometimes customer). Or you work for them after some years.
+
+Next about India. This is from my personal experience being in India, so take it with a grain of salt.
 * There is abundace of job. Like, really good enery especially in Banglore.
 * The early engineers are totally world class! If you know how to hire, you should spin up junior teams. I might be a bit parital, but the ambitious juniors are rocking
 * Unfortunately, world class seniors/staffs/EMs and + are rare breed, so spinning up engineering orgs for scale is difficult. Most of these people ended up working in some grunt org, never did any foundational work, and never realized their potential.
 * Culture issue is there. Meritocracy hasent creeped in yet, its seniority all the way. I am not sure what to do about this.
+
+### There are severe location advantages
+
+The best job markets are generally in US/UK. If you are based out of New Zealand, its hard for you to land impactful roles. Immigration is a horrendous challenge in 2026! For example, if you are in Swiss studying in ETH Zurich, there are strict laws for remote work (given you wanna work at US/UK based firms are there are comparatively less companies in swiss). So, if possible, stay in US/UK/Europe to maximize your opportunity surface area. India also has a really nice job market for SWE at the top of the hierarchy.
+
+![Global senior SWE total compensation by country](global-senior-swe-compensation.png)
+
+![European SWEs new offer pay ranges by country](european-swe-compensation.png)
+
+For me, joining Sqwish AI in the UK made sense because of the EMI tax benefits, the access to the UK tech ecosystem, and the fact that early stage startups in the UK can offer competitive packages when you factor in the equity upside. The nominal salary might be lower than a US offer, but the tax treatment on equity is genuinely better. And being in UK means I am in the same timezone as most of Europe, which matters for an early stage company building relationships across the continent.
+
+### The remote work problem
+
+![Remote work became a junior tax](remote-work-junior-tax.png)
+
+I decided to join onsite for a reason. There is a price to working remotely, and that price is not the same at every level. When you are early in your career, you are harder to evaluate without in person signals. Your output is more tied to your environment. Mentorship happens through osmosis, watching how senior people behave, how they handle meetings, how they debug problems, how they navigate politics. That kind of learning does not transfer well over Zoom tbh. The career advice buried in this is simple. Early on, being in office is not just a financial decision, it's a compounding one.
+
+The consensus from people who study this stuff is that the first 2 to 3 years of your career are the period of maximum tacit knowledge acquisition. This is when you are building your fundamental mental models of how work happens. Fully remote during this window is a genuine disadvantage. Hybrid is fine. Fully remote is risky.
+
+
+## LUCK and its anti
+
+Luck really matters in life man! Try to make yourself more lucky. Have high AGENCY. Just be bad at making excuses, there are no ends to buts in life tbh. Just get what you want out of life. Intensity at right times have exponential value. *An underrated aspect of hardwork is that it induces trust before results.* Reliability as a human being goes a long way. You can engineer luck sometimes. Everybody at the end has is a salesperson. We are just selling different things. Its the magnitude of achievements that matter more than frequency of achievements, so take those audacious projects.
+
+But i cant neglect that there is bad luck as well. Its when you are doing everything right, but getting dragged out due to factors beyond your control. This is really common in 2026. People complanining about no luck factor are sitting at 0, which is atleast better than bad luck.
+
+After Meta layoofs, zuck apologized, but people pay with their lives. Losing their paycheck, healtcare, visa (lord help US immigrants), years of career momentum, etc. The leaders dont take accountability of their actions. [Meta is literally involved in child sexual abuse in India?!](https://www.nytimes.com/2026/07/07/world/asia/india-meta-child-abuse-imagery.html) No remorse I guess.
 
 ## Me?
 
@@ -349,8 +352,12 @@ Personally, I had very competitive offers in India. I actually have taken a pay 
 
 Choosing the right company is very important now, and its extremely hard as well. Its time to accelerate. We don't know what the next 6 months will look like, and I cant even imagine the next decade. Its a quantum leap that humans are going to make with AI. Just make sure you understand what trade off you are actually making.
 
+I play with asymmetric opportunities all the time.
+
 ## Relax
 
 At the end, to get hired, be that Waterloo guy (☝ ՞ਊ ՞)☝ 
+
+Karpathy built a [US Job Market Visualizer](https://karpathy.ai/jobs/) scoring 342 occupations by AI exposure. Software developers score 9 out of 10. But a high score does not mean the job disappears. Demand could grow as each developer becomes more productive. The takeaway is not that software engineering is dying, its just being hit first. It is being reshaped faster than almost any other profession, i.e other crafts are gonna get hit soon as the tech matures (opportunity alert, CS + domain knowledge is gonna be lit, so take that EE, ME, BSBE, ES, pure sciences, and more cool things, dont be a CS maxxer). If you are not adapting, you are falling behind. If you are adapting, you are becoming more valuable than ever tbh.
 
 and relax, take care of yourself. This is a bad time for most countires, let alone individuals. Thank god we are not in WW3 or something. Dont let go of your hobbies, travel time to time to relax, and live life. Its the only life that you have got. I know its easier said than done, but I am writing this for myself and you, and hopefully we both will succeed in our own ways. Jeff Dean used to be quite active while being a top-tier engineer.
