@@ -1,11 +1,11 @@
 +++
-title = "Computer Science"
+title = "STEM"
 date = 2024-07-12
 in_search_index = false
 
 +++
 
-Well, I used to hop around and read many CS books for passing my time in boring undergrad classes. It was fun, and I am not the best sort of a student. Here I am listing my favorite reads till now and, what and why would I pick them up for if I wanted to read again. They have helped me enjoy in the midst of boring lectures in IITK and I want to sincerely thank the authors for putting in the work. Also, I have shared the CS lectures I watched to grasp the concepts better so that people can have reference material and broader understanding of the interesting topics. The best way to learn these concepts is to implement some intriguing idea that you have while slowly and sensually reading these beauties!
+Well, I used to hop around and read many STEM books for passing my time in boring undergrad classes. It was fun, and I am not the best sort of a student. Here I am listing my favorite reads till now and, what and why would I pick them up for if I wanted to read again. They have helped me enjoy in the midst of boring lectures in IITK and I want to sincerely thank the authors for putting in the work. Also, I have shared the lectures I watched to grasp the concepts better so that people can have reference material and broader understanding of the interesting topics. The best way to learn these concepts is to implement some intriguing idea that you have while slowly and sensually reading these beauties!
 
 *The resources are in no particular order, I just enjoyed them, and you might also love them!*
 
@@ -18,6 +18,7 @@ Reads:
 * [Coding is Boring, Engineering isn't](https://thesquareplanet.com/blog/coding-is-boring-engineering-isnt/)
 * [Why Machines Learn](https://www.amazon.in/Why-Machines-Learn-Elegant-Behind/dp/0593185749)
 * [Building Modern Computers from first principles](https://www.nand2tetris.org/)
+* [Image Compression](https://www.makingsoftware.com/chapters/image-compression) (Making Software)
 
 Lectures:
 
@@ -29,6 +30,7 @@ Lectures:
 ### Data Structures and Algorithms
 Reads:
 * [Introduction to Algorithms](https://www.amazon.com/Introduction-Algorithms-fourth-Thomas-Cormen/dp/026204630X/ref=sr_1_1?crid=2IHAGR7IHM0QX&keywords=introduction+to+algorithms&qid=1700927429&sprefix=introduction+%2Caps%2C349&sr=8-1)
+* [Algorithms](https://jeffe.cs.illinois.edu/teaching/algorithms/) (Jeff Erickson)
 * [The Algorithm Design Manual](https://mimoza.marmara.edu.tr/~msakalli/cse706_12/SkienaTheAlgorithmDesignManual.pdf)
 * [Grokking Algorithms](https://www.amazon.com/Grokking-Algorithms-illustrated-programmers-curious/dp/1617292230/ref=sr_1_1?crid=12W6C5C7TSJ9S&keywords=grokking+algorithm&qid=1700928477&sprefix=grokking+%2Caps%2C373&sr=8-1)
 
@@ -36,6 +38,7 @@ Lectures:
 
 * [Introduction to Algorithms](https://www.youtube.com/playlist?list=PLUl4u3cNGP61Oq3tWYp6V_F-5jb5L2iHb)
 * [Design and Analysis of Algorithms](https://www.youtube.com/playlist?list=PLUl4u3cNGP6317WaSNfmCvGym2ucw3oGp)
+* [Graph Theory](https://www.youtube.com/playlist?list=PLDV1Zeh2NRsDGO4--qE8yH72HFL1Km93P)
 
 Just go [Neetcode](https://neetcode.io/) for those stupid Leetcode Medium/Hards that you are going to get in your interviews. Leetcode preparation is unnecessary if you don't want to work in Big Tech giants, but deep knowledge of Data Structures and Algorithms is crucial for crafting clever software!
 
@@ -49,9 +52,20 @@ Reads:
 * [Linux Kernel Development](https://www.amazon.com/Linux-Kernel-Development-Robert-Love/dp/0672329468/ref=sr_1_1?crid=YVYXWIEK6RCB&keywords=linux+kernel+development&qid=1700928821&sprefix=linux+kernel+%2Caps%2C415&sr=8-1)
 * [The Linux Programming Interface](https://www.amazon.com/Linux-Programming-Interface-System-Handbook/dp/1593272200/ref=sr_1_1?crid=6CDGSVTUTZ34&keywords=the+linux+programming+interface&qid=1700928931&sprefix=the+lin%2Caps%2C438&sr=8-1)
 * [Advanced Programming in UNIX Environment](https://www.amazon.com/Advanced-Programming-UNIX-Environment-3rd/dp/0321637739/ref=sr_1_1?crid=AU7DFIOPZOAC&keywords=advanced+programming+in+the+unix+environment&qid=1700929014&sprefix=advanced+program%2Caps%2C452&sr=8-1)
+* [Evolution of the Unix System Architecture](https://ieeexplore.ieee.org/document/8704965)
 * [What every programmer should know about Memeory!](https://people.freebsd.org/~lstewart/articles/cpumemory.pdf)
+* [Data Access Patterns That Makes Your CPU Really Angry](https://blog.weineng.me/posts/slowest_add/)
+* [Modern Microprocessors: A 90-Minute Guide](https://www.lighterra.com/papers/modernmicroprocessors/)
+* [Algorithms for Modern Hardware](https://en.algorithmica.org/hpc/)
+* [Code Optimization](https://cvw.cac.cornell.edu/code-optimization) (Cornell Virtual Workshop)
+* [Optimization Techniques for GPU Programming](https://dl.acm.org/doi/10.1145/3570638)
+* [GPU Glossary](https://modal.com/gpu-glossary)
 * [An incremental approach to Compiler construction](http://scheme2006.cs.uchicago.edu/11-ghuloum.pdf)
+* [Introduction to the Dependency Graph](https://www.tweag.io/blog/2025-09-04-introduction-to-dependency-graph/)
+* [Assembly Language Programming on ARM64](https://github.com/pkivolowitz/asm_book)
 * [What is Systems Programming](https://willcrichton.net/notes/systems-programming/)
+* [Putting the "You" in CPU](https://cpu.land/)
+* [How do breakpoints even work?](https://interrupt.memfault.com/blog/cortex-m-breakpoints)
 * [Intro to Concurrency](https://www.netanel.dev/concurrency) and [Tree Structured Concurrency](https://blog.yoshuawuyts.com/tree-structured-concurrency/#what-is-structured-concurrency)
 * [Seven Concurrency Models in Seven Weeks](https://www.oreilly.com/library/view/seven-concurrency-models/9781941222737/)
 * [Computer Systems Security](https://www.youtube.com/playlist?list=PLUl4u3cNGP62K2DjQLRxDNRi0z2IRWnNh)
@@ -66,6 +80,7 @@ Lectures:
 *  [Computer System Engineering](https://www.youtube.com/playlist?list=PL6535748F59DCA484)
 * [Concurrent Programming KAISTT CS341](https://www.youtube.com/playlist?list=PL5aMzERQ_OZ9j40DJNlsem2qAGoFbfwb4)
 * [Performance Engineering for Software Systems](https://www.youtube.com/playlist?list=PLUl4u3cNGP63VIBQVWguXxZZi0566y7Wf)
+* [The World's Most Important Machine](https://www.youtube.com/watch?v=MiUHjLxm3V0)
 
 ### Networking 
 
@@ -193,19 +208,36 @@ Lectures:
 * [Introduction to Computational Thinking and Data Science](https://www.youtube.com/playlist?list=PLUl4u3cNGP619EG1wp0kT-7rDE_Az5TNd)
 * [Intro to Machine Learning](https://youtube.com/playlist?list=PLoROMvodv4rMiGQp3WXShtMGgzqpfVfbU&si=YcK9DPmQUawE2jrv)
 * [Deep Learning](https://www.youtube.com/playlist?list=PLgPbN3w-ia_PeT1_c5jiLW3RJdR7853b9)
+* [Transformers and Large Language Models](https://cme295.stanford.edu/)
+* [Diffusion and Large Vision Models](https://cme296.stanford.edu/)
+* [Deep Reinforcement Learning](https://www.youtube.com/playlist?list=PLKq1TCpsv3Y4)
 * [Introduction to Optimization](https://www.youtube.com/playlist?list=PLxdnSsBqCrrHo2EYb_sMctU959D-iPybT)
 * [Convex Optimizations](https://www.youtube.com/playlist?list=PLvJ08ASPN6JPOsN1O91T0uVA-U7jfYBKU)
 * [Differential Privacy in Machine Learning](https://youtube.com/playlist?list=PLmd_zeMNzSvRRNpoEWkVo6QY_6rR3SHjp&si=EvQVc1VEYKQyX-aJ)
 * [MLSys Seminar](https://www.youtube.com/playlist?list=PLSrTvUm384I9PV10koj_cqit9OfbJXEkq)
+* [Machine Learning Hardware and Systems](https://www.youtube.com/playlist?list=PL0mFAhrXqy9CuopJhAB8GVu_Oy7J0ery6)
+* [Nvidia's H100 GPU](https://www.youtube.com/watch?v=MC223HlPdK0)
 * [AI for Sciences and Engineering](https://www.youtube.com/playlist?list=PLJkYEExhe7rYFkBIB2U5pf_RWzYnFLj7r)
 * [Physics Informed Machine Learning](https://www.youtube.com/playlist?list=PLuD_SqLtxSdW5aasHsFTNw_MrZrtu5tZ3)
+* [Intro to Audio Processing for Deep Learning](https://www.youtube.com/watch?v=55QWsm1itKo)
+* [Deep Speech 2: Automatic Speech Recognition](https://www.youtube.com/watch?v=725Og6eyWCc)
 
 Reads:
+* [Introduction to Artificial Intelligence](https://inst.eecs.berkeley.edu/~cs188/textbook/) (CS 188)
 * [Deep Learning](https://www.deeplearningbook.org/)
+* [Speech and Language Processing](https://web.stanford.edu/~jurafsky/slp3/) (Jurafsky & Martin)
+* [Introduction to Information Retrieval](https://nlp.stanford.edu/IR-book/information-retrieval-book.html) (Manning, Raghavan & Schütze)
+* [Fuzzy Search](https://www.meilisearch.com/blog/fuzzy-search)
+* [A Recipe for Training Neural Networks](https://karpathy.github.io/2019/04/25/recipe/)
+* [A Visual Guide to Quantization](https://newsletter.maartengrootendorst.com/p/a-visual-guide-to-quantization)
+* [How to Scale Your Model](https://jax-ml.github.io/scaling-book/)
+* [Precision, Recall, and F-measures](https://scikit-learn.org/stable/modules/model_evaluation.html#precision-recall-and-f-measures)
+* [What Is Accuracy, Precision, Recall, and F1 Score?](https://labelf.ai/blog/what-is-accuracy-precision-recall-and-f1-score)
 
 ### Programming Languages
 
 Books:
+* [Control Structures in Programming Languages](https://xavierleroy.org/control-structures/book/index.html) (Xavier Leroy)
 * [Rust Atomics and Locks](https://marabos.nl/atomics/)
 * [Rust for Rustaceans](https://rust-for-rustaceans.com/)
 * [Concurrency in Go](https://www.oreilly.com/library/view/concurrency-in-go/9781491941294/)

@@ -10,7 +10,7 @@ Harsh Pratap Singh is a competent software engineer and researcher focused on Di
 
 - https://harsh-ps-2003.github.io/ - Home page with bio and links
 - https://harsh-ps-2003.github.io/writes/ - Technical blog posts about engineering and research
-- https://harsh-ps-2003.github.io/reads/ - Curated reading lists for CS, Philosophy, Startups, and Finance
+- https://harsh-ps-2003.github.io/reads/ - Curated reading lists for STEM, Worldly, and Otherworldly
 - https://harsh-ps-2003.github.io/resume/ - Professional experience and work history
 
 ## Writes
@@ -36,10 +36,9 @@ Harsh Pratap Singh is a competent software engineer and researcher focused on Di
 ## Reading Lists
 
 - https://harsh-ps-2003.github.io/reads/ - Index of curated reading lists
-- Computer Science - Systems, databases, distributed computing
-- Philosophy - Epistemology, ethics, metaphysics
-- Startups - Building companies, product development
-- Finance - Wealth, investing, economics
+- STEM - Systems, databases, distributed computing, cryptography, ML
+- Worldly - Startups, wealth, society, and institutions
+- Otherworldly - Fiction, philosophy, and life
 
 ## Contact
 
