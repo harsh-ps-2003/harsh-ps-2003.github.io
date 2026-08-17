@@ -19,10 +19,9 @@ flowchart TB
         
         subgraph reads ["reads/"]
             reads_index["_index.md<br/>(Section intro)"]
-            cs["cs/index.md"]
-            philosophy["philosophy/index.md"]
-            startups["startups/index.md"]
-            finance["finance/index.md"]
+            stem["stem/index.md"]
+            worldly["worldly/index.md"]
+            otherworldly["otherworldly/index.md"]
         end
         
         resume["resume/_index.md<br/>(Single page)"]
@@ -195,7 +194,7 @@ Your content here...
 
 ### New Reading List Entry
 
-Add to existing category in `content/reads/cs/index.md`, `content/reads/philosophy/index.md`, etc.
+Add to existing category in `content/reads/stem/index.md`, `content/reads/worldly/index.md`, `content/reads/otherworldly/index.md`, etc.
 
 ### New Navigation Section
 
@@ -223,10 +222,9 @@ harsh-ps-2003/
 │   │   └── */index.md       # Blog posts (24 posts)
 │   ├── reads/
 │   │   ├── _index.md        # Section intro
-│   │   ├── cs/index.md
-│   │   ├── philosophy/index.md
-│   │   ├── startups/index.md
-│   │   └── finance/index.md
+│   │   ├── stem/index.md
+│   │   ├── worldly/index.md
+│   │   └── otherworldly/index.md
 │   └── resume/_index.md     # Resume page
 ├── templates/
 │   ├── base.html
