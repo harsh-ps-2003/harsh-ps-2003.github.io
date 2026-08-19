@@ -6,11 +6,11 @@ in_search_index = false
 
 ## Education
 
-*Master of Science* in *Computer Science* from **Georgia Institute of Technology**                                                              
-*Bachelor of Science* in *Earth Sciences* (major), *Computer Science* (minors) and *Philosophy* (minor) at **Indian Institute of Technology, Kanpur**
+*Master of Science* in **Computer Science** with specialization in Machine Learning from *Georgia Institute of Technology*                                                              
+*Bachelor of Science* in *Earth Sciences* (major), *Computer Science* (minor) and *Philosophy* (minor) at **Indian Institute of Technology, Kanpur**
 
-During my undergrad years, I had a very curiosity-driven approach to STEM and I fundamentally pursued Computational Sciences with some Philosophy. I enjoyed inter-disciplinary research quite a lot! Got 2 papers published :
-* 
+During my undergrad years, I had a very curiosity-driven approach to STEM and I fundamentally pursued Computational Sciences with some Philosophy. I enjoyed inter-disciplinary research quite a lot! Got 2 first authored papers published :
+* [Ordinary Screens Can Accept the Wrong CPML Map](tab:) in NeurIPS AI for Science Workshop
 * 
 
 Undergrad was very special time of my life! I cherish my alma-mater way beyond the courses I took there; literally did all the cool courses I could find in STEM! I spent my time there figuring out what I actually wanted to do with my life! Exploring life was my first priority, studies came later (so a fuked up GPA). Did some solo tripping asking random people to take my pics, roamed in late winter nights with drunken girls, played some music here and there, and felt inferior to some pure math researchers (no to quants), and more ʕ•ᴥ•ʔ
