@@ -271,15 +271,21 @@ Then there is the exit that pays everyone except you. Employees hold common stoc
 
 Your spreadsheet uses headline valuation times your percentage. The preference stack is what is left after investors get paid back first. [Marshall Hargrave's walkthrough](https://medium.com/startup-insider-edge/your-startup-equity-is-probably-worth-less-than-you-think-heres-the-math-cf7471f28669) and [this first person account of exercising startup options](https://www.productlessons.xyz/article/how-stock-options-for-employees-work) show the same gap, paper wealth at grant, then strike cost plus tax at exercise, then preferences at exit.
 
-The board are the only people who decide what type of exit happens, and what employees get. reseach the board of the startup, i would say more than PMF! even if company does well, greedy board can prevent payout to people who do the real grunt work.
-
-The founder will choose the board, so the ethics of founder is non negotiable. there are startups employees who found out that their founders made a special deal (secondary deal) where they got large perosonal payout while other employees get nothing (preference stack left nothing)
-
 The grant also looks bigger than it is. Your strike price comes from a 409A valuation of common stock, not the preferred price from the last round. [Startup Law Blog's 409A guide](https://www.thestartuplawblog.com/409a-valuations-what-every-startup-needs-to-know/) and [409A valuation benchmarks](https://409a-valuation.com/insights/409a-vs-preferred-price) put typical common FMV at 25 to 60 percent below preferred, wider at seed and narrower pre IPO.
 
 Zoom out to a career and it gets worse. [Wayne Morris modeled the odds](https://rvnu.substack.com/p/rvnu-030-the-startup-equity-reality) using NVCA venture monitor data, 10 4-year startup stints over 40 years gives roughly a 60 percent chance of never seeing a $100k+ equity payout, while below market salary traded for those options can easily total $400k in foregone cash. 
 
 Looks pretty shitty if you are working for US-based startups tbh.
+
+## Trust
+
+The board are the only people who decide what type of exit happens, and what employees get. reseach the board of the startup really really well. even if company does well, greedy board can prevent payout to people who do the real grunt work. and big credentials doesnt make someone a great human being.
+
+The founder will choose the board, so the ethics of founder is non negotiable. there are startups employees who found out that their founders made a special deal (secondary deal) where they got large perosonal payout while other employees get nothing (preference stack left nothing). A lot of people dont recognize the sheer number of ways a founder can screw you! They can fire you before cliffs, not have nice exercise plans, hide company performance, do shitty 409a price management, have 0 accleration protection (your equity at buyers mercy during aquisition). Founder trust is paramount whenever you join a startup.
+
+Untrustworthy founders will lead to poor outcomes and good startups with trustworthy founders lead to brilliant outcomes. Your founders should have your back (willing to take stress for you), and ideally balls of steel. You should ideally hire a damn lawyer for cross verifying your employer contract. You founder should have a good character.
+
+One of the imp point of joining a startup is possibility of extraordinary outcomes compared to base comps. But when you are a employee (even a founding engineer), in the sale you will be last in the line. And minority shares are gamble, not an investment, you have no rights!
 
 ### UK EMI
 
