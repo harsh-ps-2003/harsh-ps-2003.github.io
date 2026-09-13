@@ -285,6 +285,10 @@ Untrustworthy founders will lead to poor outcomes and good startups with trustwo
 
 One of the imp point of joining a startup is possibility of extraordinary outcomes compared to base comps. But when you are a employee (even a founding engineer), in the sale you will be last in the line. And minority shares are gamble, not an investment, you have no rights!
 
+### Stealth
+
+Well yea some founders might feel the need to hide product and ideas for competetive reasons. But if the company is stealth, the founder has to compensate with more trust signal, as there is no public evidence of company. I havent had good experiences personally with stealth founders. Actually putting yourself out there and trying to sell something to real people is valuable and humbling exp. If someone truly believes that their idea is too good for the market, they are most probably gonna live in shock when they reveal their precious idea. Its just for looking cool on linkedin. Even Elon Musk doesnt go stealth.
+
 ### UK EMI
 
 If you are in the UK, read the grant anyway, but the tax mechanics are much kinder than US ISOs and NSOs ;)
