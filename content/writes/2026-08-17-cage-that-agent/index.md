@@ -1,6 +1,6 @@
 +++
 title = "cage that damn agent!"
-date = 2026-08-17
+date = 2026-09-14
 draft = false
 description = "Guardrails are not a cage. Permissions, kernel isolation, Copy Fail, snapshot secrets, confidential computing, MCP gateways, and defense in depth for agents that run code you never wrote."
 
@@ -74,13 +74,13 @@ One agent session might hit GitHub with a PAT, Postgres with DB creds, S3 with A
 
 Its defense in depth, and most teams skip half the layers and wonder why shit blows up.
 
-* Identity. Who is this session acting as? User OAuth token, not some shared god account obviously.
-* Policy engine. Is this action allowed for this task? e.g. no prod writes during autonomous runs.
-* Sandbox. What can the process touch locally? Keep writes inside the workspace and block sensitive host paths. `/etc` is where system config and trust settings live, so write access there can change DNS, cert trust, auth behavior, or startup config for later processes. block the host docker socket too, because socket access is host control by proxy. If code can talk to Docker on the host it can start privileged containers, mount host filesystems, and escape your app level guardrails. You dont want to have that mess.
-* Network egress. Where can it call? Default deny and allowlist only the domains needed for the task, package registries, Git host, and approved APIs. Everything else should fail closed. Block cloud metadata endpoints like `169.254.169.254` (AWS IMDS), `metadata.google.internal`, and Azure metadata, because those endpoints can return temporary credentials if reachable. Without egress controls, prompt injected code can exfiltrate secrets with a single outbound request.
-* Tool gateway. What backend operations are permitted? Use JIT scoped tokens so credentials are minted only when needed, with the smallest possible permissions, and short expiry. If a token leaks, the blast radius is smaller and the token dies quickly. Then validate every tool argument against policy. Which repo, which tenant, which action, and which parameter ranges are allowed. Otherwise the model can call a real tool with wrong but syntactically valid arguments and still cause damage.
-* Human gate. Which actions need explicit approval? Merge, deploy, send external email, and charge money should not happen because the model felt confident. The agent can prep the work. A human clicks yes on the irreversible part.
-* Audit log. What happened, with what args? Keep an append only event log per thread so every session has a clean timeline from prompt to tool call to side effect. Per thread matters because incidents are session scoped. You need to answer which exact conversation triggered which action, without mixing events from other runs. Also log identity, tool name, arguments, policy decision, token scope, network destinations, file diffs, and timestamps. If you only log final answers, you cannot debug or prove what happened.
+* Identity- Who is this session acting as? User OAuth token, not some shared god account obviously.
+* Policy engine - Is this action allowed for this task? e.g. no prod writes during autonomous runs.
+* Sandbox - What can the process touch locally? Keep writes inside the workspace and block sensitive host paths. `/etc` is where system config and trust settings live, so write access there can change DNS, cert trust, auth behavior, or startup config for later processes. block the host docker socket too, because socket access is host control by proxy. If code can talk to Docker on the host it can start privileged containers, mount host filesystems, and escape your app level guardrails. You dont want to have that mess.
+* Network egress - Where can it call? Default deny and allowlist only the domains needed for the task, package registries, Git host, and approved APIs. Everything else should fail closed. Block cloud metadata endpoints like `169.254.169.254` (AWS IMDS), `metadata.google.internal`, and Azure metadata, because those endpoints can return temporary credentials if reachable. Without egress controls, prompt injected code can exfiltrate secrets with a single outbound request.
+* Tool gateway - What backend operations are permitted? Use JIT scoped tokens so credentials are minted only when needed, with the smallest possible permissions, and short expiry. If a token leaks, the blast radius is smaller and the token dies quickly. Then validate every tool argument against policy. Which repo, which tenant, which action, and which parameter ranges are allowed. Otherwise the model can call a real tool with wrong but syntactically valid arguments and still cause damage.
+* Human gate - Which actions need explicit approval? Merge, deploy, send external email, and charge money should not happen because the model felt confident. The agent can prep the work. A human clicks yes on the irreversible part.
+* Audit log - What happened, with what args? Keep an append only event log per thread so every session has a clean timeline from prompt to tool call to side effect. Per thread matters because incidents are session scoped. You need to answer which exact conversation triggered which action, without mixing events from other runs. Also log identity, tool name, arguments, policy decision, token scope, network destinations, file diffs, and timestamps. If you only log final answers, you cannot debug or prove what happened.
 
 Skip one layer and the rest have to overcompensate. No network egress controls? Now your audit log has to detect exfiltration after the fact instead of preventing it. No sandbox? Now the tool gateway is the only thing stopping the agent from reading `/etc/shadow`. No human gate? Now you are trusting the model to never hallucinate a destructive action. Each missing layer forces the remaining ones to cover failure modes they were not designed for. Skip all of them and congrats, you are doing vibe security. Good luck with that postmortem.
 
@@ -140,7 +140,7 @@ The Linux kernel exposes [457 callable syscalls on x86_64](tab:https://syscalls.
 
 A normal web server touches 40 or 50 of those. You wrote the code, you can profile it, you can [lock the rest with seccomp](tab:https://securitylabs.datadoghq.com/articles/container-security-fundamentals-part-6/). An agent writes code at runtime and might invoke any of the 457 depending on what the LLM decided to generate. You cant build a seccomp allowlist because the code doesnt exist until it runs.
 
-Linux gives you five defense layers containers stack together. [namespaces](tab:https://man7.org/linux/man-pages/man7/namespaces.7.html), cgroups, [capabilities](tab:https://man7.org/linux/man-pages/man7/capabilities.7.html), seccomp, and LSMs. Docker uses all five. [AWS still says containers are not a security boundary](tab:https://aws.amazon.com/security/security-bulletins/rss/aws-2025-024/). Escapes land every year anyway, usually in the gaps between layers, not because namespaces are fake. [Datadogs container security fundamentals](tab:https://securitylabs.datadoghq.com/articles/container-security-fundamentals-part-3/) is worth a read if you want the longer version.
+Linux gives you five defense layers containers stack together. [namespaces](tab:https://man7.org/linux/man-pages/man7/namespaces.7.html), cgroups, [capabilities](tab:https://man7.org/linux/man-pages/man7/capabilities.7.html), seccomp, and LSMs. Docker uses all five but [AWS still says containers are not a security boundary](tab:https://aws.amazon.com/security/security-bulletins/rss/aws-2025-024/). Escapes land every year anyway, usually in the gaps between layers, not because namespaces are fake. [Datadogs container security fundamentals](tab:https://securitylabs.datadoghq.com/articles/container-security-fundamentals-part-3/) is worth a read if you want the longer version.
 
 ### Twenty years of bolted on isolation
 
@@ -162,12 +162,12 @@ No single designer. No unified threat model. No guarantee the gaps between mecha
 
 Each namespace gives a separate view of one kernel subsystem. The pattern is always the same. Namespaces change what the process sees, not what the kernel does. The view is separate, the executor is shared. Thats the architectural fact behind container escapes.
 
-* Mount (2002). Own mount table, own filesystem tree. Doesnt isolate content, and shared subtrees can propagate mounts across namespaces. Three mount related CVEs in the wild exploited exactly this.
-* PID (2008). Own PID numbering. PID 1 in container maps to something else on host. Parent namespace still sees child processes. `/proc` must be remounted or the container sees the hosts process list.
-* Network (2009). Own interfaces, routes, firewall, port space. Kernel TCP/IP stack is still shared. Abstract unix sockets live in the network namespace, not mount. [CVE-2020-15257](tab:https://research.nccgroup.com/2020/12/10/abstract-shimmer-cve-2020-15257-host-networking-is-root-equivalent-again/) exploited that gap.
-* User (2013). Maps UIDs across namespaces so root in container can be unprivileged on host. Also exposes kernel interfaces (FUSE, nftables, BPF paths) to anyone who can create a user ns. [CVE-2024-1086](tab:https://www.crowdstrike.com/en-us/blog/active-exploitation-linux-kernel-privilege-escalation-vulnerability/) needed unprivileged user namespaces to hit nf_tables. Ubuntu restricts user ns via AppArmor now. [Qualys found three bypasses in Jan 2025](tab:https://blog.qualys.com/vulnerabilities-threat-research/2025/03/27/qualys-tru-discovers-three-bypasses-of-ubuntu-unprivileged-user-namespace-restrictions).
-* UTS (2006). Hostname isolation. Low risk, not interesting for agents.
-* IPC (2006). Isolates SysV IPC. POSIX shm via `/dev/shm` still needs mount namespace help.
+* Mount (2002) - Owns mount table, own filesystem tree. Doesnt isolate content, and shared subtrees can propagate mounts across namespaces. Three mount related CVEs in the wild exploited exactly this.
+* PID (2008) - Owns PID numbering. PID 1 in container maps to something else on host. Parent namespace still sees child processes. `/proc` must be remounted or the container sees the hosts process list.
+* Network (2009) - Owns interfaces, routes, firewall, port space. Kernel TCP/IP stack is still shared. Abstract unix sockets live in the network namespace, not mount. [CVE-2020-15257](tab:https://research.nccgroup.com/2020/12/10/abstract-shimmer-cve-2020-15257-host-networking-is-root-equivalent-again/) exploited that gap.
+* User (2013)- Maps UIDs across namespaces so root in container can be unprivileged on host. Also exposes kernel interfaces (FUSE, nftables, BPF paths) to anyone who can create a user ns. [CVE-2024-1086](tab:https://www.crowdstrike.com/en-us/blog/active-exploitation-linux-kernel-privilege-escalation-vulnerability/) needed unprivileged user namespaces to hit nf_tables. Ubuntu restricts user ns via AppArmor now. [Qualys found three bypasses in Jan 2025](tab:https://blog.qualys.com/vulnerabilities-threat-research/2025/03/27/qualys-tru-discovers-three-bypasses-of-ubuntu-unprivileged-user-namespace-restrictions).
+* UTS (2006) - for hostname isolation. Low risk, not interesting for agents.
+* IPC (2006) - Isolates SysV IPC. POSIX shm via `/dev/shm` still needs mount namespace help.
 * Cgroup (2016). Virtualizes `/proc/self/cgroup` view. Actual limits come from cgroups themselves. [CVE-2024-21626](tab:https://snyk.io/blog/leaky-vessels-docker-runc-container-breakout-vulnerabilities/) leaked an fd into host cgroup fs and walked out.
 * Time (2020). Offsets monotonic clocks for CRIU checkpoint/restore. Some hardened configs disable it. People argue whether thats seven or eight namespaces.
 
@@ -225,7 +225,7 @@ Agents make every weakness above worse. Unknown code changes syscall patterns pe
 
 ## What if the kernel wasnt shared
 
-We just traced seven years of runc escapes to one architectural fact. Namespaces, cgroups, seccomp, all of it still funnels through the same host kernel and the same ~457 syscall surface. Three teams at three companies built three different alternatives. AWS shipped [Firecracker](tab:https://github.com/firecracker-microvm/firecracker). Google shipped [gVisor](tab:https://gvisor.dev/docs/). Intel (with Microsoft and Arm) shipped [Cloud Hypervisor](tab:https://github.com/cloud-hypervisor/cloud-hypervisor). Same goal, different bets about which tradeoff hurts least when the workload is an agent writing bash youve never seen.
+We just traced seven years of runc escapes to one architectural fact. Namespaces, cgroups, seccomp, all of it still funnels through the same host kernel and the same 400ish syscall surface. Three teams at three companies built three different alternatives. AWS shipped [Firecracker](tab:https://github.com/firecracker-microvm/firecracker). Google shipped [gVisor](tab:https://gvisor.dev/docs/). Intel (with Microsoft and Arm) shipped [Cloud Hypervisor](tab:https://github.com/cloud-hypervisor/cloud-hypervisor). Same goal, different bets about which tradeoff hurts least when the workload is an agent writing bash youve never seen.
 
 ### runc, the baseline youre probably on
 
