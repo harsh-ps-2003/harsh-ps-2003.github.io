@@ -1,7 +1,7 @@
 +++
 title = "cage that damn agent!"
 date = 2026-09-14
-draft = false
+draft = true
 description = "Guardrails are not a cage. Permissions, kernel isolation, Copy Fail, snapshot secrets, confidential computing, MCP gateways, and defense in depth for agents that run code you never wrote."
 
 [taxonomies]
