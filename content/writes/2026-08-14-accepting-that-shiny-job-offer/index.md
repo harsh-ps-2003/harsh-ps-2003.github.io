@@ -132,7 +132,7 @@ I have literally built god knows what, 10,000 QPS distributed systems, agent san
 
 Almost all the hiring managers, the founders, CEOs, and CTOs shout out of their lungs that they want the best talent, that they want the smartest people, the top 1% of engineers and whatnot. To be very frank, most of these people themselves are not that smart, they are very normal people with a lot of privilege and the right place at the right time effect. I don't know why software engineering has such ego issues. I know some guys in aerospace and some biotech folks who are extremely competent (they are translating signals from brains to help patients speak, truly noble use of AI), but you will never see them speaking such bullshit with such deep confidence. I guess its VC language. I have talked to people who consider themselves humble, which is paradoxical as a truly humble individual simply cannot internalize that they are humble, otherwise humility will become another garden that ego waters, and indeed a beautiful looking garden it would be.
 
-## The research premium
+## The Research World?
 
 I have a few friends who finished their PhDs recently. One of them walked into an industry job with zero prior work experience and started earning what I would make after 5 years as a software engineer. No internships, no industry connections whatsoever, just a dissertation and some weird papers. Apart from that he lives in Zurich which is such a beautiful place. Man I am jealous. 
 
@@ -140,13 +140,13 @@ I have a few friends who finished their PhDs recently. One of them walked into a
 
 A few years back, almost nobody outside of academia knew what this job was (I leterally knew only some REs in UCL who do cool physics). Now every AI company is fighting over these people like they are the last engineers on earth.
 
-What changed? The product changed. When the model is the product, the people who can make the model better become the most valuable people in the building. It is not about shipping features anymore. It is about whether your model can do something it could not do last month. The researchers who can push that boundary went from being a nice to have to being the entire competitive advantage.
+What changed? The product changed. When the model is the product, the people who can make the model better become the most valuable people in the building. It is not about only shipping features anymore (people can do it with agents fast if they are decently smart). It is about whether your model can do something it could not do last month. The researchers who can push that boundary went from being a nice to have to being the entire competitive advantage.
 
-A software engineer ships the app. A research scientist invents the thing that makes the app possible. They are the ones designing new architectures, figuring out why training is unstable, running experiments that take weeks to complete. Most of them have PhDs. Their job is to create capabilities that did not exist before, then hand those capabilities to the engineers who productionize them.
+A software engineer ships the app (for now). A research scientist invents the thing that makes the app possible. They are the ones designing new architectures, figuring out why training is unstable, running experiments that take weeks to complete. Most of them have PhDs. Their job is to create capabilities that did not exist before, then hand those capabilities to the engineers who productionize them.
 
 The pay reflects this. At every level, research scientists earn more than software engineers. A fresh PhD with no industry experience starts at what roughly what a mid level software engineer makes. By the time you get to senior levels, the gap is even wider. Research scientists are basically paid a level ahead from day one.
 
-Why so much? Two reasons. First, there are almost no people who can do this work. The pool of humans who can genuinely push the frontier on foundation models is measured in thousands globally. Maybe a few hundred at the very top. And every major lab is trying to hire from that same tiny pool. Anthropic, OpenAI, DeepMind, Meta AI. They are all bidding against each other for the same people.
+Why so much? Two reasons. First, there are almost no people who can do this work. The pool of humans who can genuinely push the frontier on foundation models is low (people with pedigree are there, not with genuine skills and insights). Maybe a few hundred at the very top. And every major lab is trying to hire from that same tiny pool. Anthropic, OpenAI, DeepMind, Meta AI. They are all bidding against each other for the same people.
 
 Second, the upside is asymmetric. If a researcher figures out the next big training trick or architecture improvement, that discovery gets baked into every product the company ships. One breakthrough can be worth billions in market value. Companies will pay absurd premiums for even a small chance at that kind of outcome. Hiring engineers scales linearly. Hiring researchers is a bet on exponential returns.
 
@@ -154,13 +154,19 @@ The numbers at the top are fuck you money. Senior researchers at frontier labs p
 
 The traditional path is a strong PhD plus internships at top labs, then a research scientist offer at graduation. Takes about 5 to 7 years from undergrad. There is also a second path where you start as a research engineer, which is more engineering focused, and transition to research scientist after a few years of strong contributions. That transition often happens informally, a tap on the shoulder rather than a formal application.
 
-Here is something that might surprise you though. Anthropic says about half their technical staff have PhDs, but plenty of brilliant colleagues never went to college. The PhD is not strictly required. What matters is whether you can do original research. If you have a strong public portfolio, open source work that gets cited, papers you published independently, that can substitute for formal credentials. The PhD signals capacity for self directed research over long time horizons. If you can demonstrate that capacity another way, the door is not closed.
+Here is something that might surprise you though. Anthropic says about half their technical staff have PhDs, but plenty of brilliant colleagues never went to college. The PhD is not strictly required. What matters is whether you can do original research. If you have a strong public portfolio, open source work that gets cited, papers you published independently, that can substitute for formal credentials. The PhD signals capacity for self directed research over long time horizons. If you can demonstrate that capacity another way, it still works.
 
 One misconception I had when I was in undergrad was that research is purely theoretical. In 2026, frontier AI research is heavily empirical. You are not sitting in a room with a whiteboard deriving equations. You are running experiments on thousands of GPUs, debugging distributed training, iterating on ideas that might take weeks to validate. The line between research and engineering has blurred a lot.
 
 For my research friends still in academia or thinking about industry, this is probably the best time to make the jump. The premium for research talent has never been higher. But I am not sure the window stays open forever. Once foundation models mature and the field shifts from capability research to deployment and optimization, the balance might shift back toward engineers. Right now though, if you can do the work, the market will pay you like it.
 
-But keep in mind, [an academic brain is quite different from a founder's brain and the transition is quite challenging](tab:https://fchaubard.github.io/academic_brain_vs_founder_brain.html).
+### To PhD or to not PhD?
+
+I have not done a PHD, i have talked to some, and worked with 3/4 PHDs maybe. so my thoughts are mostly shit, but still its my blog my rules.
+
+I have had friends in IITK tell me that they will apply for PHD as backup incase they dont get a job as SWE. I mean yeah job market is fucked, but this analogous to saying that you will do a startup if you cant find a job. Its not the less risky path that people are imagining. PHDs demand grit over a long period, and unfortunately you might realize after some years that you are a loser who cant publish tons of papers in A* conferences, and you dont wanna do this anymore. If you do PHD, you have spent years on some niche topic, and there is no guarantee that your niche is gonna get good outcomes later. You cant really forsee 5-6 years can you? Yes, people who did PHD in AI are now reaping benefits, but you cant really replicate whats done. PHD is a risky move, your entire youth is spent in a nerdy way, you sure you want that?
+
+Also keep in mind, [an academic brain is quite different from a founder's brain and the transition is quite challenging](tab:https://fchaubard.github.io/academic_brain_vs_founder_brain.html).
 
 ## New unicorn FDEs
 
