@@ -10,7 +10,7 @@ tags = ["agents", "security", "sandbox", "mcp", "isolation"]
 
 [Every model is jailbreaking these days](tab:https://www.youtube.com/watch?v=87DyyMV0kCY). I wonder when is gemini going to do that ;)
 
-3 random dude (pun intended) hacked openai with 3k dollars. 
+[3 random dude (pun intended) hacked openai](tab:https://www.hacktron.ai/blog/hacking-openai). its really fun world we are living in right now.   
 
 In my [last agent writeup](/writes/the-longer-you-chat-the-worse-your-agents-response/), I spent most of the time on context collapse, memory layers, and evals. But there is a failure mode thats the most fucked up thing ever, security failure. you gave the agent keys to the kingdom and hoped the model would be polite. haha jokes on you!
 

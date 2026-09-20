@@ -6,14 +6,15 @@ in_search_index = false
 
 ## Education
 
-*Master of Science* in **Computer Science** with specialization in Machine Learning from *Georgia Institute of Technology*                                                              
-*Bachelor of Science* in *Earth Sciences* (major), *Computer Science* (minor) and *Philosophy* (minor) at **Indian Institute of Technology, Kanpur**
+*Masters of Science* in *Computer Science* with specialization in Machine Learning from **Georgia Institute of Technology**
+> (Thesis under [Prof. Felix J. Herrmann in SLIM](tab:https://slim.gatech.edu/people/team))
 
-During my undergrad years, I had a very curiosity-driven approach to STEM and I fundamentally pursued Computational Sciences with some Philosophy. I enjoyed inter-disciplinary research quite a lot! Got 2 first authored papers published :
-* [](tab:) in NeurIPS AI for Science Workshop
-* 
+*Bachelors of Science* in *Earth Sciences* (major), *Computer Science* (minor) and *Philosophy* (minor) at **Indian Institute of Technology, Kanpur**
+> (Thesis under [Prof Dibakar Ghosal](tab:https://home.iitk.ac.in/~dghosal/Home.html) and [Prof Subhojit Roy](tab:https://www.cse.iitk.ac.in/users/subhajit/))
 
-Undergrad was very special time of my life! I cherish my alma-mater way beyond the courses I took there; literally did all the cool courses I could find in STEM! I spent my time there figuring out what I actually wanted to do with my life! Exploring life was my first priority, studies came later (fuked up GPA). Did some solo tripping asking random people to take my pics, roamed in late winter nights with drunken girls, played some music here and there, and felt inferior to some pure math researchers (no to quants), and more ʕ•ᴥ•ʔ
+During my undergrad years, I had a very curiosity-driven approach to STEM and I fundamentally pursued Computational Sciences with some Philosophy. I enjoyed inter-disciplinary research quite a lot! Got my bachelors thesis published as well [](tab:) in NeurIPS AI for Science Workshop.
+
+Undergrad was very special time of my life! I cherish my alma-mater way beyond the courses I took there, literally did all the hard cool courses I could find in STEM! I spent my time there figuring out what I actually wanted to do with my life! Exploring life was my first priority, studies came later (fuked up GPA). Did some solo tripping asking random people to take my pics, roamed in late winter nights with drunken girls, played some music here and there, and felt inferior to some pure math researchers, and more ʕ•ᴥ•ʔ
 
 I was doing internships/part-time (mostly full time effort) jobs since freshman year (throughout semesters, and still was able to get through dreaded IITK academics), and most of my time went into it, so made quite a bit of money to spend on my Master's as well (✿╹◡╹)
 
