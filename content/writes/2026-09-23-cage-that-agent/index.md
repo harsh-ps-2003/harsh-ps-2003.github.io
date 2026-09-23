@@ -16,13 +16,13 @@ In my [last agent writeup](/writes/the-longer-you-chat-the-worse-your-agents-res
 
 ## Your agent runs code you never wrote
 
-Containers, VMs, serverless, all of it was built for code a human wrote. Someone opened a PR, CI ran, ops deployed, and you know whats running because you decided what runs. multi-agent systems dont work like that. give your agent a sandbox and it writes Python, bash, SQL, shell one liners on the fly, and it executes the moment the model spits it out.
+Containers, VMs, and serverless runtimes were built for code a human wrote, reviewed, and shipped through a deploy path. Someone opened a PR, CI ran, ops deployed an artifact, and the runtime only had to isolate code whose behavior was at least bounded by that artifact. Multi-agent systems change that boundary because the sandbox does not receive one known program, it receives a model that writes Python, bash, SQL, and shell one liners as part of the task, then executes them as soon as the tool call lands.
 
-That changes the isolation problem. Its not just keeping service A away from service B. Its keeping the world away from code you cant really trust. The stuff that breaks real agents is usually not model quality or prompt engineering. Its infrastructure and isolation, and most people only find out when something already went wrong.
+That changes the isolation problem from separating service A from service B into separating the host and connected systems from code that was generated minutes ago and never passed through the normal build and review path. The stuff that breaks real agents is usually not model quality or prompt engineering, it is infrastructure and isolation, and most people only find out when something already went wrong.
 
-## The agent is already inside your house
+## The agent is already inside your trust boundary
 
-Classic security models assume a human clicks approve on each sensitive action (human in the loop). Its doenst work that well practically. The human approves once, and the model makes hundreds of micro decisions after that. Each decision inherits whatever authority the runtime gave the session. So when you click on that approve based on vibe, your agent might do some nasty shit later based on vibes as well.
+Classic security models assume a human clicks approve on each sensitive action (human in the loop), but that breaks down when the human grants broad session authority once and the model makes hundreds of micro decisions after that. Each decision inherits whatever authority the runtime gave the session, so one casual approval can turn into file reads, tool calls, network requests, and writes the human never reviewed.
 
 Three properties make this nasty :
 
@@ -34,7 +34,7 @@ This wreaks trust boundary. data that should be untrusted (external content) can
 
 ## Five things we assumed that arent true anymore
 
-Our isolation stack (containers, VMs, lambdas) is battle tested. But it was built on five assumptions about what runs inside the cage. Agents break every one of themm
+Our isolation stack (containers, VMs, lambdas) is battle tested, but it was built on five assumptions about what runs inside the isolation boundary. Agents break every one of them.
 
 *Assumption 1 - Code is known at deploy time.*
 
@@ -44,7 +44,7 @@ An agent breaks this by definition. Ask it to fix a bug and it might import pack
 
 *Assumption 2 - Workload scope is bounded.*
 
-You know what nginx does. [Docker's default seccomp](tab:https://docs.docker.com/engine/security/seccomp/) mostly fits it, and nobody touches the profile for years because the binary does not reinvent its syscalls. Same idea for a lambda, the [provider cage](tab:https://docs.aws.amazon.com/whitepapers/latest/security-overview-aws-lambda/security-overview-aws-lambda.html) is for a fixed function, not a new program every turn.
+You know what nginx does. [Docker's default seccomp](tab:https://docs.docker.com/engine/security/seccomp/) mostly fits it, and nobody touches the profile for years because the binary does not reinvent its syscalls. Same idea for a lambda, the [provider enforced execution boundary](tab:https://docs.aws.amazon.com/whitepapers/latest/security-overview-aws-lambda/security-overview-aws-lambda.html) is for a fixed function, not a new program every turn.
 
 Now ask an agent to analyze this dataset and watch it `uv pip install` three packages from PyPI, write temp files, hit two APIs you didnt know existed, spawn a subprocess to parse a PDF, and read your entire working directory looking for context. Tomorrow the same agent gets a different task and the [syscall footprint](tab:https://www.usenix.org/conference/usenixsecurity20/presentation/ghavamnia) looks nothing like today. The profile you tuned for yesterdays workload [blocks todays](tab:https://cs.unibg.it/seclab-papers/2025/ASIACCS/poster-syscalls.pdf). You cant write a firewall rule for a workload that [reinvents itself every session](tab:https://engineering.pigment.com/2026/06/10/sandbox-for-llm-generated-code-execution/).
 
@@ -52,9 +52,9 @@ Now ask an agent to analyze this dataset and watch it `uv pip install` three pac
 
 Traditional threat model says someone has to find a vulnerability, write an exploit, get it past your defenses. That takes skill, tooling, and intent.
 
-Prompt injection makes a fucking mess out of this. A sentence in a webpage, doc, API response, or repo file is enough. The agent reads it, treats it as instruction, complies. No zero day, no exploit chain, just text in the wrong place. The attacker doesnt even need to know your agent exists. They just need to put instructions where the agent might look and dance after that.
+Prompt injection makes a fucking mess out of this because a sentence in a webpage, doc, API response, or repo file can become an instruction channel once the agent reads it. There is no zero day or exploit chain, only attacker controlled text entering privileged context, and if the agent has enough tools and credentials, exfiltration or tool abuse can follow without further attacker action.
 
-[Johann Rehberger showed this with Devin in April 2025](tab:https://embracethered.com/blog/posts/2025/devin-i-spent-usd500-to-hack-devin/). He put poisoned instructions on a site linked from a GitHub issue. Devin followed the link, downloaded a C2 binary, ran `chmod +x`, executed, and the attacker walked away with the VM, secrets, and AWS keys like a bosss. Cost to attacker was just one bad issue.
+[Johann Rehberger showed this with Devin in April 2025](tab:https://embracethered.com/blog/posts/2025/devin-i-spent-usd500-to-hack-devin/). He put poisoned instructions on a site linked from a GitHub issue, then Devin followed the link, downloaded a C2 binary, ran `chmod +x`, executed it, and gave the attacker VM access, secrets, and AWS keys. Cost to attacker was just one bad issue.
 
 [Hidden Slack channel instructions exfiltrated private data through Slack AI in 2024](tab:https://promptarmor.com/blog/slack-ai-data-exfiltration-from-private-channel). [GeminiJack](tab:https://noma.security/noma-labs/geminijack/) used a poisoned Google Doc to make Gemini Enterprise search connected Workspace data and send it out, literally zero clicks required. [ServiceNow CVE-2025-12420](tab:https://appomni.com/ao-labs/ai-agent-to-agent-discovery-prompt-injection/) (CVSS 9.3) had injection in a ticket field recruit higher privileged agents to run attacker instructions.
 
@@ -62,17 +62,17 @@ Prompt injection makes a fucking mess out of this. A sentence in a webpage, doc,
 
 *Assumption 4 - Workloads are stateless or explicitly stateful.*
 
-Containers are usually one or the other. A web server is stateless, request in response out simple. A database is explicitly stateful, its designed as the persistence layer.
+Containers usually sit on one side of a state boundary: a web server is a stateless request worker, while a database is explicitly designed as the persistence layer.
 
-Agents are neither, they are shady bunch of minions. They accumulate state implicitly as they work. Files created, packages installed, env vars set, OAuth tokens, API keys, SSH keys, session cookies, all piling up mid session without anyone designing for it. Then you scale to zero and snapshot captures all of it. Keys in memory, keys on disk, keys in env. Restore later and those creds come back, maybe expired, maybe not, sitting in whatever storage holds your snapshots. You end up with secrets in a place you never meant to put them.
+Agents sit between those models because they accumulate state implicitly as they work. Files created, packages installed, env vars set, OAuth tokens, API keys, SSH keys, and session cookies all pile up mid session without anyone designing for it. Then you scale to zero and the snapshot captures all of it. Secrets can exist simultaneously in memory, on disk, in environment variables, and in snapshot storage, so when the runtime restores later, those credentials may come back even if no one intended snapshots to become a secrets store.
 
 *Assumption 5 - One workload, one trust boundary.*
 
-One container, one service, one IAM role, simple. And the blast radius of a compromise is the permissions of that single role. Clean.
+The old boundary was one container, one service, and one IAM role or service account, with the blast radius of a compromise bounded by that identity.
 
 One agent session might hit GitHub with a PAT, Postgres with DB creds, S3 with AWS keys, and more. Five separate blast radii collapsed into one process. In Node, [`process.env` exposes the environment variables for that process](tab:https://nodejs.org/api/process.html#processenv). So if a malicious install script runs, it can read every secret loaded into that session, not just the one for the package it is pretending to install. Recent npm supply chain attacks used `postinstall` hooks to steal GitHub tokens, AWS keys, npm tokens, and other env secrets from the machine doing the install ([Kudelski](tab:https://kudelskisecurity.com/research/supply-chain-attack-targeting-several-npm-packages-to-harvest-credentials), [Splunk](tab:https://www.splunk.com/en_us/blog/security/npm-supply-chain-attack-detection-analysis.html)). The old model assumed each credential lived inside the service that needed it. Agents break that because one runtime often holds credentials for five systems at once.
 
-## What a cage actually is
+## What defense in depth actually is
 
 Its defense in depth, and most teams skip half the layers and wonder why shit blows up.
 
@@ -84,29 +84,29 @@ Its defense in depth, and most teams skip half the layers and wonder why shit bl
 * Human gate - Which actions need explicit approval? Merge, deploy, send external email, and charge money should not happen because the model felt confident. The agent can prep the work. A human clicks yes on the irreversible part.
 * Audit log - What happened, with what args? Keep an append only event log per thread so every session has a clean timeline from prompt to tool call to side effect. Per thread matters because incidents are session scoped. You need to answer which exact conversation triggered which action, without mixing events from other runs. Also log identity, tool name, arguments, policy decision, token scope, network destinations, file diffs, and timestamps. If you only log final answers, you cannot debug or prove what happened.
 
-Skip one layer and the rest have to overcompensate. No network egress controls? Now your audit log has to detect exfiltration after the fact instead of preventing it. No sandbox? Now the tool gateway is the only thing stopping the agent from reading `/etc/shadow`. No human gate? Now you are trusting the model to never hallucinate a destructive action. Each missing layer forces the remaining ones to cover failure modes they were not designed for. Skip all of them and congrats, you are doing vibe security. Good luck with that postmortem.
+Skipping one layer pushes its failure modes into layers that were not designed to handle them. Without network egress controls, your audit log only detects exfiltration after it happened instead of preventing it. Without local sandboxing, the tool gateway becomes the last barrier between the agent and sensitive host paths like `/etc/shadow`. Without a human gate on irreversible actions, you are relying on prompt behavior instead of enforced policy.
 
-Beyond these layers, think about what persists across sessions (filesystem), what the agent can reach on the network, where secrets live and whether the model can see raw values (credentials), how big the syscall attack window is for untrusted code, and whether the agent touches screen, keyboard, or clipboard (the computer use problem). Ill go deeper on some of these below. The point is a cage is not one knob to play.
+Beyond these layers, think about what persists across sessions (filesystem), what the agent can reach on the network, where secrets live and whether the model can see raw values (credentials), how big the syscall attack window is for untrusted code, and whether the agent touches screen, keyboard, or clipboard (the computer use problem). Ill go deeper on some of these below, because isolation is not a single control.
 
 ## What this looks like in practice
 
-Say the task is "Fix the failing test in `src/auth/login.test.ts`." Follow the chain and it gets ugly fast.
+Say the task is "Fix the failing test in `src/auth/login.test.ts`." Follow the chain and the risk accumulates fast.
 
-First it clones the repo. Where does the SSH key live, env var or mounted file? Can the agent read it directly? Then it reads the test and source. Is access scoped to relevant files or the whole repo? Then `npm install`, and postinstall scripts run arbitrary code with the agents permissions while pulling hundreds of packages from a public registry.
+The agent first clones the repo, so the SSH key or token has to exist somewhere the runtime can use it, and if that credential is an env var or mounted file the same process may be able to read it directly. It then reads the test and source, which raises the question of whether access is scoped to relevant files or the whole repo. When it runs `npm install`, postinstall scripts execute arbitrary code with the agents permissions while pulling hundreds of packages from a public registry.
 
-The agent writes a fix, LLM generated, never reviewed, running as the agent process. It runs `npm test`, but test fixtures and data files are untrusted input and prompt injection can hide in there. Finally it pushes the fix with write access to the repo, and nothing obvious stops it from touching files it shouldnt.
+Next it writes an LLM generated fix that has never been reviewed, runs `npm test` against fixtures and data files that may contain untrusted input, and finally pushes with repo write access even though nothing obvious prevents it from touching unrelated files.
 
 At every step untrusted input shapes behavior, and at every step the agent acts with real creds that have real consequences. This is why approving each bash command is not a security model.
 
 ## The one equation that should be tattooed on every agent PR
 
-```
+```text
 Agent access = user permissions ∩ tool permissions ∩ policy permissions
 ```
 
 The agent should never be more authorized than the user sitting in front of it. If I cannot read the `customers_pii` table in Metabase, my coding agent should not be able to SELECT * FROM it because I asked nicely. If I cannot merge to `main` without review, the agent should not get a bypass token because it found a lint error. These sound obvious, but agents are smarter than humans.
 
-Pass through permissions matter because agents actually combine information. A user with access to doc A and doc B might never manually correlate them. An agent asked to "summarize everything about customer X" will. Without row level and object level enforcement at the tool layer, you have built a data exfiltration copilot.
+Pass through permissions matter because agents actually combine information. A user with access to doc A and doc B might never manually correlate them. An agent asked to "summarize everything about customer X" will. Without row level and object level enforcement at the tool layer, you have built a cross document exfiltration path.
 
 Intersection, not union. The moment you grant the agent a superset of user rights for convenience (me guilty of this), you have created a standing insider threat.
 
@@ -136,7 +136,7 @@ OpenAI Code Interpreter uses a locked down container with no internet. Cant inst
 
 Compute isolation is the foundational question. Shared kernel or not? Most agent sandboxes today mean Docker, which is five separate kernel mechanisms folded together over twenty years. Worth understanding what youre actually buying.
 
-## How Docker and the kernel cage your agent (and where they dont)
+## How Docker and the kernel isolate your agent (and where they dont)
 
 The Linux kernel exposes [457 callable syscalls on x86_64](tab:https://syscalls.mebeim.net/) (424 common plus 33 arch specific). `open`, `read`, `write`, `mmap`, `ioctl`, `mount`, `clone`, `ptrace`, and so on. Every container on the host shares the same kernel interface.
 
@@ -146,7 +146,7 @@ Linux gives you five defense layers containers stack together. [namespaces](tab:
 
 ### Twenty years of bolted on isolation
 
-Linux isolation was never designed as a system. It arrived in pieces over twenty years, each piece solving whatever problem someone had that year. Nobody drew an architecture diagram first.
+Linux isolation was never designed as one system, it arrived in pieces over twenty years, with each piece solving the immediate problem that made it necessary rather than fitting into one prewritten architecture or threat model.
 
 It started in 2002. [Al Viro added mount namespaces to kernel 2.4.19](tab:https://lwn.net/Articles/689856/), giving a process its own filesystem view for the first time. The clone flag was `CLONE_NEWNS`, literally "new namespace," because [nobody expected more kinds](tab:https://lwn.net/Articles/531114/). That naming decision tells you everything about how planned this was.
 
@@ -154,9 +154,9 @@ Four years later, [Google engineers Paul Menage and Rohit Seth](tab:https://en.w
 
 Then came user namespaces in [kernel 3.8](tab:https://lwn.net/Articles/531114/) (2013), the most controversial addition. [Eric Biederman](tab:https://en.wikipedia.org/wiki/Linux_namespaces) spent years on the implementation. The idea was that unprivileged processes could map to root inside a namespace without root on the host. Security people immediately side eyed it. They were right to. [CVE-2013-1858](tab:https://lwn.net/Articles/543273/) dropped within weeks of release, a local privilege escalation from combining `CLONE_NEWUSER` with `CLONE_FS`. Fixed in 3.8.3, but the pattern was set. Ubuntu now [restricts user namespace creation via AppArmor](tab:https://blog.qualys.com/vulnerabilities-threat-research/2025/03/27/qualys-tru-discovers-three-bypasses-of-ubuntu-unprivileged-user-namespace-restrictions) and Qualys found three bypasses in January 2025.
 
-That same year, 2013, [Solomon Hykes gave a five minute lightning talk at PyCon](tab:https://www.youtube.com/watch?v=wW9CAH9nSLs) showing Docker for the first time. Docker did not invent any kernel primitive. It packaged all of the above (namespaces, cgroups, chroot, and later seccomp) into a CLI that made containers feel like a product instead of a kernel subsystem. [Containers are not a kernel feature](tab:https://en.wikipedia.org/wiki/Linux_namespaces). Theyre a pattern. Docker made the pattern accessible.
+That same year, 2013, [Solomon Hykes gave a five minute lightning talk at PyCon](tab:https://www.youtube.com/watch?v=wW9CAH9nSLs) showing Docker for the first time. Docker did not invent any kernel primitive. It packaged all of the above (namespaces, cgroups, chroot, and later seccomp) into a CLI that made containers usable as a product instead of exposed kernel subsystems. [Containers are not a kernel feature](tab:https://en.wikipedia.org/wiki/Linux_namespaces). Theyre a pattern. Docker made the pattern accessible.
 
-Three more years. Docker 1.10 ships a [default seccomp profile](tab:https://docs.docker.com/engine/security/seccomp/) in 2016. [Tejun Heo lands cgroups v2 in kernel 4.5](tab:https://en.wikipedia.org/wiki/Cgroups), replacing the messy multi hierarchy v1 with a single unified tree. In 2021, [Landlock](tab:https://docs.kernel.org/userspace-api/landlock.html) merges in 5.13, the first unprivileged stackable MAC that might actually be useful for agents. And in 2025, we are still patching escape bugs in mechanisms first written in 2006.
+Three more years later, Docker 1.10 shipped a [default seccomp profile](tab:https://docs.docker.com/engine/security/seccomp/) in 2016. [Tejun Heo lands cgroups v2 in kernel 4.5](tab:https://en.wikipedia.org/wiki/Cgroups), replacing the messy multi hierarchy v1 with a single unified tree. In 2021, [Landlock](tab:https://docs.kernel.org/userspace-api/landlock.html) merges in 5.13, the first unprivileged stackable MAC that might actually be useful for agents. And in 2025, we are still patching escape bugs in mechanisms first written in 2006.
 
 There was never a single designer watching over this stack, never a unified threat model that said how the layers should meet, and no real guarantee that the gaps between mechanisms are covered, which is exactly where runc keeps getting owned.
 
@@ -175,17 +175,17 @@ Each namespace gives a separate view of one kernel subsystem. The pattern is alw
 
 ### Cgroups are resource limits, not security boundaries
 
-Cgroups cap CPU, memory, IO, process count. Good for stopping one container from starving another. but it dosent really care which syscalls you call, only how much you consume. Hitting the memory limit gets you OOM killed. 
+Cgroups limit resource consumption, not authority: they cap CPU, memory, IO, and process count, so one container cannot starve another, but they do not decide which syscalls a process can invoke. If a process crosses the memory limit it gets OOM killed, which is a resource decision rather than a containment policy.
 
-dont mix up resource isolation and security isolation. cgroups can actually become the attack path. [Leaky Vessels](tab:https://labs.snyk.io/resources/leaky-vessels-docker-runc-container-breakout-vulnerabilities/) escaped through a [leaked fd into the cgroup filesystem](tab:https://github.com/opencontainers/runc/security/advisories/GHSA-xr7r-f8xq-vfvv). The thing meant to limit resources became the tunnel out.
+dont mix up resource isolation and security isolation, because cgroups can become part of the breakout path rather than the defense boundary. In [Leaky Vessels](tab:https://labs.snyk.io/resources/leaky-vessels-docker-runc-container-breakout-vulnerabilities/), runc leaked a [file descriptor into the host cgroup filesystem](tab:https://github.com/opencontainers/runc/security/advisories/GHSA-xr7r-f8xq-vfvv), and that fd let a container process reach the host mount namespace through `/proc/self/fd`.
 
 ### Capabilities (root split into 41 pieces)
 
-Linux has [41 capabilities](tab:https://man7.org/linux/man-pages/man7/capabilities.7.html). `CAP_NET_BIND_SERVICE`, `CAP_SYS_PTRACE`, `CAP_SYS_ADMIN` (the god mode that does way too much). [Docker keeps 14 by default](tab:https://dockerlabs.collabnix.com/advanced/security/capabilities/), drops `SYS_ADMIN`, `SYS_PTRACE`, `SYS_MODULE`, `NET_ADMIN`, `BPF`, and 22 others. So,default container cant load kernel modules or create BPF programs, which blocks a real class of privilege escalation.
+Linux has [41 capabilities](tab:https://man7.org/linux/man-pages/man7/capabilities.7.html). `CAP_NET_BIND_SERVICE`, `CAP_SYS_PTRACE`, `CAP_SYS_ADMIN` (the broad admin capability that does way too much). [Docker keeps 14 by default](tab:https://dockerlabs.collabnix.com/advanced/security/capabilities/), drops `SYS_ADMIN`, `SYS_PTRACE`, `SYS_MODULE`, `NET_ADMIN`, `BPF`, and 22 others. So,default container cant load kernel modules or create BPF programs, which blocks a real class of privilege escalation.
 
 Look at what Docker keeps though. `CHOWN`, `DAC_OVERRIDE` (bypass file permission checks), `SETUID`, `SETGID`, `NET_RAW`, `KILL`, `MKNOD`. You cant really drop these for an agent. It needs to chmod files it generates, setuid when spawning subprocesses, send raw packets for health checks, kill hung child processes. The capabilities that remain are the ones agents actually use.
 
-`CAP_BPF` showed up in kernel 5.8 to relieve pressure on `SYS_ADMIN`. Docker drops it by default, but observability tooling and some agent stacks want it. Grant `CAP_BPF` and the process can attach BPF programs that read essentially any host memory. At that point namespaces and seccomp are mostly theater.
+`CAP_BPF` showed up in kernel 5.8 to relieve pressure on `SYS_ADMIN`. Docker drops it by default, but observability tooling and some agent stacks want it. Grant `CAP_BPF` and the process can attach BPF programs that read essentially any host memory. At that point namespaces and seccomp do not materially reduce host memory read risk.
 
 Rehbergers Devin compromise didnt need any of this. `chmod +x` and execute. Basic file ops every container allows because every container needs them.
 
@@ -209,17 +209,17 @@ But Landlock restricts resources not operations. "Read/write `/workspace/project
 
 ### Anatomy of escapes (where each layer fails)
 
-Tracing the big container escape CVEs to the mechanism that actually broke for nerdy fun
+Tracing the big container escape CVEs to the mechanism that actually broke gives a more useful view than treating container isolation as one uniform feature.
 
 * [CVE-2019-5736 runc](tab:https://nvd.nist.gov/vuln/detail/CVE-2019-5736) - Malicious container overwrote host runc via `/proc/self/exe` race during exec. Process isolation failed because the setup tool crosses the boundary.
 * [CVE-2019-14271 Docker](tab:https://unit42.paloaltonetworks.com/docker-patched-the-most-severe-copy-vulnerability-to-date-with-cve-2019-14271/) - `docker cp` helper chrooted into container then loaded `libnss` from guest filesystem with host root. Mount namespace failed because host loaded guest code.
 * [CVE-2020-15257 containerd](tab:https://research.nccgroup.com/2020/12/10/abstract-shimmer-cve-2020-15257-host-networking-is-root-equivalent-again/) - Shim API on abstract unix sockets reachable from `--net=host` containers. Network namespace design gap.
 * [CVE-2021-30465 runc](tab:https://github.com/opencontainers/runc/security/advisories/GHSA-c3xm-pvg7-gh7r). Symlink swap between mount safety check and actual mount. TOCTOU during namespace setup.
 * [CVE-2022-0811 CRI-O](tab:https://www.crowdstrike.com/en-us/blog/cr8escape-new-vulnerability-discovered-in-cri-o-container-engine-cve-2022-0811/) - Pod annotations set host global sysctl `kernel.core_pattern`, core dump runs attacker script on host. Wasnt in the isolation threat model at all.
-* [CVE-2024-21626 runc](tab:https://snyk.io/blog/leaky-vessels-docker-runc-container-breakout-vulnerabilities/) - Leaked fd to host `/sys/fs/cgroup`, `WORKDIR /proc/self/fd/7` pointed container cwd at host fs. One fd tunneled through all five layers.
+* [CVE-2024-21626 runc](tab:https://snyk.io/blog/leaky-vessels-docker-runc-container-breakout-vulnerabilities/) - Leaked fd to host `/sys/fs/cgroup`, `WORKDIR /proc/self/fd/7` pointed container cwd at host fs. One fd crossed the stack through the runtime setup path.
 * [CVE-2025-31133/52565/52881 runc](tab:https://www.sysdig.com/blog/runc-container-escape-vulnerabilities) - Masked path abuse, `/dev/console` mount race, LSM bypass via `/proc/self/attr`. Multiple gaps at once.
 
-Namespaces, Cgroups, Seccomp all works as designed. Escapes live in the interactions, setup races, leaked fds, host tools loading guest libraries. In five of six pre 2025 CVEs the bug was in the runtime (runc, containerd, CRI-O, Docker), not the kernel primitive. The code that builds the cage has to cross the cage to build it.
+Namespaces, cgroups, and seccomp can all work as designed while the escape happens in interactions: setup races, leaked fds, and host tools loading guest libraries. In five of six pre 2025 CVEs the bug was in the runtime (runc, containerd, CRI-O, Docker), not the kernel primitive itself, because runtime setup has to cross the trust boundary it is trying to construct.
 
 Then [Copy Fail](tab:https://xint.io/blog/copy-fail-linux-distributions) broke the pattern entirely. A logic bug in the shared kernel itself, not in runc or containerd. I unpack who held and who scrambled after we map the platforms.
 
@@ -227,39 +227,39 @@ Agents make every weakness above worse. Unknown code changes syscall patterns pe
 
 ## What if the kernel wasnt shared
 
-We just traced seven years of runc escapes to one architectural fact. Namespaces, cgroups, seccomp, all of it still funnels through the same host kernel and the same 400ish syscall surface. Three teams at three companies built three different alternatives. AWS shipped [Firecracker](tab:https://github.com/firecracker-microvm/firecracker), Google shipped [gVisor](tab:https://gvisor.dev/docs/), Intel (with Microsoft and Arm) shipped [Cloud Hypervisor](tab:https://github.com/cloud-hypervisor/cloud-hypervisor). same goal, but different bets about which tradeoff hurts least when the workload is an agent writing bash youve never seen.
+We just traced seven years of runc escapes to one architectural fact: namespaces, cgroups, and seccomp still funnel through the same host kernel and the same 400ish syscall surface. AWS shipped [Firecracker](tab:https://github.com/firecracker-microvm/firecracker), Google shipped [gVisor](tab:https://gvisor.dev/docs/), and Intel, Microsoft, and Arm shipped [Cloud Hypervisor](tab:https://github.com/cloud-hypervisor/cloud-hypervisor), all with the same goal but different tradeoffs for running an agent that may generate shell commands you have never reviewed.
 
 ### runc, the baseline youre most probably on
 
-its worth understanding the comparison point before the alternatives. [runc](tab:https://github.com/opencontainers/runc) is what Docker, k8s, containerd, and CRI-O actually run. Fastest cold start, simplest ops, entire ecosystem already wired. For known trusted code thats often enough.
+its worth understanding the comparison point before the alternatives because [runc](tab:https://github.com/opencontainers/runc) is what Docker, k8s, containerd, and CRI-O actually run. It gives you the fastest cold start, the simplest operations model, and the ecosystem that is already wired into almost every CI and deployment flow. For known trusted code, that is often enough.
 
 For agents, shared kernel is the problem we traced above. The sections below are what people reach for when "just use Docker" stops feeling responsible. [Edera has a decent side by side](tab:https://edera.dev/stories/kata-vs-firecracker-vs-gvisor-isolation-compared) if you want a second opinion.
 
 ### Firecracker gives every agent its own kernel
 
-Lambda couldnt run millions of strangers code on one kernel and sleep well. [Firecracker](tab:https://github.com/firecracker-microvm.github.io/) is the answer. A ~50k line [Rust VMM](tab:https://github.com/firecracker-microvm/firecracker) on KVM, one microVM per function, own kernel, own memory, own fs view. Guest to host is not 457 syscalls. Its on the order of [~25 KVM hypercalls](tab:https://e2b.dev/blog/firecracker-vs-qemu). Thats the whole pitch. Smaller attack surface.
+AWS built [Firecracker](tab:https://github.com/firecracker-microvm.github.io/) for Lambda because running millions of untrusted functions against one host kernel would put the kernel syscall surface directly inside every tenant's risk model. The result is a ~50k line [Rust VMM](tab:https://github.com/firecracker-microvm/firecracker) on KVM, with one microVM per function, its own kernel, its own memory, and its own filesystem view. The guest-to-host interface is not 457 Linux syscalls, it is on the order of [~25 KVM hypercalls](tab:https://e2b.dev/blog/firecracker-vs-qemu), which is the core attack-surface reduction.
 
-Minimalism is policy, not accident. [Five device types](tab:https://github.com/firecracker-microvm/firecracker). Virtio net, blk, vsock, balloon, rng. No USB, no GPU, no PCIe passthrough. Every device you skip is attack surface you dont ship. The team [paused GPU work in 2025](tab:https://some-natalie.dev/blog/stop-saying-just-use-firecracker/) because they dont have bandwidth, which is itself a statement about what Firecracker is for.
+Minimalism is policy, not accident: [five device types](tab:https://github.com/firecracker-microvm/firecracker), virtio net, blk, vsock, balloon, and rng. Firecracker does not expose USB, GPU, or PCIe passthrough, so those device models are not part of the trusted runtime surface. The team [paused GPU work in 2025](tab:https://some-natalie.dev/blog/stop-saying-just-use-firecracker/) because they dont have bandwidth, which is itself a statement about what Firecracker is for.
 
-For agents the ops numbers are stupid in a good way. [Snapshot restore in ~4ms](tab:https://github.com/firecracker-microvm/firecracker/blob/main/docs/snapshotting/snapshot-support.md) (GA as of v1.14). Boot a golden image once (packages, tools, baseline creds policy), snapshot it, restore per session instead of cold booting Linux every time. [Firebench](tab:https://dreadl0ck.net/papers/Firebench.pdf) style benchmarks talk about 150 VMs/sec per host and sub 5MB overhead per microVM if you care about density math.
+For agents, the operational numbers matter because [snapshot restore in ~4ms](tab:https://github.com/firecracker-microvm/firecracker/blob/main/docs/snapshotting/snapshot-support.md) (GA as of v1.14) lets a platform boot a golden image once with packages, tools, and baseline credential policy, then restore per session instead of cold booting Linux every time. [Firebench](tab:https://dreadl0ck.net/papers/Firebench.pdf) style benchmarks talk about 150 VMs/sec per host and sub 5MB overhead per microVM if you care about density math.
 
-Security record. Production since 2018 at Lambda scale, zero guest to host VM escapes. [CVE-2026-1386](tab:https://aws.amazon.com/security/security-bulletins/rss/2026-003-aws/) was jailer symlink handling on the host, not breakout from inside the VM.
+Its security record is the strongest part of the argument: production since 2018 at Lambda scale, with zero public guest-to-host VM escapes. [CVE-2026-1386](tab:https://aws.amazon.com/security/security-bulletins/rss/2026-003-aws/) was jailer symlink handling on the host, not breakout from inside the VM.
 
-Limits are real. No GPU means no local inference inside the cage unless you proxy out. Needs KVM (nested virt on AWS/GCE/Azure helps now, but [nested adds latency](tab:https://pages.cs.wisc.edu/~swift/papers/vee20-isolation.pdf) that matters for ephemeral agents). No macOS/Windows host, so your laptop and prod run different isolation models. Snapshot format can break across Firecracker versions, which is an ops tax at scale. And there is no `docker run`. You manage VMM lifecycle, TAP networking, jailer, storage. Infrastructure engineering, not app deploy. [E2B](tab:https://e2b.dev/docs) and friends abstract this so you dont have to.
+The limits are also real. No GPU means no local inference inside the microVM unless you proxy out. Firecracker needs KVM, and while nested virtualization on AWS/GCE/Azure helps now, [nested adds latency](tab:https://pages.cs.wisc.edu/~swift/papers/vee20-isolation.pdf) that matters for ephemeral agents. There is no macOS or Windows host support, snapshot formats can break across Firecracker versions, and there is no `docker run` equivalent. You manage VMM lifecycle, TAP networking, jailer, and storage, which makes this infrastructure engineering rather than app deploy. [E2B](tab:https://e2b.dev/docs) and friends abstract this so you dont have to.
 
 ### gVisor rewrites the kernel in userspace
 
-Google took the opposite bet. Dont give the guest a real kernel on the host. Intercept syscalls in userspace and reimplement them in Go.
+Google took the opposite approach: do not give the guest a real kernel on the host, intercept syscalls in userspace, and reimplement the kernel surface in Go.
 
-[gVisor](tab:https://gvisor.dev/docs/architecture_guide/) splits into the Sentry (compute, memory, most syscalls) and the Gofer (filesystem proxy on the host). Your process thinks its on Linux. The Sentry decides what touches real Linux. Philosophy is dont let untrusted code talk to the host kernel directly. [UW Madison compared this model to Firecracker](tab:https://pages.cs.wisc.edu/~swift/papers/vee20-isolation.pdf) and the tradeoffs are exactly what youd expect.
+[gVisor](tab:https://gvisor.dev/docs/architecture_guide/) splits into the Sentry, which handles compute, memory, and most syscalls, and the Gofer, which proxies filesystem access on the host. Your process thinks it is on Linux, but the Sentry decides what reaches real Linux, and the design goal is to stop untrusted code from talking to the host kernel directly. [UW Madison compared this model to Firecracker](tab:https://pages.cs.wisc.edu/~swift/papers/vee20-isolation.pdf) and the tradeoffs are exactly what youd expect.
 
 Production interception today is mostly [systrap](tab:https://gvisor.dev/blog/2023/04/28/systrap-release/) (SECcomp trap + SIGSYS), faster than old ptrace, works inside VMs where most cloud workloads live. KVM platform mode exists for bare metal but nested virt makes it slower in VMs. Google runs systrap on Cloud Run.
 
-Coverage gap is the agent shaped problem. gVisor implements [274 of 350 syscalls on amd64](tab:https://gvisor.dev/docs/architecture_guide/) (~78%). Web server fine. Agent runs `pip install` then arbitrary Python with native extensions? Youre hoping every wheel only needs implemented syscalls. Runtimes have fallbacks sometimes. "Usually works" is not "always works."
+The coverage gap is the agent shaped problem. gVisor implements [274 of 350 syscalls on amd64](tab:https://gvisor.dev/docs/architecture_guide/) (~78%), which is fine for many web servers, but an agent that runs `pip install` and arbitrary Python with native extensions depends on whatever syscalls those wheels, build scripts, and runtime fallbacks need. "Usually works" is not "always works."
 
-Other costs. File IO through Gofer proxy often costs [20 to 50% vs native](tab:https://northflank.com/blog/firecracker-vs-gvisor). No snapshot/restore like Firecracker, so no 4ms session restore. 
+The other cost is performance. File IO through the Gofer proxy often costs [20 to 50% vs native](tab:https://northflank.com/blog/firecracker-vs-gvisor), and there is no Firecracker style snapshot/restore path for 4ms session restore.
 
-Upsides Firecracker cant match. Near instant start (its a process, not a booting VM). Systrap mode runs without KVM, useful in CI or locked down clouds. Written in Go, memory safe, zero public sandbox escapes achieving host code execution. And GPU is no longer a hard no. [nvproxy](tab:https://gvisor.dev/docs/user_guide/gpu/) proxies CUDA/Vulkan to host NVIDIA drivers on GKE. Not PCIe passthrough, but real GPU workloads inside gVisor sandboxes now.
+The upside is that gVisor can do things Firecracker cannot. Startup is near instant because it is a process rather than a booting VM, systrap mode runs without KVM in CI or locked down clouds, and the Go implementation has no public sandbox escapes achieving host code execution. GPU is no longer a hard no either, because [nvproxy](tab:https://gvisor.dev/docs/user_guide/gpu/) proxies CUDA/Vulkan to host NVIDIA drivers on GKE. It is not PCIe passthrough, but real GPU workloads now run inside gVisor sandboxes.
 
 Google uses it for Cloud Run, GKE Sandbox, App Engine. If you need isolation without guaranteeing KVM everywhere, this is the portable play.
 
@@ -289,13 +289,13 @@ Five choices if you count the bridge:
 * Firecracker gets you density and snapshot restore. Price is no GPU, KVM dependency, ops complexity. Built for thousands of ephemeral agents per host.
 * gVisor gets you portability and fast start. Price is partial syscall coverage, IO tax, no snapshots. Built for "isolate me but I cant assume bare metal KVM."
 * Cloud Hypervisor gets you GPU and hotplug. Price is slower boot, younger snapshot story. Built for long GPU agent jobs.
-* Kata gets you Kubernetes native microVMs. Price is extra shim layer. Built for teams that want the cage without leaving the container workflow.
+* Kata gets you Kubernetes native microVMs. Price is extra shim layer. Built for teams that want microVM isolation without leaving the container workflow.
 
 None of them fixes creds in env vars, snapshot secret leakage, or prompt injection alone. Compute is layer one. The next question is who actually ships this stuff as a product.
 
-## The agent sandbox map
+## The agent sandbox workload model
 
-You are about to pick an agent sandbox for your team. The isolation primitive under the hood matters, but what matters more is which workload shape the product was built for. E2B and Fly Sprites both sit on Firecracker. They feel nothing alike because they bet on different cells of the same map. Understanding which cell your workload lands in decides which tradeoffs you inherit, which failure modes you accept, and which vendor actually fits.
+You are about to pick an agent sandbox for your team. The isolation primitive under the hood matters, but what matters more is which workload shape the product was built for. E2B and Fly Sprites both sit on Firecracker, but they feel nothing alike because one optimizes short lived CPU sessions while the other optimizes persistent per agent machines. Understanding where your workload lands decides which tradeoffs you inherit, which failure modes you accept, and which vendor actually fits.
 
 Three axes you can use to place platforms:
 
@@ -303,7 +303,7 @@ Three axes you can use to place platforms:
 * Resource that you need, basicaly CPU vs GPU
 * Session model. Stateless (each call is independent) vs stateful (named sandbox with continuous fs and processes)
 
-Eight cells, three platforms that picked three different ones on purpose. The empty corners matter too. Ephemeral GPU stateful is thin (Modal GPU memory snapshots blur the line but stay alpha). Ephemeral CPU stateful barely exists outside AgentCore session storage. Persistent GPU stateful has years of VM substrate (RunPod, Lightning, Lambda) but no agent first SKU on top. The map is lumpy on purpose. Vendors optimize for the workload shape they think wins, not for filling a cube.
+Eight combinations, three platforms that picked three different ones on purpose. The under-served combinations matter too. Ephemeral GPU stateful is thin (Modal GPU memory snapshots blur the line but stay alpha). Ephemeral CPU stateful barely exists outside AgentCore session storage. Persistent GPU stateful has years of VM substrate (RunPod, Lightning, Lambda) but no agent first SKU on top. Vendors optimize for the workload shape they think wins, not for covering the entire design space.
 
 ### E2B (ephemeral, CPU, stateless)
 
@@ -321,7 +321,7 @@ The real token, env vars, working directory, and CA bundle arrive over a separat
 
 Volume mounts arrive as NFS targets pointing at the host orchestrators nfsproxy. Guest sees a normal NFS mount. Traffic terminates at a host side proxy that enforces what is accessible. Egress is the same shape. Host injects its own CA bundle into guest `/init`, so TLS to allowed external endpoints can be terminated and inspected by the hosts egress proxy. Guest trusts the proxy CA as a trust anchor. Marketing does not headline MITM egress. The code commits to it.
 
-One thing the architecture does not isolate is the orchestrator itself. Nomad runs the orchestrator binary as a `raw_exec` driver task. It executes directly on the worker hosts namespace, not inside a container. The Go binary handling sandbox lifecycle, UFFD servicing, NBD rootfs serving, NFS proxying, and egress filtering is the host attack surface for every sandbox it manages. A bug in that orchestrator is a bug in the host kernels neighborhood, not in any guest. E2Bs Nomad spec uses `restart { attempts = 0 }`. A crash terminates the host worker rather than auto restarting on potentially corrupted state. Reasonable failure mode for an isolation primitive. Also a real one.
+One thing the architecture does not isolate is the orchestrator itself. Nomad runs the orchestrator binary as a `raw_exec` driver task, so it executes directly in the worker hosts namespace rather than inside a container. The Go binary handling sandbox lifecycle, UFFD servicing, NBD rootfs serving, NFS proxying, and egress filtering is the host attack surface for every sandbox it manages. A bug in that orchestrator is a host-side bug, not a guest-side bug. E2Bs Nomad spec uses `restart { attempts = 0 }`, so a crash terminates the host worker rather than auto restarting on potentially corrupted state. Reasonable failure mode for an isolation primitive. Also a real one.
 
 Production infra has scars. The [default ready command builder](tab:https://github.com/e2b-dev/infra/blob/main/packages/orchestrator/pkg/template/build/phases/finalize/ready.go) contains, verbatim, `// HACK: This is a temporary fix for a customer that needs a bigger time...` followed by three hardcoded template IDs that get a 120 second startup grace instead of the default. Customers ask for things. The code remembers. That is what isolation infrastructure looks like when it is actually operated.
 
@@ -355,11 +355,11 @@ More honest engineering lives in what the docs admit than in blog headlines. Res
 
 A subtler footgun. Random number generators freeze on restore. From the docs: "If a variable is randomly initialized and that value included in a Memory Snapshot, that variable will be identical after every restore, possibly breaking uniqueness expectations." Cryptographic nonces, sampling seeds, allocator randomization. Your code may depend on entropy that became deterministic.
 
-[Sandbox networking docs](tab:https://modal.com/docs/guide/sandbox-networking) describe the egress and isolation story for untrusted Python on the same fabric as GPU functions. Sandbox CPU costs roughly 3x production CPU on [pricing](tab:https://modal.com/pricing). The [sandbox launch post](tab:https://modal.com/blog/sandbox-launch) says sandboxes run on the same underlying infrastructure as functions but does not explain the premium. Reasonable guesses. Per invocation spawn without warm container amortization, different node pools, snapshot machinery amortized differently. Premium is real. Engineering reason is not public.
+[Sandbox networking docs](tab:https://modal.com/docs/guide/sandbox-networking) describe the egress and isolation story for untrusted Python on the same infrastructure as GPU functions. Sandbox CPU costs roughly 3x production CPU on [pricing](tab:https://modal.com/pricing). The [sandbox launch post](tab:https://modal.com/blog/sandbox-launch) says sandboxes run on the same underlying infrastructure as functions but does not explain the premium. Reasonable guesses are per invocation spawn without warm container amortization, different node pools, and snapshot machinery amortized differently. The premium is real, but the engineering reason is not public.
 
-Modals commitment is a fabric that makes serverless GPU inference feasible. gVisor over Firecracker (no KVM dependency on every node), driver level CUDA C/R (only way to skip 26k syscalls of import overhead on every cold start), FUSE image fs (skip pull), three snapshot tiers for different amortization shapes. The sandbox API is how you charge for untrusted Python execution on that fabric. The fabric is the product. The sandbox is the toll booth.
+Modals commitment is a GPU serverless platform that makes fast inference startup feasible. gVisor over Firecracker removes the need for KVM on every node, driver level CUDA C/R skips the 26k syscalls of import overhead on every cold start, FUSE image fs bypasses image pull, and the three snapshot tiers amortize different parts of startup and state. The sandbox API is the metering and isolation boundary for untrusted Python execution on that platform.
 
-So if your agent needs GPU and you want serverless pricing, Modal is the only sandbox product that ships CUDA checkpoint/restore today. You accept gVisor instead of hardware isolation, partial syscall coverage, and 3x sandbox CPU premium. If your workload is CPU only or needs persistent state across days, you are paying for GPU fabric you dont use.
+So if your agent needs GPU and you want serverless pricing, Modal is the only sandbox product that ships CUDA checkpoint/restore today. You accept gVisor instead of hardware isolation, partial syscall coverage, and 3x sandbox CPU premium. If your workload is CPU only or needs persistent state across days, you are paying for GPU infrastructure you dont use.
 
 ### Fly Sprites (persistent, CPU, stateful)
 
@@ -387,7 +387,7 @@ So if your agent needs to persist across sessions, remember installed packages, 
 
 ### Everyone else (same map, different cells)
 
-By mid 2026 the cube has more company than three anchor vendors.
+By mid 2026 the workload space has more company than three anchor vendors.
 
 * [AWS Bedrock AgentCore](tab:https://aws.amazon.com/bedrock/agentcore/). Managed agent runtime coupled to Bedrock. Markets "complete session isolation" but will not name the VMM for some reason? Strong inference is Firecracker for AWS inference workloads, but that remains inference, not confirmed fact for AgentCore. [Session storage preview](tab:https://aws.amazon.com/about-aws/whats-new/2026/03/bedrock-agentcore-runtime-session-storage/). Persistent filesystem mount across stop/resume, 1 GB per session, 14 day idle retention. Moves AgentCore from purely ephemeral toward stateful. [GovCloud US West](tab:https://aws.amazon.com/about-aws/whats-new/2026/05/bedrock-agentcore-launch-aws-govcloud-us/) added. Differentiator is integration. Identity via IAM, secrets via KMS, audit via CloudTrail, models via Bedrock. AWS shop? Button. Not AWS? Different company.
 
@@ -397,37 +397,37 @@ By mid 2026 the cube has more company than three anchor vendors.
 
 * Persistent CPU stateful cell got crowded fast. [Cloudflare Sandboxes](tab:https://blog.cloudflare.com/sandbox-ga/) (containers on Durable Objects, GA April 13), [Vercel Sandbox](tab:https://vercel.com/docs/vercel-sandbox) (Firecracker, GA April), [Cursor Cloud Agents](tab:https://cursor.com/docs/cloud-agent) (isolated cloud VMs, February), [Manus Cloud Computer](tab:https://manus.im/blog/manus-cloud-computer) (persistent Ubuntu per user, April 30), Coder Agents (Kubernetes/VM workspaces, beta May), Together Code Sandbox (microVM hibernate/resume, ongoing through 2026). Each picked its own isolation primitive underneath. Product shape is constant. Named per agent persistent sandbox. Architecture is the variable.
 
-* Persistent GPU stateful is the opposite story. [ThunderCompute](tab:https://www.thundercompute.com/), Lightning AI Studios, RunPod persistent pods, Anyscale Ray workspaces, Lambda Labs have shipped persistent GPU VMs for years. Agent can boot a box, install deps, shut down to stop billing, resume tomorrow. Substrate exists. What is missing is agent first packaging. Nobody sells a Sprites equivalent "named GPU sandbox per agent" with a per agent identity primitive on top. Smaller gap than the cube originally suggested, different shape.
+* Persistent GPU stateful is the opposite story. [ThunderCompute](tab:https://www.thundercompute.com/), Lightning AI Studios, RunPod persistent pods, Anyscale Ray workspaces, and Lambda Labs have shipped persistent GPU VMs for years. An agent can start a VM, install deps, shut down to stop billing, and resume tomorrow. The VM substrate exists, but the missing layer is agent first packaging with a named sandbox, per agent identity, and policy integration. The gap is smaller than the workload model suggests, but the shape is different.
 
-* [Northflank sandboxes](tab:https://northflank.com/product/sandboxes): persistent and ephemeral sandboxes as first class, BYOC, Kata/Cloud Hypervisor microVM or gVisor backends, no session cap, volumes 4 GB to 64 TB. Lives across multiple cells depending on customer configuration. [Their agent sandbox guide](tab:https://northflank.com/blog/how-to-sandbox-ai-agents) is worth reading alongside this map.
+* [Northflank sandboxes](tab:https://northflank.com/product/sandboxes): persistent and ephemeral sandboxes as first class, BYOC, Kata/Cloud Hypervisor microVM or gVisor backends, no session cap, volumes 4 GB to 64 TB. It spans multiple workload combinations depending on customer configuration. [Their agent sandbox guide](tab:https://northflank.com/blog/how-to-sandbox-ai-agents) is worth reading alongside this model.
 
-* Runhouse is not on the map. Python native remote compute library, not a sandbox product.
+* Runhouse sits outside this workload model. It is a Python native remote compute library, not a sandbox product.
 
-The observation worth holding. Same isolation architecture ships as different products. E2B and Sprites both use Firecracker. Commercially they are nothing alike. Architecture answers what keeps the agents code from breaking out. Product answers what shape of agent workload that boundary makes possible. Pick the cell first, then the vendor.
+The observation worth holding is that the same isolation architecture can ship as very different products. E2B and Sprites both use Firecracker, but commercially they are nothing alike because architecture answers what keeps the agents code from breaking out while product design answers what shape of agent workload that boundary makes possible. Pick the workload shape first, then the vendor.
 
 ## Copy Fail: where the boundary didnt hold
 
-The map above is theory. [CVE-2026-31431](tab:https://xint.io/blog/copy-fail-linux-distributions), Copy Fail, is what happened when April 2026 stress tested it in production.
+The workload model is useful, but [CVE-2026-31431](tab:https://xint.io/blog/copy-fail-linux-distributions), Copy Fail, is what happened when April 2026 stress tested these boundaries in production.
 
-A security firm found a four byte controlled write hiding behind a [2017 commit](tab:https://www.openwall.com/lists/oss-security/2026/04/29/23) in the kernels AF_ALG AEAD path. They published a [732 byte Python local root](tab:https://www.openwall.com/lists/oss-security/2026/04/29/23) that hit every mainstream distro for eight years. Not runc. Not containerd. A logic bug in the shared kernel. [CISA KEV](tab:https://www.cisa.gov/known-exploited-vulnerabilities-catalog) the same week. [Unit 42](tab:https://unit42.paloaltonetworks.com/cve-2026-31431-copy-fail/) walked the full chain.
+A security firm found a four byte controlled write in the kernels AF_ALG AEAD path, introduced by a [2017 commit](tab:https://www.openwall.com/lists/oss-security/2026/04/29/23), and published a [732 byte Python local root](tab:https://www.openwall.com/lists/oss-security/2026/04/29/23) that hit every mainstream distro for eight years. This was not runc or containerd, it was a logic bug in the shared kernel. [CISA KEV](tab:https://www.cisa.gov/known-exploited-vulnerabilities-catalog) listed it the same week, and [Unit 42](tab:https://unit42.paloaltonetworks.com/cve-2026-31431-copy-fail/) walked the full chain.
 
 If your stack runs untrusted code on Linux and your isolation story has the word "container" in it, this was your bug. [University of Toronto advisory](tab:https://security.utoronto.ca/advisories/copy-fail-linux-kernel-lpe-and-container-escape/) framed the container escape angle cleanly. [Emirbs independent writeup](tab:https://emirb.github.io/blog/microvm-2026/) on why your container is not a sandbox lands in the same place from a different angle.
 
 ### Who held, who patched
 
-Containers held nothing. [Daytonas security update](tab:https://www.daytona.io/dotfiles/updates/security-update-cve-2026-31431-copy-fail) is the cleanest case to read. An unprivileged process inside a Daytona sandbox able to open AF_ALG sockets could corrupt cached file content observable to co tenant sandboxes on shared runners. Sysbox runtime boundary, the layer Daytona uses to harden plain runc, was not breached. Shared kernel underneath was. Daytona patched within twelve hours, blacklisted the offending module, rotated runner credentials, paused signups. None of that would have been necessary if architecture had not committed to a shared kernel.
+Container-based products did not hold the boundary. [Daytonas security update](tab:https://www.daytona.io/dotfiles/updates/security-update-cve-2026-31431-copy-fail) is the cleanest case to read: an unprivileged process inside a Daytona sandbox able to open AF_ALG sockets could corrupt cached file content observable to co tenant sandboxes on shared runners. The Sysbox runtime boundary, the layer Daytona uses to harden plain runc, was not breached, but the shared kernel underneath was. Daytona patched within twelve hours, blacklisted the offending module, rotated runner credentials, and paused signups. None of that would have been necessary if the architecture had not committed to a shared kernel.
 
-This is the shared kernel thesis materialized. Five of six pre 2025 container escape CVEs lived in the runtime. Copy Fail is in the kernel. Same outcome from the agents perspective. Boundary failed. Different mechanism.
+Copy Fail is the shared kernel thesis in production: five of six pre 2025 container escape CVEs lived in the runtime, while this one lived in the kernel, but from the agents perspective the boundary failed either way.
 
-Firecracker held cleanly. E2B, Fly Sprites, Vercel Sandbox, AWS Lambda. Guests run on their own kernels. Four byte write stays inside guest page cache. No path from guest `algif_aead` to host kernel because host kernel does not host the guests crypto stack. None needed emergency advisories. E2B had [disabled AF_ALG in the guest kernel](tab:https://www.e2b.dev/blog/not-affected-by-copy-fail-heres-why) before the exploit existed. Architecture answered the question for them.
+Firecracker held cleanly for E2B, Fly Sprites, Vercel Sandbox, and AWS Lambda because guests run on their own kernels. The four byte write stays inside the guest page cache, with no path from guest `algif_aead` to the host kernel because the host kernel does not host the guests crypto stack. None needed emergency advisories, and E2B had [disabled AF_ALG in the guest kernel](tab:https://www.e2b.dev/blog/not-affected-by-copy-fail-heres-why) before the exploit existed.
 
-gVisor held cleanly. Modal, GKE Agent Sandbox default config. Sentry intercepts syscalls in userspace. Vulnerable code path lives in kernels `algif_aead` module. Sentry does not proxy that path to host kernel in a way that exposes the vulnerable optimization. Different architecture, same result. Bug never reached anything the platform owned.
+gVisor also held cleanly for Modal and the GKE Agent Sandbox default config because Sentry intercepts syscalls in userspace. The vulnerable code path lives in the kernels `algif_aead` module, and Sentry does not proxy that path to the host kernel in a way that exposes the vulnerable optimization. Different architecture, same result: the bug never reached anything the platform owned.
 
-Cloudflares response is the asterisk. They run their own edge metal. Fix was a [bpf-lsm program blocking `AF_ALG` socket_bind](tab:https://blog.cloudflare.com/copy-fail-linux-vulnerability-mitigation/) across the fleet within hours, patched kernels in five days. They have not said publicly which customer facing products were exposed. [Cloudflare Sandboxes](tab:https://blog.cloudflare.com/sandbox-ga/) GA April 13 runs on Cloudflare Containers backed by Durable Objects. Containers. Shared kernel. eBPF LSM mitigation suggests they knew enough to treat host as defended surface. What they did not do was publish a "your Cloudflare Sandbox was vulnerable for these hours" advisory. Silence is itself a data point.
+Cloudflares response is the asterisk because they run their own edge metal. The fix was a [bpf-lsm program blocking `AF_ALG` socket_bind](tab:https://blog.cloudflare.com/copy-fail-linux-vulnerability-mitigation/) across the fleet within hours, with patched kernels in five days. They have not said publicly which customer facing products were exposed. [Cloudflare Sandboxes](tab:https://blog.cloudflare.com/sandbox-ga/) GA April 13 runs on Cloudflare Containers backed by Durable Objects, which means containers and a shared kernel. The eBPF LSM mitigation suggests they knew enough to treat the host as a defended surface, but they did not publish a "your Cloudflare Sandbox was vulnerable for these hours" advisory. Silence is itself a data point.
 
-Copy Fail would have been Copy Fail in 2018. Kernel did not get less safe. Who runs code on top changed. Shared kernel did not move. The workload above it got more dangerous. Hardware isolation and gVisor both held here. Containers did not. That does not make containers useless. It makes the trade visible. Daytonas twelve hour response was competent ops on a weak boundary, not proof that weak boundaries are fine.
+Copy Fail would have been Copy Fail in 2018; the kernel did not get less safe, the workload above it got more dangerous. Hardware isolation and gVisor both held here while containers did not, which does not make containers useless, but it makes the trade visible. Daytonas twelve hour response was competent ops on a weak boundary, not proof that weak boundaries are fine.
 
-Compute cages passed or failed Copy Fail on guest to host escape. Snapshots test the reverse direction, whether the host or anyone with the memfile can hurt the guests secrets. That is the next problem.
+Compute isolation layers passed or failed Copy Fail on guest-to-host escape. Snapshots test the reverse direction, whether the host or anyone with the memfile can expose the guests secrets. That is the next problem.
 
 ## Credentials in the snapshot
 
@@ -519,7 +519,7 @@ This is not a bug. Firecracker warns about exactly this. Running it makes the wa
 
 ### Confidential computing as the architectural answer
 
-Problem. Host can read the guest memory file. Architectural answer. Make the host unable to read it. That is confidential computing.
+The problem is that the host can read the guest memory file, and the architectural answer is to make that memory unreadable to the host. That is confidential computing.
 
 [AMD SEV-SNP](tab:https://www.amd.com/en/developer/sev.html) encrypts VM memory pages with a per VM key in the Platform Security Processor. Hypervisor sees ciphertext. [Reverse Map Tables](tab:https://www.amd.com/system/files/TechDocs/SEV-SNP-strengthening-vm-isolation-with-integrity-protection-and-more.pdf) stop the hypervisor remapping guest pages without the guest noticing. Trust boundary moves toward silicon. EPYC Milan or newer. Available on [AWS](tab:https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/sev-snp.html), Azure, [Google Cloud](tab:https://cloud.google.com/confidential-computing/confidential-vm/docs/confidential-vm-overview).
 
@@ -533,7 +533,7 @@ Vendors do not lead with operational constraints. [Azure confidential VMs](tab:h
 
 ### What confidential computing does not solve
 
-Three caveats. The category will be oversold.
+The category will be oversold unless three limitations stay visible.
 
 First, guest code still sees the credential. Malicious package exfiltrates token to attacker URL? Hardware memory encryption does not help. Confidential computing protects against the host operator. Not against in guest compromise. For agent workloads where LLM generated code runs at request time, in guest threat model is dominant. Necessary, not sufficient.
 
@@ -564,13 +564,13 @@ dmesg | grep -iE 'sev|snp' | head -7
 
 SEV encrypts guest RAM. SEV-ES protects CPU register state on world switches. SEV-SNP adds integrity via RMP so hypervisor cannot remap guest pages undetected. SNP requires the earlier layers. Nitro hypervisor sees ciphertext.
 
-Attestation report via `/dev/sev-guest` and `SNP_GET_REPORT` ioctl binds firmware measurements, launch state, and a caller nonce. Verify against [AMD KDS](tab:https://kdsintf.amd.com). Without that step, encryption is trust me bro.
+Attestation report via `/dev/sev-guest` and `SNP_GET_REPORT` ioctl binds firmware measurements, launch state, and a caller nonce. Verify against [AMD KDS](tab:https://kdsintf.amd.com). Without that step, encryption does not establish workload identity.
 
 Contrast with the Firecracker demo. On nested virt c8i, host runs `strings` and gets 65 copies of the token from the memfile. On SEV-SNP m6a, equivalent host read yields ciphertext. Same primitive (memory dumped or observed). Different threat model. Encryption blocks a real, specific threat. It does not block guest malware, bad attestation, or immature ecosystem.
 
 ### Who is shipping this for agents today
 
-Substrate exists. Agent first packaging does not.
+The substrate exists, but agent first packaging does not.
 
 [When Agents Handle Secrets survey](tab:https://arxiv.org/abs/2605.03213) (May 2026) enumerates the moving pieces without a commercial per agent endpoint to point at. [Trusted AI Agents in the Cloud](tab:https://arxiv.org/html/2512.05951v1) same story from a different angle.
 
@@ -584,11 +584,11 @@ Tool gateways next. They are how you stop the agent from using whatever credenti
 
 ## The tool gateway. MCP is standardized access, not standardized safety
 
-The tool gateway bullet above is the policy layer. MCP is the wire format underneath it, and MCP itself is getting punched in the face by security researchers. [mcp-remote CVE-2025-6514](tab:https://thehackernews.com/2025/07/critical-mcp-remote-vulnerability.html). [Anthropic filesystem MCP CVE-2025-53109/53110](tab:https://cymulate.com/blog/cve-2025-53109-53110-escaperoute-anthropic/) (EscapeRoute). [Git MCP CVE-2025-68143/44/45](tab:https://thehackernews.com/2026/01/three-flaws-in-anthropic-mcp-git-server.html). People are counting [30+ MCP CVEs in ~60 days](tab:https://www.heyuan110.com/posts/ai/2026-03-10-mcp-security-2026/). Standardizing the wire format does not standardize safety. [Clinejection](tab:https://adnanthekhan.com/posts/clinejection/) showed supply chain fun via malicious MCP config too.
+The tool gateway bullet above is the policy layer. MCP is the wire format underneath it, and MCP itself is now getting continuous security attention. [mcp-remote CVE-2025-6514](tab:https://thehackernews.com/2025/07/critical-mcp-remote-vulnerability.html), [Anthropic filesystem MCP CVE-2025-53109/53110](tab:https://cymulate.com/blog/cve-2025-53109-53110-escaperoute-anthropic/) (EscapeRoute), and [Git MCP CVE-2025-68143/44/45](tab:https://thehackernews.com/2026/01/three-flaws-in-anthropic-mcp-git-server.html) all point at the same lesson. People are counting [30+ MCP CVEs in ~60 days](tab:https://www.heyuan110.com/posts/ai/2026-03-10-mcp-security-2026/). Standardizing the wire format does not standardize safety, and [Clinejection](tab:https://adnanthekhan.com/posts/clinejection/) showed the supply chain path through malicious MCP config too.
 
 The flow looks like this:
 
-```
+```text
 User asks question
    ↓
 Agent decides it needs a tool
@@ -622,16 +622,16 @@ Mitigations that actually help:
 
 1. Separate instructions from evidence. Retrieved content is data, not commands. XML tags, channel separation, whatever works, but the runtime has to treat them differently at policy time, not just in the prompt template.
 2. Untrusted content does not get to pick tools. Model proposes, gateway disposes.
-3. Validate tool args in code. If `read_file` gets a path, resolve and canonicalize server side. Model says "user asked for /etc/passwd"? Cool story, denied.
+3. Validate tool args in code. If `read_file` gets a path, resolve and canonicalize server side. If the model says "user asked for /etc/passwd", policy denies it.
 4. Sanitize tool returns before they go back into context. Raw HTML, PDF dumps, 50k log lines are injection vector and context pollution in one package.
 5. Irreversible stuff needs a human. Delete, deploy, external email, spin up paid infra needs a click or signed token, no exceptions because the demo looked good.
-6. Canary permissions. Start read only, widen only when needed, narrow again after. Dont hand out god mode because the task "might" need it.
+6. Canary permissions. Start read only, widen only when needed, narrow again after. Dont hand out broad admin authority because the task "might" need it.
 
-Red team it like an API. Hidden instructions in issue bodies, webpages you control, "summarize this ticket" where the ticket says export everything to a webhook. If the cage works, exfil gets blocked even when the model tries to be helpful.
+Red team the interface as an API surface. Hidden instructions in issue bodies, webpages you control, "summarize this ticket" where the ticket says export everything to a webhook. If the enforced controls work, exfil gets blocked even when the model tries to be helpful.
 
 ## Side effects need idempotency and receipts
 
-Caged agents still do real work, which means actual backend engineering, not prompt cosplay. Use idempotency keys on writes so retry loops do not double charge or double deploy. Use checkpoints so a crash at step 99 of 100 does not replay destructive steps. Use dead letter queues when human approval times out because silent hangs are the worst.
+Sandboxed agents still do real work, which means actual backend engineering, not prompt-only architecture. Use idempotency keys on writes so retry loops do not double charge or double deploy. Use checkpoints so a crash at step 99 of 100 does not replay destructive steps. Use dead letter queues when human approval times out because silent hangs are the worst.
 
 When pagerduty fires at 2 a.m., you need to answer what this thing thought it was allowed to do and who said yes, not "idk the model got creative lol."
 
@@ -654,7 +654,7 @@ outcome: success|error|timeout|blocked
 redaction_applied: true|false
 ```
 
-Wire this into whatever observability you already have. OpenTelemetry GenAI spans should cover model, tokens, tool name, error type. When someone asks "did any session touch prod creds last Tuesday," you want a query, not an archaeology expedition through LangSmith.
+Wire this into whatever observability you already have. OpenTelemetry GenAI spans should cover model, tokens, tool name, error type. When someone asks "did any session touch prod creds last Tuesday," you want a query over structured audit events, not manual trace reconstruction in LangSmith.
 
 ## Failure modes and the checklist
 
@@ -662,7 +662,7 @@ Ive seen most of these in the wild, multiple times, sometimes in the same codeba
 
 Before you hand another intern, human or silicon, prod access:
 
-1. Agent runs as the user, not root. No god mode service account shared across users.
+1. Agent runs as the user, not root. No broad admin service account shared across users.
 2. Sandbox fs + network, default deny. Enforce paths in code, not in the system prompt.
 3. Tool gateway on every call. No bare MCP straight to prod. Curate allowlists, patch MCP CVEs fast.
 4. Secrets never touch the model context or a hot snapshot memfile. Use short lived tokens or late binding.
@@ -680,7 +680,7 @@ Some of this I am still figuring out and not pretending otherwise.
 1. Is microVM isolation necessary for every agent workload, or is there a "good enough" tier for low risk stuff?
 2. How often do real agent workloads hit gVisors unimplemented syscalls? Anyone measured this outside blog posts?
 3. Is Cloud Hypervisor snapshot/restore mature enough to match Firecrackers Lambda hardened path?
-4. gVisor inside Firecracker. Double cage or operational madness? Anyone running it?
+4. gVisor inside Firecracker. Nested isolation or operational complexity? Anyone running it?
 5. What does AgentCore "memory is sanitized" actually mean in implementation? Docs assert it. Mechanism unspecified.
 6. Does anyone do credential refresh on restore in production? Orchestrator forces fresh token before user code runs. Pattern is obvious, nobody documents it as standard.
 7. Where do Fly Sprites metadata only checkpoints leave creds in inner container process memory? Memfile still on host.
@@ -702,8 +702,8 @@ If you have answers, tell me. This space moves faster than the blog posts.
 
 ## Conclusion
 
-Uncaged agents feel magical in week one. By week three someone asks yours to fix a bug, it reads a poisoned stack trace, runs code nobody reviewed, ships your env file somewhere bad, and posts "all good!" in Slack. Ive seen variations of this story already and its never funny in retrospect.
+Unbounded agents feel productive in week one. By week three someone asks yours to fix a bug, it reads a poisoned stack trace, runs code nobody reviewed, ships your env file somewhere bad, and posts "all good!" in Slack. Ive seen variations of this story already and its never funny in retrospect.
 
-The goal is not to cripple agents. Its to make autonomy bounded, attributable, and revocable. Cage the tools, cage the network, cage the credentials, cage the code you never wrote, and let the model think inside the box. Copy Fail was the reminder that shared kernel containers are not a cage. Snapshot memfiles are the reminder that microVMs are not a secret vault either.
+The goal is not to cripple agents. Its to make autonomy bounded, attributable, and revocable by enforcing isolation across tools, network egress, credentials, and code the team did not write. Copy Fail was the reminder that shared kernel containers are not a strong isolation boundary for untrusted code. Snapshot memfiles are the reminder that microVMs do not automatically protect secrets inside guest memory either.
 
-Context engineering is what the agent remembers. Cage engineering is what its allowed to break. You need both. I wrote the first one, this is the second.
+Context engineering is what the agent remembers, while isolation engineering is what it is allowed to touch, change, and break, so the earlier post handled memory and this one handles boundaries.
