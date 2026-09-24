@@ -85,17 +85,17 @@ Its defense in depth, and most teams skip half the layers and wonder why shit bl
 * Human gate - Which actions need explicit approval? Merge, deploy, send external email, and charge money should not happen because the model felt confident. The agent can prep the work. A human clicks yes on the irreversible part.
 * Audit log - What happened, with what args? Keep an append only event log per thread so every session has a clean timeline from prompt to tool call to side effect. Per thread matters because incidents are session scoped. You need to answer which exact conversation triggered which action, without mixing events from other runs. Also log identity, tool name, arguments, policy decision, token scope, network destinations, file diffs, and timestamps. If you only log final answers, you cannot debug or prove what happened.
 
-Skipping one layer pushes its failure modes into layers that were not designed to handle them. Without network egress controls, your audit log only detects exfiltration after it happened instead of preventing it. Without local sandboxing, the tool gateway becomes the last barrier between the agent and sensitive host paths like `/etc/shadow`. Without a human gate on irreversible actions, you are relying on prompt behavior instead of enforced policy.
+Skipping one layer pushes its failure modes into layers that were not designed to handle them. for eg, without network egress controls, your audit log only detects exfiltration after it happened instead of preventing it, without local sandboxing, the tool gateway becomes the last barrier between the agent and sensitive host paths like `/etc/shadow`. Without a human gate on irreversible actions, you are relying on prompt behavior instead of enforced policy.
 
-Beyond these layers, think about what persists across sessions (filesystem), what the agent can reach on the network, where secrets live and whether the model can see raw values (credentials), how big the syscall attack window is for untrusted code, and whether the agent touches screen, keyboard, or clipboard (the computer use problem). Ill go deeper on some of these below, because isolation is not a single control.
+Beyond these layers, think about what persists across sessions (filesystem), what the agent can reach on the network, where secrets live and whether the model can see raw values (credentials), how big the syscall attack window is for untrusted code, and whether the agent touches screen, keyboard, or clipboard (the computer use problem). Ill go deeper on some of these below, because isolation is not a single control, and obviously becuz it fun
 
 ## What this looks like in practice
 
-Say the task is "Fix the failing test in `src/auth/login.test.ts`." Follow the chain and the risk accumulates fast.
+Say the task is "Fix the failing test in `src/auth/login.test.ts`." If you just follow the chain, youll see that the risk accumulates fast.
 
-The agent first clones the repo, so the SSH key or token has to exist somewhere the runtime can use it, and if that credential is an env var or mounted file the same process may be able to read it directly. It then reads the test and source, which raises the question of whether access is scoped to relevant files or the whole repo. When it runs `npm install`, postinstall scripts execute arbitrary code with the agents permissions while pulling hundreds of packages from a public registry.
+The agent first clones the repo, so the SSH key or token has to exist somewhere the runtime can use it, and if that credential is an env var or mounted file or easily accessable via logged in CLI, the same process may be able to read it directly. It then reads the test and source, which raises the question of whether access is scoped to relevant files or the whole repo. When it runs `pnpm install`, postinstall scripts execute arbitrary code with the agents permissions while pulling hundreds of packages from a public registry.
 
-Next it writes an LLM generated fix that has never been reviewed, runs `npm test` against fixtures and data files that may contain untrusted input, and finally pushes with repo write access even though nothing obvious prevents it from touching unrelated files.
+Next it writes an LLM generated fix that has never been reviewed, runs `pnpm test` against fixtures and data files that may contain untrusted input, and finally pushes with repo write access even though nothing obvious prevents it from touching unrelated files.
 
 At every step untrusted input shapes behavior, and at every step the agent acts with real creds that have real consequences. This is why approving each bash command is not a security model.
 
@@ -105,7 +105,7 @@ At every step untrusted input shapes behavior, and at every step the agent acts 
 Agent access = user permissions ∩ tool permissions ∩ policy permissions
 ```
 
-The agent should never be more authorized than the user sitting in front of it. If I cannot read the `customers_pii` table in Metabase, my coding agent should not be able to SELECT * FROM it because I asked nicely. If I cannot merge to `main` without review, the agent should not get a bypass token because it found a lint error. These sound obvious, but agents are smarter than humans.
+The agent should never be more authorized than the user sitting in front of it. If I cannot read the `customers_pii` table in postgres, my coding agent should not be able to SELECT * FROM it because I asked nicely. If I cannot merge to `main` without review, the agent should not get a bypass token because it found a lint error. These sound obvious, but agents are smarter than humans and sneaky sometimes
 
 Pass through permissions matter because agents actually combine information. A user with access to doc A and doc B might never manually correlate them. An agent asked to "summarize everything about customer X" will. Without row level and object level enforcement at the tool layer, you have built a cross document exfiltration path.
 
@@ -113,21 +113,19 @@ Intersection, not union. The moment you grant the agent a superset of user right
 
 ## Sandboxing in the wild
 
-The sandbox bullet above is the checklist. Here is what shipping products actually do with it.
+Everybody is doing it obviously. [Codex](tab:https://codex.danielvaughan.com/2026/04/07/codex-cli-agentic-loop-internals/) runs the loop in a provisioned container with sandboxed tools. [Cursor sandboxes terminal commands](tab:https://cursor.com/docs/agent/security/run-modes) with workspace scoped filesystem access and restricted network, configurable via [`sandbox.json`](tab:https://cursor.com/docs/reference/sandbox). [GitHub Agentic Workflows](tab:https://github.blog/changelog/2025-05-28-github-agentic-workflows/) compile Markdown agents into workflows where writes (labels, comments, PRs) happen in separate permission gated jobs after the agent finishes, not inline while its still thinking.
 
-[Codex](tab:https://codex.danielvaughan.com/2026/04/07/codex-cli-agentic-loop-internals/) runs the loop in a provisioned container with sandboxed tools. [Cursor](tab:https://cursor.com) sandboxes terminal commands. [GitHub Agentic Workflows](tab:https://github.blog/changelog/2025-05-28-github-agentic-workflows/) compile Markdown agents into workflows where writes (labels, comments, PRs) happen in separate permission gated jobs after the agent finishes, not inline while its still "thinking."
-
-Same pattern everywhere. Reasoning and side effects should not live at the same trust level. Obvious in hindsight, rare in production.
+Similar patterns everywhere.. Reasoning and side effects should not live at the same trust level. THis feels quite obvious in hindsight, rare in production.
 
 ### How every major agent product already got owned
 
-Every product picks a different isolation tradeoff and there is no bloody consensus.
+Every product picks a different isolation tradeoff and there seems to be no bloody consensus.
 
-Cursor runs commands in your shell with a dialog box before execution, full fs, network, processes on your machine. [CVE-2025-59944](tab:https://www.lakera.ai/blog/cursor-vulnerability-cve-2025-59944) showed how thin that can be. No sandbox to escape because there is no sandbox.
+Cursor runs commands in your shell with a dialog box before execution, full fs, network, processes on your machine. [CVE-2025-59944](tab:https://www.lakera.ai/blog/cursor-vulnerability-cve-2025-59944) showed how thin that can actually be! No sandbox to escape because there is no sandbox ( ͡° ͜ °)
 
-Claude Code runs on your machine too with a permission gate per action and an OS level sandbox on bash. [Check Point found CVE-2025-59536](tab:https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/), malicious project config could run shell before you even saw the trust dialog. Clone repo, run Claude Code, attacker has code execution. Patched now, but the architecture point still stands.
+Claude Code runs on your machine too with a permission gate per action and an OS level sandbox on bash. [Check Point found CVE-2025-59536](tab:https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/), malicious project config could run shell before you even saw the trust dialog. Clone repo, run Claude Code, attacker has code execution. obviosuly patched now, but the architecture point still stands.
 
-Devin goes the other way with a cloud VM per session, desktop, browser, terminal. The VM is the boundary and every cred you give Devin lives inside. Rehbergers injection owned the whole thing.
+Devin goes the other way with a cloud VM per session, desktop, browser, terminal. The VM is the boundary and every cred you give Devin lives inside it. Rehbergers injection owned the whole thing.
 
 OpenAI Code Interpreter uses a locked down container with no internet. Cant install packages, cant HTTP. Strongest isolation, but least capable.
 
@@ -135,7 +133,7 @@ OpenAI Code Interpreter uses a locked down container with no internet. Cant inst
 
 ### Containers vs microVMs for agent workloads
 
-Compute isolation is the foundational question. Shared kernel or not? Most agent sandboxes today mean Docker, which is five separate kernel mechanisms folded together over twenty years. Worth understanding what youre actually buying.
+Compute isolation is the foundational question. Shared kernel or not? Most agent sandboxes today mean Docker, which is five separate kernel mechanisms folded together over 20 years. Worth understanding what youre actually buying you knoww
 
 ## How Docker and the kernel isolate your agent (and where they dont)
 
@@ -198,9 +196,9 @@ Blocked stuff is obviously dangerous. `mount`, `pivot_root`, `reboot`, `kexec_lo
 
 That profile was tuned for web apps. Strace a web server in testing, capture syscalls, build a profile, ship once. An agent is different every invocation. Fix a test today, compile C tomorrow, parse a CSV next week. Syscall footprint changes with the task. Tighten seccomp and the agent breaks. Leave it loose and you havent improved much. Security wants narrow, capability wants wide, and for agents there is no known code to split the difference.
 
-### LSMs (AppArmor, SELinux, Landlock)
+### LSMs (AppArmor, Landlock)
 
-AppArmor confines by path ("read `/etc/ssl/` not `/home/`"). SELinux confines by label. Docker uses AppArmor on Ubuntu, SELinux on RHEL. Both assume you know what the app does. Agents dont.
+AppArmor confines by path ("read `/etc/ssl/` not `/home/`"). Docker on Ubuntu and similar Linux hosts uses AppArmor by default, and on Mac the container still runs Linux under Docker Desktop so the same path based confinement applies inside the VM. These profiles assume you know what the app does, which binaries run, which directories they read and write, and which sockets they open, so you can ship a fixed allowlist once. Agents break that assumption because the process may write new code mid session, install packages, open temp paths, and touch files you never named in the profile. A tight AppArmor policy blocks the next task, and a loose one is barely confinement at all.
 
 [Landlock](tab:https://landlock.io/news/5/) is the interesting one now (ABI v7 on Linux 6.15). Unprivileged, stackable, self restricting (can only tighten, never loosen). Can limit filesystem access, TCP bind/connect, abstract unix sockets, cross domain signals. v7 logs denials too.
 
@@ -240,13 +238,13 @@ For agents, shared kernel is the problem we traced above. The sections below are
 
 AWS built [Firecracker](tab:https://github.com/firecracker-microvm.github.io/) for Lambda because running millions of untrusted functions against one host kernel would put the kernel syscall surface directly inside every tenant's risk model. The result is a ~50k line [Rust VMM](tab:https://github.com/firecracker-microvm/firecracker) on KVM, with one microVM per function, its own kernel, its own memory, and its own filesystem view. The guest-to-host interface is not 457 Linux syscalls, it is on the order of [~25 KVM hypercalls](tab:https://e2b.dev/blog/firecracker-vs-qemu), which is the core attack-surface reduction.
 
-Minimalism is policy, not accident: [five device types](tab:https://github.com/firecracker-microvm/firecracker), virtio net, blk, vsock, balloon, and rng. Firecracker does not expose USB, GPU, or PCIe passthrough, so those device models are not part of the trusted runtime surface. The team [paused GPU work in 2025](tab:https://some-natalie.dev/blog/stop-saying-just-use-firecracker/) because they dont have bandwidth, which is itself a statement about what Firecracker is for.
+Minimalism is policy, not accident, [five device types](tab:https://github.com/firecracker-microvm/firecracker), virtio net, blk, vsock, balloon, and rng. Firecracker does not expose USB, GPU, or PCIe passthrough, so those device models are not part of the trusted runtime surface. The team [paused GPU work in 2025](tab:https://some-natalie.dev/blog/stop-saying-just-use-firecracker/) because they dont have bandwidth, which is itself a statement about what Firecracker is for.
 
 For agents, the operational numbers matter because [snapshot restore in ~4ms](tab:https://github.com/firecracker-microvm/firecracker/blob/main/docs/snapshotting/snapshot-support.md) (GA as of v1.14) lets a platform boot a golden image once with packages, tools, and baseline credential policy, then restore per session instead of cold booting Linux every time. [Firebench](tab:https://dreadl0ck.net/papers/Firebench.pdf) style benchmarks talk about 150 VMs/sec per host and sub 5MB overhead per microVM if you care about density math.
 
 Its security record is the strongest part of the argument: production since 2018 at Lambda scale, with zero public guest-to-host VM escapes. [CVE-2026-1386](tab:https://aws.amazon.com/security/security-bulletins/rss/2026-003-aws/) was jailer symlink handling on the host, not breakout from inside the VM.
 
-The limits are also real. No GPU means no local inference inside the microVM unless you proxy out. Firecracker needs KVM, and while nested virtualization on AWS/GCE/Azure helps now, [nested adds latency](tab:https://pages.cs.wisc.edu/~swift/papers/vee20-isolation.pdf) that matters for ephemeral agents. There is no macOS or Windows host support, snapshot formats can break across Firecracker versions, and there is no `docker run` equivalent. You manage VMM lifecycle, TAP networking, jailer, and storage, which makes this infrastructure engineering rather than app deploy. [E2B](tab:https://e2b.dev/docs) and friends abstract this so you dont have to.
+The limits are also real. No GPU means no local inference inside the microVM unless you proxy out. Firecracker needs Linux with KVM, and while nested virtualization on AWS/GCE/Azure helps now, [nested adds latency](tab:https://pages.cs.wisc.edu/~swift/papers/vee20-isolation.pdf) that matters for ephemeral agents. It does not run natively on Mac, so a Mac laptop and a Linux prod host end up with different isolation models. Snapshot formats can break across Firecracker versions, and there is no `docker run` equivalent. You manage VMM lifecycle, TAP networking, jailer, and storage, which makes this infrastructure engineering rather than app deploy. [E2B](tab:https://e2b.dev/docs) and friends abstract this so you dont have to.
 
 ### gVisor rewrites the kernel in userspace
 
@@ -687,7 +685,7 @@ Some of this I am still figuring out and not pretending otherwise.
 7. Where do Fly Sprites metadata only checkpoints leave creds in inner container process memory? Memfile still on host.
 8. When does a SaaS agent sandbox ship on confidential VMs by default? H100 CC removes GPU objection. Product layer still missing.
 9. Does CoCo plus Kata plus GKE Agent Sandbox compose into deployable per agent confidential sandbox today? Layers GA'd. End to end case study missing.
-10. Desktop agents on macOS/Windows. Cloud sandbox for everything or accept the laptop as hostile?
+10. Desktop agents on macOS and Linux. Cloud sandbox for everything or accept the laptop as hostile?
 11. Economics at scale. Does Firecracker per session change unit economics or just security posture?
 12. ECS/GKE/AKS: agent specific hardening or same seccomp profile as nginx?
 13. Can Landlock per task scoping work in production agent runtimes?
