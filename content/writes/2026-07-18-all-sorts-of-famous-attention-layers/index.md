@@ -13,8 +13,10 @@ Well, we had a bomb of Kimi K3 launch, and I writing this after going through it
 
 Before Transformers, models like RNNs and LSTMs processed text sequentially, word by word. This process was slow and models struggled to remember information from the distant past, creating a long-range dependency problem. The attention mechanism solved this by allowing the model to look at all parts of the input sequence simultaneously and assign importance (attention) scores to each word, creating a rich context vector. It abandoned sequential processing entirely, enabling parallel computation and providing the model with a direct, weighted memory of its entire input.
 
-I mean, if you're reading my blogs, most probably you know what the attention is, but for reiteration, the standard softmax based attention equation looks like :
-> Attention(k, Q, V) = softmax(QK^T^ / d^1/2^)V
+I mean, if you're reading my blogs, most probably you know what the attention is, but for reiteration, the standard scaled dot-product attention equation looks like :
+> Attention(Q, K, V) = softmax(QK^T^ / d^1/2^)V
+
+That is Softmax attention. The `/ √d` scale keeps the dot products from blowing up as head dimension grows. Causal vs bidirectional is just a mask on the scores before softmax. Cross attention uses the same formula with Q from one sequence and K/V from another. The code below is causal self-attention (decoder-style):
 
 The attention process :
 ```python
@@ -43,7 +45,7 @@ Once the final hidden-state matrix is produced, the language model head maps it 
 
 ## There is a variety!
 
-Linear Attention is not a variant of Self-Attention. I used to think that so clarifying here, some papers blur the line. MLA (DeepSeek) is still softmax-based but uses low-rank projections. The hybrid models like Kimi K3 or Qwen3 mix both.
+Linear Attention is not a variant of Self-Attention. I used to think that cuz i am a dumbass so clarifying here. MLA (DeepSeek) is still softmax-based but uses low-rank projections. The hybrid models like Kimi K3 or Qwen3 mix both.
 
 it's a fundamentally different formulation that replaces the softmax based attention mechanism entirely.
 
@@ -52,14 +54,30 @@ it's a fundamentally different formulation that replaces the softmax based atten
 
 By removing softmax and using a kernel function φ, you can change the order of operations. instead of (QK^T^)V which requires the n×n matrix, you compute K^T^ V first (d×d matrix), then multiply by Q. This is the kernel trick that makes it linear.
 
+Everything under Softmax is still scaled dot-product attention (`softmax(QKᵀ / √d) V`). Causal, bidirectional, and cross attention are not separate algorithms. They are mask and Q/K/V-source choices that compose with head layout and kernels. A modern decoder stack is usually causal GQA (or MLA) running under Flash/Paged, not a replacement for scaled-dot.
+
+Those orthogonal axes look like this:
+
+```
+Axes (compose freely)
+├── Score formula: scaled-dot softmax | linear kernel | retention | SSM
+├── Q/K/V source: self | cross (Q from one sequence, K/V from another)
+├── Mask / pattern: full | causal | bidirectional | sliding window | sparse
+├── Head layout: MHA | MQA | GQA | MLA
+└── Implementation: naive | Flash* | Paged
+```
+
+The rest of this post is the efficiency evolution (what changed after the Basics equation), not a replacement taxonomy for those axes:
+
 ```
 Attention Mechanisms
-├── Softmax-based Attention (Quadratic O(n²))
-│   ├── Self-Attention (vanilla)
+├── Softmax-based Attention (Quadratic O(n²), still scaled-dot)
+│   ├── Self-Attention (Q, K, V from the same sequence)
+│   ├── Cross-Attention (Q from one sequence, K/V from another)
 │   ├── Multi-Head Attention (MHA)
 │   ├── Multi-Query Attention (MQA)
 │   ├── Grouped-Query Attention (GQA)
-│   ├── Sliding Window Attention (sparse, but still softmax)
+│   ├── Sliding Window Attention (sparse mask, but still softmax)
 │   └── Multi-Head Latent Attention (MLA) - low-rank, but still softmax
 │
 ├── Faster Softmax Attention (same maths, better memory access via implementation optimizations)
@@ -80,6 +98,8 @@ Attention Mechanisms
     ├── Mamba
     └── Mamba-2
 ```
+
+Causal vs bidirectional is a mask on top of any Softmax node above. Decoder LLMs almost always use a causal mask so token `t` only attends to positions `≤ t`. Encoder models like BERT use bidirectional (full) attention within a segment. Cross attention still shows up in encoder-decoder models, multimodal stacks (text Q attending to vision/audio K/V), and some memory setups. Head sharing (MQA/GQA) and Flash kernels apply to both self and cross.
 
 ![Attention patterns comparison](attention-patterns.png)
 

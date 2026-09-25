@@ -133,7 +133,7 @@ OpenAI Code Interpreter uses a locked down container with no internet. Cant inst
 
 ### Containers vs microVMs for agent workloads
 
-Compute isolation is the foundational question. Shared kernel or not? Most agent sandboxes today mean Docker, which is five separate kernel mechanisms folded together over 20 years. Worth understanding what youre actually buying you knoww
+Compute isolation is the foundational question. Shared kernel (== to shared attack surface) or not? Most agent sandboxes today mean Docker,  every container talks to the same Linux kernel through the same syscall interface, which is five separate kernel mechanisms folded together over 20 years. Isolation is mostly namespaces/cgroups/seccomp sitting on top of that kernel. If one tenant’s code finds a bug in any of those paths, the compromise can reach the host and therefore other tenants. Worth understanding what youre actually buying you knoww
 
 ## How Docker and the kernel isolate your agent (and where they dont)
 
@@ -141,13 +141,13 @@ The Linux kernel exposes [457 callable syscalls on x86_64](tab:https://syscalls.
 
 A normal web server touches 40 or 50 of those. You wrote the code, you can profile it, you can [lock the rest with seccomp](tab:https://securitylabs.datadoghq.com/articles/container-security-fundamentals-part-6/). An agent writes code at runtime and might invoke any of the 457 depending on what the LLM decided to generate. You cant build a seccomp allowlist because the code doesnt exist until it runs.
 
-Linux gives you five defense layers containers stack together. [namespaces](tab:https://man7.org/linux/man-pages/man7/namespaces.7.html), cgroups, [capabilities](tab:https://man7.org/linux/man-pages/man7/capabilities.7.html), seccomp, and LSMs. Docker uses all five but [AWS still says containers are not a security boundary](tab:https://aws.amazon.com/security/security-bulletins/rss/aws-2025-024/). Escapes land every year anyway, usually in the gaps between layers, not because namespaces are fake. [Datadogs container security fundamentals](tab:https://securitylabs.datadoghq.com/articles/container-security-fundamentals-part-3/) is worth a read if you want the longer version.
+Linux gives you five defense layers containers stack together. [namespaces](tab:https://man7.org/linux/man-pages/man7/namespaces.7.html), cgroups, [capabilities](tab:https://man7.org/linux/man-pages/man7/capabilities.7.html), seccomp, and LSMs. Docker uses all five but [AWS still says containers are not a security boundary](tab:https://aws.amazon.com/security/security-bulletins/rss/aws-2025-024/). Escapes come up every year anyway, usually in the gaps between layers, not because namespaces are fake. [Datadogs container security fundamentals](tab:https://securitylabs.datadoghq.com/articles/container-security-fundamentals-part-3/) is worth a read if you want the longer version.
 
 ### Twenty years of bolted on isolation
 
-Linux isolation was never designed as one system, it arrived in pieces over twenty years, with each piece solving the immediate problem that made it necessary rather than fitting into one prewritten architecture or threat model.
+Linux isolation was never designed as one system, it arrived in bits and pieces over 20 years, with each piece solving the immediate problem that made it necessary rather than fitting into one prewritten architecture or threat model.
 
-It started in 2002. [Al Viro added mount namespaces to kernel 2.4.19](tab:https://lwn.net/Articles/689856/), giving a process its own filesystem view for the first time. The clone flag was `CLONE_NEWNS`, literally "new namespace," because [nobody expected more kinds](tab:https://lwn.net/Articles/531114/). That naming decision tells you everything about how planned this was.
+It all started in the golden year of [2002](tab:https://youtu.be/Il-an3K9pjg?si=T_ZLfhz2ZaY-9O8i). [Al Viro added mount namespaces to kernel 2.4.19](tab:https://lwn.net/Articles/689856/), giving a process its own filesystem view for the first time. The clone flag was `CLONE_NEWNS`, literally "new namespace," because [nobody expected more kinds](tab:https://lwn.net/Articles/531114/). That naming decision tells you everything about how planned this was.
 
 Four years later, [Google engineers Paul Menage and Rohit Seth](tab:https://en.wikipedia.org/wiki/Cgroups) started building "process containers" to stop batch jobs from starving latency sensitive services on Borg machines. UTS and IPC namespaces landed in [kernel 2.6.19](tab:https://en.wikipedia.org/wiki/Linux_namespaces) the same year. By 2008, PID namespaces and the renamed "control groups" (cgroups) shipped in [2.6.24](tab:https://en.wikipedia.org/wiki/Cgroups). The goal was resource accounting, not security. Network namespaces followed in [2.6.29](tab:https://en.wikipedia.org/wiki/Linux_namespaces) (2009), giving each process its own network stack.
 
@@ -159,9 +159,9 @@ Three more years later, Docker 1.10 shipped a [default seccomp profile](tab:http
 
 There was never a single designer watching over this stack, never a unified threat model that said how the layers should meet, and no real guarantee that the gaps between mechanisms are covered, which is exactly where runc keeps getting owned.
 
-### The eight namespaces (and what they dont do)
+### The 8 namespaces (and what they dont do)
 
-Each namespace gives a separate view of one kernel subsystem. The pattern is always the same. Namespaces change what the process sees, not what the kernel does. The view is separate, the executor is shared. Thats the architectural fact behind container escapes.
+Each namespace gives a separate view (view = which PIDs, mounts, nets, UIDs you see) of one kernel subsystem. but its still one kernel in memory executing syscalls for every container on the host. Namespaces can only change what the process sees, not what the kernel does. The view is separate, the executor (the shared host kernel that actually performs the work) is shared. Thats the architectural fact behind container escapes.
 
 * Mount (2002) - Owns mount table, own filesystem tree. Doesnt isolate content, and shared subtrees can propagate mounts across namespaces. Three mount related CVEs in the wild exploited exactly this.
 * PID (2008) - Owns PID numbering. PID 1 in container maps to something else on host. Parent namespace still sees child processes. `/proc` must be remounted or the container sees the hosts process list.
@@ -172,9 +172,14 @@ Each namespace gives a separate view of one kernel subsystem. The pattern is alw
 * Cgroup (2016). Virtualizes `/proc/self/cgroup` view. Actual limits come from cgroups themselves. [CVE-2024-21626](tab:https://snyk.io/blog/leaky-vessels-docker-runc-container-breakout-vulnerabilities/) leaked an fd into host cgroup fs and walked out.
 * Time (2020) - Offsets monotonic clocks for CRIU checkpoint/restore. Some hardened configs disable it. People argue whether thats seven or eight namespaces, idgaf
 
+Escape happens when untrusted code reaches something that is not fully sliced off by namespaces, for example:
+* a bug in shared kernel code reachable via a syscall (ioctl, filesystem, netfilter, blaa ba blaa)
+* a leaked host file descriptor or mount
+* a misconfigured capability or device that still talks to host-global state
+
 ### Cgroups are resource limits, not security boundaries
 
-Cgroups limit resource consumption, not authority: they cap CPU, memory, IO, and process count, so one container cannot starve another, but they do not decide which syscalls a process can invoke. If a process crosses the memory limit it gets OOM killed, which is a resource decision rather than a containment policy.
+Cgroups limit resource consumption, not authority. they cap CPU, memory, IO, and process count, so one container cannot starve another, but they do not decide which syscalls a process can invoke. If a process crosses the memory limit it gets OOM killed, which is a resource decision rather than a containment policy.
 
 dont mix up resource isolation and security isolation, because cgroups can become part of the breakout path rather than the defense boundary. In [Leaky Vessels](tab:https://labs.snyk.io/resources/leaky-vessels-docker-runc-container-breakout-vulnerabilities/), runc leaked a [file descriptor into the host cgroup filesystem](tab:https://github.com/opencontainers/runc/security/advisories/GHSA-xr7r-f8xq-vfvv), and that fd let a container process reach the host mount namespace through `/proc/self/fd`.
 
@@ -226,13 +231,13 @@ Agents make every weakness above worse. Unknown code changes syscall patterns pe
 
 ## What if the kernel wasnt shared
 
-We just traced seven years of runc escapes to one architectural fact: namespaces, cgroups, and seccomp still funnel through the same host kernel and the same 400ish syscall surface. AWS shipped [Firecracker](tab:https://github.com/firecracker-microvm/firecracker), Google shipped [gVisor](tab:https://gvisor.dev/docs/), and Intel, Microsoft, and Arm shipped [Cloud Hypervisor](tab:https://github.com/cloud-hypervisor/cloud-hypervisor), all with the same goal but different tradeoffs for running an agent that may generate shell commands you have never reviewed.
+We just traced 7 years of runc escapes to one architectural fact, namespaces, cgroups, and seccomp still funnel through the same host kernel and the same 400ish syscall surface. AWS shipped [Firecracker](tab:https://github.com/firecracker-microvm/firecracker), Google shipped [gVisor](tab:https://gvisor.dev/docs/), and Intel, Microsoft, and Arm shipped [Cloud Hypervisor](tab:https://github.com/cloud-hypervisor/cloud-hypervisor), all with the same goal but different tradeoffs for running an agent that may generate shell commands you have never reviewed. These are really cool stuff
 
 ### runc, the baseline youre most probably on
 
-its worth understanding the comparison point before the alternatives because [runc](tab:https://github.com/opencontainers/runc) is what Docker, k8s, containerd, and CRI-O actually run. It gives you the fastest cold start, the simplest operations model, and the ecosystem that is already wired into almost every CI and deployment flow. For known trusted code, that is often enough.
+its worth understanding the comparison point before the alternatives because [runc](tab:https://github.com/opencontainers/runc) (a container runtime) is what Docker, k8s, containerd, and CRI-O actually run under the hood. the project started as a part of Docker (hence it's written in Go) but eventually was extracted and transformed into a independent CLI tool. its just a tool to spawn a new ordinary linux process just inside of an isolated environment (a dedicated root file systemm a new process tree and is being achieved via Linux namespaces and cgroups facilities). this new process that runc launches becomes the first process (i.e. PID=1) inside of the newly started container. runc is literally a reference implementation of the OCI runtime specification! It gives you the fastest cold start, the simplest operations model, and the ecosystem that is already wired into almost every CI and deployment flow. For known trusted code, that is often enough.
 
-For agents, shared kernel is the problem we traced above. The sections below are what people reach for when "just use Docker" stops feeling responsible. [Edera has a decent side by side](tab:https://edera.dev/stories/kata-vs-firecracker-vs-gvisor-isolation-compared) if you want a second opinion.
+For agents, shared kernel is the problem we traced above. The sections below are what people reach for when "just use Docker" stops feeling responsible. [Edera has a nice side by side](tab:https://edera.dev/stories/kata-vs-firecracker-vs-gvisor-isolation-compared) if you want a second opinion.
 
 ### Firecracker gives every agent its own kernel
 
@@ -264,11 +269,11 @@ Google uses it for Cloud Run, GKE Sandbox, App Engine. If you need isolation wit
 
 ### Cloud Hypervisor, when agents need more than minimal
 
-Firecracker deliberately left headroom on the table. [Cloud Hypervisor](tab:https://github.com/cloud-hypervisor/cloud-hypervisor) fills it. Same rust-vmm DNA as Firecracker (~50k lines Rust, shared KVM crates), different priorities.
+Firecracker deliberately left headroom on the table which [Cloud Hypervisor](tab:https://github.com/cloud-hypervisor/cloud-hypervisor) filled. Same rust-vmm DNA as Firecracker (~50k lines Rust, shared KVM crates), just different priorities.
 
 [16+ device types vs Firecrackers 5](tab:https://northflank.com/blog/guide-to-cloud-hypervisor). [VFIO GPU passthrough](tab:https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/vfio.md) for near native NVIDIA performance. [CPU and memory hotplug](tab:https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/hotplug.md) up to silly core counts without reboot. Agent runs six hours and workload spikes? Scale the VM in place.
 
-Tradeoffs. ~200ms boot vs Firecrackers ~125ms (irrelevant for long jobs, painful for 30 second ephemeral tasks). Snapshots exist but are younger than Lambdas trillions of restores. Community smaller though [Fly.io uses it for GPU machines](tab:https://news.ycombinator.com/item?id=39364738) and [Northflank pushes millions of microVMs/month](tab:https://northflank.com/blog/how-to-sandbox-ai-agents) via Kata.
+Tradeoffs. ~200ms boot vs Firecrackers ~125ms (irrelevant for long jobs, shit for 30 second ephemeral tasks). Snapshots exist but are younger than Lambdas trillions of restores. Community smaller though [Fly.io uses it for GPU machines](tab:https://news.ycombinator.com/item?id=39364738) and [Northflank pushes millions of microVMs/month](tab:https://northflank.com/blog/how-to-sandbox-ai-agents) via Kata.
 
 Architecture is still KVM + Rust minimal VMM. More devices means somewhat larger surface than Firecracker, less Lambda decade of battle testing. Pick it when the agent needs GPU or long running dynamic sizing, not when you need maximum density on short lived sandboxes.
 
