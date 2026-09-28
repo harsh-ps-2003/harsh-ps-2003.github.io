@@ -5,8 +5,6 @@ in_search_index = false
 
 +++
 
-Fiction, philosophy, and life reads that stayed with me. Some rewired how I think. Some just hit harder than they had any right to.
-
 ### Fiction
 
 Novels and stories that stayed with me. Some are philosophical without being philosophy textbooks. Some are just brutal and beautiful on their own terms.
@@ -76,6 +74,7 @@ When I am talking about Philosophy, don't confuse it with Theology. I have a lov
 * The Right to Oblivion: Privacy and the Good Life
 * The Structure of Scientific Revolutions
 * Why I am an Atheist
+* Talmud
 
 These have been wonderful reads and have exposed me to a new me!
 
