@@ -196,6 +196,19 @@ img {
     max-width: 100%;
 }
 
+.reads-gallery {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 1em 0;
+
+    img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+}
+
 // Excalidraw diagrams - invert colors in dark mode
 // Use class="excalidraw" or place in a container with class="diagram"
 img.excalidraw,
