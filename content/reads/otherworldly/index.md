@@ -101,5 +101,5 @@ Psychology, identity, parenting, work, love, aging, and the messy business of be
 
 Some wonderful talks:
 
-* [Achieving your childhood dreams](tab:https://www.youtube.com/watch?v=ji5_MqicxSo&t=40s)
-* [Building a Life](tab:https://www.youtube.com/watch?v=wLn28DrSF68&t)
+* [Achieving your childhood dreams](https://www.youtube.com/watch?v=ji5_MqicxSo&t=40s)
+* [Building a Life](https://www.youtube.com/watch?v=wLn28DrSF68&t)

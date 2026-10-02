@@ -158,7 +158,7 @@ I have not done a PHD, i have talked to some, and worked with 3/4 PHDs maybe. so
 
 I have had friends in IITK tell me that they will apply for PHD as backup incase they dont get a job as SWE. I mean yeah job market is fucked, but this analogous to saying that you will do a startup if you cant find a job. Its not the less risky path that people are imagining. PHDs demand grit over a long period, and unfortunately you might realize after some years that you are a loser who cant publish tons of papers in A* conferences, and you dont wanna do this anymore. If you do PHD, you have spent years on some niche topic, and there is no guarantee that your niche is gonna get good outcomes later. You cant really forsee 5-6 years can you? Yes, people who did PHD in AI are now reaping benefits, but you cant really replicate whats done. PHD is a risky move, your entire youth is spent in a nerdy way, you sure you want that?
 
-Also keep in mind, [an academic brain is quite different from a founder's brain and the transition is quite challenging](tab:https://fchaubard.github.io/academic_brain_vs_founder_brain.html).
+Also keep in mind, [an academic brain is quite different from a founder's brain and the transition is quite challenging](https://fchaubard.github.io/academic_brain_vs_founder_brain.html).
 
 ## New unicorn FDEs
 

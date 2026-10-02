@@ -371,7 +371,7 @@ def forward_linear(self, x, state=None):
 ```
 > Notice the difference! softmax attention returns (k, v) that grow with sequence length. Linear attention returns a fixed-size state matrix.
 
-If you see [original paper](tab:https://arxiv.org/pdf/2006.16236), they say `the cost per time-step for transformers scales with the square of the current sequence length` which might trip you up! Today we know Flash Attention makes softmax attention practical. Well the paper was released in 2020 (a different world altogether). 
+If you see [original paper](https://arxiv.org/pdf/2006.16236), they say `the cost per time-step for transformers scales with the square of the current sequence length` which might trip you up! Today we know Flash Attention makes softmax attention practical. Well the paper was released in 2020 (a different world altogether). 
 ```python
 # 2020-era: recompute everything, no KV cache
 def generate_token(model, all_previous_tokens):
@@ -543,7 +543,7 @@ for i in range(t):
 ```
 Each step depends on the previous state. GPUs hate this. They want big parallel matrix multiplies, not tiny sequential ones. This is why naive linear attention is slower than Flash Attention in practice despite being O(n) vs O(n²).
 
-The [DeltaNet](tab:https://arxiv.org/pdf/2406.06484) paper solves this with chunking. Split the sequence into chunks of size C, then within each chunk, do normal quadratic attention (parallel, GPU-friendly) and across chunks, use the recurrent state update (sequential, but only T/C steps instead of T)
+The [DeltaNet](https://arxiv.org/pdf/2406.06484) paper solves this with chunking. Split the sequence into chunks of size C, then within each chunk, do normal quadratic attention (parallel, GPU-friendly) and across chunks, use the recurrent state update (sequential, but only T/C steps instead of T)
 
 ```python
 S = torch.zeros(b, h, dh, dh) if cache is None else cache
@@ -650,7 +650,7 @@ Why does this matter? The D×D state matrix has limited capacity. With a single 
 
 This was Moonshot AI's approach before K3. The idea was simple, if softmax attention is expensive at long contexts and linear attention loses expressiveness, why not use both?
 
-[Kimi Linear](tab:https://arxiv.org/abs/2510.26692) made a bold claim :
+[Kimi Linear](https://arxiv.org/abs/2510.26692) made a bold claim :
 > "We introduce Kimi Linear, a hybrid linear attention architecture that, for the first time, outperforms full attention under fair comparisons across various scenarios—including short-context, long-context, and reinforcement learning (RL) scaling regimes."
 
 They used a hybrid architecture:
@@ -705,7 +705,7 @@ K3 is natively multimodal - vision is built into the architecture from the start
 
 ### Stable LatentMoE
 Training a 2.8T parameter model is hard. K3 uses a Stable LatentMoE framework that combines:
-- The MuonClip optimizer (from [Kimi K2](tab:https://arxiv.org/pdf/2507.20534)) for training stability
+- The MuonClip optimizer (from [Kimi K2](https://arxiv.org/pdf/2507.20534)) for training stability
 - Careful expert routing to prevent collapse
 - Latent representations that compress the expert outputs
 

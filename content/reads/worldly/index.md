@@ -66,5 +66,5 @@ Books about how power, institutions, inequality, and collective stories shape th
 
 Some wonderful talks:
 
-* [Justice](tab:https://youtube.com/playlist?list=PL30C13C91CFFEFEA6&si=gZcJBmOPKFTUYpy5)
-* [Mass Immigration](tab:https://www.youtube.com/watch?v=UMGl30B5HpQ)
+* [Justice](https://youtube.com/playlist?list=PL30C13C91CFFEFEA6&si=gZcJBmOPKFTUYpy5)
+* [Mass Immigration](https://www.youtube.com/watch?v=UMGl30B5HpQ)
