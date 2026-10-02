@@ -12,7 +12,7 @@ in_search_index = false
 *Bachelors of Science* in *Earth Sciences* (major), *Computer Science* (minor) and *Philosophy* (minor) at **Indian Institute of Technology, Kanpur**
 > Thesis under [Prof Dibakar Ghosal](https://home.iitk.ac.in/~dghosal/Home.html) and [Prof Subhojit Roy](https://www.cse.iitk.ac.in/users/subhajit/)
 
-During my undergrad years, I had a very curiosity-driven approach to STEM and I fundamentally pursued Computational Sciences with some Philosophy. I enjoyed inter-disciplinary research quite a lot! Got my ([bachelors thesis](/education/neurIPS_ai4science.pdf))  published as well in [NeurIPS AI for Science Workshop](https://ai4sciencecommunity.github.io/neurips26.html).
+During my undergrad years, I had a very curiosity-driven approach to STEM and I fundamentally pursued Computational Sciences with some Philosophy. I enjoyed inter-disciplinary research quite a lot! Got my [bachelors thesis](/education/neurIPS_ai4science.pdf)  published as well in [NeurIPS AI for Science Workshop](https://ai4sciencecommunity.github.io/neurips26.html).
 
 Undergrad was very special time of my life! I cherish my alma-mater way beyond the courses I took there, literally did all the hard cool courses I could find in STEM! I spent my time there figuring out what I actually wanted to do with my life! It was the first time in my life that I had some individual freedom and autonomy. I couldn't care less about studies (fuked up my GPA). Did some solo tripping asking random people to take my pics, roamed in late winter nights with my drunken girls, played some music here and there, and felt inferior to some pure math researchers, and more that cant be expressed in words Yᵒᵘ Oᶰˡʸ Lᶤᵛᵉ Oᶰᶜᵉ
 
