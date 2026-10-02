@@ -7,10 +7,10 @@ in_search_index = false
 ## Education
 
 *Masters of Science* in *Computer Science* with specialization in Machine Learning from **Georgia Institute of Technology**
-> (Thesis under [Prof. Felix J. Herrmann in SLIM](https://slim.gatech.edu/people/team))
+> Thesis under [Prof. Felix J. Herrmann in SLIM](https://slim.gatech.edu/people/team)
 
 *Bachelors of Science* in *Earth Sciences* (major), *Computer Science* (minor) and *Philosophy* (minor) at **Indian Institute of Technology, Kanpur**
-> (Thesis under [Prof Dibakar Ghosal](https://home.iitk.ac.in/~dghosal/Home.html) and [Prof Subhojit Roy](https://www.cse.iitk.ac.in/users/subhajit/))
+> Thesis under [Prof Dibakar Ghosal](https://home.iitk.ac.in/~dghosal/Home.html) and [Prof Subhojit Roy](https://www.cse.iitk.ac.in/users/subhajit/)
 
 During my undergrad years, I had a very curiosity-driven approach to STEM and I fundamentally pursued Computational Sciences with some Philosophy. I enjoyed inter-disciplinary research quite a lot! Got my bachelors thesis published as well ([Matching the wavefield is not matching the CPML solver](/education/neurIPS_ai4science.pdf)) in [NeurIPS AI for Science Workshop](https://ai4sciencecommunity.github.io/neurips26.html).
 
