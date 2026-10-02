@@ -10,7 +10,8 @@
 * playing with attention mask and position id, right traingle matrix so that choice order invariant is fixed
 * understnand every parameter of transformer model as it helps build intution of things
 * scaling SDPO (latent space tv)
-* improve ai perf info on cutting that inference cost blog and attention blog
+* improve ai perf info on cutting that inference cost blog and attention blog https://www.youtube.com/watch?v=mOWXZ9Aw60M
+
 https://github.com/wafer-ai/gpu-perf-engineering-resources
 
 an intro to transformers https://arxiv.org/pdf/2304.10557
