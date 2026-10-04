@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 498" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
-  <title id="title">Copy Fail: where a 4-byte page-cache write lands</title>
-  <desc id="desc">The same Copy Fail exploit (socket AF_ALG, algif_aead, splice file pages, 4-byte write into the page cache, cached setuid binary gives root) against three boundaries. In a container the AF_ALG path and the page cache belong to the shared host kernel, so co-tenant cached files are corrupted. In a Firecracker microVM the write lands in the guest kernel's own page cache and stops at the KVM boundary; E2B's guest kernel does not even build AF_ALG AEAD. In gVisor the Sentry has no AF_ALG socket provider and returns EAFNOSUPPORT, so the host kernel path is never reached. Cloudflare mitigated its shared-kernel fleet with a bpf-lsm program on socket_bind.</desc>
+  <title id="title">Copy Fail in three kinds of sandbox</title>
+  <desc id="desc">The same Copy Fail exploit (an AF_ALG socket, algif_aead, spliced file pages, a 4-byte write into the page cache, and a cached setuid binary that gives root) against three boundaries. In a container the AF_ALG path and the page cache are part of the shared host kernel, so cached files of other tenants get corrupted. In a Firecracker microVM the write stays in the guest kernel's own page cache and stops at the KVM boundary, and E2B's guest kernel does not even build AF_ALG AEAD. In gVisor the Sentry has no AF_ALG socket support and returns EAFNOSUPPORT, so the host kernel path is never reached. Cloudflare protected its shared-kernel fleet with a bpf-lsm program on socket_bind.</desc>
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
     <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#c62f2f"/></marker>
@@ -29,14 +29,14 @@
   </style>
 
   <text class="k" x="16" y="22">CVE-2026-31431 · COPY FAIL</text>
-  <text class="t" x="16" y="42">Where a 4-byte page-cache write lands</text>
-  <text class="c" x="16" y="60">Same exploit, three boundaries. Only the shared kernel turns it into a co-tenant problem.</text>
+  <text class="t" x="16" y="42">Same exploit, three outcomes</text>
+  <text class="c" x="16" y="60">Only the shared kernel turns a 4-byte page cache write into a problem for other tenants.</text>
 
   <!-- exploit chain -->
-  <text class="lane" x="16" y="86">THE EXPLOIT · IDENTICAL IN ALL THREE COLUMNS</text>
+  <text class="lane" x="16" y="86">THE EXPLOIT, SAME IN EVERY COLUMN</text>
   <g>
     <rect class="box" x="16" y="94" width="124" height="36" rx="4"/>
-    <text class="e1" x="24" y="109">unprivileged code</text><text class="m" x="24" y="123">732-byte Python</text>
+    <text class="e1" x="24" y="109">unprivileged code</text><text class="m" x="24" y="123">~700 B of Python</text>
     <rect class="box" x="157" y="94" width="124" height="36" rx="4"/>
     <text class="e1" x="165" y="109">socket(AF_ALG)</text><text class="m" x="165" y="123">aead, authencesn</text>
     <rect class="box" x="298" y="94" width="124" height="36" rx="4"/>
@@ -78,9 +78,9 @@
   <circle cx="28" cy="353" r="3.5" fill="#c62f2f"/>
   <text class="b red" x="36" y="357">co-tenant files corrupted</text>
   <text class="red" x="36" y="371">path to root on the host</text>
-  <text class="m" x="24" y="389">Daytona: algif_aead blacklisted,</text>
-  <text class="m" x="24" y="402">patched in 12 h, creds rotated,</text>
-  <text class="m" x="24" y="415">signups paused</text>
+  <text class="m" x="24" y="389">Daytona blacklisted algif_aead,</text>
+  <text class="m" x="24" y="402">patched in ~12 hours, rotated</text>
+  <text class="m" x="24" y="415">creds, and paused signups</text>
 
   <!-- (b) firecracker -->
   <text class="h" x="257" y="166">Firecracker microVM</text>
@@ -100,9 +100,9 @@
   <circle cx="261" cy="353" r="3.5" fill="#5ea876"/>
   <text class="b" x="269" y="357">contained to one guest</text>
   <text class="m" x="269" y="371">escaping needs a 2nd bug (VMM)</text>
-  <text class="m" x="257" y="389">E2B guest kernel built without</text>
-  <text class="m" x="257" y="402">CONFIG_CRYPTO_USER_API_AEAD:</text>
-  <text class="m" x="257" y="415">socket(AF_ALG) can't open</text>
+  <text class="m" x="257" y="389">E2B builds its guest kernel</text>
+  <text class="m" x="257" y="402">without the AF_ALG AEAD option,</text>
+  <text class="m" x="257" y="415">so socket(AF_ALG) can't open</text>
 
   <!-- (c) gVisor -->
   <text class="h" x="490" y="166">gVisor</text>
@@ -121,14 +121,14 @@
   <circle cx="494" cy="353" r="3.5" fill="#9b86c9"/>
   <text class="b" x="502" y="357">bug unreachable</text>
   <text class="m" x="502" y="371">the call never leaves Sentry</text>
-  <text class="m" x="490" y="389">Sentry socket families:</text>
-  <text class="m" x="490" y="402">unix, netlink, inet, inet6,</text>
-  <text class="m" x="490" y="415">packet. Nothing else.</text>
+  <text class="m" x="490" y="389">the Sentry only has unix,</text>
+  <text class="m" x="490" y="402">netlink, inet, inet6, and</text>
+  <text class="m" x="490" y="415">packet sockets</text>
 
   <!-- shared-kernel mitigation -->
   <line x1="16" y1="430" x2="704" y2="430" stroke="#c3c3cf" stroke-width="1"/>
   <text class="lane" x="16" y="448">IF YOU MUST SHARE THE KERNEL · CLOUDFLARE'S FLEET FIX</text>
-  <text x="16" y="465" style="font-size:10.5px">bpf-lsm on socket_bind: family == AF_ALG and binary not allowlisted -&gt; deny.</text>
-  <text class="m" x="16" y="480">eBPF exporter first to find legit AF_ALG users, then enforcement; patched kernels from 4 May (+5 days).</text>
+  <text x="16" y="465" style="font-size:10.5px">A bpf-lsm program on socket_bind denies AF_ALG unless the binary is on an allowlist.</text>
+  <text class="m" x="16" y="480">They used an eBPF exporter to find real AF_ALG users first, then enforced, and patched kernels ~5 days later.</text>
 
 </svg>

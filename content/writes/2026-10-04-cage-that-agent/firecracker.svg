@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 562" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
-  <title id="title">Firecracker: one process, one microVM, two barriers</title>
-  <desc id="desc">The jailer builds a jail (chroot, cgroup, mount namespace with pivot_root, network namespace, optional PID namespace, uid/gid drop, rlimits) and execs one firecracker process per microVM. Inside that process the guest kernel and agent workload run in an anonymous memory mapping. Three kinds of thread, each with its own seccomp filter, serve the guest: fc_api serves REST on api.sock, the VMM main thread runs the virtio devices and MMDS in one epoll loop, and fc_vcpu threads run the KVM_RUN loop. The virtualization barrier separates the guest from the VMM, and the jailer barrier separates the VMM from the host kernel.</desc>
+  <title id="title">Firecracker, one process, one microVM, two barriers</title>
+  <desc id="desc">The jailer builds a jail (chroot, cgroup, mount namespace with pivot_root, network namespace, optional PID namespace, uid/gid drop, rlimits) and execs one firecracker process per microVM. Inside that process the guest kernel and agent workload run in an anonymous memory mapping. Three kinds of thread, each with its own seccomp filter, serve the guest. fc_api serves REST on api.sock, the VMM main thread runs the virtio devices and MMDS in one epoll loop, and fc_vcpu threads run the KVM_RUN loop. The virtualization barrier separates the guest from the VMM, and the jailer barrier separates the VMM from the host kernel.</desc>
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
     <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
@@ -30,7 +30,7 @@
 
   <text class="k" x="16" y="22">FIRECRACKER</text>
   <text class="t" x="16" y="42">One process, one microVM, two barriers</text>
-  <text class="c" x="16" y="60">Untrusted code gets its own kernel; the host only sees a jailed, seccomp-filtered VMM.</text>
+  <text class="c" x="16" y="60">Untrusted code gets its own kernel, and the host only sees a jailed, seccomp-filtered VMM.</text>
 
   <!-- host -->
   <rect x="16" y="72" width="688" height="418" rx="6" fill="#f5f5f8" stroke="#a3a3b3" stroke-width="1.25"/>
@@ -51,8 +51,8 @@
     <text x="30" y="364">/network-interfaces</text>
     <text x="30" y="377">/mmds</text>
     <text x="30" y="390">/snapshot/load</text>
-    <text x="30" y="403">/actions:</text>
-    <text x="30" y="416">InstanceStart</text>
+    <text x="30" y="403">/actions</text>
+    <text x="30" y="416">(InstanceStart)</text>
   </g>
 
   <!-- jail (hatched = jailer barrier) -->
@@ -109,7 +109,7 @@
   <text x="188" y="327">HTTP on api.sock</text>
   <text class="m" x="188" y="340">never fast path</text>
   <text class="m" x="188" y="353">mpsc + eventfd</text>
-  <rect class="sc" x="188" y="362" width="80" height="14" rx="7"/><text x="228" y="372.5" text-anchor="middle">seccomp: api</text>
+  <rect class="sc" x="188" y="362" width="80" height="14" rx="7"/><text x="228" y="372.5" text-anchor="middle">api seccomp</text>
   <line x1="292" y1="349" x2="318" y2="349" stroke="#232333" stroke-width="1.25" marker-end="url(#a)"/>
 
   <rect class="box" x="320" y="296" width="232" height="84" rx="4"/>
@@ -117,14 +117,14 @@
   <text x="330" y="327">virtio-net · virtio-block · vsock</text>
   <text x="330" y="340">rng · balloon · serial · i8042</text>
   <text x="330" y="353">MMDS "Dumbo" · rate limiters</text>
-  <rect class="sc" x="330" y="362" width="80" height="14" rx="7"/><text x="370" y="372.5" text-anchor="middle">seccomp: vmm</text>
+  <rect class="sc" x="330" y="362" width="80" height="14" rx="7"/><text x="370" y="372.5" text-anchor="middle">vmm seccomp</text>
 
   <rect class="box" x="576" y="296" width="96" height="84" rx="4"/>
   <text class="h" x="584" y="312" style="font-size:11px">fc_vcpu 0..N</text>
   <text x="584" y="327">KVM_RUN loop</text>
   <text class="m" x="584" y="340">MMIO/PIO exits</text>
   <text class="m" x="584" y="353">handled here</text>
-  <rect class="sc" x="581" y="362" width="86" height="14" rx="7"/><text x="624" y="372.5" text-anchor="middle">seccomp: vcpu</text>
+  <rect class="sc" x="581" y="362" width="86" height="14" rx="7"/><text x="624" y="372.5" text-anchor="middle">vcpu seccomp</text>
 
   <!-- orchestrator -> api -->
   <line x1="142" y1="311" x2="178" y2="311" stroke="#232333" stroke-width="1.25" marker-end="url(#a)"/>
@@ -150,11 +150,11 @@
   </g>
 
   <!-- numbers + quote -->
-  <text class="big" x="16" y="520">&lt;125 ms</text>
+  <text class="big" x="16" y="520">~125 ms</text>
   <text class="m" x="16" y="536">start → /sbin/init</text>
-  <text class="big" x="168" y="520">≤5 MiB</text>
+  <text class="big" x="168" y="520">under 5 MB</text>
   <text class="m" x="168" y="536">overhead per microVM</text>
-  <text class="big" x="320" y="520">150/s</text>
+  <text class="big" x="320" y="520">150ish/s</text>
   <text class="m" x="320" y="536">microVMs per host</text>
   <line x1="462" y1="506" x2="462" y2="548" stroke="#ff5f1f" stroke-width="2"/>
   <text class="q" x="472" y="516">"all vCPU threads are considered to be</text>

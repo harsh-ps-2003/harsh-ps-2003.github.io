@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 506" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
   <title id="title">Root, split into 41 capabilities</title>
-  <desc id="desc">All 41 Linux capabilities, numbered 0 to 40. Docker's default keeps 14: CHOWN, DAC_OVERRIDE, FOWNER, FSETID, KILL, SETGID, SETUID, SETPCAP, NET_BIND_SERVICE, NET_RAW, SYS_CHROOT, MKNOD, AUDIT_WRITE and SETFCAP. It drops the other 27, including the big escalation levers SYS_ADMIN, SYS_PTRACE, SYS_MODULE, NET_ADMIN and BPF. The kept set is what agents actually use, and a chmod-and-execute compromise needs none of the dropped ones.</desc>
+  <desc id="desc">All 41 Linux capabilities, numbered 0 to 40. Docker's default keeps 14 (CHOWN, DAC_OVERRIDE, FOWNER, FSETID, KILL, SETGID, SETUID, SETPCAP, NET_BIND_SERVICE, NET_RAW, SYS_CHROOT, MKNOD, AUDIT_WRITE, and SETFCAP). It drops the other 27, including the big escalation levers SYS_ADMIN, SYS_PTRACE, SYS_MODULE, NET_ADMIN, and BPF. The kept set is what agents actually use, and a chmod-and-execute compromise needs none of the dropped ones.</desc>
   <style>
     text { fill: #232333; font-size: 10.5px; }
     .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
@@ -22,13 +22,13 @@
 
   <text class="k" x="16" y="22">CAPABILITIES</text>
   <text class="t" x="16" y="42">Root, split into 41 pieces</text>
-  <text class="c" x="16" y="60">Docker keeps 14. The 14 it keeps are exactly the ones an agent uses all day.</text>
+  <text class="c" x="16" y="60">Docker keeps 14 of them, and those 14 are pretty much what an agent uses all day.</text>
 
   <!-- legend -->
   <rect class="kept" x="16" y="72" width="14" height="10" rx="2"/><text class="m" x="36" y="81">kept by Docker default (14)</text>
   <rect class="drop" x="226" y="72" width="14" height="10" rx="2"/><text class="m" x="246" y="81">dropped (27)</text>
-  <rect class="lever" x="340" y="72" width="14" height="10" rx="2"/><text class="m" x="360" y="81">dropped: escalation levers</text>
-  <text class="tag" x="704" y="81" text-anchor="end">5.8 = split from SYS_ADMIN</text>
+  <rect class="lever" x="340" y="72" width="14" height="10" rx="2"/><text class="m" x="360" y="81">escalation levers</text>
+  <text class="tag" x="704" y="81" text-anchor="end">2020 = split out of SYS_ADMIN</text>
 
   <!-- grid: n = 4r + c -->
   <rect class="kept" x="16" y="92" width="166" height="20" rx="3"/><text class="num" x="38" y="106" text-anchor="end">0</text><text class="tk" x="44" y="106">CHOWN</text>
@@ -69,25 +69,25 @@
   <rect class="drop" x="538" y="284" width="166" height="20" rx="3"/><text class="num" x="560" y="298" text-anchor="end">35</text><text class="td" x="566" y="298">WAKE_ALARM</text>
   <rect class="drop" x="16" y="308" width="166" height="20" rx="3"/><text class="num" x="38" y="322" text-anchor="end">36</text><text class="td" x="44" y="322">BLOCK_SUSPEND</text>
   <rect class="drop" x="190" y="308" width="166" height="20" rx="3"/><text class="num" x="212" y="322" text-anchor="end">37</text><text class="td" x="218" y="322">AUDIT_READ</text>
-  <rect class="drop" x="364" y="308" width="166" height="20" rx="3"/><text class="num" x="386" y="322" text-anchor="end">38</text><text class="td" x="392" y="322">PERFMON</text><text class="tag" x="523" y="322" text-anchor="end">5.8</text>
-  <rect class="lever" x="538" y="308" width="166" height="20" rx="3"/><text class="num" x="560" y="322" text-anchor="end">39</text><text class="tl" x="566" y="322">BPF</text><text class="tag" x="697" y="322" text-anchor="end">5.8</text>
+  <rect class="drop" x="364" y="308" width="166" height="20" rx="3"/><text class="num" x="386" y="322" text-anchor="end">38</text><text class="td" x="392" y="322">PERFMON</text><text class="tag" x="523" y="322" text-anchor="end">2020</text>
+  <rect class="lever" x="538" y="308" width="166" height="20" rx="3"/><text class="num" x="560" y="322" text-anchor="end">39</text><text class="tl" x="566" y="322">BPF</text><text class="tag" x="697" y="322" text-anchor="end">2020</text>
   <rect class="drop" x="16" y="332" width="166" height="20" rx="3"/><text class="num" x="38" y="346" text-anchor="end">40</text><text class="td" x="44" y="346">CHECKPOINT_RESTORE</text>
 
   <!-- annotations -->
   <line x1="16" y1="372" x2="704" y2="372" stroke="#c3c3cf" stroke-width="1"/>
   <text class="lane" x="16" y="392">WHAT AN AGENT USES FROM THE 14</text>
-  <text x="16" y="411"><tspan class="b">CHOWN FOWNER DAC_OVERRIDE</tspan><tspan class="m" dx="8">own, chmod its files</tspan></text>
+  <text x="16" y="411"><tspan class="b">CHOWN FOWNER DAC_OVERRIDE</tspan><tspan class="m" dx="8">chown, chmod its files</tspan></text>
   <text x="16" y="428"><tspan class="b">SETUID SETGID</tspan><tspan class="m" dx="8">subprocesses switch uid</tspan></text>
   <text x="16" y="445"><tspan class="b">NET_RAW</tspan><tspan class="m" dx="8">ping, raw health checks</tspan></text>
   <text x="16" y="462"><tspan class="b">KILL</tspan><tspan class="m" dx="8">kill hung child processes</tspan></text>
 
   <text class="lane" x="368" y="392">WHY THE RED FIVE ARE DROPPED</text>
-  <text x="368" y="411"><tspan class="tl">SYS_ADMIN</tspan><tspan class="m" dx="8">mount, namespaces: "the new root"</tspan></text>
+  <text x="368" y="411"><tspan class="tl">SYS_ADMIN</tspan><tspan class="m" dx="8">mount, namespaces, "the new root"</tspan></text>
   <text x="368" y="428"><tspan class="tl">SYS_MODULE</tspan><tspan class="m" dx="8">load code into the kernel</tspan></text>
   <text x="368" y="445"><tspan class="tl">SYS_PTRACE</tspan><tspan class="m" dx="8">read/write other processes</tspan></text>
   <text x="368" y="462"><tspan class="tl">NET_ADMIN</tspan><tspan class="m" dx="8">reconfigure net stack, nftables</tspan></text>
   <text x="368" y="479"><tspan class="tl">BPF</tspan><tspan class="m" dx="8">(+PERFMON) tracing reads kernel memory</tspan></text>
 
   <rect x="16" y="472" width="336" height="22" rx="4" fill="#f5f5f8"/>
-  <text x="24" y="487"><tspan class="b">Devin's compromise needed none:</tspan><tspan class="m" dx="8">chmod +x, run</tspan></text>
+  <text x="24" y="487"><tspan class="b">Devin's hack needed none of these,</tspan><tspan class="m" dx="8">chmod +x, run</tspan></text>
 </svg>

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 566" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
-  <title id="title">Seccomp: a filter at syscall entry</title>
-  <desc id="desc">A process's syscall enters the kernel and first runs the thread's seccomp BPF filter over the syscall number, architecture, instruction pointer and arguments. The filter returns an action, and the highest-precedence action wins: KILL_PROCESS, KILL_THREAD, TRAP, ERRNO, USER_NOTIF, TRACE, LOG, ALLOW. Only ALLOW reaches the shared kernel's syscall handler. Docker's default profile is an allowlist with defaultAction SCMP_ACT_ERRNO and errno EPERM. 361 syscall names are allowed outright, some are allowed only when the arguments match, some only when the container holds a capability, and the rest are never listed. An agent's syscall needs change with every task, so a tighter profile breaks tasks and a looser one leaves the kernel reachable.</desc>
+  <title id="title">Seccomp, a filter at syscall entry</title>
+  <desc id="desc">A syscall enters the kernel and first runs the seccomp BPF filter of the thread, which looks at the syscall number, architecture, instruction pointer and arguments and returns an action. The strongest action wins, in the order KILL_PROCESS, KILL_THREAD, TRAP, ERRNO, USER_NOTIF, TRACE, LOG and ALLOW, and only ALLOW gets to the shared kernel. Docker uses an allowlist that returns EPERM for anything not listed, around 360 syscalls are allowed outright, some only when the arguments match, some only with a capability, and the rest never. An agent needs different syscalls for every task, so a tight profile breaks work and a loose one leaves the kernel in reach.</desc>
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
   </defs>
@@ -22,8 +22,8 @@
   </style>
 
   <text class="k" x="16" y="22">SECCOMP-BPF</text>
-  <text class="t" x="16" y="42">A filter at syscall entry, tuned for code you already know</text>
-  <text class="c" x="16" y="60">Docker's default is an allowlist tied to capabilities. An agent has no fixed syscall set.</text>
+  <text class="t" x="16" y="42">A filter for code you already know</text>
+  <text class="c" x="16" y="60">Docker's default is an allowlist tied to capabilities, but an agent has no fixed set of syscalls.</text>
 
   <!-- ROW 1: mechanism -->
   <text class="lane" x="16" y="84">WHERE IT RUNS</text>
@@ -41,7 +41,7 @@
 
   <rect class="box" x="244" y="96" width="166" height="84" rx="4" style="stroke:#ff5f1f;stroke-width:1.75"/>
   <text class="h" x="252" y="113">seccomp filter</text>
-  <text x="252" y="129">cBPF on seccomp_data:</text>
+  <text x="252" y="129">cBPF over seccomp_data</text>
   <text x="252" y="144">nr arch ip args[0..5]</text>
   <text class="m xs" x="252" y="160">per thread, inherited,</text>
   <text class="m xs" x="252" y="173">stackable, never removed</text>
@@ -54,7 +54,7 @@
     <text class="b" x="444" y="104">KILL_PROCESS</text><text class="m xs" x="540" y="104">kill whole process</text>
     <text class="b" x="444" y="121">KILL_THREAD</text><text class="m xs" x="540" y="121">kill calling thread</text>
     <text class="b" x="444" y="138">TRAP</text><text class="m xs" x="540" y="138">SIGSYS (gVisor systrap)</text>
-    <text class="b" x="444" y="155">ERRNO</text><text class="m xs" x="540" y="155">fail: Docker returns EPERM</text>
+    <text class="b" x="444" y="155">ERRNO</text><text class="m xs" x="540" y="155">fail, Docker returns EPERM</text>
     <text class="b" x="444" y="172">USER_NOTIF</text><text class="m xs" x="540" y="172">ask a supervisor process</text>
     <text class="b" x="444" y="189">TRACE</text><text class="m xs" x="540" y="189">hand to a ptracer</text>
     <text class="b" x="444" y="206">LOG</text><text class="m xs" x="540" y="206">log, then run</text>
@@ -65,14 +65,14 @@
   <text class="b" x="238" y="261">syscall handler</text><text class="m xs" x="362" y="261">the same host kernel for every container</text>
 
   <!-- ROW 2: Docker default profile -->
-  <text class="lane" x="16" y="294">DOCKER DEFAULT · "defaultAction": "SCMP_ACT_ERRNO", "defaultErrnoRet": 1</text>
-  <text class="m xs" x="16" y="309">an allowlist: unlisted (incl. future) syscalls get EPERM · docs: "disables around 44 out of 300+"</text>
+  <text class="lane" x="16" y="294">DOCKER DEFAULT · defaultAction SCMP_ACT_ERRNO (EPERM)</text>
+  <text class="m xs" x="16" y="309">an allowlist, so unlisted and future syscalls get EPERM · the docs say it disables around 44 of 300+</text>
 
   <!-- col 1 -->
   <rect class="box" x="16" y="318" width="166" height="160" rx="4" style="stroke:#5ea876"/>
   <text class="lane" x="24" y="334">ALLOWED OUTRIGHT</text>
-  <text class="big" x="24" y="362">361</text>
-  <text class="m xs" x="78" y="361">syscall names</text>
+  <text class="big" x="24" y="362">~360</text>
+  <text class="m xs" x="88" y="361">syscall names</text>
   <text x="24" y="384">read write openat</text>
   <text x="24" y="399">mmap execve kill</text>
   <text x="24" y="414">chmod ioctl ...</text>
@@ -83,14 +83,14 @@
   <!-- col 2 -->
   <rect class="box" x="190" y="318" width="166" height="160" rx="4"/>
   <text class="lane" x="198" y="334">IF ARGS MATCH</text>
-  <text x="198" y="354"><tspan class="b">socket</tspan>: listed</text>
-  <text class="m xs" x="198" y="367">families; no AF_ALG,</text>
-  <text class="m xs" x="198" y="380">no AF_VSOCK</text>
-  <text x="198" y="398"><tspan class="b">clone</tspan>: no CLONE_NEW*</text>
+  <text x="198" y="354"><tspan class="b">socket</tspan> for listed</text>
+  <text class="m xs" x="198" y="367">families only, not</text>
+  <text class="m xs" x="198" y="380">AF_ALG or AF_VSOCK</text>
+  <text x="198" y="398"><tspan class="b">clone</tspan>, no CLONE_NEW*</text>
   <text x="198" y="416"><tspan class="b">clone3</tspan> → ENOSYS</text>
   <text class="m xs" x="198" y="429">glibc falls back to clone</text>
-  <text x="198" y="447"><tspan class="b">personality</tspan>: fixed</text>
-  <text x="198" y="465"><tspan class="b">ptrace</tspan>: kernel ≥ 4.8</text>
+  <text x="198" y="447"><tspan class="b">personality</tspan>, fixed set</text>
+  <text x="198" y="465"><tspan class="b">ptrace</tspan>, newer kernels</text>
 
   <!-- col 3 -->
   <rect class="box" x="364" y="318" width="166" height="160" rx="4"/>
@@ -123,11 +123,11 @@
 
   <!-- ROW 3: agent problem -->
   <text class="lane" x="16" y="502">THE AGENT PROBLEM</text>
-  <text class="b" x="16" y="520">Tighter: the next task breaks.</text>
-  <text class="m xs" x="16" y="535">docker build needs unshare + mount;</text>
+  <text class="b" x="16" y="520">Too tight and the next task breaks</text>
+  <text class="m xs" x="16" y="535">docker build needs unshare and mount,</text>
   <text class="m xs" x="16" y="549">perf record needs perf_event_open</text>
-  <text class="b" x="368" y="520">Looser: the kernel stays in reach.</text>
-  <text class="m xs" x="368" y="535">a strace'd web server uses ~40-50 syscalls;</text>
+  <text class="b" x="368" y="520">Too loose and the kernel stays reachable</text>
+  <text class="m xs" x="368" y="535">a web server sticks to 40 or 50ish syscalls,</text>
   <text class="m xs" x="368" y="549">an agent's set changes with every task</text>
 
 </svg>

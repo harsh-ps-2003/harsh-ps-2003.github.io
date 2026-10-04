@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 458" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
-  <title id="title">gVisor: a kernel written in Go, between the app and Linux</title>
-  <desc id="desc">In gVisor, the application's syscalls are trapped by the systrap platform. A seccomp filter with SECCOMP_RET_TRAP raises SIGSYS, and a sysmsg handler on a shared-memory alternate stack hands the registers to the Sentry. A patched fast path jumps to a trampoline without a signal. The Sentry is a Go application kernel with its own VFS, memory manager, tasks and netstack, and it implements 290 of 352 amd64 syscalls. It runs in an empty mount namespace and its own user namespace, under a seccomp allowlist of 72 base host syscalls that excludes open, socket, connect and execve. A per-container Gofer handles files over LISAFS, or hands over mount FDs under directfs. Networking reaches the host through a single AF_PACKET socket, and nvproxy forwards NVIDIA ioctls. The host kernel never sees the application's own syscalls.</desc>
+  <title id="title">gVisor, a Go kernel in front of Linux</title>
+  <desc id="desc">In gVisor, the application's syscalls are trapped by the systrap platform. A seccomp filter with SECCOMP_RET_TRAP raises SIGSYS, and a sysmsg handler on a shared-memory alternate stack hands the registers to the Sentry. A patched fast path jumps to a trampoline without a signal. The Sentry is a Go application kernel with its own VFS, memory manager, tasks and netstack, and it implements around 290 of the roughly 350 amd64 syscalls. It runs in an empty mount namespace and its own user namespace, under a seccomp allowlist of about 70 base host syscalls that excludes open, socket, connect and execve. A per-container Gofer handles files over LISAFS, or hands over mount FDs under directfs. Networking reaches the host through a single AF_PACKET socket, and nvproxy forwards NVIDIA ioctls. The host kernel never sees the application's own syscalls.</desc>
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
   </defs>
@@ -23,8 +23,8 @@
   </style>
 
   <text class="k" x="16" y="22">GVISOR</text>
-  <text class="t" x="16" y="42">A kernel written in Go, between the app and Linux</text>
-  <text class="c" x="16" y="60">App syscalls stop at the Sentry. The host kernel only sees the Sentry's short list.</text>
+  <text class="t" x="16" y="42">A Go kernel in front of Linux</text>
+  <text class="c" x="16" y="60">App syscalls stop at the Sentry, and the host kernel only sees the Sentry's own short list.</text>
 
   <text class="lane" x="16" y="84">SANDBOX (ONE SENTRY PER POD)</text>
   <text class="lane" x="500" y="84">HOST PROCESSES</text>
@@ -40,7 +40,7 @@
 
   <!-- KVM alternative -->
   <rect class="note" x="250" y="100" width="150" height="48" rx="4"/>
-  <text class="s" x="258" y="114" font-weight="700">alt: KVM platform</text>
+  <text class="s" x="258" y="114" font-weight="700">or the KVM platform</text>
   <text class="m" x="258" y="127">app in guest ring 3,</text>
   <text class="m" x="258" y="140">Sentry = kernel + VMM</text>
 
@@ -49,14 +49,14 @@
   <text class="s" x="140" y="160">syscall</text>
   <rect class="proc" x="28" y="166" width="210" height="66" rx="4"/>
   <text class="s" x="36" y="180" font-weight="700">systrap</text><text class="m" x="90" y="180">(default platform)</text>
-  <text class="s" x="36" y="194">stub thread: seccomp RET_TRAP</text>
+  <text class="s" x="36" y="194">stub thread, seccomp RET_TRAP</text>
   <text class="s" x="36" y="207">kernel → SIGSYS → sysmsg</text>
   <text class="s" x="36" y="220">regs on shared-mem alt stack</text>
 
   <rect class="note" x="250" y="166" width="150" height="66" rx="4"/>
   <text class="s" x="258" y="180" font-weight="700">fast path</text>
   <text class="m" x="258" y="194">mov sysno,%eax;syscall</text>
-  <text class="m" x="258" y="207">patched: jmp *%gs:off</text>
+  <text class="m" x="258" y="207">patched to jmp *%gs:off</text>
   <text class="m" x="258" y="220">trampoline, no SIGSYS</text>
 
   <line class="ln" x1="133" y1="232" x2="133" y2="248" marker-end="url(#a)"/>
@@ -65,13 +65,13 @@
   <!-- Sentry -->
   <rect class="sentry" x="28" y="250" width="372" height="100" rx="5"/>
   <text class="h" x="36" y="265">Sentry</text><text class="m" x="88" y="265">application kernel, Go, 1 per sandbox</text>
-  <rect class="sub" x="36" y="272" width="108" height="20" rx="3"/><text class="s" x="42" y="286">290/352 syscalls</text>
+  <rect class="sub" x="36" y="272" width="108" height="20" rx="3"/><text class="s" x="42" y="286">~290 syscalls</text>
   <rect class="sub" x="150" y="272" width="34" height="20" rx="3"/><text class="s" x="167" y="286" text-anchor="middle">VFS</text>
   <rect class="sub" x="190" y="272" width="30" height="20" rx="3"/><text class="s" x="205" y="286" text-anchor="middle">mm</text>
   <rect class="sub" x="226" y="272" width="90" height="20" rx="3"/><text class="s" x="271" y="286" text-anchor="middle">tasks·signals</text>
   <rect class="sub" x="322" y="272" width="72" height="20" rx="3"/><text class="s" x="358" y="286" text-anchor="middle">netstack</text>
   <text class="s" x="36" y="308">empty mount ns · own user ns · minimal capabilities</text>
-  <text class="s" x="36" y="322">seccomp on its own host syscalls: 72 base entries</text>
+  <text class="s" x="36" y="322">seccomp on its own host syscalls, ~70 base entries</text>
   <text class="s" x="36" y="336">none of open, openat, socket, connect, execve</text>
 
   <!-- runsc -->
@@ -83,7 +83,7 @@
   <!-- network note -->
   <rect class="note" x="500" y="166" width="204" height="66" rx="4"/>
   <text class="s" x="508" y="180" font-weight="700">network</text>
-  <text class="m" x="508" y="194">netstack runs in the Sentry;</text>
+  <text class="m" x="508" y="194">netstack runs in the Sentry,</text>
   <text class="m" x="508" y="207">host hands it 1 AF_PACKET</text>
   <text class="m" x="508" y="220">socket on the veth, no others</text>
 
@@ -91,9 +91,9 @@
   <rect class="proc" x="500" y="250" width="204" height="100" rx="4"/>
   <text class="h" x="508" y="265">Gofer</text><text class="m" x="552" y="265">1 per container</text>
   <text class="s" x="508" y="281">file proxy outside the sandbox</text>
-  <text class="m" x="508" y="295">LISAFS: socket or flipcall shm</text>
+  <text class="m" x="508" y="295">LISAFS, socket or flipcall shm</text>
   <text class="m" x="508" y="309">host FDs passed via SCM_RIGHTS</text>
-  <text class="s" x="508" y="325" font-weight="700">directfs (default, 2023)</text>
+  <text class="s" x="508" y="325" font-weight="700">directfs (now the default)</text>
   <text class="m" x="508" y="339">mount FDs → *at() + O_NOFOLLOW</text>
 
   <!-- Sentry <-> Gofer -->
@@ -103,7 +103,7 @@
 
   <!-- down to the host kernel -->
   <line class="ln" x1="60" y1="350" x2="60" y2="402" marker-end="url(#a)"/>
-  <text class="s" x="66" y="393">host syscalls (72 base)</text>
+  <text class="s" x="66" y="393">host syscalls (~70 base)</text>
   <line class="ln" x1="236" y1="350" x2="236" y2="402" marker-end="url(#a)"/>
   <text class="s" x="242" y="393">AF_PACKET</text>
   <line class="ln" x1="318" y1="350" x2="318" y2="402" marker-end="url(#a)" stroke-dasharray="3 2"/>
@@ -115,6 +115,6 @@
   <rect x="16" y="404" width="688" height="40" rx="4" fill="#e9e9ef" stroke="#a3a3b3" stroke-width="1"/>
   <text class="h" x="26" y="420">host Linux kernel</text>
   <text class="m" x="170" y="420">sees the Sentry's filtered syscalls, Gofer file ops, AF_PACKET</text>
-  <text class="s" x="26" y="436">never the app's own: <tspan class="acc">"no system call is passed through directly to the host"</tspan></text>
+  <text class="s" x="26" y="436">never the app's own, as gVisor puts it <tspan class="acc">"no system call is passed through directly to the host"</tspan></text>
 
 </svg>

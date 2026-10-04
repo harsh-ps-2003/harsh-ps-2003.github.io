@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 424" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
   <title id="title">Same agent code, three different first kernels</title>
-  <desc id="desc">Three stacks compared row by row. In a runc container the agent's roughly 385 x86_64 syscalls go straight into the shared host kernel, where namespaces, cgroups, capabilities, seccomp and LSMs are filters on that one kernel. Under gVisor, the syscalls are trapped into the Sentry, a Go user-space kernel implementing 290 of 352 syscalls, and only the Sentry's seccomp-filtered host syscalls reach the host kernel. In a Firecracker microVM, the syscalls go to a full guest kernel, and only VM exits and virtio queues reach KVM and the jailed Rust VMM. An orange line marks where untrusted code first reaches host-kernel code in each stack.</desc>
+  <desc id="desc">Three stacks compared row by row. In a runc container the agent's roughly 385 x86_64 syscalls go straight into the shared host kernel, where namespaces, cgroups, capabilities, seccomp and LSMs are filters on that one kernel. Under gVisor, the syscalls are trapped into the Sentry, a Go user-space kernel that implements around 290 of roughly 350 syscalls, and only the Sentry's seccomp-filtered host syscalls reach the host kernel. In a Firecracker microVM, the syscalls go to a full guest kernel, and only VM exits and virtio queues reach KVM and the jailed Rust VMM. An orange line marks where untrusted code first reaches host-kernel code in each stack.</desc>
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
     <marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#ff5f1f"/></marker>
@@ -68,7 +68,7 @@
   <text class="m" x="100" y="209">= filters on this one kernel</text>
   <text class="red" x="100" y="234">shared by every container</text>
   <text class="red" x="100" y="247">on the node</text>
-  <text class="m" x="100" y="272">Docker blocks ~44 of them;</text>
+  <text class="m" x="100" y="272">Docker blocks ~44 of them,</text>
   <text class="m" x="100" y="285">the rest reach page cache,</text>
   <text class="m" x="100" y="298">VFS, net stack, mm …</text>
   <text class="m" x="100" y="322">bug here = host bug</text>
@@ -78,13 +78,13 @@
   <text class="s" x="320" y="137">trapped (systrap)</text>
   <rect class="sentry" x="300" y="148" width="196" height="66" rx="4"/>
   <text class="h" x="308" y="166">Sentry</text><text class="m" x="360" y="166">Go, user space</text>
-  <text class="s" x="308" y="181">implements 290/352</text>
+  <text class="s" x="308" y="181">implements ~290 of ~350</text>
   <text class="s" x="308" y="194">amd64 syscalls itself</text>
   <text class="m" x="308" y="207">own VFS, mm, netstack</text>
   <line class="ln" x1="312" y1="214" x2="312" y2="226" marker-end="url(#a)"/>
   <rect class="proc" x="300" y="228" width="196" height="56" rx="4"/>
   <text class="s" x="308" y="245" font-weight="700">Sentry's own syscalls</text>
-  <text class="s" x="308" y="259">seccomp: 72 base entries</text>
+  <text class="s" x="308" y="259">seccomp, ~70 base entries</text>
   <text class="m" x="308" y="273">no open/socket/execve</text>
   <line x1="312" y1="284" x2="312" y2="303" stroke="#ff5f1f" stroke-width="1.5" marker-end="url(#ao)"/>
   <text class="acc" x="320" y="298">filtered host calls</text>
@@ -106,8 +106,8 @@
   <rect class="host" x="508" y="228" width="196" height="56" rx="4"/>
   <line class="edge" x1="508" y1="228" x2="704" y2="228"/>
   <text class="s" x="516" y="245" font-weight="700">KVM → firecracker VMM</text>
-  <text class="s" x="516" y="259">MMIO/PIO exits, 5 devices</text>
-  <text class="m" x="516" y="273">VMM: Rust, jailed, seccomp</text>
+  <text class="s" x="516" y="259">MMIO/PIO exits, ~5 devices</text>
+  <text class="m" x="516" y="273">VMM in Rust, jailed, seccomp</text>
   <line class="ln" x1="520" y1="284" x2="520" y2="303" marker-end="url(#a)"/>
   <text class="s" x="528" y="298">VMM's filtered calls</text>
   <rect class="host" x="508" y="306" width="196" height="34" rx="4"/>
@@ -123,7 +123,7 @@
   <text class="s" x="92" y="392">+ ecosystem, fastest start</text>
   <text class="red" x="92" y="406">− shared kernel, yearly escapes</text>
   <text class="s" x="300" y="392">+ no KVM needed, fast start</text>
-  <text class="red" x="300" y="406">− 62 syscalls missing, IO tax</text>
+  <text class="red" x="300" y="406">− 60ish syscalls missing, IO tax</text>
   <text class="s" x="508" y="392">+ own kernel, snapshot restore</text>
   <text class="red" x="508" y="406">− no GPU, needs KVM, more ops</text>
 

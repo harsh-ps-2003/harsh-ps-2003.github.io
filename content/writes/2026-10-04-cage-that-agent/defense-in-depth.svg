@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 458" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
-  <title id="title">Defense in depth for one tool call</title>
-  <desc id="desc">A tool call passes six gates in order: identity, policy engine, sandbox, network egress, tool gateway and human gate, before it becomes a side effect. Each gate can stop the call, and each gate writes to an append-only per-thread audit log. The right column lists what goes wrong when a gate is skipped.</desc>
+  <title id="title">Six gates for every tool call</title>
+  <desc id="desc">A tool call passes six gates in order (identity, policy engine, sandbox, network egress, tool gateway, and human gate) before it becomes a side effect. Each gate can stop the call, and each gate writes to an append-only per-thread audit log. The right column lists what goes wrong when a gate is skipped.</desc>
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
     <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#c62f2f"/></marker>
@@ -19,8 +19,8 @@
   </style>
 
   <text class="k" x="16" y="22">DEFENSE IN DEPTH</text>
-  <text class="t" x="16" y="42">Every tool call should pass every gate</text>
-  <text class="c" x="16" y="60">Each layer stops a different failure. Skip one and its failures land on the next.</text>
+  <text class="t" x="16" y="42">Six gates for every tool call</text>
+  <text class="c" x="16" y="60">Each gate stops a different failure, and if you skip one its failures move to the next gate.</text>
 
   <text class="lane" x="56" y="90">GATE</text>
   <text class="lane" x="262" y="90">STOPS, FOR EXAMPLE</text>
@@ -97,7 +97,7 @@
   <text class="red" x="262" y="295">169.254.169.254, attacker.com</text>
   <text class="m" x="262" y="309">default deny + domain allowlist</text>
   <text class="red" x="262" y="343">right tool, wrong repo/tenant</text>
-  <text class="m" x="262" y="357">JIT token: narrow scope, short TTL</text>
+  <text class="m" x="262" y="357">JIT token, narrow scope, short TTL</text>
   <text class="red" x="262" y="391">merge, deploy, email, charge $</text>
   <text class="m" x="262" y="405">held for a click, not denied</text>
 
@@ -120,6 +120,6 @@
   <!-- side effect -->
   <rect x="76" y="424" width="140" height="20" rx="4" fill="#e2f2e6" stroke="#5ea876" stroke-width="1.25"/>
   <text x="146" y="438" text-anchor="middle">side effect</text>
-  <text class="m" x="232" y="438">runs with a scoped token; every decision above is in the log</text>
+  <text class="m" x="232" y="438">runs with a scoped token, and every decision above is in the log</text>
 
 </svg>

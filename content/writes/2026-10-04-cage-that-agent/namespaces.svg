@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 546" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
   <title id="title">One kernel, many views</title>
-  <desc id="desc">Two containers each get their own view of eight kernel subsystems through namespaces (mount, PID, network, user, UTS, IPC, cgroup, time), but both send syscalls to the same host kernel, which runs one copy of the scheduler, memory and page cache, VFS, TCP/IP stack, nf_tables, crypto API, BPF, io_uring, keyrings and procfs/sysfs for everyone. Escapes come from kernel bugs reachable by a syscall, leaked host file descriptors or mounts, and host-global knobs. A table lists what each namespace isolates and what stays shared.</desc>
+  <desc id="desc">Two containers each get a separate view of eight kernel subsystems through namespaces (mount, PID, network, user, UTS, IPC, cgroup, time), but both send syscalls to the same host kernel, which runs one copy of the scheduler, memory and page cache, VFS, TCP/IP stack, nf_tables, crypto API, BPF, io_uring, keyrings and procfs/sysfs for everyone. Escapes come from kernel bugs reachable by a syscall, leaked host file descriptors or mounts, and host-global knobs. A table lists what each namespace isolates and what stays shared.</desc>
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
   </defs>
@@ -37,7 +37,7 @@
     <rect class="ns" x="104" y="96" width="74" height="32" rx="3"/><text class="b" x="110" y="109">pid</text><text class="m" x="110" y="122">1 = nginx</text>
     <rect class="ns" x="184" y="96" width="74" height="32" rx="3"/><text class="b" x="190" y="109">net</text><text class="m" x="190" y="122">10.0.0.2</text>
     <rect class="ns" x="264" y="96" width="74" height="32" rx="3"/><text class="b" x="270" y="109">user</text><text class="m" x="270" y="122">0 → 100000</text>
-    <rect class="ns" x="24" y="136" width="74" height="32" rx="3"/><text class="b" x="30" y="149">uts</text><text class="m" x="30" y="162">host: a1b2</text>
+    <rect class="ns" x="24" y="136" width="74" height="32" rx="3"/><text class="b" x="30" y="149">uts</text><text class="m" x="30" y="162">host a1b2</text>
     <rect class="ns" x="104" y="136" width="74" height="32" rx="3"/><text class="b" x="110" y="149">ipc</text><text class="m" x="110" y="162">shm, mq</text>
     <rect class="ns" x="184" y="136" width="74" height="32" rx="3"/><text class="b" x="190" y="149">cgroup</text><text class="m" x="190" y="162">a.scope</text>
     <rect class="ns" x="264" y="136" width="74" height="32" rx="3"/><text class="b" x="270" y="149">time</text><text class="m" x="270" y="162">offset 0</text>
@@ -51,7 +51,7 @@
     <rect class="ns" x="460" y="96" width="74" height="32" rx="3"/><text class="b" x="466" y="109">pid</text><text class="m" x="466" y="122">1 = python</text>
     <rect class="ns" x="540" y="96" width="74" height="32" rx="3"/><text class="b" x="546" y="109">net</text><text class="m" x="546" y="122">10.0.0.3</text>
     <rect class="ns" x="620" y="96" width="74" height="32" rx="3"/><text class="b" x="626" y="109">user</text><text class="m" x="626" y="122">0 → 165536</text>
-    <rect class="ns" x="380" y="136" width="74" height="32" rx="3"/><text class="b" x="386" y="149">uts</text><text class="m" x="386" y="162">host: c3d4</text>
+    <rect class="ns" x="380" y="136" width="74" height="32" rx="3"/><text class="b" x="386" y="149">uts</text><text class="m" x="386" y="162">host c3d4</text>
     <rect class="ns" x="460" y="136" width="74" height="32" rx="3"/><text class="b" x="466" y="149">ipc</text><text class="m" x="466" y="162">shm, mq</text>
     <rect class="ns" x="540" y="136" width="74" height="32" rx="3"/><text class="b" x="546" y="149">cgroup</text><text class="m" x="546" y="162">b.scope</text>
     <rect class="ns" x="620" y="136" width="74" height="32" rx="3"/><text class="b" x="626" y="149">time</text><text class="m" x="626" y="162">offset 0</text>
@@ -66,7 +66,7 @@
 
   <!-- kernel -->
   <rect class="kern" x="16" y="212" width="688" height="84" rx="5"/>
-  <text class="h" x="26" y="228">host kernel</text><text class="m" x="120" y="228">one copy in memory; runs every container's syscalls</text>
+  <text class="h" x="26" y="228">host kernel</text><text class="m" x="120" y="228">one copy in memory, runs every container's syscalls</text>
   <g>
     <rect class="sub" x="26" y="236" width="127" height="22" rx="3"/><text x="34" y="251">scheduler</text>
     <rect class="sub" x="161" y="236" width="127" height="22" rx="3"/><text x="169" y="251">mm + page cache</text>
@@ -95,7 +95,7 @@
 
   <!-- table -->
   <text class="lane" x="16" y="348">NAMESPACE</text>
-  <text class="lane" x="140" y="348">GIVES IT ITS OWN</text>
+  <text class="lane" x="140" y="348">SEPARATE PER CONTAINER</text>
   <text class="lane" x="384" y="348">STILL SHARED / KNOWN GAP</text>
   <line x1="16" y1="354" x2="704" y2="354" stroke="#232333" stroke-width="1"/>
   <g>
@@ -105,35 +105,35 @@
     <rect x="16" y="488" width="688" height="22" fill="#f5f5f8"/>
   </g>
   <g>
-    <text class="tb" x="22" y="371">mount</text><text class="m" x="76" y="371">2.4.19</text>
+    <text class="tb" x="22" y="371">mount</text><text class="m" x="76" y="371">2002</text>
     <text class="row" x="140" y="371">mount table, filesystem tree</text>
     <text class="row" x="384" y="371">mount propagation crosses namespaces</text>
 
-    <text class="tb" x="22" y="393">pid</text><text class="m" x="76" y="393">2.6.24</text>
-    <text class="row" x="140" y="393">PID numbers; app is PID 1</text>
-    <text class="row" x="384" y="393">parent sees all; stale /proc = host PIDs</text>
+    <text class="tb" x="22" y="393">pid</text><text class="m" x="76" y="393">2008</text>
+    <text class="row" x="140" y="393">PID numbers, app is PID 1</text>
+    <text class="row" x="384" y="393">parent sees all, stale /proc shows host PIDs</text>
 
-    <text class="tb" x="22" y="415">net</text><text class="m" x="76" y="415">2.6.29</text>
+    <text class="tb" x="22" y="415">net</text><text class="m" x="76" y="415">2009</text>
     <text class="row" x="140" y="415">interfaces, routes, ports, rules</text>
-    <text class="row" x="384" y="415">one TCP/IP stack; abstract sockets</text>
+    <text class="row" x="384" y="415">one TCP/IP stack, abstract sockets</text>
 
-    <text class="tb" x="22" y="437">user</text><text class="m" x="76" y="437">3.8</text>
-    <text class="row" x="140" y="437">uid/gid map: root ≠ host root</text>
+    <text class="tb" x="22" y="437">user</text><text class="m" x="76" y="437">2013</text>
+    <text class="row" x="140" y="437">uid/gid map, root ≠ host root</text>
     <text class="row" x="384" y="437">unlocks nf_tables, FUSE, BPF paths</text>
 
-    <text class="tb" x="22" y="459">uts</text><text class="m" x="76" y="459">2.6.19</text>
+    <text class="tb" x="22" y="459">uts</text><text class="m" x="76" y="459">2006</text>
     <text class="row" x="140" y="459">hostname, NIS domain</text>
     <text class="row m" x="384" y="459">low risk</text>
 
-    <text class="tb" x="22" y="481">ipc</text><text class="m" x="76" y="481">2.6.19</text>
+    <text class="tb" x="22" y="481">ipc</text><text class="m" x="76" y="481">2006</text>
     <text class="row" x="140" y="481">SysV IPC, POSIX mqueues</text>
     <text class="row" x="384" y="481">/dev/shm needs the mount ns too</text>
 
-    <text class="tb" x="22" y="503">cgroup</text><text class="m" x="76" y="503">4.6</text>
+    <text class="tb" x="22" y="503">cgroup</text><text class="m" x="76" y="503">2016</text>
     <text class="row" x="140" y="503">view of /proc/self/cgroup</text>
     <text class="row" x="384" y="503">limits come from cgroups, not the ns</text>
 
-    <text class="tb" x="22" y="525">time</text><text class="m" x="76" y="525">5.6</text>
+    <text class="tb" x="22" y="525">time</text><text class="m" x="76" y="525">2020</text>
     <text class="row" x="140" y="525">MONOTONIC/BOOTTIME offsets</text>
     <text class="row" x="384" y="525">wall clock (REALTIME) is shared</text>
   </g>

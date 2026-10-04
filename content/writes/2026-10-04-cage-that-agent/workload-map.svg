@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 612" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
   <title id="title">Agent sandbox workload map</title>
-  <desc id="desc">Eight cells from three axes: ephemeral or persistent, CPU or GPU, stateless or stateful. E2B sits in ephemeral CPU stateless on Firecracker, Modal in ephemeral GPU stateless on gVisor, Fly Sprites in persistent CPU stateful on Firecracker. Persistent CPU stateful is crowded (Vercel, Together, Cursor, Coder, Manus, Daytona, Cloudflare). Ephemeral stateful cells are thin, persistent stateless cells are empty, and persistent GPU stateful has VM substrate but no agent-first product. GKE Agent Sandbox and Northflank span cells by configuration.</desc>
+  <desc id="desc">Eight cells from three axes, ephemeral or persistent, CPU or GPU, and stateless or stateful. E2B sits in ephemeral CPU stateless on Firecracker, Modal in ephemeral GPU stateless on gVisor, and Fly Sprites in persistent CPU stateful on Firecracker. Persistent CPU stateful is crowded (Vercel, Together, Cursor, Coder, Manus, Daytona, Cloudflare), the ephemeral stateful cells are thin, the persistent stateless cells are empty, and persistent GPU stateful has VM substrate but no agent-first product. GKE Agent Sandbox and Northflank span cells depending on configuration.</desc>
   <style>
     text { fill: #232333; font-size: 11px; }
     .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
@@ -31,7 +31,7 @@
   </defs>
   <text class="k" x="16" y="22">WORKLOAD MODEL</text>
   <text class="t" x="16" y="42">Pick the cell first, then the vendor</text>
-  <text class="c" x="16" y="60">Duration x resource x session = 8 cells. Same primitive, very different products.</text>
+  <text class="c" x="16" y="60">Three axes give 8 cells, and one primitive can ship as very different products.</text>
   <text class="lane" x="112" y="88">STATELESS</text><text class="m" x="182.0" y="88">each call independent</text>
   <text class="lane" x="412" y="88">STATEFUL</text><text class="m" x="474.0" y="88">named box, fs + procs persist</text>
   <line x1="16" y1="96" x2="704" y2="96" stroke="#c3c3cf" stroke-width="1"/>
@@ -61,7 +61,7 @@
   <text class="n" x="422" y="126">AgentCore</text>
 <rect class="p mat" x="488.4" y="115.5" width="52.0" height="14" rx="3"/>
 <text class="pt" x="493.4" y="126.0">preview</text>
-  <text class="m" x="547.4" y="126">session storage, 1 GB</text>
+  <text class="m" x="547.4" y="126">session storage, ~1 GB</text>
   <text class="m" x="696" y="170" text-anchor="end" font-style="italic">barely exists outside AgentCore</text>
   <rect class="empty" x="112" y="182" width="292" height="160" rx="5"/>
   <text class="m" x="258.0" y="266.0" text-anchor="middle">no vendor in this map</text>
@@ -123,21 +123,21 @@
 <text class="pt" x="140.2" y="538.0">gVisor</text>
 <rect class="p hw" x="186.2" y="527.5" width="52.0" height="14" rx="3"/>
 <text class="pt" x="191.2" y="538.0">microVM</text>
-  <text class="m" x="245.2" y="538">gVisor + short pods = Modal's cell; Kata + Pod Snapshots = Sprites'</text>
+  <text class="m" x="245.2" y="538">gVisor + short pods sits near Modal, Kata + Pod Snapshots near Sprites</text>
   <text class="n" x="16" y="556">Northflank</text>
 <rect class="p hw" x="89.0" y="545.5" width="52.0" height="14" rx="3"/>
 <text class="pt" x="94.0" y="556.0">microVM</text>
 <rect class="p gv" x="146.0" y="545.5" width="46.0" height="14" rx="3"/>
 <text class="pt" x="151.0" y="556.0">gVisor</text>
-  <text class="m" x="199.0" y="556">Kata / Cloud Hypervisor or gVisor; ephemeral and persistent, BYOC</text>
+  <text class="m" x="199.0" y="556">Kata on Cloud Hypervisor or gVisor, ephemeral and persistent, BYOC</text>
 <rect class="p hw" x="16.0" y="569.5" width="22.0" height="14" rx="3"/>
 <text class="pt" x="21.0" y="580.0">FC</text>
-  <text class="m" x="43.0" y="580">Firecracker / microVM / VM: own kernel</text>
+  <text class="m" x="43.0" y="580">own kernel (Firecracker, microVM, VM)</text>
 <rect class="p gv" x="285.0" y="569.5" width="46.0" height="14" rx="3"/>
 <text class="pt" x="290.0" y="580.0">gVisor</text>
   <text class="m" x="336.0" y="580">user-space kernel</text>
 <rect class="p ct" x="452.0" y="569.5" width="64.0" height="14" rx="3"/>
 <text class="pt" x="457.0" y="580.0">container</text>
   <text class="m" x="521.0" y="580">shared host kernel</text>
-  <text class="src" x="16" y="602">Orange names: E2B and Fly Sprites both run Firecracker, yet sit in opposite cells.</text>
+  <text class="src" x="16" y="602">E2B and Fly Sprites (orange) both run Firecracker but sit in opposite cells.</text>
 </svg>

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 578" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
-  <title id="title">20 years of bolted-on Linux isolation</title>
-  <desc id="desc">Timeline from 2002 to 2026 in six lanes: namespaces, cgroups, syscall filtering, capabilities and LSMs, runtimes, and container escape CVEs. Primitives arrived one at a time across kernel releases; escapes cluster after 2019, mostly in runtime setup code, with Copy Fail in 2026 landing in the shared kernel itself.</desc>
+  <title id="title">Linux isolation, bolted on over 20ish years</title>
+  <desc id="desc">Timeline from 2002 to 2026 in six lanes (namespaces, cgroups, syscall filtering, capabilities and LSMs, runtimes, and container escape CVEs). The pieces arrived one at a time, the escapes cluster after 2019 and sit mostly in runtime setup code, and Copy Fail in 2026 is a bug in the shared kernel itself.</desc>
   <style>
     text { fill: #232333; font-size: 10px; }
     .m { fill: #5c5c6e; }
@@ -19,8 +19,8 @@
   </style>
 
   <text class="k" x="16" y="22">LINUX ISOLATION · 2002 → 2026</text>
-  <text class="t" x="16" y="42">20 years of bolted-on isolation</text>
-  <text class="c" x="16" y="60">Each primitive shipped for the problem of its year. Nobody owned the seams between them.</text>
+  <text class="t" x="16" y="42">Bolted on over 20ish years</text>
+  <text class="c" x="16" y="60">Each piece shipped to fix the problem of its year, and nobody looked after the gaps between them.</text>
 
   <!-- 5-year bands -->
   <g fill="#f5f5f8">
@@ -43,7 +43,7 @@
   <!-- lane headers -->
   <text class="lane" x="50" y="86">NAMESPACES</text>
   <text class="lane" x="150" y="86">CGROUPS</text>
-  <text class="lane" x="238" y="86">SYSCALL FLT</text>
+  <text class="lane" x="238" y="86">SECCOMP</text>
   <text class="lane" x="338" y="86">CAPS / LSM</text>
   <text class="lane" x="446" y="86">RUNTIMES</text>
   <text class="lane" x="550" y="86">ESCAPES (CVE)</text>
@@ -78,13 +78,13 @@
   </g>
 
   <!-- NAMESPACES (x 44..144) -->
-  <circle class="dot" cx="51" cy="102.5" r="2.5"/><text x="57" y="106">mnt 2.4.19</text>
-  <circle class="dot" cx="51" cy="170.5" r="2.5"/><text x="57" y="174">uts,ipc 2.6.19</text>
-  <circle class="dot" cx="51" cy="216.5" r="2.5"/><text x="57" y="220">pid 2.6.24</text>
-  <circle class="dot" cx="51" cy="233.5" r="2.5"/><text x="57" y="237">net 2.6.29</text>
-  <circle class="dot" cx="51" cy="301.5" r="2.5"/><text x="57" y="305" font-weight="600">user 3.8</text>
-  <circle class="dot" cx="51" cy="352.5" r="2.5"/><text x="57" y="356">cgroup 4.6</text>
-  <circle class="dot" cx="51" cy="444.5" r="2.5"/><text x="57" y="448">time 5.6</text>
+  <circle class="dot" cx="51" cy="102.5" r="2.5"/><text x="57" y="106">mnt</text>
+  <circle class="dot" cx="51" cy="170.5" r="2.5"/><text x="57" y="174">uts + ipc</text>
+  <circle class="dot" cx="51" cy="216.5" r="2.5"/><text x="57" y="220">pid</text>
+  <circle class="dot" cx="51" cy="233.5" r="2.5"/><text x="57" y="237">net</text>
+  <circle class="dot" cx="51" cy="301.5" r="2.5"/><text x="57" y="305" font-weight="600">user</text>
+  <circle class="dot" cx="51" cy="352.5" r="2.5"/><text x="57" y="356">cgroup</text>
+  <circle class="dot" cx="51" cy="444.5" r="2.5"/><text x="57" y="448">time</text>
   <text class="note" x="50" y="254">changes what a</text>
   <text class="note" x="50" y="267">process sees,</text>
   <text class="note" x="50" y="280">not what the</text>
@@ -93,23 +93,23 @@
   <!-- CGROUPS (x 144..232) -->
   <circle class="dot" cx="151" cy="170.5" r="2.5"/><text x="157" y="174">process</text><text x="157" y="186">containers</text>
   <text class="m" x="157" y="198">(Google)</text>
-  <circle class="dot" cx="151" cy="216.5" r="2.5"/><text x="157" y="220">v1 2.6.24</text>
-  <circle class="dot" cx="151" cy="352.5" r="2.5"/><text x="157" y="356">v2 4.5</text>
+  <circle class="dot" cx="151" cy="216.5" r="2.5"/><text x="157" y="220">cgroups v1</text>
+  <circle class="dot" cx="151" cy="352.5" r="2.5"/><text x="157" y="356">cgroups v2</text>
   <text class="note" x="150" y="254">built for</text>
   <text class="note" x="150" y="267">accounting,</text>
   <text class="note" x="150" y="280">not security</text>
 
   <!-- SYSCALL FILTER (x 232..332) -->
-  <circle class="dot" cx="239" cy="153.5" r="2.5"/><text x="245" y="157">strict 2.6.12</text>
-  <circle class="dot" cx="239" cy="284.5" r="2.5"/><text x="245" y="288">BPF filter 3.5</text>
-  <circle class="dot" cx="239" cy="352.5" r="2.5"/><text x="245" y="356">Docker default</text>
+  <circle class="dot" cx="239" cy="153.5" r="2.5"/><text x="245" y="157">strict mode</text>
+  <circle class="dot" cx="239" cy="284.5" r="2.5"/><text x="245" y="288">BPF filters</text>
+  <circle class="dot" cx="239" cy="352.5" r="2.5"/><text x="245" y="356">Docker profile</text>
 
   <!-- CAPS / LSM (x 332..440) -->
-  <circle class="dot" cx="339" cy="119.5" r="2.5"/><text x="345" y="123">SELinux 2.6.0</text>
-  <circle class="dot" cx="339" cy="250.5" r="2.5"/><text x="345" y="254">AppArmor 2.6.36</text>
-  <circle class="dot" cx="339" cy="444.5" r="2.5"/><text x="345" y="448">CAP_BPF 5.8</text>
-  <circle class="dot" cx="339" cy="461.5" r="2.5"/><text x="345" y="465" font-weight="600">Landlock 5.13</text>
-  <circle class="dot" cx="339" cy="541.5" r="2.5"/><text x="345" y="545">Landlock v7</text>
+  <circle class="dot" cx="339" cy="119.5" r="2.5"/><text x="345" y="123">SELinux</text>
+  <circle class="dot" cx="339" cy="250.5" r="2.5"/><text x="345" y="254">AppArmor</text>
+  <circle class="dot" cx="339" cy="444.5" r="2.5"/><text x="345" y="448">CAP_BPF</text>
+  <circle class="dot" cx="339" cy="461.5" r="2.5"/><text x="345" y="465" font-weight="600">Landlock</text>
+  <circle class="dot" cx="339" cy="541.5" r="2.5"/><text x="345" y="545">Landlock audit</text>
 
   <!-- RUNTIMES (x 440..544) -->
   <circle class="dot rt" cx="447" cy="216.5" r="2.5"/><text x="453" y="220">LXC</text>
@@ -133,6 +133,6 @@
   <circle class="dot kcve" cx="551" cy="512.5" r="2.5"/><text class="red" x="557" y="516">CVE-2024-1086 nftables</text>
   <circle class="dot cve" cx="551" cy="524.5" r="2.5"/><text class="red" x="557" y="528">CVE-2024-21626 fd leak</text>
   <circle class="dot cve" cx="551" cy="541.5" r="2.5"/><text class="red" x="557" y="545">CVE-2025-31133 +2 runc</text>
-  <circle class="dot kcve" cx="551" cy="558.5" r="2.5"/><text class="red" x="557" y="562" font-weight="700">CVE-2026-31431 CopyFail</text>
+  <circle class="dot kcve" cx="551" cy="558.5" r="2.5"/><text class="red" x="557" y="562" font-weight="700">CVE-2026-31431 Copy Fail</text>
 
 </svg>

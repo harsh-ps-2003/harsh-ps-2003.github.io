@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 588" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
-  <title id="title">Confidential computing moves the boundary toward silicon, not past the guest</title>
-  <desc id="desc">Side by side, a plain KVM microVM and an AMD SEV-SNP VM. In the plain VM the host and hypervisor read guest pages in plaintext and a memory dump shows the token. In the SEV-SNP VM the AMD Secure Processor holds a per-VM key, the memory controller encrypts guest pages, the host sees only ciphertext, SEV-ES encrypts register state, and the Reverse Map Table blocks the hypervisor from remapping guest pages. In both VMs a malicious package inside the guest can still read the token and send it out. Attestation through /dev/sev-guest and SNP_GET_REPORT, verified against AMD KDS, is what ties the encrypted VM to known code.</desc>
+  <title id="title">What SEV-SNP hides and what it doesn't</title>
+  <desc id="desc">A plain KVM microVM next to an AMD SEV-SNP VM. In the plain VM the host and hypervisor read guest pages in plaintext, and a memory dump shows the token. In the SEV-SNP VM the AMD Secure Processor holds a per-VM key, the memory controller encrypts guest pages so the host only sees ciphertext, SEV-ES encrypts register state, and the Reverse Map Table stops the hypervisor from remapping guest pages. In both VMs a malicious package inside the guest can still read the token and send it out. Attestation through /dev/sev-guest and SNP_GET_REPORT, checked against AMD KDS, is what ties the encrypted VM to known code.</desc>
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
     <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#c62f2f"/></marker>
@@ -28,8 +28,8 @@
   </style>
 
   <text class="k" x="16" y="22">CONFIDENTIAL COMPUTING</text>
-  <text class="t" x="16" y="42">The boundary moves toward silicon, not past the guest</text>
-  <text class="c" x="16" y="60">SEV-SNP hides guest RAM from the host. Code inside the guest still sees everything.</text>
+  <text class="t" x="16" y="42">Hidden from the host, not from the guest</text>
+  <text class="c" x="16" y="60">SEV-SNP hides guest RAM from the host, but code inside the guest still sees everything.</text>
 
   <text class="lane" x="16" y="86">PLAIN MICROVM (KVM)</text>
   <text class="lane" x="368" y="86">AMD SEV-SNP VM · PAGES ENCRYPTED</text>
@@ -47,7 +47,7 @@
 
   <rect class="host" x="16" y="182" width="336" height="52" rx="5"/>
   <text class="h" x="28" y="198">host · hypervisor · VMM</text>
-  <text class="red" x="28" y="213">sees: SECRET_DEMO_TOKEN</text>
+  <text class="red" x="28" y="213">sees SECRET_DEMO_TOKEN</text>
   <text class="m" x="28" y="227">vCPU registers readable at exit</text>
 
   <line x1="306" y1="234" x2="306" y2="252" stroke="#c62f2f" stroke-width="1.25" marker-end="url(#ar)"/>
@@ -63,7 +63,7 @@
   </g>
 
   <rect x="16" y="290" width="336" height="62" rx="5" fill="none" stroke="#a3a3b3" stroke-width="1.25" stroke-dasharray="4 3"/>
-  <text class="m" x="184" y="316" text-anchor="middle">no help from silicon:</text>
+  <text class="m" x="184" y="316" text-anchor="middle">no help from silicon,</text>
   <text class="m" x="184" y="332" text-anchor="middle">KVM and Firecracker trust the host</text>
 
   <!-- ===== right: SEV-SNP ===== -->
@@ -79,7 +79,7 @@
 
   <rect class="host" x="368" y="182" width="336" height="52" rx="5"/>
   <text class="h" x="380" y="198">host · hypervisor · VMM</text>
-  <text class="ok" x="380" y="213">sees: ciphertext only</text>
+  <text class="ok" x="380" y="213">sees ciphertext only</text>
   <text class="m" x="380" y="227">vCPU registers encrypted (SEV-ES)</text>
 
   <line x1="658" y1="234" x2="658" y2="252" stroke="#232333" stroke-width="1.25" marker-end="url(#a)"/>
@@ -116,11 +116,11 @@
   <line class="hair" x1="16" y1="386" x2="704" y2="386" style="stroke:#232333"/>
   <text x="16" y="402">host operator / hypervisor</text>
   <text class="red" x="316" y="402">yes, plaintext</text>
-  <text class="ok" x="516" y="402">no: ciphertext</text>
+  <text class="ok" x="516" y="402">no, ciphertext</text>
   <line class="hair" x1="16" y1="408" x2="704" y2="408"/>
   <text x="16" y="422">snapshot / memory dump</text>
   <text class="red" x="316" y="422">yes, strings finds it</text>
-  <text class="ok" x="516" y="422">no: ciphertext</text>
+  <text class="ok" x="516" y="422">no, ciphertext</text>
   <line class="hair" x1="16" y1="428" x2="704" y2="428"/>
   <text x="16" y="442">malicious pkg in the guest</text>
   <text class="red" x="316" y="442">yes</text>
@@ -132,7 +132,7 @@
   <line class="hair" x1="16" y1="468" x2="704" y2="468" style="stroke:#232333"/>
 
   <!-- ===== attestation ===== -->
-  <text class="lane" x="16" y="490">ATTESTATION: WITHOUT IT, ENCRYPTION PROVES NO IDENTITY</text>
+  <text class="lane" x="16" y="490">WITHOUT ATTESTATION, ENCRYPTION PROVES NO IDENTITY</text>
   <g>
     <rect class="guest" x="16" y="498" width="120" height="36" rx="4"/>
     <text class="b" x="24" y="513">guest</text><text class="m" x="24" y="527">/dev/sev-guest</text>
@@ -141,7 +141,7 @@
     <rect class="box" x="300" y="498" width="120" height="36" rx="4"/>
     <text class="b" x="308" y="513">AMD-SP signs</text><text class="m" x="308" y="527">with the VCEK</text>
     <rect class="box" x="442" y="498" width="120" height="36" rx="4"/>
-    <text class="b" x="450" y="513">verifier</text><text class="m" x="450" y="527">chain: AMD KDS</text>
+    <text class="b" x="450" y="513">verifier</text><text class="m" x="450" y="527">checks via AMD KDS</text>
     <rect class="cred" x="584" y="498" width="120" height="36" rx="4"/>
     <text class="b" x="592" y="513">release secret</text><text class="m" x="592" y="527">only on a match</text>
   </g>
@@ -152,7 +152,7 @@
     <line x1="562" y1="516" x2="582" y2="516"/>
   </g>
 
-  <text class="m" x="16" y="556">Intel TDX plays the same role with Trust Domains. CoCo runs Kata pods inside SEV-SNP/TDX VMs.</text>
-  <text class="m" x="16" y="571">Costs: Azure confidential VMs drop live migration and Azure Backup; snapshot semantics change.</text>
+  <text class="m" x="16" y="556">Intel TDX does the same job with Trust Domains, and CoCo runs Kata pods inside SEV-SNP or TDX VMs.</text>
+  <text class="m" x="16" y="571">Not free either, Azure confidential VMs lose live migration and Azure Backup, and snapshots work differently.</text>
 
 </svg>
