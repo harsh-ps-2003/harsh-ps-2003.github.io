@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 526" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">One CRI, three runtimes: where the kernel boundary lands</title>
+  <desc id="desc">kubelet calls containerd over CRI gRPC, and the pod's runtimeClassName selects a handler. With runc, containerd-shim-runc-v2 runs runc, which sets up namespaces and cgroups and exits, so the agent's syscalls hit the shared host kernel directly. With gVisor, containerd-shim-runsc-v1 runs runsc, and the agent's syscalls are trapped into the Sentry user-space kernel, which reaches the host only through a seccomp-filtered set of syscalls. With Kata, containerd-shim-kata-v2 spawns a VMM (Cloud Hypervisor, Firecracker, QEMU or Dragonball) whose microVM has its own guest kernel and a kata-agent reached over ttRPC on vsock; the host kernel is reached only through KVM ioctls and virtio I/O.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+    <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="5" height="5" fill="#ffffff"/>
+      <line x1="0" y1="0" x2="0" y2="5" stroke="#d3d3dd" stroke-width="1.5"/>
+    </pattern>
+  </defs>
+  <style>
+    text { fill: #232333; font-size: 10px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; }
+    .b { font-weight: 700; }
+    .h { font-size: 11.5px; font-weight: 700; }
+    .s11 { font-size: 11px; }
+    .or { fill: #e2541a; font-weight: 700; }
+    .box { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .code { fill: #f5f5f8; stroke: #c3c3cf; stroke-width: 1; }
+    .shim { fill: url(#hatch); stroke: #232333; stroke-width: 1.25; }
+    .proc { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1.25; }
+    .first { fill: none; stroke: #ff5f1f; stroke-width: 2; }
+  </style>
+
+  <text class="k" x="16" y="22">KUBERNETES</text>
+  <text class="t" x="16" y="42">One CRI, three runtimes: where the kernel boundary lands</text>
+  <text class="c" x="16" y="60">Same kubelet, same pod spec. RuntimeClass picks the first kernel untrusted code talks to.</text>
+
+  <!-- pod spec -->
+  <rect class="code" x="16" y="76" width="184" height="58" rx="4"/>
+  <text class="m" x="26" y="92"># pod.yaml</text>
+  <text x="26" y="106">spec:</text>
+  <text x="38" y="120">runtimeClassName: <tspan class="or">kata</tspan></text>
+
+  <!-- RuntimeClass -->
+  <rect class="code" x="520" y="76" width="184" height="72" rx="4"/>
+  <text class="m" x="530" y="92"># RuntimeClass</text>
+  <text x="530" y="106">apiVersion: node.k8s.io/v1</text>
+  <text x="530" y="120">metadata: {name: kata}</text>
+  <text x="530" y="134">handler: <tspan class="or">kata</tspan></text>
+
+  <!-- control path -->
+  <rect class="box" x="280" y="76" width="160" height="22" rx="4"/>
+  <text class="h" x="360" y="91" text-anchor="middle">kubelet</text>
+  <line x1="360" y1="98" x2="360" y2="116" stroke="#232333" stroke-width="1.25" marker-end="url(#a)"/>
+  <text x="366" y="111">CRI gRPC</text>
+  <rect class="box" x="280" y="118" width="160" height="32" rx="4"/>
+  <text class="h" x="360" y="132" text-anchor="middle">containerd</text>
+  <text class="m" x="360" y="144" text-anchor="middle">CRI plugin</text>
+  <g stroke="#232333" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#a)">
+    <line x1="200" y1="105" x2="278" y2="88"/>
+    <line x1="520" y1="134" x2="442" y2="134"/>
+  </g>
+  <text class="m" x="206" y="88">reads</text>
+  <text class="m" x="514" y="128" text-anchor="end">handler</text>
+
+  <!-- fan out by handler -->
+  <polyline points="360,150 360,162" fill="none" stroke="#232333" stroke-width="1.25"/>
+  <line x1="124" y1="162" x2="596" y2="162" stroke="#232333" stroke-width="1.25"/>
+  <g stroke="#232333" stroke-width="1.25" marker-end="url(#a)">
+    <line x1="124" y1="162" x2="124" y2="184"/>
+    <line x1="360" y1="162" x2="360" y2="184"/>
+    <line x1="596" y1="162" x2="596" y2="184"/>
+  </g>
+  <text x="130" y="178">handler: runc</text>
+  <text x="366" y="178">handler: runsc</text>
+  <text x="602" y="178">handler: kata</text>
+
+  <!-- shims -->
+  <rect class="shim" x="24" y="186" width="200" height="20" rx="3"/>
+  <text class="b" x="124" y="200" text-anchor="middle">containerd-shim-runc-v2</text>
+  <rect class="shim" x="260" y="186" width="200" height="20" rx="3"/>
+  <text class="b" x="360" y="200" text-anchor="middle">containerd-shim-runsc-v1</text>
+  <rect class="shim" x="496" y="186" width="200" height="20" rx="3"/>
+  <text class="b" x="596" y="200" text-anchor="middle">containerd-shim-kata-v2</text>
+  <g stroke="#232333" stroke-width="1.25" marker-end="url(#a)">
+    <line x1="124" y1="206" x2="124" y2="220"/>
+    <line x1="360" y1="206" x2="360" y2="220"/>
+    <line x1="596" y1="206" x2="596" y2="220"/>
+  </g>
+
+  <!-- lane A: runc -->
+  <rect x="24" y="222" width="200" height="22" rx="4" fill="#ffffff" stroke="#232333" stroke-width="1.25" stroke-dasharray="4 3"/>
+  <text x="32" y="237"><tspan class="b">runc</tspan> · sets up, then exits</text>
+  <line x1="124" y1="244" x2="124" y2="262" stroke="#232333" stroke-width="1.25" marker-end="url(#a)"/>
+  <text class="m" x="130" y="257">clone + unshare</text>
+  <rect x="24" y="264" width="200" height="66" rx="5" fill="#f5f9fe" stroke="#7aa7d9" stroke-width="1.25" stroke-dasharray="4 3"/>
+  <text class="lane" x="32" y="278">NS · CGROUPS · SECCOMP</text>
+  <rect class="proc" x="32" y="286" width="184" height="22" rx="4"/>
+  <text class="s11" x="40" y="301"><tspan class="b">agent process</tspan></text>
+  <text class="m" x="48" y="322">a view, not a kernel</text>
+  <line x1="40" y1="308" x2="40" y2="426" stroke="#232333" stroke-width="1.25" marker-end="url(#a)"/>
+  <text x="48" y="360">every syscall</text>
+  <text x="48" y="373">goes straight</text>
+  <text x="48" y="386">to the host</text>
+
+  <!-- lane B: gVisor -->
+  <rect class="box" x="260" y="222" width="200" height="22" rx="4"/>
+  <text x="268" y="237"><tspan class="b">runsc</tspan> · starts sandbox</text>
+  <line x1="360" y1="244" x2="360" y2="262" stroke="#232333" stroke-width="1.25" marker-end="url(#a)"/>
+  <rect x="260" y="264" width="200" height="104" rx="5" fill="#faf8fd" stroke="#9b86c9" stroke-width="1.25"/>
+  <text class="lane" x="268" y="278">GVISOR SANDBOX</text>
+  <rect class="proc" x="268" y="286" width="184" height="22" rx="4"/>
+  <text class="s11" x="276" y="301"><tspan class="b">agent process</tspan></text>
+  <line x1="326" y1="308" x2="326" y2="324" stroke="#232333" stroke-width="1.25" marker-end="url(#a)"/>
+  <text class="m" x="332" y="320">trapped (systrap)</text>
+  <rect x="268" y="326" width="116" height="34" rx="4" fill="#ece6f7" stroke="#9b86c9" stroke-width="1.25"/>
+  <rect class="first" x="265" y="323" width="122" height="40" rx="6"/>
+  <text class="h" x="276" y="340">Sentry</text>
+  <text class="m" x="276" y="353">user-space kernel</text>
+  <rect x="394" y="326" width="58" height="34" rx="4" fill="#f4f0fb" stroke="#9b86c9" stroke-width="1.25"/>
+  <text class="b" x="423" y="340" text-anchor="middle">Gofer</text>
+  <text class="m" x="423" y="353" text-anchor="middle">files</text>
+  <line x1="384" y1="343" x2="392" y2="343" stroke="#232333" stroke-width="1.25"/>
+  <g stroke="#232333" stroke-width="1.25" marker-end="url(#a)">
+    <line x1="326" y1="363" x2="326" y2="426"/>
+    <line x1="440" y1="360" x2="440" y2="426"/>
+  </g>
+  <text x="332" y="390">seccomp-filtered</text>
+  <text x="332" y="403">host syscalls</text>
+
+  <!-- lane C: Kata -->
+  <rect class="box" x="496" y="222" width="200" height="170" rx="5"/>
+  <text class="b" x="504" y="237">VMM</text>
+  <text class="m" x="528" y="237">CH · FC · QEMU · Dragonball</text>
+  <text class="m" x="602" y="217">spawns</text>
+  <rect x="504" y="244" width="184" height="108" rx="5" fill="#e2f2e6" stroke="#5ea876" stroke-width="2"/>
+  <text class="lane" x="512" y="258" style="fill:#2f7d4a">MICROVM</text>
+  <rect class="proc" x="512" y="264" width="168" height="20" rx="4"/>
+  <text x="520" y="278"><tspan class="b">agent process</tspan> ns+cgroups</text>
+  <rect class="box" x="512" y="290" width="168" height="20" rx="4"/>
+  <text x="520" y="304"><tspan class="b">kata-agent</tspan> · ttRPC/vsock</text>
+  <rect x="512" y="318" width="168" height="24" rx="4" fill="#c6e6cf" stroke="#5ea876" stroke-width="1.25"/>
+  <rect class="first" x="509" y="315" width="174" height="30" rx="6"/>
+  <text class="h" x="520" y="334">guest kernel</text>
+  <text class="m" x="504" y="368">rootfs: virtio-fs (virtiofsd)</text>
+  <text class="m" x="504" y="381">or devmapper (Firecracker)</text>
+  <line x1="596" y1="392" x2="596" y2="426" stroke="#232333" stroke-width="1.25" marker-end="url(#a)"/>
+  <text x="602" y="405">KVM ioctls,</text>
+  <text x="602" y="418">virtio I/O</text>
+
+  <!-- host kernel -->
+  <rect x="16" y="428" width="688" height="34" rx="4" fill="#e9e9ef" stroke="#a3a3b3" stroke-width="1.25"/>
+  <rect class="first" x="20" y="431" width="208" height="28" rx="4"/>
+  <text x="32" y="449"><tspan class="b">host kernel</tspan> <tspan class="m">· direct</tspan></text>
+  <text class="m" x="360" y="449" text-anchor="middle">host kernel · via Sentry only</text>
+  <text class="m" x="596" y="449" text-anchor="middle">host kernel · via VMM only</text>
+  <line x1="242" y1="432" x2="242" y2="458" stroke="#a3a3b3" stroke-width="1"/>
+  <line x1="478" y1="432" x2="478" y2="458" stroke="#a3a3b3" stroke-width="1"/>
+
+  <!-- legend -->
+  <rect class="first" x="16" y="478" width="18" height="12" rx="3"/>
+  <text x="42" y="488">first kernel the agent's syscalls reach</text>
+  <rect x="300" y="478" width="18" height="12" rx="3" fill="#e2f2e6" stroke="#5ea876" stroke-width="2"/>
+  <text x="326" y="488">hardware boundary (KVM)</text>
+  <rect x="496" y="478" width="18" height="12" rx="3" fill="#f5f9fe" stroke="#7aa7d9" stroke-width="1.25" stroke-dasharray="3 2"/>
+  <text x="522" y="488">namespaces only</text>
+  <text class="m" x="16" y="508">Kata runs one shim and one VM per pod; inside the guest, kata-agent creates the namespaces and cgroups.</text>
+
+</svg>

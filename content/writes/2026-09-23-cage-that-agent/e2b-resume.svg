@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 674" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">E2B: spawning a sandbox means resuming a snapshot, page by page</title>
+  <desc id="desc">At template build time E2B boots the template, snapshots it, records which guest pages fault in, and stores a snapfile, a layered memfile, a layered rootfs and metadata. Every spawn then resumes that snapshot: the orchestrator starts Firecracker in a network namespace without the jailer, loads the snapshot with a userfaultfd backend, serves guest memory page by page from the memfile layers and prefaults the recorded hot pages, serves the rootfs over NBD, resumes the VM, writes only a SHA-512 hash of the access token into MMDS, then posts the real token to envd inside the guest, which checks it against the hash. The token never sits in the snapshot files on disk, but it does sit in guest RAM once envd holds it.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+    <marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#ff5f1f"/></marker>
+  </defs>
+  <style>
+    text { fill: #232333; font-size: 10.5px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; font-size: 10px; }
+    .h { font-size: 11.5px; font-weight: 700; }
+    .b { font-weight: 700; }
+    .o { fill: #c2410c; font-weight: 700; }
+    .box { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .host { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1.25; }
+    .guest { fill: #e2f2e6; stroke: #5ea876; stroke-width: 1.25; }
+    .life { stroke: #a3a3b3; stroke-width: 1; stroke-dasharray: 3 3; }
+    .msg { stroke: #232333; stroke-width: 1.25; fill: none; }
+    .hl { paint-order: stroke; stroke: #f5f5f8; stroke-width: 4px; stroke-linejoin: round; }
+    .n { fill: #ff5f1f; }
+    .nt { fill: #ffffff; font-size: 9.5px; font-weight: 700; }
+    .lb { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: .75; }
+    .l2 { fill: #e3eefb; stroke: #7aa7d9; stroke-width: .75; }
+    .l3 { fill: #ffede4; stroke: #ff5f1f; stroke-width: .75; }
+  </style>
+
+  <text class="k" x="16" y="22">E2B · SANDBOX SPAWN</text>
+  <text class="t" x="16" y="42">Spawn = resume a snapshot, page by page</text>
+  <text class="c" x="16" y="60">No warm pool: every sandbox is a paused microVM brought back lazily from its template.</text>
+
+  <!-- ===== build band ===== -->
+  <text class="lane" x="16" y="86">ONCE PER TEMPLATE BUILD</text>
+  <text class="lane" x="560" y="86">ARTIFACTS PER BUILD</text>
+
+  <rect class="box" x="16" y="94" width="160" height="36" rx="4"/>
+  <text class="h" x="24" y="109">boot template</text>
+  <text class="m" x="24" y="123">run start command</text>
+  <line class="msg" x1="176" y1="112" x2="198" y2="112" marker-end="url(#a)"/>
+  <rect class="box" x="200" y="94" width="160" height="36" rx="4"/>
+  <text class="h" x="208" y="109">snapshot + resume</text>
+  <text class="m" x="208" y="123">during the build</text>
+  <line class="msg" x1="360" y1="112" x2="382" y2="112" marker-end="url(#a)"/>
+  <rect class="box" x="384" y="94" width="160" height="36" rx="4"/>
+  <text class="h" x="392" y="109">record page faults</text>
+  <text class="m" x="392" y="123">= prefetch mapping</text>
+  <line class="msg" x1="544" y1="112" x2="558" y2="112" marker-end="url(#a)"/>
+
+  <rect class="box" x="560" y="94" width="144" height="66" rx="4"/>
+  <text x="568" y="109">snapfile</text>
+  <text x="568" y="123">memfile&#160;<tspan class="m">+.header</tspan></text>
+  <text x="568" y="137">rootfs.ext4&#160;<tspan class="m">+.header</tspan></text>
+  <text x="568" y="151">metadata.json</text>
+
+  <!-- memfile layers -->
+  <text x="16" y="154">memfile</text>
+  <g>
+    <rect class="lb" x="80" y="143" width="15" height="14"/><rect class="lb" x="96" y="143" width="15" height="14"/><rect class="lb" x="112" y="143" width="15" height="14"/><rect class="lb" x="128" y="143" width="15" height="14"/>
+    <rect class="l2" x="144" y="143" width="15" height="14"/><rect class="lb" x="160" y="143" width="15" height="14"/><rect class="lb" x="176" y="143" width="15" height="14"/><rect class="lb" x="192" y="143" width="15" height="14"/>
+    <rect class="l3" x="208" y="143" width="15" height="14"/><rect class="l3" x="224" y="143" width="15" height="14"/><rect class="lb" x="240" y="143" width="15" height="14"/><rect class="lb" x="256" y="143" width="15" height="14"/>
+    <rect class="lb" x="272" y="143" width="15" height="14"/><rect class="l2" x="288" y="143" width="15" height="14"/><rect class="l2" x="304" y="143" width="15" height="14"/><rect class="lb" x="320" y="143" width="15" height="14"/>
+    <rect class="lb" x="336" y="143" width="15" height="14"/><rect class="l3" x="352" y="143" width="15" height="14"/><rect class="lb" x="368" y="143" width="15" height="14"/><rect class="lb" x="384" y="143" width="15" height="14"/>
+    <rect class="lb" x="400" y="143" width="15" height="14"/><rect class="lb" x="416" y="143" width="15" height="14"/><rect class="l2" x="432" y="143" width="15" height="14"/><rect class="lb" x="448" y="143" width="15" height="14"/>
+    <rect class="lb" x="464" y="143" width="15" height="14"/><rect class="lb" x="480" y="143" width="15" height="14"/><rect class="lb" x="496" y="143" width="15" height="14"/><rect class="lb" x="512" y="143" width="15" height="14"/>
+  </g>
+  <text class="m" x="80" y="172">.header maps each block range to the build that owns it: base or diff</text>
+
+  <!-- ===== resume band ===== -->
+  <text class="lane" x="16" y="198">EVERY SPAWN</text>
+  <rect x="10" y="204" width="350" height="398" rx="6" fill="#f5f5f8"/>
+  <text class="m" x="18" y="596">host attack surface: one Go binary, raw_exec</text>
+
+  <rect class="host" x="18" y="210" width="156" height="34" rx="4"/>
+  <text class="h" x="96" y="225" text-anchor="middle">orchestrator</text>
+  <text class="m" x="96" y="238" text-anchor="middle">lifecycle · FC API</text>
+  <rect class="host" x="194" y="210" width="156" height="34" rx="4"/>
+  <text class="h" x="272" y="225" text-anchor="middle">orchestrator</text>
+  <text class="m" x="272" y="238" text-anchor="middle">uffd handler · NBD</text>
+  <rect class="box" x="370" y="210" width="156" height="34" rx="4"/>
+  <text class="h" x="448" y="225" text-anchor="middle">firecracker</text>
+  <text class="m" x="448" y="238" text-anchor="middle">VMM, in a netns</text>
+  <rect class="guest" x="546" y="210" width="156" height="34" rx="4"/>
+  <text class="h" x="624" y="225" text-anchor="middle">guest microVM</text>
+  <text class="m" x="624" y="238" text-anchor="middle">envd :49983</text>
+
+  <g class="life">
+    <line x1="96" y1="244" x2="96" y2="586"/>
+    <line x1="272" y1="244" x2="272" y2="586"/>
+    <line x1="448" y1="244" x2="448" y2="586"/>
+    <line x1="624" y1="244" x2="624" y2="584"/>
+  </g>
+
+  <!-- 1 -->
+  <line class="msg" x1="96" y1="268" x2="446" y2="268" marker-end="url(#a)"/>
+  <circle class="n" cx="110" cy="259.5" r="7"/><text class="nt" x="110" y="263" text-anchor="middle">1</text>
+  <text class="hl" x="122" y="263">unshare -m · ip netns exec · firecracker</text>
+  <text class="m" x="122" y="281">no jailer on this path</text>
+  <!-- 2 -->
+  <line class="msg" x1="96" y1="304" x2="446" y2="304" marker-end="url(#a)"/>
+  <circle class="n" cx="110" cy="295.5" r="7"/><text class="nt" x="110" y="299" text-anchor="middle">2</text>
+  <text class="hl" x="122" y="299">PUT /snapshot/load {Uffd, resume_vm:false}</text>
+  <!-- 3 -->
+  <line class="msg" x1="448" y1="330" x2="274" y2="330" marker-end="url(#a)"/>
+  <circle class="n" cx="286" cy="321.5" r="7"/><text class="nt" x="286" y="325" text-anchor="middle">3</text>
+  <text x="298" y="325">uffd fd + regions</text>
+  <text class="m" x="298" y="343">over a unix socket</text>
+  <!-- 4 -->
+  <line class="msg" x1="272" y1="366" x2="446" y2="366" marker-end="url(#a)"/>
+  <circle class="n" cx="286" cy="357.5" r="7"/><text class="nt" x="286" y="361" text-anchor="middle">4</text>
+  <text x="298" y="361">prefault hot pages</text>
+  <text class="m" x="298" y="379">via UFFDIO_COPY</text>
+  <!-- 5 -->
+  <line class="msg" x1="272" y1="402" x2="446" y2="402" marker-end="url(#a)"/>
+  <circle class="n" cx="286" cy="393.5" r="7"/><text class="nt" x="286" y="397" text-anchor="middle">5</text>
+  <text x="298" y="397">rootfs = /dev/nbdN</text>
+  <text class="m" x="298" y="415">ro template + rw overlay</text>
+  <!-- 6 -->
+  <line class="msg" x1="96" y1="438" x2="446" y2="438" marker-end="url(#a)"/>
+  <circle class="n" cx="110" cy="429.5" r="7"/><text class="nt" x="110" y="433" text-anchor="middle">6</text>
+  <text class="hl" x="122" y="433">PATCH /vm {state: Resumed}</text>
+  <!-- 7 -->
+  <line class="msg" x1="624" y1="462" x2="274" y2="462" stroke-dasharray="4 3" marker-end="url(#a)"/>
+  <circle class="n" cx="286" cy="453.5" r="7"/><text class="nt" x="286" y="457" text-anchor="middle">7</text>
+  <text class="hl" x="298" y="457">guest touches a cold page → fault</text>
+  <line class="msg" x1="272" y1="480" x2="622" y2="480" stroke-dasharray="4 3" marker-end="url(#a)"/>
+  <text class="hl" x="298" y="476">UFFDIO_COPY ← memfile layers (lazy)</text>
+  <!-- 8 -->
+  <line class="msg" x1="96" y1="510" x2="446" y2="510" marker-end="url(#a)"/>
+  <circle class="n" cx="110" cy="501.5" r="7"/><text class="nt" x="110" y="505" text-anchor="middle">8</text>
+  <text class="hl" x="122" y="505">PUT /mmds {instanceID, envID, accessTokenHash}</text>
+  <!-- 9 -->
+  <line x1="96" y1="536" x2="622" y2="536" stroke="#ff5f1f" stroke-width="1.75" marker-end="url(#ao)"/>
+  <circle class="n" cx="110" cy="527.5" r="7"/><text class="nt" x="110" y="531" text-anchor="middle">9</text>
+  <text class="o hl" x="122" y="531">POST /init {accessToken, envVars, CA bundle}</text>
+  <!-- 10 -->
+  <line class="msg" x1="624" y1="562" x2="450" y2="562" marker-end="url(#a)"/>
+  <circle class="n" cx="462" cy="553.5" r="7"/><text class="nt" x="462" y="557" text-anchor="middle">10</text>
+  <text x="474" y="557">GET hash, MMDS V2</text>
+  <text class="m" x="474" y="575">169.254.169.254</text>
+  <rect class="guest" x="560" y="584" width="128" height="20" rx="4"/>
+  <text x="624" y="598" text-anchor="middle" font-size="10">SHA-512 match?</text>
+
+  <!-- token callout -->
+  <rect x="16" y="614" width="688" height="46" rx="5" fill="#fbf1cf" stroke="#d4b34a" stroke-width="1.25"/>
+  <text x="26" y="632"><tspan class="b">On disk:</tspan> snapfile, memfile, rootfs carry no token. MMDS gets SHA-512(token).</text>
+  <text x="26" y="650"><tspan class="b">In RAM:</tspan> from step 9 the token sits in envd's heap. The next pause writes it out.</text>
+
+</svg>

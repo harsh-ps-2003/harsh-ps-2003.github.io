@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 566" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">Seccomp: a filter at syscall entry</title>
+  <desc id="desc">A process's syscall enters the kernel and first runs the thread's seccomp BPF filter over the syscall number, architecture, instruction pointer and arguments. The filter returns an action, and the highest-precedence action wins: KILL_PROCESS, KILL_THREAD, TRAP, ERRNO, USER_NOTIF, TRACE, LOG, ALLOW. Only ALLOW reaches the shared kernel's syscall handler. Docker's default profile is an allowlist with defaultAction SCMP_ACT_ERRNO and errno EPERM. 361 syscall names are allowed outright, some are allowed only when the arguments match, some only when the container holds a capability, and the rest are never listed. An agent's syscall needs change with every task, so a tighter profile breaks tasks and a looser one leaves the kernel reachable.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+  </defs>
+  <style>
+    text { fill: #232333; font-size: 10.5px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .lane.red { fill: #c62f2f; }
+    .m { fill: #5c5c6e; }
+    .xs { font-size: 10px; }
+    .b { font-weight: 700; }
+    .h { font-size: 11.5px; font-weight: 700; }
+    .red { fill: #c62f2f; }
+    .big { font-size: 22px; font-weight: 700; }
+    .box { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .ln { stroke: #232333; stroke-width: 1.25; fill: none; }
+  </style>
+
+  <text class="k" x="16" y="22">SECCOMP-BPF</text>
+  <text class="t" x="16" y="42">A filter at syscall entry, tuned for code you already know</text>
+  <text class="c" x="16" y="60">Docker's default is an allowlist tied to capabilities. An agent has no fixed syscall set.</text>
+
+  <!-- ROW 1: mechanism -->
+  <text class="lane" x="16" y="84">WHERE IT RUNS</text>
+  <text class="lane" x="436" y="84">ACTION · HIGHEST PRECEDENCE FIRST</text>
+
+  <rect x="16" y="96" width="152" height="60" rx="4" fill="#e3eefb" stroke="#7aa7d9" stroke-width="1.25"/>
+  <text class="h" x="24" y="113">process</text>
+  <text x="24" y="130">syscall(nr, args)</text>
+  <text class="m xs" x="24" y="146">agent-written code</text>
+
+  <line x1="199" y1="90" x2="199" y2="186" stroke="#8a8a9a" stroke-width="1" stroke-dasharray="3 3"/>
+  <text class="m xs" x="195" y="184" text-anchor="end">user</text>
+  <text class="m xs" x="203" y="184">kernel</text>
+  <line class="ln" x1="168" y1="126" x2="242" y2="126" marker-end="url(#a)"/>
+
+  <rect class="box" x="244" y="96" width="166" height="84" rx="4" style="stroke:#ff5f1f;stroke-width:1.75"/>
+  <text class="h" x="252" y="113">seccomp filter</text>
+  <text x="252" y="129">cBPF on seccomp_data:</text>
+  <text x="252" y="144">nr arch ip args[0..5]</text>
+  <text class="m xs" x="252" y="160">per thread, inherited,</text>
+  <text class="m xs" x="252" y="173">stackable, never removed</text>
+  <line class="ln" x1="410" y1="126" x2="434" y2="126" marker-end="url(#a)"/>
+
+  <rect x="436" y="90" width="268" height="140" rx="4" fill="#f5f5f8" stroke="#c3c3cf" stroke-width="1"/>
+  <rect x="437" y="143" width="266" height="17" fill="#ffede4"/>
+  <rect x="437" y="211" width="266" height="17" fill="#e2f2e6"/>
+  <g>
+    <text class="b" x="444" y="104">KILL_PROCESS</text><text class="m xs" x="540" y="104">kill whole process</text>
+    <text class="b" x="444" y="121">KILL_THREAD</text><text class="m xs" x="540" y="121">kill calling thread</text>
+    <text class="b" x="444" y="138">TRAP</text><text class="m xs" x="540" y="138">SIGSYS (gVisor systrap)</text>
+    <text class="b" x="444" y="155">ERRNO</text><text class="m xs" x="540" y="155">fail: Docker returns EPERM</text>
+    <text class="b" x="444" y="172">USER_NOTIF</text><text class="m xs" x="540" y="172">ask a supervisor process</text>
+    <text class="b" x="444" y="189">TRACE</text><text class="m xs" x="540" y="189">hand to a ptracer</text>
+    <text class="b" x="444" y="206">LOG</text><text class="m xs" x="540" y="206">log, then run</text>
+    <text class="b" x="444" y="223">ALLOW</text><text class="m xs" x="540" y="223">run the syscall</text>
+  </g>
+  <line class="ln" x1="470" y1="230" x2="470" y2="244" marker-end="url(#a)"/>
+  <rect x="230" y="246" width="474" height="22" rx="4" fill="#e9e9ef" stroke="#a3a3b3" stroke-width="1"/>
+  <text class="b" x="238" y="261">syscall handler</text><text class="m xs" x="362" y="261">the same host kernel for every container</text>
+
+  <!-- ROW 2: Docker default profile -->
+  <text class="lane" x="16" y="294">DOCKER DEFAULT · "defaultAction": "SCMP_ACT_ERRNO", "defaultErrnoRet": 1</text>
+  <text class="m xs" x="16" y="309">an allowlist: unlisted (incl. future) syscalls get EPERM · docs: "disables around 44 out of 300+"</text>
+
+  <!-- col 1 -->
+  <rect class="box" x="16" y="318" width="166" height="160" rx="4" style="stroke:#5ea876"/>
+  <text class="lane" x="24" y="334">ALLOWED OUTRIGHT</text>
+  <text class="big" x="24" y="362">361</text>
+  <text class="m xs" x="78" y="361">syscall names</text>
+  <text x="24" y="384">read write openat</text>
+  <text x="24" y="399">mmap execve kill</text>
+  <text x="24" y="414">chmod ioctl ...</text>
+  <text class="m xs" x="24" y="438">all the kernel code</text>
+  <text class="m xs" x="24" y="451">behind them stays</text>
+  <text class="m xs" x="24" y="464">reachable</text>
+
+  <!-- col 2 -->
+  <rect class="box" x="190" y="318" width="166" height="160" rx="4"/>
+  <text class="lane" x="198" y="334">IF ARGS MATCH</text>
+  <text x="198" y="354"><tspan class="b">socket</tspan>: listed</text>
+  <text class="m xs" x="198" y="367">families; no AF_ALG,</text>
+  <text class="m xs" x="198" y="380">no AF_VSOCK</text>
+  <text x="198" y="398"><tspan class="b">clone</tspan>: no CLONE_NEW*</text>
+  <text x="198" y="416"><tspan class="b">clone3</tspan> → ENOSYS</text>
+  <text class="m xs" x="198" y="429">glibc falls back to clone</text>
+  <text x="198" y="447"><tspan class="b">personality</tspan>: fixed</text>
+  <text x="198" y="465"><tspan class="b">ptrace</tspan>: kernel ≥ 4.8</text>
+
+  <!-- col 3 -->
+  <rect class="box" x="364" y="318" width="166" height="160" rx="4"/>
+  <text class="lane" x="372" y="334">ONLY WITH A CAP</text>
+  <g>
+    <text x="372" y="354">mount umount2</text><text class="m xs" x="522" y="354" text-anchor="end">SYS_ADMIN</text>
+    <text x="372" y="370">unshare setns</text><text class="m xs" x="522" y="370" text-anchor="end">SYS_ADMIN</text>
+    <text x="372" y="386">bpf</text><text class="m xs" x="522" y="386" text-anchor="end">BPF</text>
+    <text x="372" y="402">perf_event_open</text><text class="m xs" x="522" y="402" text-anchor="end">PERFMON</text>
+    <text x="372" y="418">*_module</text><text class="m xs" x="522" y="418" text-anchor="end">SYS_MODULE</text>
+    <text x="372" y="434">reboot</text><text class="m xs" x="522" y="434" text-anchor="end">SYS_BOOT</text>
+    <text x="372" y="450">clock_settime</text><text class="m xs" x="522" y="450" text-anchor="end">SYS_TIME</text>
+  </g>
+  <text class="m xs" x="372" y="469">default caps grant none</text>
+
+  <!-- col 4 -->
+  <rect x="538" y="318" width="166" height="160" rx="4" fill="#fbe5e3" stroke="#c62f2f" stroke-width="1.25"/>
+  <text class="lane red" x="546" y="334">NEVER LISTED → EPERM</text>
+  <g>
+    <text x="546" y="354">pivot_root</text>
+    <text x="546" y="368">kexec_load</text>
+    <text x="546" y="382">kexec_file_load</text>
+    <text x="546" y="396">keyctl add_key</text>
+    <text x="546" y="410">request_key</text>
+    <text x="546" y="424">userfaultfd</text>
+    <text x="546" y="438">io_uring_setup</text>
+    <text x="546" y="452">io_uring_enter</text>
+    <text x="546" y="466">swapon vm86</text>
+  </g>
+
+  <!-- ROW 3: agent problem -->
+  <text class="lane" x="16" y="502">THE AGENT PROBLEM</text>
+  <text class="b" x="16" y="520">Tighter: the next task breaks.</text>
+  <text class="m xs" x="16" y="535">docker build needs unshare + mount;</text>
+  <text class="m xs" x="16" y="549">perf record needs perf_event_open</text>
+  <text class="b" x="368" y="520">Looser: the kernel stays in reach.</text>
+  <text class="m xs" x="368" y="535">a strace'd web server uses ~40-50 syscalls;</text>
+  <text class="m xs" x="368" y="549">an agent's set changes with every task</text>
+
+</svg>

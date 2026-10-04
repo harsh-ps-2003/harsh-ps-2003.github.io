@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 424" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">Same agent code, three different first kernels</title>
+  <desc id="desc">Three stacks compared row by row. In a runc container the agent's roughly 385 x86_64 syscalls go straight into the shared host kernel, where namespaces, cgroups, capabilities, seccomp and LSMs are filters on that one kernel. Under gVisor, the syscalls are trapped into the Sentry, a Go user-space kernel implementing 290 of 352 syscalls, and only the Sentry's seccomp-filtered host syscalls reach the host kernel. In a Firecracker microVM, the syscalls go to a full guest kernel, and only VM exits and virtio queues reach KVM and the jailed Rust VMM. An orange line marks where untrusted code first reaches host-kernel code in each stack.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+    <marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#ff5f1f"/></marker>
+  </defs>
+  <style>
+    text { fill: #232333; font-size: 10.5px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane, .lane text { font-size: 10px; font-weight: 600; letter-spacing: .06em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; font-size: 10px; }
+    .s { font-size: 10px; }
+    .h { font-size: 11.5px; font-weight: 700; }
+    .red { fill: #c62f2f; font-size: 10px; }
+    .acc { fill: #c2410c; font-size: 10px; font-weight: 600; }
+    .app { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1.25; }
+    .host { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1; }
+    .sentry { fill: #ece6f7; stroke: #9b86c9; stroke-width: 1.25; }
+    .guest { fill: #e2f2e6; stroke: #5ea876; stroke-width: 1.25; }
+    .proc { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .hw { fill: #f5f5f8; stroke: #c3c3cf; stroke-width: 1; }
+    .ln { stroke: #232333; stroke-width: 1.25; fill: none; }
+    .edge { stroke: #ff5f1f; stroke-width: 3; }
+  </style>
+
+  <text class="k" x="16" y="22">WHAT IF THE KERNEL WASN'T SHARED</text>
+  <text class="t" x="16" y="42">Same agent code, three different first kernels</text>
+  <text class="c" x="16" y="60">The orange line is where untrusted code first reaches host-kernel code.</text>
+
+  <!-- column titles: cols at x 92 / 300 / 508, w 196 -->
+  <text class="h" x="92" y="84">runc container</text>
+  <text class="h" x="300" y="84">gVisor (runsc)</text>
+  <text class="h" x="508" y="84">Firecracker microVM</text>
+
+  <!-- row labels -->
+  <g class="lane">
+    <text x="16" y="111">AGENT</text>
+    <text x="16" y="172">FIRST</text><text x="16" y="185">KERNEL</text>
+    <text x="16" y="252">INTO THE</text><text x="16" y="265">HOST</text>
+    <text x="16" y="319">HOST</text><text x="16" y="332">KERNEL</text>
+    <text x="16" y="361">HW</text>
+  </g>
+  <g stroke="#e1e1e8" stroke-width="1">
+    <line x1="16" y1="140" x2="84" y2="140"/>
+    <line x1="16" y1="218" x2="84" y2="218"/>
+    <line x1="16" y1="292" x2="84" y2="292"/>
+  </g>
+
+  <!-- row A: agent code (all three) -->
+  <rect class="app" x="92" y="92" width="196" height="30" rx="4"/>
+  <text class="s" x="100" y="111"><tspan font-weight="700">agent code</tspan></text><text class="m" x="182" y="111">unreviewed</text>
+  <rect class="app" x="300" y="92" width="196" height="30" rx="4"/>
+  <text class="s" x="308" y="111"><tspan font-weight="700">agent code</tspan></text><text class="m" x="390" y="111">unreviewed</text>
+  <rect class="app" x="508" y="92" width="196" height="30" rx="4"/>
+  <text class="s" x="516" y="111"><tspan font-weight="700">agent code</tspan></text><text class="m" x="598" y="111">unreviewed</text>
+
+  <!-- ===== runc ===== -->
+  <line x1="104" y1="122" x2="104" y2="145" stroke="#ff5f1f" stroke-width="1.5" marker-end="url(#ao)"/>
+  <text class="acc" x="112" y="137">~385 syscalls, direct</text>
+  <rect class="host" x="92" y="148" width="196" height="192" rx="4"/>
+  <line class="edge" x1="92" y1="148" x2="288" y2="148"/>
+  <text class="h" x="100" y="166">host kernel</text>
+  <text class="s" x="100" y="182">namespaces · cgroups</text>
+  <text class="s" x="100" y="195">caps · seccomp · LSM</text>
+  <text class="m" x="100" y="209">= filters on this one kernel</text>
+  <text class="red" x="100" y="234">shared by every container</text>
+  <text class="red" x="100" y="247">on the node</text>
+  <text class="m" x="100" y="272">Docker blocks ~44 of them;</text>
+  <text class="m" x="100" y="285">the rest reach page cache,</text>
+  <text class="m" x="100" y="298">VFS, net stack, mm …</text>
+  <text class="m" x="100" y="322">bug here = host bug</text>
+
+  <!-- ===== gVisor ===== -->
+  <line class="ln" x1="312" y1="122" x2="312" y2="146" marker-end="url(#a)"/>
+  <text class="s" x="320" y="137">trapped (systrap)</text>
+  <rect class="sentry" x="300" y="148" width="196" height="66" rx="4"/>
+  <text class="h" x="308" y="166">Sentry</text><text class="m" x="360" y="166">Go, user space</text>
+  <text class="s" x="308" y="181">implements 290/352</text>
+  <text class="s" x="308" y="194">amd64 syscalls itself</text>
+  <text class="m" x="308" y="207">own VFS, mm, netstack</text>
+  <line class="ln" x1="312" y1="214" x2="312" y2="226" marker-end="url(#a)"/>
+  <rect class="proc" x="300" y="228" width="196" height="56" rx="4"/>
+  <text class="s" x="308" y="245" font-weight="700">Sentry's own syscalls</text>
+  <text class="s" x="308" y="259">seccomp: 72 base entries</text>
+  <text class="m" x="308" y="273">no open/socket/execve</text>
+  <line x1="312" y1="284" x2="312" y2="303" stroke="#ff5f1f" stroke-width="1.5" marker-end="url(#ao)"/>
+  <text class="acc" x="320" y="298">filtered host calls</text>
+  <rect class="host" x="300" y="306" width="196" height="34" rx="4"/>
+  <line class="edge" x1="300" y1="306" x2="496" y2="306"/>
+  <text class="h" x="308" y="321">host kernel</text>
+  <text class="m" x="308" y="334">never sees app syscalls</text>
+
+  <!-- ===== Firecracker ===== -->
+  <line class="ln" x1="520" y1="122" x2="520" y2="146" marker-end="url(#a)"/>
+  <text class="s" x="528" y="137">syscalls stay in guest</text>
+  <rect class="guest" x="508" y="148" width="196" height="66" rx="4"/>
+  <text class="h" x="516" y="166">guest kernel</text>
+  <text class="s" x="516" y="181">full Linux, its own</text>
+  <text class="s" x="516" y="194">page cache + crypto</text>
+  <text class="m" x="516" y="207">guest root ≠ host root</text>
+  <line x1="520" y1="214" x2="520" y2="225" stroke="#ff5f1f" stroke-width="1.5" marker-end="url(#ao)"/>
+  <text class="acc" x="528" y="224">VM exits + virtio</text>
+  <rect class="host" x="508" y="228" width="196" height="56" rx="4"/>
+  <line class="edge" x1="508" y1="228" x2="704" y2="228"/>
+  <text class="s" x="516" y="245" font-weight="700">KVM → firecracker VMM</text>
+  <text class="s" x="516" y="259">MMIO/PIO exits, 5 devices</text>
+  <text class="m" x="516" y="273">VMM: Rust, jailed, seccomp</text>
+  <line class="ln" x1="520" y1="284" x2="520" y2="303" marker-end="url(#a)"/>
+  <text class="s" x="528" y="298">VMM's filtered calls</text>
+  <rect class="host" x="508" y="306" width="196" height="34" rx="4"/>
+  <text class="h" x="516" y="321">host kernel</text>
+  <text class="m" x="516" y="334">never runs guest syscalls</text>
+
+  <!-- hardware -->
+  <rect class="hw" x="92" y="348" width="196" height="20" rx="3"/><text class="m" x="100" y="362">CPU · RAM · NIC · disk</text>
+  <rect class="hw" x="300" y="348" width="196" height="20" rx="3"/><text class="m" x="308" y="362">CPU · RAM · NIC · disk</text>
+  <rect class="hw" x="508" y="348" width="196" height="20" rx="3"/><text class="m" x="516" y="362">VT-x / AMD-V enforce VM</text>
+
+  <!-- trade-offs -->
+  <text class="s" x="92" y="392">+ ecosystem, fastest start</text>
+  <text class="red" x="92" y="406">− shared kernel, yearly escapes</text>
+  <text class="s" x="300" y="392">+ no KVM needed, fast start</text>
+  <text class="red" x="300" y="406">− 62 syscalls missing, IO tax</text>
+  <text class="s" x="508" y="392">+ own kernel, snapshot restore</text>
+  <text class="red" x="508" y="406">− no GPU, needs KVM, more ops</text>
+
+</svg>

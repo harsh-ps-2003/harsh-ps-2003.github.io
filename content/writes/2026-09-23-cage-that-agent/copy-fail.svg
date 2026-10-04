@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 498" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">Copy Fail: where a 4-byte page-cache write lands</title>
+  <desc id="desc">The same Copy Fail exploit (socket AF_ALG, algif_aead, splice file pages, 4-byte write into the page cache, cached setuid binary gives root) against three boundaries. In a container the AF_ALG path and the page cache belong to the shared host kernel, so co-tenant cached files are corrupted. In a Firecracker microVM the write lands in the guest kernel's own page cache and stops at the KVM boundary; E2B's guest kernel does not even build AF_ALG AEAD. In gVisor the Sentry has no AF_ALG socket provider and returns EAFNOSUPPORT, so the host kernel path is never reached. Cloudflare mitigated its shared-kernel fleet with a bpf-lsm program on socket_bind.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#c62f2f"/></marker>
+  </defs>
+  <style>
+    text { fill: #232333; font-size: 10px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; }
+    .h { font-size: 12.5px; font-weight: 700; }
+    .e1 { font-size: 10.5px; font-weight: 600; }
+    .b { font-weight: 700; font-size: 10.5px; }
+    .red { fill: #c62f2f; }
+    .box { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .atk { fill: #e3eefb; stroke: #c62f2f; stroke-width: 1.4; }
+    .usr { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1.25; }
+    .kern { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1.25; }
+    .hot { fill: #fbe5e3; stroke: #c62f2f; stroke-width: 1.25; }
+    .rbox { fill: #ffffff; stroke: #c62f2f; stroke-width: 1.25; }
+    .guest { fill: #e2f2e6; stroke: #5ea876; stroke-width: 1.25; }
+    .sentry { fill: #ece6f7; stroke: #9b86c9; stroke-width: 1.25; }
+    .ctr { text-anchor: middle; }
+    .ra { stroke: #c62f2f; stroke-width: 1.4; fill: none; }
+  </style>
+
+  <text class="k" x="16" y="22">CVE-2026-31431 · COPY FAIL</text>
+  <text class="t" x="16" y="42">Where a 4-byte page-cache write lands</text>
+  <text class="c" x="16" y="60">Same exploit, three boundaries. Only the shared kernel turns it into a co-tenant problem.</text>
+
+  <!-- exploit chain -->
+  <text class="lane" x="16" y="86">THE EXPLOIT · IDENTICAL IN ALL THREE COLUMNS</text>
+  <g>
+    <rect class="box" x="16" y="94" width="124" height="36" rx="4"/>
+    <text class="e1" x="24" y="109">unprivileged code</text><text class="m" x="24" y="123">732-byte Python</text>
+    <rect class="box" x="157" y="94" width="124" height="36" rx="4"/>
+    <text class="e1" x="165" y="109">socket(AF_ALG)</text><text class="m" x="165" y="123">aead, authencesn</text>
+    <rect class="box" x="298" y="94" width="124" height="36" rx="4"/>
+    <text class="e1" x="306" y="109">splice() target</text><text class="m" x="306" y="123">file pages in</text>
+    <rect class="box" x="439" y="94" width="124" height="36" rx="4"/>
+    <text class="e1" x="447" y="109">4-byte write</text><text class="m" x="447" y="123">into page cache</text>
+    <rect class="hot" x="580" y="94" width="124" height="36" rx="4"/>
+    <text class="e1" x="588" y="109">cached setuid su</text><text class="m" x="588" y="123">next exec = root</text>
+  </g>
+  <g stroke="#232333" stroke-width="1.25" marker-end="url(#a)">
+    <line x1="140" y1="112" x2="155" y2="112"/>
+    <line x1="281" y1="112" x2="296" y2="112"/>
+    <line x1="422" y1="112" x2="437" y2="112"/>
+    <line x1="563" y1="112" x2="578" y2="112"/>
+  </g>
+
+  <!-- column separators -->
+  <g stroke="#dcdce4" stroke-width="1">
+    <line x1="243" y1="150" x2="243" y2="416"/>
+    <line x1="476" y1="150" x2="476" y2="416"/>
+  </g>
+
+  <!-- (a) container -->
+  <text class="h" x="24" y="166">Container</text>
+  <text class="m" x="24" y="180">runc / Sysbox (Daytona)</text>
+  <rect class="atk" x="24" y="192" width="94" height="24" rx="4"/><text class="ctr" x="71" y="208">tenant A</text>
+  <rect class="usr" x="134" y="192" width="95" height="24" rx="4"/><text class="ctr" x="181.5" y="208">tenant B</text>
+  <rect x="24" y="224" width="205" height="16" rx="3" fill="none" stroke="#7aa7d9" stroke-width="1" stroke-dasharray="4 3"/>
+  <text class="m ctr" x="126.5" y="235.5">ns · cgroups · seccomp</text>
+  <rect class="kern" x="24" y="248" width="205" height="94" rx="4"/>
+  <rect class="rbox" x="34" y="258" width="84" height="22" rx="3"/><text class="ctr" x="76" y="273">algif_aead</text>
+  <rect class="hot" x="136" y="258" width="85" height="22" rx="3"/><text class="ctr" x="178.5" y="273">page cache</text>
+  <line class="ra" x1="44" y1="216" x2="44" y2="256" marker-end="url(#ar)"/>
+  <line class="ra" x1="118" y1="269" x2="134" y2="269" marker-end="url(#ar)"/>
+  <line class="ra" x1="211" y1="258" x2="211" y2="218" marker-end="url(#ar)" stroke-dasharray="3 2"/>
+  <text class="m" x="34" y="300">one page cache for</text>
+  <text class="m" x="34" y="313">every tenant on the host</text>
+  <text class="lane" x="34" y="334">HOST KERNEL · SHARED</text>
+  <circle cx="28" cy="353" r="3.5" fill="#c62f2f"/>
+  <text class="b red" x="36" y="357">co-tenant files corrupted</text>
+  <text class="red" x="36" y="371">path to root on the host</text>
+  <text class="m" x="24" y="389">Daytona: algif_aead blacklisted,</text>
+  <text class="m" x="24" y="402">patched in 12 h, creds rotated,</text>
+  <text class="m" x="24" y="415">signups paused</text>
+
+  <!-- (b) firecracker -->
+  <text class="h" x="257" y="166">Firecracker microVM</text>
+  <text class="m" x="257" y="180">E2B, Sprites, Vercel, Lambda</text>
+  <rect class="guest" x="257" y="190" width="205" height="104" rx="5"/>
+  <rect class="atk" x="265" y="198" width="94" height="22" rx="4"/><text class="ctr" x="312" y="213">agent code</text>
+  <rect class="rbox" x="267" y="238" width="84" height="22" rx="3"/><text class="ctr" x="309" y="253">algif_aead</text>
+  <rect class="hot" x="367" y="238" width="87" height="22" rx="3"/><text class="ctr" x="410.5" y="253">guest cache</text>
+  <text class="lane" x="454" y="232" text-anchor="end" style="fill:#2f6b43">GUEST KERNEL</text>
+  <line class="ra" x1="309" y1="220" x2="309" y2="236" marker-end="url(#ar)"/>
+  <line class="ra" x1="351" y1="249" x2="365" y2="249" marker-end="url(#ar)"/>
+  <text class="m" x="267" y="282">write stays in this guest</text>
+  <line x1="257" y1="303" x2="462" y2="303" stroke="#5ea876" stroke-width="3"/>
+  <text class="m" x="462" y="315" text-anchor="end">KVM boundary</text>
+  <rect class="kern" x="257" y="320" width="205" height="22" rx="4"/>
+  <text class="lane" x="265" y="335">HOST KERNEL · UNTOUCHED</text>
+  <circle cx="261" cy="353" r="3.5" fill="#5ea876"/>
+  <text class="b" x="269" y="357">contained to one guest</text>
+  <text class="m" x="269" y="371">escaping needs a 2nd bug (VMM)</text>
+  <text class="m" x="257" y="389">E2B guest kernel built without</text>
+  <text class="m" x="257" y="402">CONFIG_CRYPTO_USER_API_AEAD:</text>
+  <text class="m" x="257" y="415">socket(AF_ALG) can't open</text>
+
+  <!-- (c) gVisor -->
+  <text class="h" x="490" y="166">gVisor</text>
+  <text class="m" x="490" y="180">Modal, GKE Agent Sandbox</text>
+  <rect class="atk" x="490" y="192" width="94" height="22" rx="4"/><text class="ctr" x="537" y="207">app code</text>
+  <line x1="537" y1="214" x2="537" y2="225" stroke="#c62f2f" stroke-width="1.4" marker-end="url(#ar)"/>
+  <rect class="sentry" x="490" y="227" width="205" height="66" rx="5"/>
+  <text class="lane" x="687" y="242" text-anchor="end" style="fill:#5b4794">SENTRY</text>
+  <text x="500" y="244">socket(AF_ALG, ...)</text>
+  <text x="500" y="262">no AF_ALG provider</text>
+  <text class="b" x="500" y="280">-&gt; EAFNOSUPPORT</text>
+  <rect x="490" y="299" width="205" height="15" rx="3" fill="none" stroke="#9b86c9" stroke-width="1" stroke-dasharray="4 3"/>
+  <text class="m ctr" x="592.5" y="310">Sentry's own seccomp filter</text>
+  <rect class="kern" x="490" y="320" width="205" height="22" rx="4"/>
+  <text class="lane" x="498" y="335">HOST KERNEL · NOT REACHED</text>
+  <circle cx="494" cy="353" r="3.5" fill="#9b86c9"/>
+  <text class="b" x="502" y="357">bug unreachable</text>
+  <text class="m" x="502" y="371">the call never leaves Sentry</text>
+  <text class="m" x="490" y="389">Sentry socket families:</text>
+  <text class="m" x="490" y="402">unix, netlink, inet, inet6,</text>
+  <text class="m" x="490" y="415">packet. Nothing else.</text>
+
+  <!-- shared-kernel mitigation -->
+  <line x1="16" y1="430" x2="704" y2="430" stroke="#c3c3cf" stroke-width="1"/>
+  <text class="lane" x="16" y="448">IF YOU MUST SHARE THE KERNEL · CLOUDFLARE'S FLEET FIX</text>
+  <text x="16" y="465" style="font-size:10.5px">bpf-lsm on socket_bind: family == AF_ALG and binary not allowlisted -&gt; deny.</text>
+  <text class="m" x="16" y="480">eBPF exporter first to find legit AF_ALG users, then enforcement; patched kernels from 4 May (+5 days).</text>
+
+</svg>

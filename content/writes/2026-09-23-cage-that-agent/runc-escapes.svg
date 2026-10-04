@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 554" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">Anatomy of runc escapes</title>
+  <desc id="desc">The thirteen steps runc takes to create a container, in source order, with the moment each protection switches on: cgroup at step 3, namespaces at steps 4 and 5, masked paths at step 10, capabilities at step 11, seccomp at step 12. Seven runc CVEs land on steps 2, 3, 6, 8, 9, 10 and 11, mostly before the masks, capability drop and seccomp filter are in place. Escapes in docker cp, the containerd shim and CRI-O follow the same pattern elsewhere in the stack.</desc>
+  <style>
+    text { fill: #232333; font-size: 10.5px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; font-size: 10px; }
+    .cv { font-size: 10px; }
+    .id { fill: #c62f2f; font-weight: 700; font-size: 10px; }
+    .num { fill: #a0a0b0; font-size: 10px; }
+    .host { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1; }
+    .init { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1; }
+    .pill { font-size: 9.5px; font-weight: 600; }
+    .bar { fill: #ff5f1f; }
+    .dot { fill: #c62f2f; }
+  </style>
+
+  <text class="k" x="16" y="22">ANATOMY OF ESCAPES</text>
+  <text class="t" x="16" y="42">runc builds the cage from inside it</text>
+  <text class="c" x="16" y="60">Masks, capability drop and seccomp switch on last. The escapes land first.</text>
+
+  <text class="lane" x="16" y="86">RUNC CREATE, IN SOURCE ORDER</text>
+  <text class="m" x="361" y="76" text-anchor="middle">guard on?</text>
+  <g text-anchor="middle" style="font-size:9.5px;font-weight:600;fill:#5c5c6e">
+    <text x="309" y="86" style="fill:#5c5c6e">cg</text>
+    <text x="335" y="86" style="fill:#5c5c6e">ns</text>
+    <text x="361" y="86" style="fill:#5c5c6e">mask</text>
+    <text x="387" y="86" style="fill:#5c5c6e">cap</text>
+    <text x="413" y="86" style="fill:#5c5c6e">sec</text>
+  </g>
+  <text class="lane" x="434" y="86">WHAT BROKE HERE</text>
+  <line x1="16" y1="91" x2="704" y2="91" stroke="#232333" stroke-width="1"/>
+
+  <!-- zebra: rows top = 94 + 28(i-1) -->
+  <g fill="#f5f5f8">
+    <rect x="16" y="122" width="688" height="28"/>
+    <rect x="16" y="178" width="688" height="28"/>
+    <rect x="16" y="234" width="688" height="28"/>
+    <rect x="16" y="290" width="688" height="28"/>
+    <rect x="16" y="346" width="688" height="28"/>
+    <rect x="16" y="402" width="688" height="28"/>
+  </g>
+
+  <!-- protection bars: start row -> end -->
+  <rect class="bar" x="304" y="152" width="10" height="304" rx="2"/>
+  <rect class="bar" x="330" y="180" width="10" height="276" rx="2" opacity=".55"/>
+  <rect class="bar" x="330" y="208" width="10" height="248" rx="2"/>
+  <rect class="bar" x="356" y="348" width="10" height="108" rx="2"/>
+  <rect class="bar" x="382" y="376" width="10" height="80" rx="2"/>
+  <rect class="bar" x="408" y="404" width="10" height="52" rx="2"/>
+
+  <!-- steps -->
+  <g>
+    <text class="num" x="18" y="112">1</text><rect class="host" x="32" y="101" width="34" height="15" rx="3"/><text class="pill" x="49" y="112" text-anchor="middle">host</text>
+    <text x="72" y="112">read bundle: config.json + rootfs</text>
+
+    <text class="num" x="18" y="140">2</text><rect class="host" x="32" y="129" width="34" height="15" rx="3"/><text class="pill" x="49" y="140" text-anchor="middle">host</text>
+    <text x="72" y="140">exec runc init: /proc/self/exe</text>
+
+    <text class="num" x="18" y="168">3</text><rect class="host" x="32" y="157" width="34" height="15" rx="3"/><text class="pill" x="49" y="168" text-anchor="middle">host</text>
+    <text x="72" y="168">join cgroup (/sys/fs/cgroup fds)</text>
+
+    <text class="num" x="18" y="196">4</text><rect class="init" x="32" y="185" width="34" height="15" rx="3"/><text class="pill" x="49" y="196" text-anchor="middle">init</text>
+    <text x="72" y="196">unshare user ns, write uid maps</text>
+
+    <text class="num" x="18" y="224">5</text><rect class="init" x="32" y="213" width="34" height="15" rx="3"/><text class="pill" x="49" y="224" text-anchor="middle">init</text>
+    <text x="72" y="224">unshare the rest; clone → PID 1</text>
+
+    <text class="num" x="18" y="252">6</text><rect class="init" x="32" y="241" width="34" height="15" rx="3"/><text class="pill" x="49" y="252" text-anchor="middle">init</text>
+    <text x="72" y="252">mounts from config (/proc, vols)</text>
+
+    <text class="num" x="18" y="280">7</text><rect class="init" x="32" y="269" width="34" height="15" rx="3"/><text class="pill" x="49" y="280" text-anchor="middle">init</text>
+    <text x="72" y="280">/dev nodes, pivot_root</text>
+
+    <text class="num" x="18" y="308">8</text><rect class="init" x="32" y="297" width="34" height="15" rx="3"/><text class="pill" x="49" y="308" text-anchor="middle">init</text>
+    <text x="72" y="308">bind pty onto /dev/console</text>
+
+    <text class="num" x="18" y="336">9</text><rect class="init" x="32" y="325" width="34" height="15" rx="3"/><text class="pill" x="49" y="336" text-anchor="middle">init</text>
+    <text x="72" y="336">hostname, AppArmor, sysctls</text>
+
+    <text class="num" x="13" y="364">10</text><rect class="init" x="32" y="353" width="34" height="15" rx="3"/><text class="pill" x="49" y="364" text-anchor="middle">init</text>
+    <text x="72" y="364">readonly + masked paths</text>
+
+    <text class="num" x="13" y="392">11</text><rect class="init" x="32" y="381" width="34" height="15" rx="3"/><text class="pill" x="49" y="392" text-anchor="middle">init</text>
+    <text x="72" y="392">no_new_privs, chdir, drop caps</text>
+
+    <text class="num" x="13" y="420">12</text><rect class="init" x="32" y="409" width="34" height="15" rx="3"/><text class="pill" x="49" y="420" text-anchor="middle">init</text>
+    <text x="72" y="420">load seccomp filter</text>
+
+    <text class="num" x="13" y="448">13</text><rect class="init" x="32" y="437" width="34" height="15" rx="3"/><text class="pill" x="49" y="448" text-anchor="middle">init</text>
+    <text x="72" y="448">wait exec.fifo → execve(app)</text>
+  </g>
+
+  <!-- CVEs -->
+  <g>
+    <circle class="dot" cx="428" cy="136.5" r="3"/>
+    <text class="cv" x="436" y="140"><tspan class="id">CVE-2019-5736</tspan> container overwrites</text>
+    <text class="m" x="436" y="152">host runc binary (fix: memfd copy)</text>
+
+    <circle class="dot" cx="428" cy="164.5" r="3"/>
+    <text class="cv" x="436" y="168"><tspan class="id">CVE-2024-21626</tspan> fd to host cgroupfs</text>
+    <text class="m" x="436" y="180">leaks into init (runc ≥ rc93) ↓</text>
+
+    <circle class="dot" cx="428" cy="248.5" r="3"/>
+    <text class="cv" x="436" y="252"><tspan class="id">CVE-2021-30465</tspan> symlink swapped</text>
+    <text class="m" x="436" y="264">between check and mount: lands outside</text>
+
+    <circle class="dot" cx="428" cy="304.5" r="3"/>
+    <text class="cv" x="436" y="308"><tspan class="id">CVE-2025-52565</tspan> console bind runs</text>
+    <text class="m" x="436" y="320">before masks; can be redirected</text>
+
+    <circle class="dot" cx="428" cy="332.5" r="3"/>
+    <text class="cv" x="436" y="336"><tspan class="id">CVE-2025-52881</tspan> race redirects</text>
+    <text class="m" x="436" y="348">/proc writes: LSM label silently skipped</text>
+
+    <circle class="dot" cx="428" cy="360.5" r="3"/>
+    <text class="cv" x="436" y="364"><tspan class="id">CVE-2025-31133</tspan> /dev/null swapped</text>
+    <text class="m" x="436" y="376">for a symlink: writable core_pattern</text>
+
+    <circle class="dot" cx="428" cy="388.5" r="3"/>
+    <text class="cv" x="436" y="392"><tspan class="id">CVE-2024-21626</tspan> cwd /proc/self/fd/7</text>
+    <text class="m" x="436" y="404">resolves in the host mount namespace</text>
+  </g>
+  <line x1="16" y1="458" x2="704" y2="458" stroke="#232333" stroke-width="1"/>
+
+  <!-- elsewhere in the stack -->
+  <rect x="16" y="470" width="688" height="70" rx="5" fill="#ffffff" stroke="#c3c3cf" stroke-width="1"/>
+  <text class="lane" x="26" y="486">SAME LESSON, OTHER LAYERS</text>
+  <text class="cv" x="26" y="503"><tspan class="id">CVE-2019-14271</tspan> docker cp chroots into the container, then loads its libnss as host root</text>
+  <text class="cv" x="26" y="518"><tspan class="id">CVE-2020-15257</tspan> containerd shim API on an abstract socket: reachable with --net=host</text>
+  <text class="cv" x="26" y="533"><tspan class="id">CVE-2022-0811</tspan>  CRI-O lets a pod set host sysctls: kernel.core_pattern runs a script</text>
+
+</svg>

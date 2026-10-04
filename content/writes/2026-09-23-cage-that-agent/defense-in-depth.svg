@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 458" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">Defense in depth for one tool call</title>
+  <desc id="desc">A tool call passes six gates in order: identity, policy engine, sandbox, network egress, tool gateway and human gate, before it becomes a side effect. Each gate can stop the call, and each gate writes to an append-only per-thread audit log. The right column lists what goes wrong when a gate is skipped.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#c62f2f"/></marker>
+  </defs>
+  <style>
+    text { fill: #232333; font-size: 11px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; font-size: 10.5px; }
+    .h { font-size: 12px; font-weight: 700; }
+    .red { fill: #c62f2f; }
+    .gate { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .num { font-size: 10px; font-weight: 700; fill: #ff5f1f; }
+  </style>
+
+  <text class="k" x="16" y="22">DEFENSE IN DEPTH</text>
+  <text class="t" x="16" y="42">Every tool call should pass every gate</text>
+  <text class="c" x="16" y="60">Each layer stops a different failure. Skip one and its failures land on the next.</text>
+
+  <text class="lane" x="56" y="90">GATE</text>
+  <text class="lane" x="262" y="90">STOPS, FOR EXAMPLE</text>
+  <text class="lane" x="500" y="90">IF THIS GATE IS MISSING</text>
+  <line x1="16" y1="96" x2="704" y2="96" stroke="#c3c3cf" stroke-width="1"/>
+
+  <!-- entry -->
+  <rect x="86" y="104" width="120" height="20" rx="10" fill="#e3eefb" stroke="#7aa7d9" stroke-width="1.25"/>
+  <text x="146" y="118" text-anchor="middle">tool call</text>
+  <line x1="146" y1="124" x2="146" y2="134" stroke="#232333" stroke-width="1.25" marker-end="url(#a)"/>
+
+  <!-- audit log bar -->
+  <rect x="16" y="136" width="24" height="276" rx="4" fill="#f5f5f8" stroke="#232333" stroke-width="1.25"/>
+  <text class="lane" transform="translate(32 274) rotate(-90)" text-anchor="middle" style="fill:#232333">AUDIT LOG · APPEND-ONLY · PER THREAD</text>
+  <g stroke="#232333" stroke-width="1" stroke-dasharray="3 2">
+    <line x1="40" y1="154" x2="56" y2="154"/>
+    <line x1="40" y1="202" x2="56" y2="202"/>
+    <line x1="40" y1="250" x2="56" y2="250"/>
+    <line x1="40" y1="298" x2="56" y2="298"/>
+    <line x1="40" y1="346" x2="56" y2="346"/>
+    <line x1="40" y1="394" x2="56" y2="394"/>
+  </g>
+
+  <!-- gates: y = 136 + 48i, h 36 -->
+  <g>
+    <rect class="gate" x="56" y="136" width="180" height="36" rx="4"/>
+    <text class="num" x="64" y="151">1</text><text class="h" x="76" y="151">Identity</text>
+    <text class="m" x="64" y="165">who is it acting as?</text>
+
+    <rect class="gate" x="56" y="184" width="180" height="36" rx="4"/>
+    <text class="num" x="64" y="199">2</text><text class="h" x="76" y="199">Policy engine</text>
+    <text class="m" x="64" y="213">allowed for this task?</text>
+
+    <rect class="gate" x="56" y="232" width="180" height="36" rx="4"/>
+    <text class="num" x="64" y="247">3</text><text class="h" x="76" y="247">Sandbox</text>
+    <text class="m" x="64" y="261">what can it touch?</text>
+
+    <rect class="gate" x="56" y="280" width="180" height="36" rx="4"/>
+    <text class="num" x="64" y="295">4</text><text class="h" x="76" y="295">Network egress</text>
+    <text class="m" x="64" y="309">where can it call?</text>
+
+    <rect class="gate" x="56" y="328" width="180" height="36" rx="4"/>
+    <text class="num" x="64" y="343">5</text><text class="h" x="76" y="343">Tool gateway</text>
+    <text class="m" x="64" y="357">which op, which args?</text>
+
+    <rect class="gate" x="56" y="376" width="180" height="36" rx="4" style="stroke:#ff5f1f;stroke-width:1.75"/>
+    <text class="num" x="64" y="391">6</text><text class="h" x="76" y="391">Human gate</text>
+    <text class="m" x="64" y="405">is it irreversible?</text>
+  </g>
+  <g stroke="#232333" stroke-width="1.25" marker-end="url(#a)">
+    <line x1="146" y1="172" x2="146" y2="182"/>
+    <line x1="146" y1="220" x2="146" y2="230"/>
+    <line x1="146" y1="268" x2="146" y2="278"/>
+    <line x1="146" y1="316" x2="146" y2="326"/>
+    <line x1="146" y1="364" x2="146" y2="374"/>
+    <line x1="146" y1="412" x2="146" y2="422"/>
+  </g>
+
+  <!-- deny exits -->
+  <g stroke="#c62f2f" stroke-width="1.25" marker-end="url(#ar)">
+    <line x1="236" y1="154" x2="254" y2="154"/>
+    <line x1="236" y1="202" x2="254" y2="202"/>
+    <line x1="236" y1="250" x2="254" y2="250"/>
+    <line x1="236" y1="298" x2="254" y2="298"/>
+    <line x1="236" y1="346" x2="254" y2="346"/>
+    <line x1="236" y1="394" x2="254" y2="394" stroke-dasharray="3 2"/>
+  </g>
+  <text class="red" x="262" y="151">shared "god" service account</text>
+  <text class="m" x="262" y="165">act with the user's OAuth token</text>
+  <text class="red" x="262" y="199">prod write in autonomous run</text>
+  <text class="m" x="262" y="213">decided in code, not the prompt</text>
+  <text class="red" x="262" y="247">write /etc, open docker.sock</text>
+  <text class="m" x="262" y="261">writes stay in the workspace</text>
+  <text class="red" x="262" y="295">169.254.169.254, attacker.com</text>
+  <text class="m" x="262" y="309">default deny + domain allowlist</text>
+  <text class="red" x="262" y="343">right tool, wrong repo/tenant</text>
+  <text class="m" x="262" y="357">JIT token: narrow scope, short TTL</text>
+  <text class="red" x="262" y="391">merge, deploy, email, charge $</text>
+  <text class="m" x="262" y="405">held for a click, not denied</text>
+
+  <!-- if skipped -->
+  <g>
+    <text x="500" y="151">agent outranks the user</text>
+    <text class="m" x="500" y="165">standing insider threat</text>
+    <text x="500" y="199">the prompt is the policy</text>
+    <text class="m" x="500" y="213">approximated, not enforced</text>
+    <text x="500" y="247">docker.sock = host root</text>
+    <text class="m" x="500" y="261">gateway is the last wall</text>
+    <text x="500" y="295">one request exfiltrates</text>
+    <text class="m" x="500" y="309">log sees it after the fact</text>
+    <text x="500" y="343">raw creds in the sandbox</text>
+    <text class="m" x="500" y="357">valid call, wrong target</text>
+    <text x="500" y="391">confidence = approval</text>
+    <text class="m" x="500" y="405">irreversible at 3 a.m.</text>
+  </g>
+
+  <!-- side effect -->
+  <rect x="76" y="424" width="140" height="20" rx="4" fill="#e2f2e6" stroke="#5ea876" stroke-width="1.25"/>
+  <text x="146" y="438" text-anchor="middle">side effect</text>
+  <text class="m" x="232" y="438">runs with a scoped token; every decision above is in the log</text>
+
+</svg>
