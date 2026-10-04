@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 387" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">Fitting in 6 MB of L2</title>
+  <desc id="desc">The V100 memory levels from closest to furthest from the cores, registers at 256 KB per SM, L1 and shared memory at 128 KB per SM, a 6 MB L2 shared by all 80 SMs, 16 or 32 GB of HBM2 at about 900 GB/s, a peer GPU over NVLink at up to 300 GB/s total, and host DRAM over PCIe at about 16 GB/s each way. On the right, the post's own estimates show a 10 thousand point residual batch and all 75 subdomains' parameters going over the 6 MB L2 line, while 2,048 point chunks and 20 subdomains at a time stay under it.</desc>
+  <style>
+    text { fill: #232333; font-size: 10.5px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; font-size: 10px; }
+    .b { font-weight: 700; }
+    .big { font-weight: 700; font-size: 11.5px; }
+    .mem { fill: #fbf1cf; stroke: #d4b34a; stroke-width: 1.25; }
+    .nvl { fill: #ffede4; stroke: #ff5f1f; stroke-width: 1.25; }
+    .pci { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1.25; }
+    .bad { fill: #fbe5e3; stroke: #c62f2f; stroke-width: 1.25; }
+    .ok { fill: #fbf1cf; stroke: #d4b34a; stroke-width: 1.25; }
+    .red { fill: #c62f2f; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+  </defs>
+
+  <text class="k" x="16" y="22">MEMORY HIERARCHY</text>
+  <text class="t" x="16" y="42">Fitting in 6 MB of L2</text>
+  <text class="c" x="16" y="60">Each level down sits further from the cores, so the post keeps hot data under the L2 line.</text>
+
+  <!-- LEFT: hierarchy -->
+  <text class="lane" x="40" y="84">V100, CLOSEST TO FURTHEST</text>
+  <line x1="24" y1="94" x2="24" y2="326" stroke="#232333" stroke-width="1.25" marker-end="url(#a)"/>
+  <text class="m" transform="translate(18 210) rotate(-90)" text-anchor="middle">further from the cores</text>
+
+  <rect class="mem" x="40" y="92" width="352" height="34" rx="4"/>
+  <text class="b" x="48" y="106">registers</text><text class="big" x="384" y="106" text-anchor="end">256 KB per SM</text>
+  <text class="m" x="48" y="119">64 KB per partition, ~20 MB across 80 SMs</text>
+
+  <rect class="mem" x="40" y="132" width="352" height="34" rx="4"/>
+  <text class="b" x="48" y="146">L1 + shared memory</text><text class="big" x="384" y="146" text-anchor="end">128 KB per SM</text>
+  <text class="m" x="48" y="159">shared memory up to 96 KB, the rest acts as L1</text>
+
+  <rect class="mem" x="40" y="172" width="352" height="34" rx="4" style="stroke:#ff5f1f;stroke-width:2"/>
+  <text class="b" x="48" y="186">L2 cache</text><text class="big" x="384" y="186" text-anchor="end">6 MB</text>
+  <text class="m" x="48" y="199">1 cache shared by all 80 SMs, in front of HBM2</text>
+
+  <rect class="mem" x="40" y="212" width="352" height="34" rx="4"/>
+  <text class="b" x="48" y="226">HBM2</text><text class="big" x="384" y="226" text-anchor="end">16 or 32 GB</text>
+  <text class="m" x="48" y="239">4 stacks on the package, ~900 GB/s</text>
+
+  <rect class="nvl" x="40" y="252" width="352" height="34" rx="4"/>
+  <text class="b" x="48" y="266">peer GPU, NVLink</text><text class="big" x="384" y="266" text-anchor="end">up to 300 GB/s</text>
+  <text class="m" x="48" y="279">6 links at 25 GB/s each way, all summed</text>
+
+  <rect class="pci" x="40" y="292" width="352" height="34" rx="4"/>
+  <text class="b" x="48" y="306">host DRAM, PCIe</text><text class="big" x="384" y="306" text-anchor="end">~16 GB/s each way</text>
+  <text class="m" x="48" y="319">~12 GB/s with pinned memory in practice</text>
+
+  <text class="m" x="40" y="344">fun fact, the register files add up to more than</text>
+  <text class="m" x="40" y="357">3x the L2, ~20 MB vs 6 MB</text>
+
+  <!-- RIGHT: the post's two tricks. scale 18 px per MB from x0 412, 6 MB at x 520 -->
+  <text class="lane" x="412" y="84">THE POST'S L2 TRICKS</text>
+
+  <text class="b" x="412" y="106">chunked PDE residuals</text>
+  <text class="m red" x="412" y="122">~10k points at once, over 6 MB</text>
+  <rect class="bad" x="412" y="126" width="196" height="10" rx="2"/>
+  <text class="m" x="412" y="152">2,048-point chunks, under 6 MB</text>
+  <rect class="ok" x="412" y="156" width="54" height="10" rx="2"/>
+
+  <text class="b" x="412" y="188">subdomain batching</text>
+  <text class="m red" x="412" y="204">all 75 subdomains, ~15 MB of params</text>
+  <rect class="bad" x="412" y="208" width="270" height="10" rx="2"/>
+  <text class="m" x="412" y="234">20 at a time, ~4 MB</text>
+  <rect class="ok" x="412" y="238" width="72" height="10" rx="2"/>
+
+  <g stroke="#ff5f1f" stroke-width="1.75">
+    <line x1="520" y1="123" x2="520" y2="139"/>
+    <line x1="520" y1="153" x2="520" y2="169"/>
+    <line x1="520" y1="205" x2="520" y2="221"/>
+    <line x1="520" y1="235" x2="520" y2="256"/>
+  </g>
+  <text x="520" y="268" text-anchor="middle" style="fill:#c2410c;font-weight:700;font-size:10px">L2 = 6 MB</text>
+
+  <rect class="bad" x="412" y="282" width="14" height="10" rx="2"/>
+  <text class="m" x="432" y="291">over the line, lines get evicted</text>
+  <text class="m" x="432" y="304">and refetched from HBM2</text>
+  <rect class="ok" x="412" y="314" width="14" height="10" rx="2"/>
+  <text class="m" x="432" y="323">under the line, stays hot in L2</text>
+
+  <text class="m" x="412" y="347">bars use the post's own estimates, the</text>
+  <text class="m" x="412" y="360">top pair only shows over vs under, and</text>
+  <text class="m" x="412" y="373">~4 MB is 20/75 of the post's ~15 MB</text>
+</svg>

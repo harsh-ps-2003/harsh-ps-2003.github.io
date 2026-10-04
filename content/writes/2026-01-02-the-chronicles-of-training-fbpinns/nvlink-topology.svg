@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 684" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">Know which GPUs are actually neighbours</title>
+  <desc id="desc">The DGX-1 V100 NVLink hybrid cube-mesh, where every GPU has 6 links but some pairs share 2 links, some share 1, and some share none, next to its PCIe tree of 2 CPUs, 4 PCIe switches and 4 InfiniBand NICs. Below it the post's 2-GPU node with its NV# link bundle, the nvidia-smi topo -m legend ranked from fastest to slowest, and the order in which NCCL tries transports, P2P then SHM then NET.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+  </defs>
+  <style>
+    text { fill: #232333; font-size: 10.5px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; font-size: 10px; }
+    .h { font-size: 11.5px; font-weight: 700; }
+    .b { font-weight: 700; }
+    .gpu { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1.25; }
+    .gt { font-size: 11px; font-weight: 700; }
+    .host { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1; }
+    .net { fill: #ece6f7; stroke: #9b86c9; stroke-width: 1; }
+    .nic { fill: #6a52a3; font-size: 10px; }
+    .nv { stroke: #ff5f1f; stroke-width: 1.5; fill: none; }
+    .pcie { stroke: #a3a3b3; stroke-width: 1.25; fill: none; }
+    .ln { stroke: #232333; stroke-width: 1.25; fill: none; }
+    .box { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .acc { fill: #ffede4; stroke: #ff5f1f; stroke-width: 1.5; }
+    .code { font-weight: 700; }
+  </style>
+
+  <text class="k" x="16" y="22">NVLINK TOPOLOGY</text>
+  <text class="t" x="16" y="42">Know which GPUs are actually neighbours</text>
+  <text class="c" x="16" y="60">Every V100 has 6 NVLinks, but on a DGX-1 some pairs get 2, some get 1, and some get none.</text>
+
+  <!-- ============ DGX-1 NVLink mesh ============ -->
+  <text class="lane" x="16" y="80">DGX-1 V100 · HYBRID CUBE-MESH</text>
+
+  <!-- quad A: 0 (60,120) 1 (170,120) 2 (170,220) 3 (60,220) ; quad B: 5 (250,120) 4 (360,120) 6 (250,220) 7 (360,220) -->
+  <g class="nv">
+    <!-- 0-4 x2 over the top -->
+    <path d="M57.5,108 V88 H362.5 V108"/>
+    <path d="M62.5,108 V93 H357.5 V108"/>
+    <!-- 3-7 x1 under the bottom -->
+    <path d="M60,232 V254 H360 V232"/>
+    <!-- quad A -->
+    <line x1="60" y1="120" x2="170" y2="120"/>
+    <line x1="167.5" y1="120" x2="167.5" y2="220"/><line x1="172.5" y1="120" x2="172.5" y2="220"/>
+    <line x1="60" y1="217.5" x2="170" y2="217.5"/><line x1="60" y1="222.5" x2="170" y2="222.5"/>
+    <line x1="57.5" y1="120" x2="57.5" y2="220"/><line x1="62.5" y1="120" x2="62.5" y2="220"/>
+    <line x1="60" y1="120" x2="170" y2="220"/>
+    <line x1="170" y1="120" x2="60" y2="220"/>
+    <!-- cross 1-5 x2, 2-6 x1 -->
+    <line x1="170" y1="117.5" x2="250" y2="117.5"/><line x1="170" y1="122.5" x2="250" y2="122.5"/>
+    <line x1="170" y1="220" x2="250" y2="220"/>
+    <!-- quad B -->
+    <line x1="250" y1="120" x2="360" y2="120"/>
+    <line x1="247.5" y1="120" x2="247.5" y2="220"/><line x1="252.5" y1="120" x2="252.5" y2="220"/>
+    <line x1="250" y1="217.5" x2="360" y2="217.5"/><line x1="250" y1="222.5" x2="360" y2="222.5"/>
+    <line x1="357.5" y1="120" x2="357.5" y2="220"/><line x1="362.5" y1="120" x2="362.5" y2="220"/>
+    <line x1="360" y1="120" x2="250" y2="220"/>
+    <line x1="250" y1="120" x2="360" y2="220"/>
+  </g>
+  <g>
+    <rect class="gpu" x="34" y="108" width="52" height="24" rx="4"/><text class="gt" x="60" y="124" text-anchor="middle">GPU0</text>
+    <rect class="gpu" x="144" y="108" width="52" height="24" rx="4"/><text class="gt" x="170" y="124" text-anchor="middle">GPU1</text>
+    <rect class="gpu" x="144" y="208" width="52" height="24" rx="4"/><text class="gt" x="170" y="224" text-anchor="middle">GPU2</text>
+    <rect class="gpu" x="34" y="208" width="52" height="24" rx="4"/><text class="gt" x="60" y="224" text-anchor="middle">GPU3</text>
+    <rect class="gpu" x="224" y="108" width="52" height="24" rx="4"/><text class="gt" x="250" y="124" text-anchor="middle">GPU5</text>
+    <rect class="gpu" x="334" y="108" width="52" height="24" rx="4"/><text class="gt" x="360" y="124" text-anchor="middle">GPU4</text>
+    <rect class="gpu" x="224" y="208" width="52" height="24" rx="4"/><text class="gt" x="250" y="224" text-anchor="middle">GPU6</text>
+    <rect class="gpu" x="334" y="208" width="52" height="24" rx="4"/><text class="gt" x="360" y="224" text-anchor="middle">GPU7</text>
+  </g>
+
+  <!-- mesh legend -->
+  <line class="nv" x1="20" y1="275" x2="44" y2="275"/>
+  <text x="50" y="279">1 link, 25 GB/s each way</text>
+  <line class="nv" x1="214" y1="272.5" x2="238" y2="272.5"/><line class="nv" x1="214" y1="277.5" x2="238" y2="277.5"/>
+  <text x="244" y="279">2 links, 50 GB/s each way</text>
+  <text class="m" x="20" y="297">6 links each, 24 in total, yet GPU0 and GPU7 share none</text>
+  <text class="m" x="20" y="311">an NVSwitch box (DGX-2) puts every GPU pair 1 hop apart instead</text>
+
+  <!-- ============ DGX-1 PCIe tree ============ -->
+  <text class="lane" x="416" y="80">DGX-1 V100 · PCIE TREE</text>
+  <rect class="host" x="426" y="94" width="104" height="24" rx="4"/><text class="b" x="478" y="110" text-anchor="middle">CPU0</text>
+  <rect class="host" x="594" y="94" width="104" height="24" rx="4"/><text class="b" x="646" y="110" text-anchor="middle">CPU1</text>
+  <line class="pcie" x1="530" y1="106" x2="594" y2="106" style="stroke:#232333"/>
+  <text class="m" x="562" y="101" text-anchor="middle">QPI</text>
+  <!-- switches -->
+  <g class="pcie">
+    <polyline points="478,118 478,134 451,134 451,146"/><polyline points="478,134 505,134 505,146"/>
+    <polyline points="646,118 646,134 619,134 619,146"/><polyline points="646,134 673,134 673,146"/>
+  </g>
+  <g>
+    <rect class="host" x="422" y="146" width="58" height="22" rx="3"/><text x="451" y="161" text-anchor="middle" style="font-size:10px">PCIe sw</text>
+    <rect class="host" x="486" y="146" width="58" height="22" rx="3"/><text x="515" y="161" text-anchor="middle" style="font-size:10px">PCIe sw</text>
+    <rect class="host" x="590" y="146" width="58" height="22" rx="3"/><text x="619" y="161" text-anchor="middle" style="font-size:10px">PCIe sw</text>
+    <rect class="host" x="654" y="146" width="50" height="22" rx="3"/><text x="679" y="161" text-anchor="middle" style="font-size:10px">PCIe sw</text>
+  </g>
+  <g class="pcie">
+    <line x1="451" y1="168" x2="451" y2="180"/><line x1="515" y1="168" x2="515" y2="180"/>
+    <line x1="619" y1="168" x2="619" y2="180"/><line x1="679" y1="168" x2="679" y2="180"/>
+  </g>
+  <g style="font-size:10px" text-anchor="middle">
+    <text x="451" y="192" style="font-size:10px">GPU0 1</text><text class="nic" x="451" y="205">IB NIC</text>
+    <text x="515" y="192" style="font-size:10px">GPU2 3</text><text class="nic" x="515" y="205">IB NIC</text>
+    <text x="619" y="192" style="font-size:10px">GPU4 5</text><text class="nic" x="619" y="205">IB NIC</text>
+    <text x="679" y="192" style="font-size:10px">GPU6 7</text><text class="nic" x="679" y="205">IB NIC</text>
+  </g>
+  <g>
+    <text class="m" x="422" y="230">each V100 gets PCIe Gen3 x16 to its switch</text>
+    <text class="m" x="422" y="244">4 IB NICs at 100 Gb/s, 1 per 2 GPUs,</text>
+    <text class="m" x="422" y="258">placed at the corners of the mesh</text>
+    <text class="m" x="422" y="272">GPUDirect RDMA lets a NIC read GPU memory</text>
+    <text class="m" x="422" y="286">GPU on CPU0 to GPU on CPU1 crosses QPI,</text>
+    <text class="m" x="422" y="300">which topo -m reports as SYS</text>
+  </g>
+
+  <line x1="16" y1="324" x2="704" y2="324" stroke="#c3c3cf" stroke-width="1"/>
+
+  <!-- ============ Your 2-GPU node ============ -->
+  <text class="lane" x="16" y="344">YOUR NODE · 2× V100</text>
+  <rect class="host" x="16" y="356" width="96" height="24" rx="4"/><text class="b" x="64" y="372" text-anchor="middle">CPU</text>
+  <rect class="host" x="150" y="356" width="104" height="24" rx="4"/><text x="202" y="372" text-anchor="middle">PCIe switch</text>
+  <line class="pcie" x1="112" y1="368" x2="150" y2="368"/>
+  <g class="pcie">
+    <polyline points="202,380 202,390 56,390 56,404"/>
+    <polyline points="202,390 214,390 214,404"/>
+  </g>
+  <rect class="gpu" x="16" y="404" width="80" height="28" rx="4"/><text class="gt" x="56" y="422" text-anchor="middle">GPU0</text>
+  <rect class="gpu" x="174" y="404" width="80" height="28" rx="4"/><text class="gt" x="214" y="422" text-anchor="middle">GPU1</text>
+  <g class="nv">
+    <line x1="96" y1="412" x2="174" y2="412"/><line x1="96" y1="418" x2="174" y2="418"/><line x1="96" y1="424" x2="174" y2="424"/>
+  </g>
+  <text x="135" y="446" text-anchor="middle" style="fill:#c2410c;font-weight:700">NV#</text>
+  <!-- mini topo -m -->
+  <rect x="16" y="454" width="238" height="74" rx="4" fill="#f5f5f8" stroke="#c3c3cf" stroke-width="1"/>
+  <g>
+    <text class="m" x="24" y="470">$ nvidia-smi topo -m</text>
+    <text x="96" y="488" class="b">GPU0</text><text x="156" y="488" class="b">GPU1</text>
+    <text x="24" y="504" class="b">GPU0</text><text x="108" y="504">X</text><text x="162" y="504" style="fill:#c2410c;font-weight:700">NV#</text>
+    <text x="24" y="520" class="b">GPU1</text><text x="102" y="520" style="fill:#c2410c;font-weight:700">NV#</text><text x="168" y="520">X</text>
+  </g>
+  <text class="m" x="16" y="546"># = links bonded between the pair, it</text>
+  <text class="m" x="16" y="560">depends on the board, 6 max = 300 GB/s</text>
+
+  <!-- ============ topo -m legend ============ -->
+  <text class="lane" x="292" y="344">NVIDIA-SMI TOPO -M · FASTEST FIRST</text>
+  <line x1="296" y1="534" x2="296" y2="358" stroke="#232333" stroke-width="1.25" marker-end="url(#a)"/>
+  <text class="m" transform="translate(290 450) rotate(-90)" text-anchor="middle">faster</text>
+  <g>
+    <rect x="304" y="352" width="400" height="22" fill="#f5f5f8"/>
+    <text class="code" x="312" y="367">X</text><text x="362" y="367">the GPU itself</text>
+    <rect class="acc" x="304" y="378" width="400" height="22"/>
+    <text class="code" x="312" y="393" style="fill:#c2410c">NV#</text><text x="362" y="393">a bonded set of # NVLinks</text>
+    <text class="code" x="312" y="419">PIX</text><text x="362" y="419">at most 1 PCIe bridge</text>
+    <rect x="304" y="430" width="400" height="22" fill="#f5f5f8"/>
+    <text class="code" x="312" y="445">PXB</text><text x="362" y="445">several PCIe bridges, no host bridge</text>
+    <text class="code" x="312" y="471">PHB</text><text x="362" y="471">PCIe plus a host bridge, usually the CPU</text>
+    <rect x="304" y="482" width="400" height="22" fill="#f5f5f8"/>
+    <text class="code" x="312" y="497">NODE</text><text x="362" y="497">PCIe plus the link between host bridges</text>
+    <text x="362" y="510" class="m">inside 1 NUMA node</text>
+    <text class="code" x="312" y="530">SYS</text><text x="362" y="530">PCIe plus QPI/UPI between NUMA nodes</text>
+  </g>
+
+  <line x1="16" y1="572" x2="704" y2="572" stroke="#c3c3cf" stroke-width="1"/>
+
+  <!-- ============ NCCL transport order ============ -->
+  <text class="lane" x="16" y="590">HOW NCCL PICKS A TRANSPORT · THE FIRST ONE THAT CAN CONNECT WINS</text>
+  <rect class="acc" x="16" y="600" width="214" height="70" rx="5"/>
+  <text class="h" x="26" y="616">P2P</text><text class="m" x="58" y="616">NCCL_P2P_DISABLE=0</text>
+  <text x="26" y="631">direct GPU memory access</text>
+  <text x="26" y="645">NVLink pairs always qualify</text>
+  <text x="26" y="659">PCIe only up to PXB by default</text>
+  <line class="ln" x1="230" y1="635" x2="250" y2="635" marker-end="url(#a)"/>
+  <rect class="host" x="252" y="600" width="214" height="70" rx="5"/>
+  <text class="h" x="262" y="616">SHM</text>
+  <text x="262" y="631">stages through host memory</text>
+  <text x="262" y="645">used when P2P can't connect,</text>
+  <text x="262" y="659">e.g. across the CPU host bridge</text>
+  <line class="ln" x1="466" y1="635" x2="488" y2="635" marker-end="url(#a)"/>
+  <rect class="net" x="490" y="600" width="214" height="70" rx="5"/>
+  <text class="h" x="500" y="616">NET</text><text class="m" x="532" y="616">NCCL_IB_DISABLE=1</text>
+  <text x="500" y="631">IB verbs, or plain sockets</text>
+  <text x="500" y="645">GPUDirect RDMA when the NIC</text>
+  <text x="500" y="659">sits close to the GPU</text>
+</svg>

@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 602" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">FBPINN architecture</title>
+  <desc id="desc">A domain split into nine overlapping subdomains, each with its own small network. For a point x that sits in four subdomains, each network normalises x to its own subdomain, runs a small tanh net, unnormalises the output, and multiplies it by a smooth window. The windowed outputs are summed and passed through a constraint operator for hard boundary conditions. The windows sum to one everywhere, the loss is the PDE residual at collocation points with derivatives from autodiff, a scheduler marks subdomains active, fixed, or inactive, and the multilevel version averages several levels of coarser and finer subdomains.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+  </defs>
+  <style>
+    text { fill: #232333; font-size: 10.5px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; font-size: 10px; }
+    .b { font-weight: 700; }
+    .eq { font-size: 12px; font-weight: 700; }
+    .o { fill: #c2410c; }
+    .sub { fill: #7aa7d9; fill-opacity: .13; stroke: #7aa7d9; stroke-width: 1; }
+    .box { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .nn { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1.25; }
+    .ln { stroke: #232333; stroke-width: 1.25; fill: none; }
+    .act { fill: #ffede4; stroke: #ff5f1f; stroke-width: 1.25; }
+    .fix { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1; }
+    .ina { fill: none; stroke: #c3c3cf; stroke-width: 1; stroke-dasharray: 3 2; }
+  </style>
+
+  <text class="k" x="16" y="22">FBPINN</text>
+  <text class="t" x="16" y="42">Many small networks, one smooth answer</text>
+  <text class="c" x="16" y="60">Each subdomain gets its own tiny network, and smooth windows blend them into one solution.</text>
+
+  <text class="lane" x="16" y="84">DOMAIN Ω</text>
+  <text class="lane" x="252" y="84">FOR EACH SUBDOMAIN THAT HOLDS x</text>
+
+  <!-- domain with 3x3 overlapping subdomains -->
+  <g>
+    <rect class="sub" x="26" y="96" width="90" height="90"/>
+    <rect class="sub" x="81" y="96" width="90" height="90"/>
+    <rect class="sub" x="136" y="96" width="90" height="90"/>
+    <rect class="sub" x="26" y="151" width="90" height="90"/>
+    <rect class="sub" x="81" y="151" width="90" height="90" style="stroke:#ff5f1f;stroke-width:1.75"/>
+    <rect class="sub" x="136" y="151" width="90" height="90"/>
+    <rect class="sub" x="26" y="206" width="90" height="90"/>
+    <rect class="sub" x="81" y="206" width="90" height="90"/>
+    <rect class="sub" x="136" y="206" width="90" height="90"/>
+  </g>
+  <rect x="26" y="96" width="200" height="200" fill="none" stroke="#232333" stroke-width="1.25"/>
+  <g class="m" text-anchor="middle">
+    <text x="53" y="127">1</text><text x="126" y="127">2</text><text x="198" y="127">3</text>
+    <text x="53" y="200">4</text><text x="126" y="200" class="o" style="font-weight:700">5</text><text x="198" y="200">6</text>
+    <text x="53" y="272">7</text><text x="126" y="272">8</text><text x="198" y="272">9</text>
+  </g>
+  <circle cx="100" cy="170" r="4" fill="#ff5f1f"/>
+  <text x="86" y="166" class="b">x</text>
+
+  <!-- 1D windows -->
+  <line x1="26" y1="340" x2="226" y2="340" stroke="#a3a3b3" stroke-width="1"/>
+  <path d="M26,310 L81,310 C98.5,310 98.5,340 116,340" fill="none" stroke="#5c5c6e" stroke-width="1.25"/>
+  <path d="M81,340 C98.5,340 98.5,310 116,310 L136,310 C153.5,310 153.5,340 171,340" fill="none" stroke="#ff5f1f" stroke-width="1.75"/>
+  <path d="M136,340 C153.5,340 153.5,310 171,310 L226,310" fill="none" stroke="#5c5c6e" stroke-width="1.25"/>
+  <text class="m" x="26" y="356">w_j along x, they sum to 1</text>
+
+  <!-- per-subdomain pipeline rows -->
+  <g>
+    <text x="252" y="111">Ω_1</text>
+    <rect class="box" x="276" y="96" width="56" height="22" rx="3"/><text x="304" y="111" text-anchor="middle">norm_j</text>
+    <rect class="nn" x="344" y="96" width="56" height="22" rx="3"/><text x="372" y="111" text-anchor="middle">NN_j</text>
+    <rect class="box" x="412" y="96" width="56" height="22" rx="3"/><text x="440" y="111" text-anchor="middle">unnorm</text>
+    <rect class="box" x="480" y="96" width="56" height="22" rx="3"/><text x="508" y="111" text-anchor="middle" style="font-size:10px">× w_j(x)</text>
+
+    <text x="252" y="141">Ω_2</text>
+    <rect class="box" x="276" y="126" width="56" height="22" rx="3"/><text x="304" y="141" text-anchor="middle">norm_j</text>
+    <rect class="nn" x="344" y="126" width="56" height="22" rx="3"/><text x="372" y="141" text-anchor="middle">NN_j</text>
+    <rect class="box" x="412" y="126" width="56" height="22" rx="3"/><text x="440" y="141" text-anchor="middle">unnorm</text>
+    <rect class="box" x="480" y="126" width="56" height="22" rx="3"/><text x="508" y="141" text-anchor="middle" style="font-size:10px">× w_j(x)</text>
+
+    <text x="252" y="171">Ω_4</text>
+    <rect class="box" x="276" y="156" width="56" height="22" rx="3"/><text x="304" y="171" text-anchor="middle">norm_j</text>
+    <rect class="nn" x="344" y="156" width="56" height="22" rx="3"/><text x="372" y="171" text-anchor="middle">NN_j</text>
+    <rect class="box" x="412" y="156" width="56" height="22" rx="3"/><text x="440" y="171" text-anchor="middle">unnorm</text>
+    <rect class="box" x="480" y="156" width="56" height="22" rx="3"/><text x="508" y="171" text-anchor="middle" style="font-size:10px">× w_j(x)</text>
+
+    <text x="252" y="201" class="o b">Ω_5</text>
+    <rect class="box" x="276" y="186" width="56" height="22" rx="3"/><text x="304" y="201" text-anchor="middle">norm_j</text>
+    <rect class="nn" x="344" y="186" width="56" height="22" rx="3"/><text x="372" y="201" text-anchor="middle">NN_j</text>
+    <rect class="box" x="412" y="186" width="56" height="22" rx="3"/><text x="440" y="201" text-anchor="middle">unnorm</text>
+    <rect class="box" x="480" y="186" width="56" height="22" rx="3" style="stroke:#ff5f1f;stroke-width:1.75"/><text x="508" y="201" text-anchor="middle" style="font-size:10px">× w_j(x)</text>
+  </g>
+  <g class="ln" marker-end="url(#a)">
+    <line x1="332" y1="107" x2="342" y2="107"/><line x1="400" y1="107" x2="410" y2="107"/><line x1="468" y1="107" x2="478" y2="107"/>
+    <line x1="332" y1="137" x2="342" y2="137"/><line x1="400" y1="137" x2="410" y2="137"/><line x1="468" y1="137" x2="478" y2="137"/>
+    <line x1="332" y1="167" x2="342" y2="167"/><line x1="400" y1="167" x2="410" y2="167"/><line x1="468" y1="167" x2="478" y2="167"/>
+    <line x1="332" y1="197" x2="342" y2="197"/><line x1="400" y1="197" x2="410" y2="197"/><line x1="468" y1="197" x2="478" y2="197"/>
+    <line x1="537" y1="107" x2="557" y2="140"/>
+    <line x1="537" y1="137" x2="552" y2="146"/>
+    <line x1="537" y1="167" x2="552" y2="158"/>
+    <line x1="537" y1="197" x2="557" y2="164"/>
+    <line x1="580" y1="152" x2="592" y2="152"/>
+    <line x1="640" y1="152" x2="650" y2="152"/>
+  </g>
+  <circle cx="566" cy="152" r="14" fill="#ffffff" stroke="#232333" stroke-width="1.25"/>
+  <text x="566" y="156.5" text-anchor="middle" style="font-size:12px;font-weight:700">Σ_j</text>
+  <rect class="box" x="594" y="140" width="46" height="24" rx="3"/><text x="617" y="156" text-anchor="middle" class="b">C[·]</text>
+  <rect class="box" x="652" y="140" width="52" height="24" rx="3" style="stroke:#ff5f1f;stroke-width:1.75;fill:#ffede4"/><text x="678" y="156" text-anchor="middle" class="b">û(x)</text>
+  <text class="m" x="617" y="180" text-anchor="middle">hard BCs</text>
+
+  <!-- ansatz + notes -->
+  <text class="eq" x="252" y="238">û(x) = C[ Σ_j w_j(x) · unnorm ∘ NN_j ∘ norm_j(x) ]</text>
+  <g>
+    <text x="252" y="258">norm_j maps Ω_j onto [-1,1] in every dimension</text>
+    <text x="252" y="274">NN_j is a small tanh net, 2×16 in 2023, 1×16 in the multilevel paper</text>
+    <text x="252" y="290">w_j = ŵ_j / Σ_k ŵ_k, so the windows sum to 1 on Ω</text>
+    <text x="252" y="306">ŵ is a cosine bump now, a product of sigmoids in the 2023 paper</text>
+    <text x="252" y="322">w_j is 0 outside Ω_j, so only the 4 nets that hold x do any work</text>
+    <text x="252" y="338">C[·] adds hard boundary conditions, e.g. û = tanh(ωx)·NN</text>
+  </g>
+
+  <line x1="16" y1="366" x2="704" y2="366" stroke="#c3c3cf" stroke-width="1"/>
+
+  <!-- loss -->
+  <text class="lane" x="16" y="384">LOSS</text>
+  <text class="eq" x="16" y="406">L(θ) = 1/N Σ_i ‖ D[û](x_i) − f(x_i) ‖²</text>
+  <text x="16" y="426">x_i are collocation points over all of Ω</text>
+  <text x="16" y="442">derivatives of û come from autodiff</text>
+  <text x="16" y="458">no interface terms, the windows glue it</text>
+  <text x="16" y="474">NN_j only learns from points inside Ω_j</text>
+
+  <!-- scheduler -->
+  <text class="lane" x="368" y="384">SCHEDULER · LEARNING OUTWARDS</text>
+  <g class="m" text-anchor="end">
+    <text x="412" y="405">t1</text><text x="412" y="423">t2</text><text x="412" y="441">t3</text>
+  </g>
+  <g>
+    <rect class="ina" x="420" y="394" width="26" height="14" rx="2"/><rect class="ina" x="449" y="394" width="26" height="14" rx="2"/><rect class="ina" x="478" y="394" width="26" height="14" rx="2"/><rect class="act" x="507" y="394" width="26" height="14" rx="2"/><rect class="ina" x="536" y="394" width="26" height="14" rx="2"/><rect class="ina" x="565" y="394" width="26" height="14" rx="2"/><rect class="ina" x="594" y="394" width="26" height="14" rx="2"/>
+    <rect class="ina" x="420" y="412" width="26" height="14" rx="2"/><rect class="ina" x="449" y="412" width="26" height="14" rx="2"/><rect class="act" x="478" y="412" width="26" height="14" rx="2"/><rect class="fix" x="507" y="412" width="26" height="14" rx="2"/><rect class="act" x="536" y="412" width="26" height="14" rx="2"/><rect class="ina" x="565" y="412" width="26" height="14" rx="2"/><rect class="ina" x="594" y="412" width="26" height="14" rx="2"/>
+    <rect class="ina" x="420" y="430" width="26" height="14" rx="2"/><rect class="act" x="449" y="430" width="26" height="14" rx="2"/><rect class="fix" x="478" y="430" width="26" height="14" rx="2"/><rect class="fix" x="507" y="430" width="26" height="14" rx="2"/><rect class="fix" x="536" y="430" width="26" height="14" rx="2"/><rect class="act" x="565" y="430" width="26" height="14" rx="2"/><rect class="ina" x="594" y="430" width="26" height="14" rx="2"/>
+  </g>
+  <g>
+    <rect class="act" x="368" y="454" width="14" height="10" rx="2"/><text class="m" x="388" y="463">active, updated</text>
+    <rect class="fix" x="490" y="454" width="14" height="10" rx="2"/><text class="m" x="510" y="463">fixed, frozen</text>
+    <rect class="ina" x="600" y="454" width="14" height="10" rx="2"/><text class="m" x="620" y="463">not yet</text>
+  </g>
+  <text class="m" x="368" y="480">only active nets and fixed neighbours enter the sum</text>
+
+  <line x1="16" y1="494" x2="704" y2="494" stroke="#c3c3cf" stroke-width="1"/>
+
+  <!-- multilevel -->
+  <text class="lane" x="16" y="512">MULTILEVEL</text>
+  <rect class="sub" x="16" y="522" width="50" height="50"/>
+  <g>
+    <rect class="sub" x="80" y="522" width="30" height="30"/><rect class="sub" x="100" y="522" width="30" height="30"/>
+    <rect class="sub" x="80" y="542" width="30" height="30"/><rect class="sub" x="100" y="542" width="30" height="30"/>
+  </g>
+  <g>
+    <rect class="sub" x="144" y="522" width="17" height="17"/><rect class="sub" x="155" y="522" width="17" height="17"/><rect class="sub" x="166" y="522" width="17" height="17"/><rect class="sub" x="177" y="522" width="17" height="17"/>
+    <rect class="sub" x="144" y="533" width="17" height="17"/><rect class="sub" x="155" y="533" width="17" height="17"/><rect class="sub" x="166" y="533" width="17" height="17"/><rect class="sub" x="177" y="533" width="17" height="17"/>
+    <rect class="sub" x="144" y="544" width="17" height="17"/><rect class="sub" x="155" y="544" width="17" height="17"/><rect class="sub" x="166" y="544" width="17" height="17"/><rect class="sub" x="177" y="544" width="17" height="17"/>
+    <rect class="sub" x="144" y="555" width="17" height="17"/><rect class="sub" x="155" y="555" width="17" height="17"/><rect class="sub" x="166" y="555" width="17" height="17"/><rect class="sub" x="177" y="555" width="17" height="17"/>
+  </g>
+  <g class="m" text-anchor="middle">
+    <text x="41" y="588">l=1 · 1</text><text x="105" y="588">l=2 · 4</text><text x="169" y="588">l=3 · 16</text>
+  </g>
+  <text class="eq" x="216" y="536">û(x) = 1/L Σ_l Σ_j w_j^(l)(x) · v_j^(l)(x)</text>
+  <text x="216" y="556">each level is its own partition of unity, J^(l) = 2^(d(l−1))</text>
+  <text x="216" y="572">level 1 is the whole domain, and L = 1 is the plain FBPINN</text>
+</svg>

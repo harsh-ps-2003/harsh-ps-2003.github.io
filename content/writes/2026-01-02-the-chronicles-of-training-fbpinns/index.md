@@ -13,9 +13,13 @@ Right now I am training FBPINNs on a supercomputer. yay!. This distributed train
 
 First and foremost, I am using [V100](https://images.nvidia.com/content/volta-architecture/pdf/volta-architecture-whitepaper.pdf). 
 
-The V100 is built from multiple Streaming Multiprocessors (SMs), each executing warps (block of 32 threads) via CUDA cores (the general‑purpose ALUs that execute most integer and BF16 operations) and one instruction issued by the warp scheduler is carried out simultaneously by all active CUDA cores for that warp (SIMT style). in a SIMT fashion (Single Instruction Multiple Threads), backed by register files, small L1/texture caches, and shared memory. There are Tenor cores for specialized matrix‑multiply‑accumulate operations. Instead of doing scalar FMA, a single tensor‑core instruction multiplies small matrices (e.g., 16×16 tiles) in mixed precision (FP16/BF16/TF32 → FP32/FP16 accumulators). They sit alongside CUDA cores and are used when your kernel uses tensor/matrix instructions (e.g., GEMM, convolutions).
+The V100 is built from multiple Streaming Multiprocessors (SMs), each executing warps (block of 32 threads) via CUDA cores (the general‑purpose ALUs that execute most integer and FP32 operations) and one instruction issued by the warp scheduler is carried out simultaneously by all active CUDA cores for that warp, SIMT style (Single Instruction Multiple Threads), backed by register files, small L1/texture caches, and shared memory. Tensor cores sit next to those CUDA cores and do the matrix‑multiply‑accumulate when a kernel actually issues a tensor instruction (GEMM, convolutions). On this chip, compute capability 7.0, a tensor core takes FP16 inputs and accumulates in FP16 or FP32. There is no BF16 and no TF32. Both of those start at compute capability 8.0.
+
+<figure class="diagram"><a href="volta-sm.svg"><img src="volta-sm.svg" alt="One Volta SM with four processing blocks, each holding a warp scheduler, a 64 KB register file, FP64, INT32, and FP32 units, and 2 tensor cores, over a shared 128 KB L1 and shared memory, next to how blocks and warps reach the SM, the compute capability 7.0 limits, and a note that V100 has no BF16 or TF32." loading="lazy"></a></figure>
 
 All SMs talk to a large on‑package HBM2 memory stack through several memory controllers, providing around 900 GB/s of memory bandwidth for local tensor data (activations, parameters, wavefields, etc.).
+
+<figure class="diagram"><a href="gv100-chip.svg"><img src="gv100-chip.svg" alt="The GV100 chip, with a PCIe host interface and GigaThread engine on top, six GPCs of 7 TPCs and 2 SMs each around a shared 6 MB L2, eight memory controllers feeding four HBM2 stacks, and six NVLink ports under a high-speed hub, next to the V100 SXM2 numbers." loading="lazy"></a></figure>
 
 CPU and GPU communicate over the PCI Express bus (it’s not technically a bus but a point to point connection). From the perspective of software running on the CPU, these days, that communication is typically in the form of memory-mapped IO. The GPU has registers and memory mapped into the CPU address space using PCIe. A write to a particular address generates a message on the PCIe bus that’s received by the GPU and produces a write to a GPU register or GPU memory. The GPU also has access to system memory through the PCIe bus. Typically, the CPU will construct buffers in memory with data (textures, vertices), commands, and GPU code. It will then store the buffer address in a GPU register and ring some sort of “doorbell” by writing to another GPU register. The GPU (specifically, the GPU command processor) will then read the buffers from system memory, and start executing the commands. Those commands can include, for example, loading GPU shader programs into shader memory and triggering the shaders to execute those shaders.
 
@@ -27,6 +31,8 @@ The CPU has DRAM and possibly a NIC (InfiniBand/Ethernet) for off‑node traffic
 
 At the hardware level, NVLink attaches logically near the GPU’s L2/memory controller region, so a tensor in GPU0’s HBM2 can be read/written by GPU1 over NVLink without going through the CPU or system DRAM. So, the hardware path is: SMs on GPU0 write halo tensors to HBM2 → L2 → NVLink serdes → L2/HBM2 on GPU1, and vice versa. 
 
+<figure class="diagram"><a href="v100-node.svg"><img src="v100-node.svg" alt="A node with a CPU, DDR4 DRAM, a PCIe switch, a NIC, and two V100s joined by NVLink, with HBM2, L2, SMs, and CUDA cores marked, four numbered data paths, and the peak bandwidth of each link." loading="lazy"></a></figure>
+
 
 How it all works together :
 * The CPU (host) calls something like cudaMalloc to reserve buffers in device (GPU) memory. The host uses an async version to DMA data over PCIe or NVLink into those device buffers. Using pinned (page‑locked) host memory allows faster transfers because the driver can DMA directly from those pages without an extra staging copy.
@@ -35,6 +41,8 @@ How it all works together :
 * When a warp stalls (e.g., waiting on DRAM), the SM instantly switches to another ready warp, hiding latency and keeping the execution units busy.
 
 So, an SM is essentially a many‑lane vector processor with its own control (warp schedulers) and fast memories, where CUDA cores handle general math, tensor cores accelerate matrix math, and the control logic juggles thousands of threads to maximize utilization.
+
+<figure class="diagram"><a href="cuda-launch-path.svg"><img src="cuda-launch-path.svg" alt="How a kernel launch reaches the SMs through the pushbuffer, GPFIFO, USERD, and the doorbell register, how pinned copies use the copy engines, and NVIDIA's V100 launch overhead numbers with and without a CUDA graph." loading="lazy"></a></figure>
 
 ## The Tech Stack
 
@@ -70,8 +78,8 @@ The streams ensure the right order (e.g., do not consume halo before copy is don
 ```bash
 export NCCL_P2P_DISABLE=0           # Enable GPU-to-GPU P2P
 export NCCL_IB_DISABLE=1            # InfiniBand disabled (not used)
-export NCCL_MIN_NCHANNELS=32        # 32 parallel channels
-export NCCL_BUFFSIZE=8388608        # 8MB buffers
+export NCCL_MIN_NCHANNELS=32        # 32 channels, and a channel is 1 CUDA block
+export NCCL_BUFFSIZE=8388608        # 8 MiB, the default is 4 MiB
 ```
 
 [NCCL handles GPU-to-GPU communication](https://developer.nvidia.com/blog/understanding-nccl-tuning-to-accelerate-gpu-to-gpu-communication/) across NVLink. I used:
@@ -81,6 +89,8 @@ export NCCL_BUFFSIZE=8388608        # 8MB buffers
 For FBPINNs, this enables:
 - Multi-GPU subdomain parallelism (each GPU owns different subdomains)
 - Synchronization via hardware `all-reduce` for combining weighted sums
+
+<figure class="diagram"><a href="nccl-collectives.svg"><img src="nccl-collectives.svg" alt="What each of four ranks holds before and after AllReduce, Broadcast, Reduce, AllGather, ReduceScatter, AlltoAll, and send and recv, with the JAX primitive for each and a ring AllReduce worked through step by step." loading="lazy"></a></figure>
 
 ## CPU Optimizaton
 
@@ -157,6 +167,8 @@ But how to verify topology of nodes? I used
 * `nvidia-smi -q -d NVLINK` to check which NVLink links are up between the two V100s
 * `nvidia-smi -L` or `CUDA_VISIBLE_DEVICES` to confirm device indices and then map shard placement: e.g., keep the most chatty tensor/model‑parallel ranks on GPU0 and GPU1 of the same node
 
+<figure class="diagram"><a href="nvlink-topology.svg"><img src="nvlink-topology.svg" alt="The DGX-1 V100 NVLink hybrid cube-mesh with its link counts and PCIe tree, a two GPU node, the nvidia-smi topo -m legend ranked fastest first, and the order NCCL tries transports." loading="lazy"></a></figure>
+
 Once you know which GPU indices share NVLink, you can implement topology‑aware sharding at the framework level (PyTorch device_ids / process group mapping, JAX mesh layout, DeepSpeed/DTensor placement) so that heavy all‑reduce/all‑to‑all happens within those NVLink pairs and only coarser‑grained sync crosses nodes over InfiniBand.
 
 Enough hardware, how did I use this information? In the FBPINN subsurface modeling, I had a large 2D domain decomposed into lots of subdomains with partition‑of‑unity windows. Each subdomain corresponds to a small local network, but neighboring subdomains still need to exchange information (e.g., wavefield values near the overlap, gradients for the inversion) each iteration, which creates a neighbor communication pattern reminiscent of a 2D stencil. 
@@ -172,6 +184,8 @@ So, how it works under the hood? Let me walk through one FBPINN training step in
 * After the halo exchange, I perform block‑level accumulation steps (e.g., summing overlapping contributions, enforcing partition‑of‑unity consistency) and then proceed to the next time step or optimization step.​ I explicitly synchronize only where necessary (e.g., before using updated halos) to avoid global barriers that would stall both GPUs.
 * The same idea extends to more complex topologies: you place the most communication‑heavy neighbors in groups that sit on NVLink or NVSwitch within a node, and only lower‑frequency communications (e.g., checkpoints, global misfit evaluation) cross node boundaries over InfiniBand or Ethernet.
 
+<figure class="diagram"><a href="topology-sharding.svg"><img src="topology-sharding.svg" alt="75 subdomains split into a solid block per GPU so only the seam crosses NVLink, one training step with a halo exchange and a psum, and a ladder of where each kind of traffic belongs." loading="lazy"></a></figure>
+
 The benefits of topology‑aware sharing is clear :
 * Higher effective throughput: by matching communication patterns to the fastest links, you utilize the ~300 GB/s NVLink bandwidth and avoid PCIe bottlenecks.
 * Lower latency and less idle time: GPUs spend more time doing local HBM2 math and less time waiting for halo or activation data.
@@ -186,23 +200,23 @@ But the tradeoffs are real :
 Well, a lot of them actually. 
  
 ### CUDA Graphs (Kernel Launch Overhead)
-Every CUDA kernel launch has ~10-50 microseconds of overhead. My FBPINN training loop runs thousands of PDE evaluations per step, each requiring multiple kernels. [This is a problem!](https://stackoverflow.com/questions/27038162/how-bad-is-it-to-launch-many-small-kernels-in-cuda)
+A kernel launch is not free, and my FBPINN training loop runs thousands of PDE evaluations per step, each requiring multiple kernels. [This is a problem!](https://stackoverflow.com/questions/27038162/how-bad-is-it-to-launch-many-small-kernels-in-cuda) On V100 the measured gap is a few microseconds per kernel, not tens, and a graph only shaves a bit of that.
 
 So, I use [CUDA Graphs](https://arxiv.org/pdf/2501.09398v1) to tackle this. How it work:
 1. In the first pass, JAX records a sequence of CUDA kernels into a graph. It runs the full forward + PDE evaluation + backward once, while recording which CUDA kernels are launched, in what order, and with what arguments. This graph is a static description of the GPU workload (a DAG of kernels, memcpys, events, etc.).
-2. Instead of launching 500 kernels one by one from the CPU, the runtime submits the entire pre‑recorded graph to the GPU in a single call. The GPU then orchestrates the 500 kernels internally, with minimal CPU involvement. On modern GPUs, the [repeat launch overhead](https://developer.nvidia.com/blog/constant-time-launch-for-straight-line-cuda-graphs-and-other-performance-enhancements/) is roughly constant and small (e.g., 1–3 μs total for the whole graph), regardless of how many kernels are inside it. So subsequent passes replay the graph with 1-2 μs overhead instead of 10-50 μs per kernel.
+2. Instead of launching every kernel one by one from the CPU, the runtime submits the pre‑recorded graph in a single call and the GPU walks the kernels itself. NVIDIA's [constant-time launch post](https://developer.nvidia.com/blog/constant-time-launch-for-straight-line-cuda-graphs-and-other-performance-enhancements/) quotes about 1–3 μs for the whole graph no matter how many kernels are inside it, but that figure starts at Ampere. On V100 they measured 2.9 μs kernels at about 9.6 μs each when every kernel is synced, about 3.8 μs each with one sync per step, and about 3.4 μs each once those same kernels sit in a graph. One CPU call still launches the lot. The per-kernel gap on this GPU barely moves.
 
-So, a training step with 500 kernels normally costs 500 × 25 μs = 12.5 ms overhead. With graphs 1 graph replay = 2 μs overhead. So, ~30-50% speedup for compute-bound workloads. Yay!! Easy
-
-And it works really well for FBPINNs! Due to fixed batch sizes we have static shapes and thus graphs can be captured (computational pattern is very repetitive, fixed batch sizes, fixed PDE domains, etc.). The structure is almost the same every iteration, only tensor values change. And due to thousands of iterations, overhead savings compound significantly. 
+The capture itself still fits FBPINNs. Fixed batch sizes mean static shapes, so the graph can be recorded (same PDE domains, same kernel order, only the tensor values change). On this V100 that is a smaller win than the Ampere number suggests. 
 
 
 ### XLA Compiler Flags (V100-Specific)
 
 [XLA performance flags](https://kolonist26-jax-kr.readthedocs.io/en/latest/gpu_performance_tips.html) are very much version dependent. Use these with caution. Some flags (like [latency‑hiding scheduler](https://github.com/jax-ml/jax/issues/20763)) can increase memory usage a lot on some models!
 
+<figure class="diagram"><a href="xla-pipeline.svg"><img src="xla-pipeline.svg" alt="jax.jit traces a Python function into a jaxpr and StableHLO, and XLA compiles it through target independent passes, the GPU backend, and codegen into thunks and CUDA graph command buffers, with the post's five XLA flags tied to the stage each one changes." loading="lazy"></a></figure>
+
 ```bash
-export XLA_FLAGS="--xla_gpu_enablefast_min_max \
+export XLA_FLAGS="--xla_gpu_enable_fast_min_max \
                   --xla_gpu_enable_triton_gemm \
                   --xla_gpu_enable_latency_hiding_scheduler=true \
                   --xla_gpu_all_reduce_combine_threshold_bytes=134217728 \
@@ -211,14 +225,13 @@ export XLA_FLAGS="--xla_gpu_enablefast_min_max \
 
 **Flag breakdown**:
 
-1. **`--xla_gpu_enable_fast_min_max`**: Use faster, slightly lower-precision min/max
-   - Benefit: 10% faster activation functions (ReLU, etc.)
-   - Tradeoff: Negligible precision loss for PINN training
+1. **`--xla_gpu_enable_fast_min_max`**: Min/max that skips NaN propagation
+   - OpenXLA's own source comment says this does not seem to be any faster
+   - It is not a 10% activation-function win
 
-2. **`--xla_gpu_enable_triton_gemm`**: Replace cuBLAS GEMM with Triton-compiled kernels
-   - Benefit: 15-25% speedup on matrix multiplication
-   - Triton is an open-source language for writing GPU kernels; auto-tuned for V100
-   - Particularly effective for non-standard matrix shapes (pretty common in FBPINNs)
+2. **`--xla_gpu_enable_triton_gemm`**: Ask XLA to emit Triton GEMMs instead of cuBLAS
+   - CUDA Triton needs compute capability 8.0 or higher
+   - V100 is 7.0, so this flag does not run here at all
 
 3. **`--xla_gpu_enable_latency_hiding_scheduler`**: Overlap memory operations with compute
    - Before: GPU stalls waiting for memory
@@ -234,8 +247,7 @@ export XLA_FLAGS="--xla_gpu_enablefast_min_max \
    - Benefit: Compute kernels run faster by preempting lower-priority streams
    - Minor effect on single-GPU, significant on multi-GPU
 
-I estimate a combined improvement of ~20% 
-Sweet!
+On this V100 the flags that can still matter are the latency-hiding scheduler, the all-reduce combine threshold, and the async stream priority. The other two do not.
 
 ### Memory Management
 
@@ -249,7 +261,7 @@ os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = "0.70"
 # Use async allocator to reduce fragmentation
 os.environ["TF_GPU_ALLOCATOR"] = "cuda_malloc_async"
 
-# Disable float64 (slower on Tensor Cores)
+# Already the default. Setting it False changes nothing.
 os.environ["JAX_ENABLE_X64"] = "False"
 ```
 
@@ -274,11 +286,12 @@ Memory tuning is critical for FBPINNs:
    - No downside for training (not used for inference)
 
 4. Float32 vs Float64:
-   - V100 Tensor Cores: 125 TFLOPS (float32), 4 TFLOPS (float64)
-   - 32x speedup by using float32
+   - The 125 TFLOPS number is FP16 tensor-core math, not float32
+   - Plain FP32 on this V100 is about 15.7 TFLOPS, and FP64 is about 7.8
+   - `JAX_ENABLE_X64` is already off by default, so the line above does not switch anything off
    - For PINNs, float32 is sufficient (physics-informed loss provides regularization)
 
-This first of all prevents OOM (total pain in my ass) and also enables 2-3x faster math. Crazzyyy...
+This first of all prevents OOM (total pain in my ass). The float32 path was already the default, so that last line was not where the speed came from.
 
 ### Compilation Caching
 ```python
@@ -301,13 +314,15 @@ Quite simple isnt it! Run the same job twice?
 ### Grouped Subdomain Evaluation
 The training domain is split into 75 overlapping subdomains. Each subdomain has its own neural network (75 networks total).
 
+<figure class="diagram"><a href="fbpinn-architecture.svg"><img src="fbpinn-architecture.svg" alt="The FBPINN architecture, where overlapping subdomains each get a small network, inputs are normalised per subdomain, outputs are blended by smooth windows that sum to one and constrained into one solution, with the loss, the scheduler, and the multilevel version." loading="lazy"></a></figure>
+
 Naive approach would have been:
 ```python
 for m in range(M):
     for p in domain_points:
         u[p] += network[m](x[p])
 ```
-Memory: O(M × P × d) where P = number of test points, d = spatial dimensions. For this setup 75 × 262,144 × 3 × 4 bytes = 300 GB (well, i dont have infinite money glitch for sure)
+Memory: O(M × P × d) where P = number of test points, d = spatial dimensions. For this setup 75 × 262,144 × 3 × 4 bytes is about 236 MB, not 300 GB. Still a chunk of a 16 GB V100, just not a fantasy card.
 So, I used some tricks up my sleve :
 ```python
 # Precomputed metadata: which points belong to which subdomains
@@ -329,7 +344,7 @@ u_local_norm = u_sum_local / jnp.maximum(wp_sum_local, 1e-5)
 Quirks you ask? 
 1. On-the-fly indexing: Instead of creating `(M, max_P, d)` array, index into `x_batch` dynamically
    - Memory: O(P × d) = 262,144 × 3 × 4 = 3 MB
-   - Savings is nuts: 300 GB to 3 MB
+   - Savings is still real: about 236 MB down to 3 MB
 
 2. Vectorized evaluation via `vmap`:
    - Automatically distributes subdomain evaluation across GPU cores
@@ -341,6 +356,8 @@ Quirks you ask?
    - Speed: 10-20x faster than Python loops
 
 I get 3-5x faster than naive sequential evaluation + memory enables 262k-point test grids. Win.
+
+<figure class="diagram"><a href="grouped-evaluation.svg"><img src="grouped-evaluation.svg" alt="Grouped evaluation in four steps, gather the points inside each subdomain, vmap every network at once, segment_sum the pieces back per point, and divide by the summed windows, with the memory of a dense layout next to x_batch." loading="lazy"></a></figure>
 
 ### Chunked Processing for Large Validations
 
@@ -426,6 +443,8 @@ Why this is fast:
 
 Overall 2-3x speedup with 2 GPUs 
 
+<figure class="diagram"><a href="pmap-step.svg"><img src="pmap-step.svg" alt="One pmap call running 10 outer scan blocks of 10 inner gradient accumulation steps on each V100, with a psum over NVLink in every forward pass and one optax update per block, so the host dispatches once instead of 100 times." loading="lazy"></a></figure>
+
 ### Hardware-Native Subdomain Sharding
 
 ```python
@@ -469,8 +488,8 @@ So, a near-linear scaling (1.8-2x with 2 GPUs)
 ```bash
 export NCCL_P2P_DISABLE=0          # Enable P2P over NVLink
 export NCCL_IB_DISABLE=1           # No InfiniBand
-export NCCL_MIN_NCHANNELS=32       # 32 channels for parallelism
-export NCCL_BUFFSIZE=8388608       # 8 MB buffers
+export NCCL_MIN_NCHANNELS=32       # 32 channels, 1 CUDA block each
+export NCCL_BUFFSIZE=8388608       # 8 MiB, default is 4 MiB
 ```
 
 NCCL parameters explained:
@@ -479,15 +498,13 @@ NCCL parameters explained:
    - Alternative: CPU-mediated (GPU → CPU → GPU, much slower)
    - My V100s are on the same PCIe switch, so P2P is efficient
 
-2. Min channels: Multiple parallel communication paths
-   - 32 channels means 32 parallel "streams" of all-reduce operations
-   - Better GPU utilization on large collectives
+2. Min channels: How many CUDA blocks NCCL puts on the collective
+   - A channel is one CUDA block, not a parallel all-reduce stream
+   - 32 channels means 32 blocks working that one collective
 
-3. Buffer size: Tradeoff between latency and memory overhead
-   - 8 MB is tuned for V100 bandwidth (~900 GB/s effective)
-   - Smaller = lower latency, larger = better throughput
-
-Thus, ~20-30% faster multi-GPU communication
+3. Buffer size: How much scratch NCCL uses per channel
+   - `8388608` is 8 MiB. The default `NCCL_BUFFSIZE` is 4 MiB
+   - The ~900 GB/s figure is HBM2 on the package, not this buffer and not NVLink. The two V100s talk at up to 300 GB/s over NVLink
 
 ### Fast PRNG
 
@@ -496,9 +513,7 @@ jax.config.update("jax_enable_custom_prng", True)
 jax.config.update("jax_default_prng_impl", "threefry2x32")
 ```
 
-ThreeFry is a fast parallel PRNG. Benefits:
-- ~5-10% speedup in sampling-heavy workloads and Minimal overhead for random point sampling
-- Disables NaN checks (small overhead, but adds up over millions of ops)
+`threefry2x32` is already JAX's default, so naming it here changes nothing. `jax_enable_custom_prng` turns on the typed PRNG key, and it does not turn off NaN checks. Those are `jax_debug_nans`, a different flag.
 
 ## Memory Hierarchy Optimizations
 
@@ -509,6 +524,8 @@ Computing PDE residuals for large batches (e.g., 10,000+ points) simultaneously 
 To push performance beyond standard JAX JIT compilation, I implemented three targeted optimizations designed to maximize [L2 cache residency](https://www.arccompute.io/arc-blog/how-to-harness-l2-cache-optimizations-for-nvidia-gpus) and minimize expensive High Bandwidth Memory (HBM) transactions.
 
 As FBPINN residual evaluations have low arithmetic intensity (few FLOPs per byte loaded). By processing in chunks that fit in L2, we can effectively increase the operational intensity by avoiding repeated DRAM fetches for the same parameters, keeping them 'hot' in cache.
+
+<figure class="diagram"><a href="memory-hierarchy.svg"><img src="memory-hierarchy.svg" alt="The V100 memory levels from registers to host DRAM with their sizes and bandwidths, next to the post's chunking and subdomain batching working sets drawn against the 6 MB L2 line." loading="lazy"></a></figure>
 
 ```python
 # Naive approach: Large working set evicts L2 cache

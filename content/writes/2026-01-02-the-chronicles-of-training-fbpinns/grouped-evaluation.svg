@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 552" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">Grouped subdomain evaluation</title>
+  <desc id="desc">Four stages evaluate 75 subdomain networks on about 262 thousand points. Precomputed indices and masks gather only the points inside each subdomain from x_batch, one vmap runs all subdomain networks at once to get u times w and w for every point and subdomain slot, segment_sum adds those back per point, and dividing u_sum by w_sum gives the partition of unity average. A dense copy of every point for every subdomain would take about 236 MB, while x_batch itself is about 3 MB, and the work grows with points times the average number of subdomains per point instead of points times all subdomains.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+  </defs>
+  <style>
+    text { fill: #232333; font-size: 10.5px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; font-size: 10px; }
+    .b { font-weight: 700; }
+    .eq { font-size: 12px; font-weight: 700; }
+    .o { fill: #c2410c; }
+    .mem { fill: #fbf1cf; stroke: #d4b34a; stroke-width: 1; }
+    .ok { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1; }
+    .pad { fill: #f5f5f8; stroke: #c3c3cf; stroke-width: 1; stroke-dasharray: 2 2; }
+    .hi { stroke: #ff5f1f; stroke-width: 1.75; }
+    .ln { stroke: #232333; stroke-width: 1.25; fill: none; }
+    .n { fill: #ff5f1f; }
+    .nt { fill: #ffffff; font-size: 9.5px; font-weight: 700; }
+  </style>
+
+  <text class="k" x="16" y="22">GROUPED EVALUATION</text>
+  <text class="t" x="16" y="42">Gather, vmap, segment_sum</text>
+  <text class="c" x="16" y="60">Every point only meets the subdomains that hold it, and a scatter-add puts the pieces back.</text>
+
+  <!-- column headers -->
+  <text class="lane" x="16" y="86">INPUTS</text>
+  <circle class="n" cx="143" cy="82" r="7"/><text class="nt" x="143" y="85.5" text-anchor="middle">1</text><text class="lane" x="154" y="86">GATHER</text>
+  <circle class="n" cx="313" cy="82" r="7"/><text class="nt" x="313" y="85.5" text-anchor="middle">2</text><text class="lane" x="324" y="86">VMAP</text>
+  <circle class="n" cx="449" cy="82" r="7"/><text class="nt" x="449" y="85.5" text-anchor="middle">3</text><text class="lane" x="460" y="86">SEGMENT_SUM</text>
+  <circle class="n" cx="601" cy="82" r="7"/><text class="nt" x="601" y="85.5" text-anchor="middle">4</text><text class="lane" x="612" y="86">DIVIDE</text>
+  <g class="ln" marker-end="url(#a)">
+    <line x1="120" y1="82" x2="132" y2="82"/>
+    <line x1="290" y1="82" x2="302" y2="82"/>
+    <line x1="426" y1="82" x2="438" y2="82"/>
+    <line x1="578" y1="82" x2="590" y2="82"/>
+  </g>
+
+  <!-- inputs -->
+  <text class="b" x="16" y="106">x_batch</text>
+  <rect class="mem" x="18" y="114" width="22" height="150"/>
+  <g stroke="#d4b34a" stroke-width="1">
+    <line x1="18" y1="129" x2="40" y2="129"/><line x1="18" y1="144" x2="40" y2="144"/><line x1="18" y1="159" x2="40" y2="159"/><line x1="18" y1="174" x2="40" y2="174"/><line x1="18" y1="189" x2="40" y2="189"/><line x1="18" y1="204" x2="40" y2="204"/><line x1="18" y1="219" x2="40" y2="219"/><line x1="18" y1="234" x2="40" y2="234"/><line x1="18" y1="249" x2="40" y2="249"/>
+  </g>
+  <rect x="18" y="204" width="22" height="15" fill="#ffede4" stroke="#ff5f1f" stroke-width="1.75"/>
+  <text x="48" y="128">P ≈ 262k</text>
+  <text class="m" x="48" y="142">points</text>
+  <text x="48" y="158">d = 3</text>
+  <text class="m" x="48" y="172">128×128×16</text>
+  <text class="o" x="48" y="215">point p</text>
+
+  <text class="b" x="16" y="290">all_params</text>
+  <rect class="ok" x="26" y="306" width="50" height="20" rx="2"/>
+  <rect class="ok" x="22" y="302" width="50" height="20" rx="2"/>
+  <rect class="ok" x="18" y="298" width="50" height="20" rx="2"/>
+  <text x="24" y="312" style="font-size:10px">NN_m</text>
+  <text class="m" x="82" y="330">75 nets</text>
+
+  <!-- gather: (75, max_P) index matrix -->
+  <g class="m">
+    <text x="136" y="115">m=1</text><text x="136" y="133">m=2</text><text x="136" y="151">m=3</text><text x="136" y="169">m=4</text>
+    <text x="146" y="188">⋮</text><text x="136" y="205">m=75</text>
+  </g>
+  <g>
+    <rect class="ok" x="164" y="104" width="14" height="14"/><rect class="ok" x="180" y="104" width="14" height="14"/><rect class="ok hi" x="196" y="104" width="14" height="14"/><rect class="ok" x="212" y="104" width="14" height="14"/><rect class="ok" x="228" y="104" width="14" height="14"/><rect class="ok" x="244" y="104" width="14" height="14"/><rect class="pad" x="260" y="104" width="14" height="14"/><rect class="pad" x="276" y="104" width="14" height="14"/>
+    <rect class="ok" x="164" y="122" width="14" height="14"/><rect class="ok" x="180" y="122" width="14" height="14"/><rect class="ok" x="196" y="122" width="14" height="14"/><rect class="ok" x="212" y="122" width="14" height="14"/><rect class="ok hi" x="228" y="122" width="14" height="14"/><rect class="ok" x="244" y="122" width="14" height="14"/><rect class="ok" x="260" y="122" width="14" height="14"/><rect class="ok" x="276" y="122" width="14" height="14"/>
+    <rect class="ok" x="164" y="140" width="14" height="14"/><rect class="ok" x="180" y="140" width="14" height="14"/><rect class="ok" x="196" y="140" width="14" height="14"/><rect class="ok" x="212" y="140" width="14" height="14"/><rect class="ok" x="228" y="140" width="14" height="14"/><rect class="pad" x="244" y="140" width="14" height="14"/><rect class="pad" x="260" y="140" width="14" height="14"/><rect class="pad" x="276" y="140" width="14" height="14"/>
+    <rect class="ok" x="164" y="158" width="14" height="14"/><rect class="ok hi" x="180" y="158" width="14" height="14"/><rect class="ok" x="196" y="158" width="14" height="14"/><rect class="ok" x="212" y="158" width="14" height="14"/><rect class="ok" x="228" y="158" width="14" height="14"/><rect class="ok" x="244" y="158" width="14" height="14"/><rect class="ok" x="260" y="158" width="14" height="14"/><rect class="pad" x="276" y="158" width="14" height="14"/>
+    <rect class="ok" x="164" y="194" width="14" height="14"/><rect class="ok" x="180" y="194" width="14" height="14"/><rect class="ok" x="196" y="194" width="14" height="14"/><rect class="ok" x="212" y="194" width="14" height="14"/><rect class="pad" x="228" y="194" width="14" height="14"/><rect class="pad" x="244" y="194" width="14" height="14"/><rect class="pad" x="260" y="194" width="14" height="14"/><rect class="pad" x="276" y="194" width="14" height="14"/>
+  </g>
+  <text class="b" x="136" y="230">g_n_idx (75, max_P)</text>
+  <text x="136" y="246">g_n_mask marks padding</text>
+  <text class="m" x="136" y="262">x_batch[g_n_idx] reads</text>
+  <text class="m" x="136" y="276">only points inside Ω_m</text>
+
+  <!-- vmap -->
+  <rect x="306" y="104" width="120" height="102" rx="4" fill="#e3eefb" stroke="#7aa7d9" stroke-width="1.25"/>
+  <rect x="312" y="174" width="108" height="8" rx="2" fill="#ffffff" stroke="#7aa7d9" stroke-width="1"/>
+  <rect x="312" y="185" width="108" height="8" rx="2" fill="#ffffff" stroke="#7aa7d9" stroke-width="1"/>
+  <rect x="312" y="196" width="108" height="4" rx="1" fill="#ffffff" stroke="#7aa7d9" stroke-width="1"/>
+  <text class="b" x="314" y="122">vmap over m</text>
+  <text x="314" y="140">NN_m(norm_m(x))</text>
+  <text x="314" y="156">unnorm, × w_m(x)</text>
+  <text class="m" x="314" y="170">75 nets at once</text>
+  <text class="b" x="306" y="230">us_g, ws_g</text>
+  <text x="306" y="246">(75, max_P) each</text>
+  <text class="m" x="306" y="262">u·w and w per slot</text>
+  <text class="m" x="306" y="276">padding masked out</text>
+  <!-- params route -->
+  <polyline class="ln" points="78,309 298,309 298,190 304,190" marker-end="url(#a)"/>
+  <text class="m" x="190" y="304" text-anchor="middle">params, one net per m</text>
+
+  <!-- segment_sum -->
+  <rect class="ok hi" x="446" y="112" width="14" height="14"/><text class="m" x="464" y="123">m=1</text>
+  <rect class="ok hi" x="446" y="136" width="14" height="14"/><text class="m" x="464" y="147">m=2</text>
+  <rect class="ok hi" x="446" y="160" width="14" height="14"/><text class="m" x="464" y="171">m=4</text>
+  <g class="ln" marker-end="url(#a)">
+    <line x1="490" y1="119" x2="553" y2="168"/>
+    <line x1="490" y1="143" x2="553" y2="170"/>
+    <line x1="490" y1="167" x2="553" y2="172"/>
+  </g>
+  <rect class="mem" x="556" y="104" width="20" height="120"/>
+  <g stroke="#d4b34a" stroke-width="1">
+    <line x1="556" y1="119" x2="576" y2="119"/><line x1="556" y1="134" x2="576" y2="134"/><line x1="556" y1="149" x2="576" y2="149"/><line x1="556" y1="164" x2="576" y2="164"/><line x1="556" y1="179" x2="576" y2="179"/><line x1="556" y1="194" x2="576" y2="194"/><line x1="556" y1="209" x2="576" y2="209"/>  </g>
+  <rect x="556" y="164" width="20" height="15" fill="#ffede4" stroke="#ff5f1f" stroke-width="1.75"/>
+  <text class="m" x="446" y="198">same point p,</text>
+  <text class="m" x="446" y="212">3 slots, 1 sum</text>
+  <text class="b" x="442" y="230">segment_sum by</text>
+  <text x="442" y="246">point id, P segments</text>
+  <text class="m" x="442" y="262">gives u_sum, w_sum</text>
+  <text class="m" x="442" y="276">one value per point</text>
+
+  <!-- divide -->
+  <line class="ln" x1="578" y1="172" x2="592" y2="172" marker-end="url(#a)"/>
+  <rect x="594" y="150" width="110" height="46" rx="4" fill="#ffede4" stroke="#ff5f1f" stroke-width="1.75"/>
+  <text x="649" y="168" text-anchor="middle" class="b">u = u_sum</text>
+  <text x="649" y="186" text-anchor="middle" style="font-size:10px">/ max(w_sum,1e-5)</text>
+  <text class="b" x="594" y="230">PoU average</text>
+  <text x="594" y="246">per point</text>
+  <text class="m" x="594" y="262">then C[·] and</text>
+  <text class="m" x="594" y="276">the PDE loss</text>
+
+  <line x1="16" y1="334" x2="704" y2="334" stroke="#c3c3cf" stroke-width="1"/>
+
+  <!-- memory -->
+  <text class="lane" x="16" y="352">MEMORY FOR ~262K TEST POINTS</text>
+  <text x="16" y="370">dense (M, P, d) array, every point copied for every subdomain</text>
+  <rect x="16" y="376" width="600" height="14" fill="#fbe5e3" stroke="#c62f2f" stroke-width="1"/>
+  <text class="b" x="624" y="387">≈ 236 MB</text>
+  <text class="m" x="16" y="404">75 × 262,144 × 3 × 4 B</text>
+  <text x="16" y="426">x_batch itself, (P, d)</text>
+  <rect x="16" y="432" width="8" height="14" fill="#ffede4" stroke="#ff5f1f" stroke-width="1"/>
+  <text class="b" x="32" y="443">≈ 3 MB</text>
+  <text class="m" x="16" y="460">262,144 × 3 × 4 B, the gather only touches ~P × C (point, subdomain) pairs</text>
+
+  <!-- cost -->
+  <text class="lane" x="16" y="486">COST, MULTILEVEL PAPER</text>
+  <text class="eq" x="16" y="506">naive O(N · J · S)</text><text class="eq o" x="200" y="506">grouped O(N · C · S)</text>
+  <text class="m" x="16" y="522">N points, J subdomains, C average subdomains per point, S cost of one small net</text>
+  <text class="m" x="16" y="538">the FBPINNs repo does the same with a flat list of (point, subdomain) pairs, no padding</text>
+</svg>

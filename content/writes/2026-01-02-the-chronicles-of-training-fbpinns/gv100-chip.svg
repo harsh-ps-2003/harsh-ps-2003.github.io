@@ -1,0 +1,255 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 444" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">GV100, 80 SMs around one L2</title>
+  <desc id="desc">The GV100 chip has a PCI Express 3.0 host interface and the GigaThread engine on top, six GPCs in two rows of three with the shared 6 MB L2 cache between the rows, each GPC holding 7 TPCs of 2 SMs for 84 SMs in the full chip and 80 enabled on V100, eight 512-bit memory controllers feeding four HBM2 stacks on the sides, and a high-speed hub with six NVLink ports at the bottom. A side panel lists the V100 SXM2 numbers, and the bottom panel shows that HBM2, NVLink, and PCIe traffic all pass through L2, at about 900, 300, and 32 GB/s.</desc>
+  <style>
+    text { fill: #232333; font-size: 10.5px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; font-size: 10px; }
+    .b { font-weight: 700; }
+    .v { font-weight: 600; }
+    .acc { fill: #c2410c; font-weight: 700; }
+    .host { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1; }
+    .gpc { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1.25; }
+    .sm { fill: #ffffff; stroke: #7aa7d9; stroke-width: .8; }
+    .mem { fill: #fbf1cf; stroke: #d4b34a; stroke-width: 1.25; }
+    .mc { fill: #ffffff; stroke: #d4b34a; stroke-width: 1.25; }
+    .nvl { fill: #ffede4; stroke: #ff5f1f; stroke-width: 1.25; }
+    .wire { stroke: #d4b34a; stroke-width: 1.25; fill: none; }
+    .bar1 { fill: #fbf1cf; stroke: #d4b34a; stroke-width: 1; }
+    .bar2 { fill: #ffede4; stroke: #ff5f1f; stroke-width: 1; }
+    .bar3 { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1; }
+  </style>
+
+  <text class="k" x="16" y="22">GV100</text>
+  <text class="t" x="16" y="42">80 SMs around one L2</text>
+  <text class="c" x="16" y="60">All 80 SMs share one 6 MB L2, with HBM2 on the sides and NVLink and PCIe at the edges.</text>
+
+  <rect x="16" y="74" width="504" height="242" rx="6" fill="#f5f5f8" stroke="#c3c3cf" stroke-width="1"/>
+  <rect x="104" y="78" width="328" height="232" rx="4" fill="#ffffff" stroke="#232333" stroke-width="1.25"/>
+  <rect class="host" x="108" y="82" width="320" height="15" rx="3"/>
+  <text x="268" y="93" text-anchor="middle">PCI Express 3.0 host interface</text>
+  <rect class="host" x="108" y="101" width="320" height="15" rx="3"/>
+  <text x="268" y="112" text-anchor="middle">GigaThread engine · hands blocks to SMs</text>
+  <rect class="gpc" x="108" y="122" width="104" height="48" rx="3"/>
+  <text class="m" x="113" y="133">GPC 0</text>
+  <text class="m" x="207" y="133" text-anchor="end">7 TPC</text>
+  <rect class="sm" x="113.0" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="113.0" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="126.6" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="126.6" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="140.2" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="140.2" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="153.8" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="153.8" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="167.4" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="167.4" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="181.0" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="181.0" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="194.6" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="194.6" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="gpc" x="216" y="122" width="104" height="48" rx="3"/>
+  <text class="m" x="221" y="133">GPC 1</text>
+  <text class="m" x="315" y="133" text-anchor="end">7 TPC</text>
+  <rect class="sm" x="221.0" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="221.0" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="234.6" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="234.6" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="248.2" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="248.2" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="261.8" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="261.8" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="275.4" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="275.4" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="289.0" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="289.0" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="302.6" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="302.6" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="gpc" x="324" y="122" width="104" height="48" rx="3"/>
+  <text class="m" x="329" y="133">GPC 2</text>
+  <text class="m" x="423" y="133" text-anchor="end">7 TPC</text>
+  <rect class="sm" x="329.0" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="329.0" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="342.6" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="342.6" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="356.2" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="356.2" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="369.8" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="369.8" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="383.4" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="383.4" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="397.0" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="397.0" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="410.6" y="138" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="410.6" y="153" width="11" height="12" rx="1.5"/>
+  <rect class="mem" x="108" y="176" width="320" height="28" rx="3"/>
+  <text class="b" x="268" y="188" text-anchor="middle">L2 cache · 6 MB</text>
+  <text class="m" x="268" y="200" text-anchor="middle">shared by all SMs, backs global memory</text>
+  <rect class="gpc" x="108" y="210" width="104" height="48" rx="3"/>
+  <text class="m" x="113" y="221">GPC 3</text>
+  <text class="m" x="207" y="221" text-anchor="end">7 TPC</text>
+  <rect class="sm" x="113.0" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="113.0" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="126.6" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="126.6" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="140.2" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="140.2" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="153.8" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="153.8" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="167.4" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="167.4" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="181.0" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="181.0" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="194.6" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="194.6" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="gpc" x="216" y="210" width="104" height="48" rx="3"/>
+  <text class="m" x="221" y="221">GPC 4</text>
+  <text class="m" x="315" y="221" text-anchor="end">7 TPC</text>
+  <rect class="sm" x="221.0" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="221.0" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="234.6" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="234.6" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="248.2" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="248.2" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="261.8" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="261.8" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="275.4" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="275.4" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="289.0" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="289.0" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="302.6" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="302.6" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="gpc" x="324" y="210" width="104" height="48" rx="3"/>
+  <text class="m" x="329" y="221">GPC 5</text>
+  <text class="m" x="423" y="221" text-anchor="end">7 TPC</text>
+  <rect class="sm" x="329.0" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="329.0" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="342.6" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="342.6" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="356.2" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="356.2" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="369.8" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="369.8" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="383.4" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="383.4" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="397.0" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="397.0" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="410.6" y="226" width="11" height="12" rx="1.5"/>
+  <rect class="sm" x="410.6" y="241" width="11" height="12" rx="1.5"/>
+  <rect class="host" x="108" y="264" width="320" height="15" rx="3"/>
+  <text x="268" y="275" text-anchor="middle">high-speed hub</text>
+  <rect class="nvl" x="108" y="285" width="50" height="18" rx="3"/>
+  <text x="133" y="297.5" text-anchor="middle" style="font-size:10px">NVLink</text>
+  <rect class="nvl" x="162" y="285" width="50" height="18" rx="3"/>
+  <text x="187" y="297.5" text-anchor="middle" style="font-size:10px">NVLink</text>
+  <rect class="nvl" x="216" y="285" width="50" height="18" rx="3"/>
+  <text x="241" y="297.5" text-anchor="middle" style="font-size:10px">NVLink</text>
+  <rect class="nvl" x="270" y="285" width="50" height="18" rx="3"/>
+  <text x="295" y="297.5" text-anchor="middle" style="font-size:10px">NVLink</text>
+  <rect class="nvl" x="324" y="285" width="50" height="18" rx="3"/>
+  <text x="349" y="297.5" text-anchor="middle" style="font-size:10px">NVLink</text>
+  <rect class="nvl" x="378" y="285" width="50" height="18" rx="3"/>
+  <text x="403" y="297.5" text-anchor="middle" style="font-size:10px">NVLink</text>
+  <rect class="mc" x="66" y="122" width="32" height="31" rx="3"/>
+  <text x="82" y="141" text-anchor="middle" style="font-size:10px">MC</text>
+  <rect class="mc" x="438" y="122" width="32" height="31" rx="3"/>
+  <text x="454" y="141" text-anchor="middle" style="font-size:10px">MC</text>
+  <line class="wire" x1="60" y1="137.5" x2="66" y2="137.5"/>
+  <line class="wire" x1="470" y1="137.5" x2="476" y2="137.5"/>
+  <line class="wire" x1="98" y1="137.5" x2="104" y2="137.5"/>
+  <line class="wire" x1="432" y1="137.5" x2="438" y2="137.5"/>
+  <rect class="mc" x="66" y="157" width="32" height="31" rx="3"/>
+  <text x="82" y="176" text-anchor="middle" style="font-size:10px">MC</text>
+  <rect class="mc" x="438" y="157" width="32" height="31" rx="3"/>
+  <text x="454" y="176" text-anchor="middle" style="font-size:10px">MC</text>
+  <line class="wire" x1="60" y1="172.5" x2="66" y2="172.5"/>
+  <line class="wire" x1="470" y1="172.5" x2="476" y2="172.5"/>
+  <line class="wire" x1="98" y1="172.5" x2="104" y2="172.5"/>
+  <line class="wire" x1="432" y1="172.5" x2="438" y2="172.5"/>
+  <rect class="mc" x="66" y="192" width="32" height="31" rx="3"/>
+  <text x="82" y="211" text-anchor="middle" style="font-size:10px">MC</text>
+  <rect class="mc" x="438" y="192" width="32" height="31" rx="3"/>
+  <text x="454" y="211" text-anchor="middle" style="font-size:10px">MC</text>
+  <line class="wire" x1="60" y1="207.5" x2="66" y2="207.5"/>
+  <line class="wire" x1="470" y1="207.5" x2="476" y2="207.5"/>
+  <line class="wire" x1="98" y1="207.5" x2="104" y2="207.5"/>
+  <line class="wire" x1="432" y1="207.5" x2="438" y2="207.5"/>
+  <rect class="mc" x="66" y="227" width="32" height="31" rx="3"/>
+  <text x="82" y="246" text-anchor="middle" style="font-size:10px">MC</text>
+  <rect class="mc" x="438" y="227" width="32" height="31" rx="3"/>
+  <text x="454" y="246" text-anchor="middle" style="font-size:10px">MC</text>
+  <line class="wire" x1="60" y1="242.5" x2="66" y2="242.5"/>
+  <line class="wire" x1="470" y1="242.5" x2="476" y2="242.5"/>
+  <line class="wire" x1="98" y1="242.5" x2="104" y2="242.5"/>
+  <line class="wire" x1="432" y1="242.5" x2="438" y2="242.5"/>
+  <rect class="mem" x="22" y="122" width="38" height="66" rx="3"/>
+  <text class="b" x="41" y="152" text-anchor="middle" style="font-size:10px">HBM2</text>
+  <text class="m" x="41" y="165" text-anchor="middle">stack</text>
+  <rect class="mem" x="476" y="122" width="38" height="66" rx="3"/>
+  <text class="b" x="495" y="152" text-anchor="middle" style="font-size:10px">HBM2</text>
+  <text class="m" x="495" y="165" text-anchor="middle">stack</text>
+  <rect class="mem" x="22" y="192" width="38" height="66" rx="3"/>
+  <text class="b" x="41" y="222" text-anchor="middle" style="font-size:10px">HBM2</text>
+  <text class="m" x="41" y="235" text-anchor="middle">stack</text>
+  <rect class="mem" x="476" y="192" width="38" height="66" rx="3"/>
+  <text class="b" x="495" y="222" text-anchor="middle" style="font-size:10px">HBM2</text>
+  <text class="m" x="495" y="235" text-anchor="middle">stack</text>
+  <text class="m" x="22" y="274">8 MCs,</text>
+  <text class="m" x="22" y="287">512-bit each,</text>
+  <text class="m" x="22" y="300">2 per stack</text>
+  <text class="m" x="514" y="274" text-anchor="end">die</text>
+  <text class="m" x="514" y="287" text-anchor="end">815 mm²,</text>
+  <text class="m" x="514" y="300" text-anchor="end">12 nm</text>
+  <text class="lane" x="16" y="338">THREE WAYS OFF THE SM</text>
+  <text x="16" y="358">SM → L2 → MC → HBM2</text>
+  <rect class="bar1" x="296" y="349" width="150.0" height="10" rx="2"/>
+  <text class="v" x="452.0" y="358">~900 GB/s</text>
+  <text x="16" y="378">SM → hub → NVLink peer</text>
+  <rect class="bar2" x="296" y="369" width="50.0" height="10" rx="2"/>
+  <text class="v" x="352.0" y="378">300 GB/s</text>
+  <text x="16" y="398">SM → host interface → PCIe</text>
+  <rect class="bar3" x="296" y="389" width="5.3" height="10" rx="2"/>
+  <text class="v" x="307.3" y="398">~32 GB/s</text>
+  <text class="m" x="16" y="418">links counted in both directions, the way NVIDIA quotes them</text>
+  <text class="lane" x="534" y="86">V100 SXM2</text>
+  <text class="m" x="534" y="104" style="font-size:10.5px">SMs</text>
+  <text class="v" x="704" y="104" text-anchor="end">80 of 84</text>
+  <text class="m" x="534" y="119" style="font-size:10.5px">FP32 cores</text>
+  <text class="v" x="704" y="119" text-anchor="end">5120</text>
+  <text class="m" x="534" y="134" style="font-size:10.5px">FP64 cores</text>
+  <text class="v" x="704" y="134" text-anchor="end">2560</text>
+  <text class="m" x="534" y="149" style="font-size:10.5px">tensor cores</text>
+  <text class="v" x="704" y="149" text-anchor="end">640</text>
+  <text class="m" x="534" y="164" style="font-size:10.5px">register file</text>
+  <text class="v" x="704" y="164" text-anchor="end">~20 MB</text>
+  <text class="m" x="534" y="179" style="font-size:10.5px">L2 cache</text>
+  <text class="v" x="704" y="179" text-anchor="end">6 MB</text>
+  <text class="m" x="534" y="194" style="font-size:10.5px">HBM2</text>
+  <text class="v" x="704" y="194" text-anchor="end">16 or 32 GB</text>
+  <text class="v" x="704" y="209" text-anchor="end">4 stacks, 4096-bit</text>
+  <text class="m" x="534" y="224" style="font-size:10.5px">bandwidth</text>
+  <text class="v" x="704" y="224" text-anchor="end">~900 GB/s</text>
+  <text class="m" x="534" y="239" style="font-size:10.5px">NVLink</text>
+  <text class="v" x="704" y="239" text-anchor="end">6 × 25 GB/s</text>
+  <text class="v" x="704" y="254" text-anchor="end">each way, 300 total</text>
+  <text class="m" x="534" y="269" style="font-size:10.5px">PCIe</text>
+  <text class="v" x="704" y="269" text-anchor="end">Gen3 x16</text>
+  <text class="v" x="704" y="284" text-anchor="end">~16 GB/s each way</text>
+  <text class="m" x="534" y="299" style="font-size:10.5px">transistors</text>
+  <text class="v" x="704" y="299" text-anchor="end">~21 billion</text>
+  <text class="m" x="534" y="314" style="font-size:10.5px">power</text>
+  <text class="v" x="704" y="314" text-anchor="end">300 W</text>
+  <line x1="534" y1="322" x2="704" y2="322" stroke="#c3c3cf" stroke-width="1"/>
+  <text class="lane" x="534" y="338">PEAK MATH, SXM2</text>
+  <text class="m" x="534" y="356" style="font-size:10.5px">FP64</text>
+  <text class="v" x="704" y="356" text-anchor="end">~7.8 TFLOPS</text>
+  <text class="m" x="534" y="371" style="font-size:10.5px">FP32</text>
+  <text class="v" x="704" y="371" text-anchor="end">~15.7 TFLOPS</text>
+  <text class="m" x="534" y="386" style="font-size:10.5px">FP16 tensor</text>
+  <text class="acc" x="704" y="386" text-anchor="end">~125 TFLOPS</text>
+  <text class="m" x="534" y="404">the 125 is FP16 tensor core</text>
+  <text class="m" x="534" y="417">math, plain FP32 tops out</text>
+  <text class="m" x="534" y="430">around 15.7</text>
+</svg>

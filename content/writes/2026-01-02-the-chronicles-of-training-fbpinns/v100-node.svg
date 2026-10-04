@@ -1,0 +1,215 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 750" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">A V100 node, from DRAM to CUDA cores</title>
+  <desc id="desc">One node with a CPU socket and DDR4 DRAM, a PCIe switch, an InfiniBand or Ethernet NIC, and two Tesla V100 GPUs joined by NVLink. Each GPU has a PCIe host interface, 80 SMs with 5120 FP32 CUDA cores and 640 tensor cores, a 6 MB L2 cache, eight memory controllers, and four HBM2 stacks giving around 900 GB/s. One SM is shown with its four partitions. Four numbered paths show local HBM2 math, the halo exchange over NVLink, host copies over PCIe, and off node traffic through the NIC, next to the peak bandwidth of each link.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+  </defs>
+  <style>
+    text { fill: #232333; font-size: 10.5px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; font-size: 10px; }
+    .s { font-size: 10px; }
+    .h { font-size: 12px; font-weight: 700; }
+    .b { font-weight: 700; }
+    .host { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1.25; }
+    .hostin { fill: #ffffff; stroke: #a3a3b3; stroke-width: 1; }
+    .mem { fill: #fbf1cf; stroke: #d4b34a; stroke-width: 1.25; }
+    .net { fill: #ece6f7; stroke: #9b86c9; stroke-width: 1.25; }
+    .gpu { fill: #ffffff; stroke: #232333; stroke-width: 1.5; }
+    .sm { fill: #e3eefb; stroke: #7aa7d9; stroke-width: .75; }
+    .smoff { fill: #ffffff; stroke: #c3c3cf; stroke-width: .75; stroke-dasharray: 2 1.5; }
+    .part { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1; }
+    .nv { fill: #ff5f1f; }
+    .nvl { stroke: #ff5f1f; stroke-width: 2; }
+    .pcie { stroke: #8a8a9a; stroke-width: 3; fill: none; }
+    .ln { stroke: #232333; stroke-width: 1.25; fill: none; }
+    .n { fill: #ff5f1f; }
+    .nt { fill: #ffffff; font-size: 9.5px; font-weight: 700; }
+    .tc { fill: #2f7d4a; font-weight: 700; }
+    .bar { fill: #ff5f1f; }
+    .barg { fill: #a3a3b3; }
+    .barp { fill: #9b86c9; }
+    .bary { fill: #d4b34a; }
+  </style>
+
+  <text class="k" x="16" y="22">V100 NODE</text>
+  <text class="t" x="16" y="42">A V100 node, from DRAM to CUDA cores</text>
+  <text class="c" x="16" y="60">The further data sits from the SMs the slower it moves, and the CPU path is ~9x slower than NVLink.</text>
+
+  <!-- HOST -->
+  <rect x="16" y="74" width="688" height="116" rx="6" fill="#f5f5f8" stroke="#c3c3cf" stroke-width="1" stroke-dasharray="4 3"/>
+  <text class="lane" x="26" y="88">HOST</text>
+
+  <rect class="mem" x="26" y="96" width="140" height="84" rx="4"/>
+  <text class="b" x="36" y="112">DDR4 DRAM</text>
+  <g class="mem">
+    <rect x="36" y="120" width="14" height="30" rx="1.5"/><rect x="58" y="120" width="14" height="30" rx="1.5"/>
+    <rect x="80" y="120" width="14" height="30" rx="1.5"/><rect x="102" y="120" width="14" height="30" rx="1.5"/>
+    <rect x="124" y="120" width="14" height="30" rx="1.5"/>
+  </g>
+  <text class="m" x="36" y="165">pinned buffers can</text>
+  <text class="m" x="36" y="176">be DMA'd to the GPU</text>
+  <line class="ln" x1="168" y1="161" x2="198" y2="161" marker-start="url(#a)" marker-end="url(#a)"/>
+
+  <rect class="host" x="200" y="96" width="300" height="84" rx="4"/>
+  <text class="b" x="210" y="112">CPU</text><text class="m" x="240" y="112">Python, JAX, CUDA driver, BLAS</text>
+  <g class="hostin">
+    <rect x="210" y="119" width="34" height="22" rx="2"/><rect x="250" y="119" width="34" height="22" rx="2"/>
+    <rect x="290" y="119" width="34" height="22" rx="2"/><rect x="330" y="119" width="34" height="22" rx="2"/>
+    <rect x="370" y="119" width="34" height="22" rx="2"/><rect x="410" y="119" width="34" height="22" rx="2"/>
+  </g>
+  <g class="s" text-anchor="middle">
+    <text x="227" y="134">core</text><text x="267" y="134">core</text><text x="307" y="134">core</text>
+    <text x="347" y="134">core</text><text x="387" y="134">core</text><text x="427" y="134">core</text>
+  </g>
+  <rect class="mem" x="450" y="119" width="40" height="22" rx="2"/><text class="s" x="470" y="134" text-anchor="middle">L3</text>
+  <rect class="hostin" x="210" y="148" width="130" height="24" rx="2"/><text class="s" x="275" y="164" text-anchor="middle">memory controller</text>
+  <rect class="hostin" x="348" y="148" width="142" height="24" rx="2"/><text class="s" x="419" y="164" text-anchor="middle">PCIe root complex</text>
+
+  <rect class="net" x="520" y="96" width="174" height="84" rx="4"/>
+  <text class="b" x="530" y="112">NIC</text>
+  <text class="s" x="530" y="128">InfiniBand / Ethernet</text>
+  <text class="s" x="530" y="143">to other nodes</text>
+  <text class="m" x="530" y="168">NCCL_IB_DISABLE=1 here</text>
+
+  <!-- PCIe switch -->
+  <line class="pcie" x1="419" y1="172" x2="419" y2="206"/>
+  <polyline class="pcie" points="590,217 607,217 607,180"/>
+  <rect class="host" x="140" y="206" width="450" height="22" rx="4"/>
+  <text class="b" x="150" y="221">PCIe switch</text><text class="m" x="240" y="221">Gen3 x16 per GPU, ~16 GB/s each way</text>
+  <line class="pcie" x1="180" y1="228" x2="180" y2="262"/>
+  <line class="pcie" x1="540" y1="228" x2="540" y2="262"/>
+
+  <!-- GPU0 (X=16, Y=262) -->
+  <rect class="gpu" x="16" y="262" width="328" height="234" rx="6"/>
+  <text class="h" x="26" y="278">GPU0 · Tesla V100 SXM2</text>
+  <rect class="host" x="26" y="285" width="308" height="16" rx="2"/>
+  <text class="s" x="180" y="297" text-anchor="middle">PCIe host interface · copy engines · GigaThread</text>
+  <g class="sm">
+    <rect x="32" y="310" width="12" height="10"/><rect x="47" y="310" width="12" height="10"/><rect x="62" y="310" width="12" height="10"/><rect x="77" y="310" width="12" height="10"/><rect x="92" y="310" width="12" height="10"/><rect x="107" y="310" width="12" height="10"/><rect x="122" y="310" width="12" height="10"/><rect x="137" y="310" width="12" height="10"/><rect x="152" y="310" width="12" height="10"/><rect x="167" y="310" width="12" height="10"/><rect x="182" y="310" width="12" height="10"/><rect x="197" y="310" width="12" height="10"/><rect x="212" y="310" width="12" height="10"/><rect x="227" y="310" width="12" height="10"/><rect x="242" y="310" width="12" height="10"/><rect x="257" y="310" width="12" height="10"/><rect x="272" y="310" width="12" height="10"/><rect x="287" y="310" width="12" height="10"/><rect x="302" y="310" width="12" height="10"/><rect x="317" y="310" width="12" height="10"/>
+    <rect x="32" y="323" width="12" height="10"/><rect x="47" y="323" width="12" height="10"/><rect x="62" y="323" width="12" height="10"/><rect x="77" y="323" width="12" height="10"/><rect x="92" y="323" width="12" height="10"/><rect x="107" y="323" width="12" height="10"/><rect x="122" y="323" width="12" height="10"/><rect x="137" y="323" width="12" height="10"/><rect x="152" y="323" width="12" height="10"/><rect x="167" y="323" width="12" height="10"/><rect x="182" y="323" width="12" height="10"/><rect x="197" y="323" width="12" height="10"/><rect x="212" y="323" width="12" height="10"/><rect x="227" y="323" width="12" height="10"/><rect x="242" y="323" width="12" height="10"/><rect x="257" y="323" width="12" height="10"/><rect x="272" y="323" width="12" height="10"/><rect x="287" y="323" width="12" height="10"/><rect x="302" y="323" width="12" height="10"/><rect x="317" y="323" width="12" height="10"/>
+    <rect x="32" y="336" width="12" height="10"/><rect x="47" y="336" width="12" height="10"/><rect x="62" y="336" width="12" height="10"/><rect x="77" y="336" width="12" height="10"/><rect x="92" y="336" width="12" height="10"/><rect x="107" y="336" width="12" height="10"/><rect x="122" y="336" width="12" height="10"/><rect x="137" y="336" width="12" height="10"/><rect x="152" y="336" width="12" height="10"/><rect x="167" y="336" width="12" height="10"/><rect x="182" y="336" width="12" height="10"/><rect x="197" y="336" width="12" height="10"/><rect x="212" y="336" width="12" height="10"/><rect x="227" y="336" width="12" height="10"/><rect x="242" y="336" width="12" height="10"/><rect x="257" y="336" width="12" height="10"/><rect x="272" y="336" width="12" height="10"/><rect x="287" y="336" width="12" height="10"/><rect x="302" y="336" width="12" height="10"/><rect x="317" y="336" width="12" height="10"/>
+    <rect x="32" y="349" width="12" height="10"/><rect x="47" y="349" width="12" height="10"/><rect x="62" y="349" width="12" height="10"/><rect x="77" y="349" width="12" height="10"/><rect x="92" y="349" width="12" height="10"/><rect x="107" y="349" width="12" height="10"/><rect x="122" y="349" width="12" height="10"/><rect x="137" y="349" width="12" height="10"/><rect x="152" y="349" width="12" height="10"/><rect x="167" y="349" width="12" height="10"/><rect x="182" y="349" width="12" height="10"/><rect x="197" y="349" width="12" height="10"/><rect x="212" y="349" width="12" height="10"/><rect x="227" y="349" width="12" height="10"/><rect x="242" y="349" width="12" height="10"/><rect x="257" y="349" width="12" height="10"/><rect x="272" y="349" width="12" height="10"/><rect x="287" y="349" width="12" height="10"/><rect x="302" y="349" width="12" height="10"/><rect x="317" y="349" width="12" height="10"/>
+  </g>
+  <rect x="317" y="310" width="12" height="10" fill="none" stroke="#ff5f1f" stroke-width="1.5"/>
+  <text class="s" x="32" y="374">80 SMs · 5120 FP32 CUDA cores · 640 tensor cores</text>
+  <rect class="mem" x="26" y="381" width="308" height="18" rx="2"/>
+  <text class="s" x="34" y="394">L2 cache · 6 MB · shared by all 80 SMs</text>
+  <g class="host">
+    <rect x="26" y="406" width="34" height="14" rx="1.5"/><rect x="65" y="406" width="34" height="14" rx="1.5"/><rect x="104" y="406" width="34" height="14" rx="1.5"/><rect x="143" y="406" width="34" height="14" rx="1.5"/>
+    <rect x="182" y="406" width="34" height="14" rx="1.5"/><rect x="221" y="406" width="34" height="14" rx="1.5"/><rect x="260" y="406" width="34" height="14" rx="1.5"/><rect x="299" y="406" width="34" height="14" rx="1.5"/>
+  </g>
+  <g class="s" text-anchor="middle">
+    <text x="43" y="417">MC</text><text x="82" y="417">MC</text><text x="121" y="417">MC</text><text x="160" y="417">MC</text>
+    <text x="199" y="417">MC</text><text x="238" y="417">MC</text><text x="277" y="417">MC</text><text x="316" y="417">MC</text>
+  </g>
+  <g class="mem">
+    <rect x="26" y="426" width="73" height="34" rx="3"/><rect x="104" y="426" width="73" height="34" rx="3"/>
+    <rect x="182" y="426" width="73" height="34" rx="3"/><rect x="260" y="426" width="73" height="34" rx="3"/>
+  </g>
+  <g text-anchor="middle">
+    <text class="b" x="62" y="441">HBM2</text><text class="m" x="62" y="454">4 GB</text>
+    <text class="b" x="140" y="441">HBM2</text><text class="m" x="140" y="454">4 GB</text>
+    <text class="b" x="218" y="441">HBM2</text><text class="m" x="218" y="454">4 GB</text>
+    <text class="b" x="296" y="441">HBM2</text><text class="m" x="296" y="454">4 GB</text>
+  </g>
+  <text class="s" x="26" y="481">16 GB or 32 GB · 4096-bit bus · ~900 GB/s</text>
+
+  <!-- GPU1 (X=376, Y=262) -->
+  <rect class="gpu" x="376" y="262" width="328" height="234" rx="6"/>
+  <text class="h" x="386" y="278">GPU1 · Tesla V100 SXM2</text>
+  <rect class="host" x="386" y="285" width="308" height="16" rx="2"/>
+  <text class="s" x="540" y="297" text-anchor="middle">PCIe host interface · copy engines · GigaThread</text>
+  <g class="sm">
+    <rect x="392" y="310" width="12" height="10"/><rect x="407" y="310" width="12" height="10"/><rect x="422" y="310" width="12" height="10"/><rect x="437" y="310" width="12" height="10"/><rect x="452" y="310" width="12" height="10"/><rect x="467" y="310" width="12" height="10"/><rect x="482" y="310" width="12" height="10"/><rect x="497" y="310" width="12" height="10"/><rect x="512" y="310" width="12" height="10"/><rect x="527" y="310" width="12" height="10"/><rect x="542" y="310" width="12" height="10"/><rect x="557" y="310" width="12" height="10"/><rect x="572" y="310" width="12" height="10"/><rect x="587" y="310" width="12" height="10"/><rect x="602" y="310" width="12" height="10"/><rect x="617" y="310" width="12" height="10"/><rect x="632" y="310" width="12" height="10"/><rect x="647" y="310" width="12" height="10"/><rect x="662" y="310" width="12" height="10"/><rect x="677" y="310" width="12" height="10"/>
+    <rect x="392" y="323" width="12" height="10"/><rect x="407" y="323" width="12" height="10"/><rect x="422" y="323" width="12" height="10"/><rect x="437" y="323" width="12" height="10"/><rect x="452" y="323" width="12" height="10"/><rect x="467" y="323" width="12" height="10"/><rect x="482" y="323" width="12" height="10"/><rect x="497" y="323" width="12" height="10"/><rect x="512" y="323" width="12" height="10"/><rect x="527" y="323" width="12" height="10"/><rect x="542" y="323" width="12" height="10"/><rect x="557" y="323" width="12" height="10"/><rect x="572" y="323" width="12" height="10"/><rect x="587" y="323" width="12" height="10"/><rect x="602" y="323" width="12" height="10"/><rect x="617" y="323" width="12" height="10"/><rect x="632" y="323" width="12" height="10"/><rect x="647" y="323" width="12" height="10"/><rect x="662" y="323" width="12" height="10"/><rect x="677" y="323" width="12" height="10"/>
+    <rect x="392" y="336" width="12" height="10"/><rect x="407" y="336" width="12" height="10"/><rect x="422" y="336" width="12" height="10"/><rect x="437" y="336" width="12" height="10"/><rect x="452" y="336" width="12" height="10"/><rect x="467" y="336" width="12" height="10"/><rect x="482" y="336" width="12" height="10"/><rect x="497" y="336" width="12" height="10"/><rect x="512" y="336" width="12" height="10"/><rect x="527" y="336" width="12" height="10"/><rect x="542" y="336" width="12" height="10"/><rect x="557" y="336" width="12" height="10"/><rect x="572" y="336" width="12" height="10"/><rect x="587" y="336" width="12" height="10"/><rect x="602" y="336" width="12" height="10"/><rect x="617" y="336" width="12" height="10"/><rect x="632" y="336" width="12" height="10"/><rect x="647" y="336" width="12" height="10"/><rect x="662" y="336" width="12" height="10"/><rect x="677" y="336" width="12" height="10"/>
+    <rect x="392" y="349" width="12" height="10"/><rect x="407" y="349" width="12" height="10"/><rect x="422" y="349" width="12" height="10"/><rect x="437" y="349" width="12" height="10"/><rect x="452" y="349" width="12" height="10"/><rect x="467" y="349" width="12" height="10"/><rect x="482" y="349" width="12" height="10"/><rect x="497" y="349" width="12" height="10"/><rect x="512" y="349" width="12" height="10"/><rect x="527" y="349" width="12" height="10"/><rect x="542" y="349" width="12" height="10"/><rect x="557" y="349" width="12" height="10"/><rect x="572" y="349" width="12" height="10"/><rect x="587" y="349" width="12" height="10"/><rect x="602" y="349" width="12" height="10"/><rect x="617" y="349" width="12" height="10"/><rect x="632" y="349" width="12" height="10"/><rect x="647" y="349" width="12" height="10"/><rect x="662" y="349" width="12" height="10"/><rect x="677" y="349" width="12" height="10"/>
+  </g>
+  <text class="s" x="392" y="374">80 SMs · 5120 FP32 CUDA cores · 640 tensor cores</text>
+  <rect class="mem" x="386" y="381" width="308" height="18" rx="2"/>
+  <text class="s" x="394" y="394">L2 cache · 6 MB · shared by all 80 SMs</text>
+  <g class="host">
+    <rect x="386" y="406" width="34" height="14" rx="1.5"/><rect x="425" y="406" width="34" height="14" rx="1.5"/><rect x="464" y="406" width="34" height="14" rx="1.5"/><rect x="503" y="406" width="34" height="14" rx="1.5"/>
+    <rect x="542" y="406" width="34" height="14" rx="1.5"/><rect x="581" y="406" width="34" height="14" rx="1.5"/><rect x="620" y="406" width="34" height="14" rx="1.5"/><rect x="659" y="406" width="34" height="14" rx="1.5"/>
+  </g>
+  <g class="s" text-anchor="middle">
+    <text x="403" y="417">MC</text><text x="442" y="417">MC</text><text x="481" y="417">MC</text><text x="520" y="417">MC</text>
+    <text x="559" y="417">MC</text><text x="598" y="417">MC</text><text x="637" y="417">MC</text><text x="676" y="417">MC</text>
+  </g>
+  <g class="mem">
+    <rect x="386" y="426" width="73" height="34" rx="3"/><rect x="464" y="426" width="73" height="34" rx="3"/>
+    <rect x="542" y="426" width="73" height="34" rx="3"/><rect x="620" y="426" width="73" height="34" rx="3"/>
+  </g>
+  <g text-anchor="middle">
+    <text class="b" x="422" y="441">HBM2</text><text class="m" x="422" y="454">4 GB</text>
+    <text class="b" x="500" y="441">HBM2</text><text class="m" x="500" y="454">4 GB</text>
+    <text class="b" x="578" y="441">HBM2</text><text class="m" x="578" y="454">4 GB</text>
+    <text class="b" x="656" y="441">HBM2</text><text class="m" x="656" y="454">4 GB</text>
+  </g>
+  <text class="s" x="386" y="481">16 GB or 32 GB · 4096-bit bus · ~900 GB/s</text>
+
+  <!-- NVLink: 6 ports each side -->
+  <g class="nv">
+    <rect x="338" y="318" width="12" height="7" rx="1"/><rect x="338" y="344" width="12" height="7" rx="1"/><rect x="338" y="370" width="12" height="7" rx="1"/>
+    <rect x="338" y="396" width="12" height="7" rx="1"/><rect x="338" y="422" width="12" height="7" rx="1"/><rect x="338" y="448" width="12" height="7" rx="1"/>
+    <rect x="370" y="318" width="12" height="7" rx="1"/><rect x="370" y="344" width="12" height="7" rx="1"/><rect x="370" y="370" width="12" height="7" rx="1"/>
+    <rect x="370" y="396" width="12" height="7" rx="1"/><rect x="370" y="422" width="12" height="7" rx="1"/><rect x="370" y="448" width="12" height="7" rx="1"/>
+  </g>
+  <g class="nvl">
+    <line x1="350" y1="321.5" x2="370" y2="321.5"/><line x1="350" y1="347.5" x2="370" y2="347.5"/><line x1="350" y1="373.5" x2="370" y2="373.5"/>
+    <line x1="350" y1="399.5" x2="370" y2="399.5"/><line x1="350" y1="425.5" x2="370" y2="425.5"/><line x1="350" y1="451.5" x2="370" y2="451.5"/>
+  </g>
+  <text class="s" x="360" y="514" text-anchor="middle">NVLink · 25 GB/s each way per link · 6 links = 300 GB/s total · how many links join a pair depends on the board</text>
+
+  <!-- path markers -->
+  <circle class="n" cx="321" cy="390" r="8"/><text class="nt" x="321" y="393.5" text-anchor="middle">1</text>
+  <circle class="n" cx="360" cy="303" r="8"/><text class="nt" x="360" y="306.5" text-anchor="middle">2</text>
+  <circle class="n" cx="196" cy="245" r="8"/><text class="nt" x="196" y="248.5" text-anchor="middle">3</text>
+  <circle class="n" cx="621" cy="197" r="8"/><text class="nt" x="621" y="200.5" text-anchor="middle">4</text>
+
+  <!-- one SM zoom -->
+  <text class="lane" x="16" y="546">INSIDE ONE SM (THE ORANGE ONE, ×80)</text>
+  <rect x="16" y="552" width="328" height="114" rx="5" fill="#ffffff" stroke="#7aa7d9" stroke-width="1.25"/>
+  <g class="part">
+    <rect x="22" y="558" width="74" height="80" rx="3"/><rect x="102" y="558" width="74" height="80" rx="3"/>
+    <rect x="182" y="558" width="74" height="80" rx="3"/><rect x="262" y="558" width="74" height="80" rx="3"/>
+  </g>
+  <g class="s">
+    <text x="28" y="571">warp sched</text><text x="28" y="583">16 FP32</text><text x="28" y="595">16 INT32</text><text x="28" y="607">8 FP64</text><text class="tc" x="28" y="619">2 tensor</text><text x="28" y="631">64 KB regs</text>
+    <text x="108" y="571">warp sched</text><text x="108" y="583">16 FP32</text><text x="108" y="595">16 INT32</text><text x="108" y="607">8 FP64</text><text class="tc" x="108" y="619">2 tensor</text><text x="108" y="631">64 KB regs</text>
+    <text x="188" y="571">warp sched</text><text x="188" y="583">16 FP32</text><text x="188" y="595">16 INT32</text><text x="188" y="607">8 FP64</text><text class="tc" x="188" y="619">2 tensor</text><text x="188" y="631">64 KB regs</text>
+    <text x="268" y="571">warp sched</text><text x="268" y="583">16 FP32</text><text x="268" y="595">16 INT32</text><text x="268" y="607">8 FP64</text><text class="tc" x="268" y="619">2 tensor</text><text x="268" y="631">64 KB regs</text>
+  </g>
+  <rect class="mem" x="22" y="644" width="314" height="16" rx="2"/>
+  <text class="s" x="179" y="656" text-anchor="middle">128 KB L1 + shared memory · warps of 32 threads</text>
+
+  <!-- bandwidth ladder -->
+  <text class="lane" x="368" y="546">PEAK BANDWIDTH, AS NVIDIA QUOTES IT</text>
+  <text class="s" x="368" y="567">HBM2</text>
+  <rect class="bary" x="466" y="557" width="170" height="13" rx="2"/><text class="s" x="642" y="567">~900 GB/s</text>
+  <text class="s" x="368" y="591">NVLink ×6</text>
+  <rect class="bar" x="466" y="583" width="57" height="13" rx="2"/><text class="s" x="529" y="591">300 GB/s both ways</text>
+  <text class="s" x="368" y="615">PCIe Gen3 x16</text>
+  <rect class="barg" x="466" y="605" width="6" height="13" rx="1"/><text class="s" x="478" y="615">32 GB/s both ways</text>
+  <text class="s" x="368" y="639">EDR IB NIC</text>
+  <rect class="barp" x="466" y="629" width="5" height="13" rx="1"/><text class="s" x="478" y="639">25 GB/s both ways</text>
+  <text class="m" x="368" y="658">pinned host copies reach ~12 GB/s in practice</text>
+
+  <!-- path legend -->
+  <circle class="n" cx="24" cy="690" r="8"/><text class="nt" x="24" y="693.5" text-anchor="middle">1</text>
+  <text class="b" x="38" y="694">local math</text>
+  <text class="m" x="38" y="707">SMs ↔ L2 ↔ HBM2, ~900 GB/s, no link involved</text>
+  <circle class="n" cx="376" cy="690" r="8"/><text class="nt" x="376" y="693.5" text-anchor="middle">2</text>
+  <text class="b" x="390" y="694">halo exchange</text>
+  <text class="m" x="390" y="707">GPU0 ⇄ GPU1 over NVLink, P2P, no CPU, no DRAM</text>
+  <circle class="n" cx="24" cy="724" r="8"/><text class="nt" x="24" y="727.5" text-anchor="middle">3</text>
+  <text class="b" x="38" y="728">host ⇄ GPU copies</text>
+  <text class="m" x="38" y="741">DMA over PCIe from pinned DRAM</text>
+  <circle class="n" cx="376" cy="724" r="8"/><text class="nt" x="376" y="727.5" text-anchor="middle">4</text>
+  <text class="b" x="390" y="728">off node</text>
+  <text class="m" x="390" y="741">PCIe → NIC → network, GPUDirect RDMA skips DRAM</text>
+</svg>

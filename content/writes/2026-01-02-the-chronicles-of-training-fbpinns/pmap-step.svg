@@ -1,0 +1,547 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 554" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">100 steps per trip from Python</title>
+  <desc id="desc">One call to the jitted pmap update runs the same program on both V100s. An outer lax.scan runs 10 blocks, each block is an inner lax.scan of 10 steps that calls value_and_grad of the FBPINN loss and adds up the gradients, then the gradients are divided by 10 and one optax update is applied. Inside every forward pass a psum over the devices axis adds u_sum and w_sum across the two GPUs over NVLink. The timeline shows one host dispatch, 100 steps per GPU with 10 optimizer updates and a sync tick every step, next to a plain Python loop that would dispatch 100 times.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+    <marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#ff5f1f"/></marker>
+  </defs>
+  <style>
+    text { fill: #232333; font-size: 10.5px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; font-size: 10px; }
+    .h { font-size: 11.5px; font-weight: 700; }
+    .b { font-weight: 700; }
+    .o { fill: #c2410c; font-weight: 700; }
+    .sw { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .dash { fill: #ffffff; stroke: #232333; stroke-width: 1.25; stroke-dasharray: 4 3; }
+    .gpu { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1.25; }
+    .chip { fill: #ffffff; stroke: #a3a3b3; stroke-width: 1; }
+    .ochip { fill: #ffede4; stroke: #ff5f1f; stroke-width: 1.25; }
+    .ln { stroke: #232333; stroke-width: 1.25; fill: none; }
+    .nv { stroke: #ff5f1f; stroke-width: 2.5; fill: none; }
+    .stp { fill: #e3eefb; stroke: #7aa7d9; stroke-width: .8; }
+    .sep { stroke: #ffffff; stroke-width: .8; }
+    .upd { fill: #ff5f1f; }
+    .tick { stroke: #ff5f1f; stroke-width: 1; }
+    .lt { fill: #a3a3b3; }
+    .n { fill: #ff5f1f; }
+    .nt { fill: #ffffff; font-size: 9.5px; font-weight: 700; }
+  </style>
+
+  <text class="k" x="16" y="22">ONE PMAP CALL</text>
+  <text class="t" x="16" y="42">100 steps per trip from Python</text>
+  <text class="c" x="16" y="60">One dispatch runs 100 steps on both GPUs, with an NVLink all-reduce inside every forward pass.</text>
+
+  <!-- program -->
+  <text class="lane" x="16" y="84">PROGRAM</text>
+  <rect class="sw" x="16" y="92" width="454" height="28" rx="4"/>
+  <text class="b" x="26" y="110">host</text>
+  <text class="m" x="70" y="110">update_pmap(aos, ap, fp, static, step)</text>
+  <text class="o" x="460" y="110" text-anchor="end">called once</text>
+  <line class="ln" x1="40" y1="120" x2="40" y2="136" marker-end="url(#a)"/>
+  <text class="m" x="50" y="132">same program on both GPUs, pmap axis "devices"</text>
+
+  <rect class="gpu" x="16" y="138" width="454" height="234" rx="5"/>
+  <text class="h" x="26" y="154">on each V100</text>
+  <text class="m" x="460" y="154" text-anchor="end">jit compiled into one XLA program</text>
+
+  <rect class="sw" x="28" y="162" width="430" height="200" rx="4"/>
+  <text class="b" x="38" y="178">outer lax.scan, 10 blocks</text>
+  <text class="m" x="448" y="178" text-anchor="end">_acc_block</text>
+
+  <rect class="dash" x="40" y="186" width="406" height="114" rx="4"/>
+  <text class="b" x="50" y="202">inner lax.scan, 10 steps</text>
+  <text class="m" x="436" y="202" text-anchor="end">_inner_step</text>
+
+  <rect class="sw" x="52" y="210" width="382" height="60" rx="4"/>
+  <text class="b" x="62" y="226">value_and_grad(FBPINN_loss)</text>
+  <rect class="chip" x="62" y="234" width="108" height="28" rx="3"/>
+  <text class="m" x="68" y="246">forward on</text><text class="m" x="68" y="258">local subdomains</text>
+  <rect class="ochip" x="178" y="234" width="140" height="28" rx="3"/>
+  <text class="b" x="186" y="246" style="font-size:10px">psum over devices</text><text class="m" x="186" y="258">u_sum and w_sum</text>
+  <circle class="n" cx="308" cy="254" r="7"/><text class="nt" x="308" y="257.5" text-anchor="middle">1</text>
+  <rect class="chip" x="326" y="234" width="100" height="28" rx="3"/>
+  <text class="m" x="332" y="246">residual and</text><text class="m" x="332" y="258">backward pass</text>
+  <text class="m" x="62" y="288">grads = grads + g, loss = loss + l</text>
+
+  <rect class="sw" x="40" y="310" width="406" height="42" rx="4" style="stroke:#ff5f1f;stroke-width:1.75"/>
+  <text class="b" x="50" y="327">grads / 10, then 1 optax update</text>
+  <text class="m" x="50" y="342">optimiser_fn and optax.apply_updates, once per block</text>
+  <circle class="n" cx="432" cy="323" r="7"/><text class="nt" x="432" y="326.5" text-anchor="middle">2</text>
+
+  <!-- hardware -->
+  <text class="lane" x="486" y="84">HARDWARE</text>
+  <rect class="gpu" x="486" y="92" width="218" height="60" rx="5"/>
+  <text class="h" x="496" y="110">V100, GPU0</text>
+  <text class="m" x="496" y="125">subdomains 1 to 37</text>
+  <text class="m" x="496" y="140">local math on its own HBM2</text>
+  <line class="nv" x1="532" y1="154" x2="532" y2="210"/>
+  <line class="nv" x1="542" y1="154" x2="542" y2="210"/>
+  <circle class="n" cx="566" cy="166" r="7"/><text class="nt" x="566" y="169.5" text-anchor="middle">1</text>
+  <text class="o" x="580" y="170">NVLink</text>
+  <text class="m" x="580" y="184">psum all-reduce</text>
+  <text class="m" x="580" y="197">every forward pass</text>
+  <rect class="gpu" x="486" y="212" width="218" height="60" rx="5"/>
+  <text class="h" x="496" y="230">V100, GPU1</text>
+  <text class="m" x="496" y="245">subdomains 38 to 75</text>
+  <text class="m" x="496" y="260">same program, other half</text>
+  <text class="m" x="486" y="294">the post also uses pmean to</text>
+  <text class="m" x="486" y="307">sync across the two GPUs</text>
+  <line x1="486" y1="322" x2="704" y2="322" stroke="#c3c3cf" stroke-width="1"/>
+  <text class="m" x="486" y="338">jax.pmap is the old API, the JAX</text>
+  <text class="m" x="486" y="351">docs now point to jax.shard_map</text>
+
+  <!-- timeline -->
+  <text class="lane" x="16" y="396">ONE CALL ON THE TIMELINE</text>
+  <text class="m" x="704" y="396" text-anchor="end">100 steps, 10 updates, 100 syncs</text>
+
+  <text class="b" x="16" y="415">host</text>
+  <rect class="upd" x="116" y="404" width="4" height="14"/>
+  <text class="m" x="128" y="415">1 dispatch, then the host waits</text>
+  <line x1="330" y1="411" x2="698" y2="411" stroke="#a3a3b3" stroke-width="1.25" stroke-dasharray="3 3"/>
+  <rect x="700" y="404" width="4" height="14" fill="#a3a3b3"/>
+
+  <text class="b" x="16" y="441">GPU0</text>
+  <g>
+    <rect class="stp" x="116" y="428" width="54.4" height="18"/>
+    <line class="sep" x1="121.4" y1="428" x2="121.4" y2="446"/>
+    <line class="sep" x1="126.9" y1="428" x2="126.9" y2="446"/>
+    <line class="sep" x1="132.3" y1="428" x2="132.3" y2="446"/>
+    <line class="sep" x1="137.8" y1="428" x2="137.8" y2="446"/>
+    <line class="sep" x1="143.2" y1="428" x2="143.2" y2="446"/>
+    <line class="sep" x1="148.6" y1="428" x2="148.6" y2="446"/>
+    <line class="sep" x1="154.1" y1="428" x2="154.1" y2="446"/>
+    <line class="sep" x1="159.5" y1="428" x2="159.5" y2="446"/>
+    <line class="sep" x1="165" y1="428" x2="165" y2="446"/>
+    <rect class="upd" x="171.2" y="428" width="3" height="18"/>
+    <rect class="stp" x="174.8" y="428" width="54.4" height="18"/>
+    <line class="sep" x1="180.2" y1="428" x2="180.2" y2="446"/>
+    <line class="sep" x1="185.7" y1="428" x2="185.7" y2="446"/>
+    <line class="sep" x1="191.1" y1="428" x2="191.1" y2="446"/>
+    <line class="sep" x1="196.6" y1="428" x2="196.6" y2="446"/>
+    <line class="sep" x1="202" y1="428" x2="202" y2="446"/>
+    <line class="sep" x1="207.4" y1="428" x2="207.4" y2="446"/>
+    <line class="sep" x1="212.9" y1="428" x2="212.9" y2="446"/>
+    <line class="sep" x1="218.3" y1="428" x2="218.3" y2="446"/>
+    <line class="sep" x1="223.8" y1="428" x2="223.8" y2="446"/>
+    <rect class="upd" x="230" y="428" width="3" height="18"/>
+    <rect class="stp" x="233.6" y="428" width="54.4" height="18"/>
+    <line class="sep" x1="239" y1="428" x2="239" y2="446"/>
+    <line class="sep" x1="244.5" y1="428" x2="244.5" y2="446"/>
+    <line class="sep" x1="249.9" y1="428" x2="249.9" y2="446"/>
+    <line class="sep" x1="255.4" y1="428" x2="255.4" y2="446"/>
+    <line class="sep" x1="260.8" y1="428" x2="260.8" y2="446"/>
+    <line class="sep" x1="266.2" y1="428" x2="266.2" y2="446"/>
+    <line class="sep" x1="271.7" y1="428" x2="271.7" y2="446"/>
+    <line class="sep" x1="277.1" y1="428" x2="277.1" y2="446"/>
+    <line class="sep" x1="282.6" y1="428" x2="282.6" y2="446"/>
+    <rect class="upd" x="288.8" y="428" width="3" height="18"/>
+    <rect class="stp" x="292.4" y="428" width="54.4" height="18"/>
+    <line class="sep" x1="297.8" y1="428" x2="297.8" y2="446"/>
+    <line class="sep" x1="303.3" y1="428" x2="303.3" y2="446"/>
+    <line class="sep" x1="308.7" y1="428" x2="308.7" y2="446"/>
+    <line class="sep" x1="314.2" y1="428" x2="314.2" y2="446"/>
+    <line class="sep" x1="319.6" y1="428" x2="319.6" y2="446"/>
+    <line class="sep" x1="325" y1="428" x2="325" y2="446"/>
+    <line class="sep" x1="330.5" y1="428" x2="330.5" y2="446"/>
+    <line class="sep" x1="335.9" y1="428" x2="335.9" y2="446"/>
+    <line class="sep" x1="341.4" y1="428" x2="341.4" y2="446"/>
+    <rect class="upd" x="347.6" y="428" width="3" height="18"/>
+    <rect class="stp" x="351.2" y="428" width="54.4" height="18"/>
+    <line class="sep" x1="356.6" y1="428" x2="356.6" y2="446"/>
+    <line class="sep" x1="362.1" y1="428" x2="362.1" y2="446"/>
+    <line class="sep" x1="367.5" y1="428" x2="367.5" y2="446"/>
+    <line class="sep" x1="373" y1="428" x2="373" y2="446"/>
+    <line class="sep" x1="378.4" y1="428" x2="378.4" y2="446"/>
+    <line class="sep" x1="383.8" y1="428" x2="383.8" y2="446"/>
+    <line class="sep" x1="389.3" y1="428" x2="389.3" y2="446"/>
+    <line class="sep" x1="394.7" y1="428" x2="394.7" y2="446"/>
+    <line class="sep" x1="400.2" y1="428" x2="400.2" y2="446"/>
+    <rect class="upd" x="406.4" y="428" width="3" height="18"/>
+    <rect class="stp" x="410" y="428" width="54.4" height="18"/>
+    <line class="sep" x1="415.4" y1="428" x2="415.4" y2="446"/>
+    <line class="sep" x1="420.9" y1="428" x2="420.9" y2="446"/>
+    <line class="sep" x1="426.3" y1="428" x2="426.3" y2="446"/>
+    <line class="sep" x1="431.8" y1="428" x2="431.8" y2="446"/>
+    <line class="sep" x1="437.2" y1="428" x2="437.2" y2="446"/>
+    <line class="sep" x1="442.6" y1="428" x2="442.6" y2="446"/>
+    <line class="sep" x1="448.1" y1="428" x2="448.1" y2="446"/>
+    <line class="sep" x1="453.5" y1="428" x2="453.5" y2="446"/>
+    <line class="sep" x1="459" y1="428" x2="459" y2="446"/>
+    <rect class="upd" x="465.2" y="428" width="3" height="18"/>
+    <rect class="stp" x="468.8" y="428" width="54.4" height="18"/>
+    <line class="sep" x1="474.2" y1="428" x2="474.2" y2="446"/>
+    <line class="sep" x1="479.7" y1="428" x2="479.7" y2="446"/>
+    <line class="sep" x1="485.1" y1="428" x2="485.1" y2="446"/>
+    <line class="sep" x1="490.6" y1="428" x2="490.6" y2="446"/>
+    <line class="sep" x1="496" y1="428" x2="496" y2="446"/>
+    <line class="sep" x1="501.4" y1="428" x2="501.4" y2="446"/>
+    <line class="sep" x1="506.9" y1="428" x2="506.9" y2="446"/>
+    <line class="sep" x1="512.3" y1="428" x2="512.3" y2="446"/>
+    <line class="sep" x1="517.8" y1="428" x2="517.8" y2="446"/>
+    <rect class="upd" x="524" y="428" width="3" height="18"/>
+    <rect class="stp" x="527.6" y="428" width="54.4" height="18"/>
+    <line class="sep" x1="533" y1="428" x2="533" y2="446"/>
+    <line class="sep" x1="538.5" y1="428" x2="538.5" y2="446"/>
+    <line class="sep" x1="543.9" y1="428" x2="543.9" y2="446"/>
+    <line class="sep" x1="549.4" y1="428" x2="549.4" y2="446"/>
+    <line class="sep" x1="554.8" y1="428" x2="554.8" y2="446"/>
+    <line class="sep" x1="560.2" y1="428" x2="560.2" y2="446"/>
+    <line class="sep" x1="565.7" y1="428" x2="565.7" y2="446"/>
+    <line class="sep" x1="571.1" y1="428" x2="571.1" y2="446"/>
+    <line class="sep" x1="576.6" y1="428" x2="576.6" y2="446"/>
+    <rect class="upd" x="582.8" y="428" width="3" height="18"/>
+    <rect class="stp" x="586.4" y="428" width="54.4" height="18"/>
+    <line class="sep" x1="591.8" y1="428" x2="591.8" y2="446"/>
+    <line class="sep" x1="597.3" y1="428" x2="597.3" y2="446"/>
+    <line class="sep" x1="602.7" y1="428" x2="602.7" y2="446"/>
+    <line class="sep" x1="608.2" y1="428" x2="608.2" y2="446"/>
+    <line class="sep" x1="613.6" y1="428" x2="613.6" y2="446"/>
+    <line class="sep" x1="619" y1="428" x2="619" y2="446"/>
+    <line class="sep" x1="624.5" y1="428" x2="624.5" y2="446"/>
+    <line class="sep" x1="629.9" y1="428" x2="629.9" y2="446"/>
+    <line class="sep" x1="635.4" y1="428" x2="635.4" y2="446"/>
+    <rect class="upd" x="641.6" y="428" width="3" height="18"/>
+    <rect class="stp" x="645.2" y="428" width="54.4" height="18"/>
+    <line class="sep" x1="650.6" y1="428" x2="650.6" y2="446"/>
+    <line class="sep" x1="656.1" y1="428" x2="656.1" y2="446"/>
+    <line class="sep" x1="661.5" y1="428" x2="661.5" y2="446"/>
+    <line class="sep" x1="667" y1="428" x2="667" y2="446"/>
+    <line class="sep" x1="672.4" y1="428" x2="672.4" y2="446"/>
+    <line class="sep" x1="677.8" y1="428" x2="677.8" y2="446"/>
+    <line class="sep" x1="683.3" y1="428" x2="683.3" y2="446"/>
+    <line class="sep" x1="688.7" y1="428" x2="688.7" y2="446"/>
+    <line class="sep" x1="694.2" y1="428" x2="694.2" y2="446"/>
+    <rect class="upd" x="700.4" y="428" width="3" height="18"/>
+  </g>
+  <g>
+    <line class="tick" x1="118.7" y1="447" x2="118.7" y2="455"/>
+    <line class="tick" x1="124.2" y1="447" x2="124.2" y2="455"/>
+    <line class="tick" x1="129.6" y1="447" x2="129.6" y2="455"/>
+    <line class="tick" x1="135" y1="447" x2="135" y2="455"/>
+    <line class="tick" x1="140.5" y1="447" x2="140.5" y2="455"/>
+    <line class="tick" x1="145.9" y1="447" x2="145.9" y2="455"/>
+    <line class="tick" x1="151.4" y1="447" x2="151.4" y2="455"/>
+    <line class="tick" x1="156.8" y1="447" x2="156.8" y2="455"/>
+    <line class="tick" x1="162.2" y1="447" x2="162.2" y2="455"/>
+    <line class="tick" x1="167.7" y1="447" x2="167.7" y2="455"/>
+    <line class="tick" x1="177.5" y1="447" x2="177.5" y2="455"/>
+    <line class="tick" x1="183" y1="447" x2="183" y2="455"/>
+    <line class="tick" x1="188.4" y1="447" x2="188.4" y2="455"/>
+    <line class="tick" x1="193.8" y1="447" x2="193.8" y2="455"/>
+    <line class="tick" x1="199.3" y1="447" x2="199.3" y2="455"/>
+    <line class="tick" x1="204.7" y1="447" x2="204.7" y2="455"/>
+    <line class="tick" x1="210.2" y1="447" x2="210.2" y2="455"/>
+    <line class="tick" x1="215.6" y1="447" x2="215.6" y2="455"/>
+    <line class="tick" x1="221" y1="447" x2="221" y2="455"/>
+    <line class="tick" x1="226.5" y1="447" x2="226.5" y2="455"/>
+    <line class="tick" x1="236.3" y1="447" x2="236.3" y2="455"/>
+    <line class="tick" x1="241.8" y1="447" x2="241.8" y2="455"/>
+    <line class="tick" x1="247.2" y1="447" x2="247.2" y2="455"/>
+    <line class="tick" x1="252.6" y1="447" x2="252.6" y2="455"/>
+    <line class="tick" x1="258.1" y1="447" x2="258.1" y2="455"/>
+    <line class="tick" x1="263.5" y1="447" x2="263.5" y2="455"/>
+    <line class="tick" x1="269" y1="447" x2="269" y2="455"/>
+    <line class="tick" x1="274.4" y1="447" x2="274.4" y2="455"/>
+    <line class="tick" x1="279.8" y1="447" x2="279.8" y2="455"/>
+    <line class="tick" x1="285.3" y1="447" x2="285.3" y2="455"/>
+    <line class="tick" x1="295.1" y1="447" x2="295.1" y2="455"/>
+    <line class="tick" x1="300.6" y1="447" x2="300.6" y2="455"/>
+    <line class="tick" x1="306" y1="447" x2="306" y2="455"/>
+    <line class="tick" x1="311.4" y1="447" x2="311.4" y2="455"/>
+    <line class="tick" x1="316.9" y1="447" x2="316.9" y2="455"/>
+    <line class="tick" x1="322.3" y1="447" x2="322.3" y2="455"/>
+    <line class="tick" x1="327.8" y1="447" x2="327.8" y2="455"/>
+    <line class="tick" x1="333.2" y1="447" x2="333.2" y2="455"/>
+    <line class="tick" x1="338.6" y1="447" x2="338.6" y2="455"/>
+    <line class="tick" x1="344.1" y1="447" x2="344.1" y2="455"/>
+    <line class="tick" x1="353.9" y1="447" x2="353.9" y2="455"/>
+    <line class="tick" x1="359.4" y1="447" x2="359.4" y2="455"/>
+    <line class="tick" x1="364.8" y1="447" x2="364.8" y2="455"/>
+    <line class="tick" x1="370.2" y1="447" x2="370.2" y2="455"/>
+    <line class="tick" x1="375.7" y1="447" x2="375.7" y2="455"/>
+    <line class="tick" x1="381.1" y1="447" x2="381.1" y2="455"/>
+    <line class="tick" x1="386.6" y1="447" x2="386.6" y2="455"/>
+    <line class="tick" x1="392" y1="447" x2="392" y2="455"/>
+    <line class="tick" x1="397.4" y1="447" x2="397.4" y2="455"/>
+    <line class="tick" x1="402.9" y1="447" x2="402.9" y2="455"/>
+    <line class="tick" x1="412.7" y1="447" x2="412.7" y2="455"/>
+    <line class="tick" x1="418.2" y1="447" x2="418.2" y2="455"/>
+    <line class="tick" x1="423.6" y1="447" x2="423.6" y2="455"/>
+    <line class="tick" x1="429" y1="447" x2="429" y2="455"/>
+    <line class="tick" x1="434.5" y1="447" x2="434.5" y2="455"/>
+    <line class="tick" x1="439.9" y1="447" x2="439.9" y2="455"/>
+    <line class="tick" x1="445.4" y1="447" x2="445.4" y2="455"/>
+    <line class="tick" x1="450.8" y1="447" x2="450.8" y2="455"/>
+    <line class="tick" x1="456.2" y1="447" x2="456.2" y2="455"/>
+    <line class="tick" x1="461.7" y1="447" x2="461.7" y2="455"/>
+    <line class="tick" x1="471.5" y1="447" x2="471.5" y2="455"/>
+    <line class="tick" x1="477" y1="447" x2="477" y2="455"/>
+    <line class="tick" x1="482.4" y1="447" x2="482.4" y2="455"/>
+    <line class="tick" x1="487.8" y1="447" x2="487.8" y2="455"/>
+    <line class="tick" x1="493.3" y1="447" x2="493.3" y2="455"/>
+    <line class="tick" x1="498.7" y1="447" x2="498.7" y2="455"/>
+    <line class="tick" x1="504.2" y1="447" x2="504.2" y2="455"/>
+    <line class="tick" x1="509.6" y1="447" x2="509.6" y2="455"/>
+    <line class="tick" x1="515" y1="447" x2="515" y2="455"/>
+    <line class="tick" x1="520.5" y1="447" x2="520.5" y2="455"/>
+    <line class="tick" x1="530.3" y1="447" x2="530.3" y2="455"/>
+    <line class="tick" x1="535.8" y1="447" x2="535.8" y2="455"/>
+    <line class="tick" x1="541.2" y1="447" x2="541.2" y2="455"/>
+    <line class="tick" x1="546.6" y1="447" x2="546.6" y2="455"/>
+    <line class="tick" x1="552.1" y1="447" x2="552.1" y2="455"/>
+    <line class="tick" x1="557.5" y1="447" x2="557.5" y2="455"/>
+    <line class="tick" x1="563" y1="447" x2="563" y2="455"/>
+    <line class="tick" x1="568.4" y1="447" x2="568.4" y2="455"/>
+    <line class="tick" x1="573.8" y1="447" x2="573.8" y2="455"/>
+    <line class="tick" x1="579.3" y1="447" x2="579.3" y2="455"/>
+    <line class="tick" x1="589.1" y1="447" x2="589.1" y2="455"/>
+    <line class="tick" x1="594.6" y1="447" x2="594.6" y2="455"/>
+    <line class="tick" x1="600" y1="447" x2="600" y2="455"/>
+    <line class="tick" x1="605.4" y1="447" x2="605.4" y2="455"/>
+    <line class="tick" x1="610.9" y1="447" x2="610.9" y2="455"/>
+    <line class="tick" x1="616.3" y1="447" x2="616.3" y2="455"/>
+    <line class="tick" x1="621.8" y1="447" x2="621.8" y2="455"/>
+    <line class="tick" x1="627.2" y1="447" x2="627.2" y2="455"/>
+    <line class="tick" x1="632.6" y1="447" x2="632.6" y2="455"/>
+    <line class="tick" x1="638.1" y1="447" x2="638.1" y2="455"/>
+    <line class="tick" x1="647.9" y1="447" x2="647.9" y2="455"/>
+    <line class="tick" x1="653.4" y1="447" x2="653.4" y2="455"/>
+    <line class="tick" x1="658.8" y1="447" x2="658.8" y2="455"/>
+    <line class="tick" x1="664.2" y1="447" x2="664.2" y2="455"/>
+    <line class="tick" x1="669.7" y1="447" x2="669.7" y2="455"/>
+    <line class="tick" x1="675.1" y1="447" x2="675.1" y2="455"/>
+    <line class="tick" x1="680.6" y1="447" x2="680.6" y2="455"/>
+    <line class="tick" x1="686" y1="447" x2="686" y2="455"/>
+    <line class="tick" x1="691.4" y1="447" x2="691.4" y2="455"/>
+    <line class="tick" x1="696.9" y1="447" x2="696.9" y2="455"/>
+  </g>
+  <text class="b" x="16" y="469">GPU1</text>
+  <g>
+    <rect class="stp" x="116" y="456" width="54.4" height="18"/>
+    <line class="sep" x1="121.4" y1="456" x2="121.4" y2="474"/>
+    <line class="sep" x1="126.9" y1="456" x2="126.9" y2="474"/>
+    <line class="sep" x1="132.3" y1="456" x2="132.3" y2="474"/>
+    <line class="sep" x1="137.8" y1="456" x2="137.8" y2="474"/>
+    <line class="sep" x1="143.2" y1="456" x2="143.2" y2="474"/>
+    <line class="sep" x1="148.6" y1="456" x2="148.6" y2="474"/>
+    <line class="sep" x1="154.1" y1="456" x2="154.1" y2="474"/>
+    <line class="sep" x1="159.5" y1="456" x2="159.5" y2="474"/>
+    <line class="sep" x1="165" y1="456" x2="165" y2="474"/>
+    <rect class="upd" x="171.2" y="456" width="3" height="18"/>
+    <rect class="stp" x="174.8" y="456" width="54.4" height="18"/>
+    <line class="sep" x1="180.2" y1="456" x2="180.2" y2="474"/>
+    <line class="sep" x1="185.7" y1="456" x2="185.7" y2="474"/>
+    <line class="sep" x1="191.1" y1="456" x2="191.1" y2="474"/>
+    <line class="sep" x1="196.6" y1="456" x2="196.6" y2="474"/>
+    <line class="sep" x1="202" y1="456" x2="202" y2="474"/>
+    <line class="sep" x1="207.4" y1="456" x2="207.4" y2="474"/>
+    <line class="sep" x1="212.9" y1="456" x2="212.9" y2="474"/>
+    <line class="sep" x1="218.3" y1="456" x2="218.3" y2="474"/>
+    <line class="sep" x1="223.8" y1="456" x2="223.8" y2="474"/>
+    <rect class="upd" x="230" y="456" width="3" height="18"/>
+    <rect class="stp" x="233.6" y="456" width="54.4" height="18"/>
+    <line class="sep" x1="239" y1="456" x2="239" y2="474"/>
+    <line class="sep" x1="244.5" y1="456" x2="244.5" y2="474"/>
+    <line class="sep" x1="249.9" y1="456" x2="249.9" y2="474"/>
+    <line class="sep" x1="255.4" y1="456" x2="255.4" y2="474"/>
+    <line class="sep" x1="260.8" y1="456" x2="260.8" y2="474"/>
+    <line class="sep" x1="266.2" y1="456" x2="266.2" y2="474"/>
+    <line class="sep" x1="271.7" y1="456" x2="271.7" y2="474"/>
+    <line class="sep" x1="277.1" y1="456" x2="277.1" y2="474"/>
+    <line class="sep" x1="282.6" y1="456" x2="282.6" y2="474"/>
+    <rect class="upd" x="288.8" y="456" width="3" height="18"/>
+    <rect class="stp" x="292.4" y="456" width="54.4" height="18"/>
+    <line class="sep" x1="297.8" y1="456" x2="297.8" y2="474"/>
+    <line class="sep" x1="303.3" y1="456" x2="303.3" y2="474"/>
+    <line class="sep" x1="308.7" y1="456" x2="308.7" y2="474"/>
+    <line class="sep" x1="314.2" y1="456" x2="314.2" y2="474"/>
+    <line class="sep" x1="319.6" y1="456" x2="319.6" y2="474"/>
+    <line class="sep" x1="325" y1="456" x2="325" y2="474"/>
+    <line class="sep" x1="330.5" y1="456" x2="330.5" y2="474"/>
+    <line class="sep" x1="335.9" y1="456" x2="335.9" y2="474"/>
+    <line class="sep" x1="341.4" y1="456" x2="341.4" y2="474"/>
+    <rect class="upd" x="347.6" y="456" width="3" height="18"/>
+    <rect class="stp" x="351.2" y="456" width="54.4" height="18"/>
+    <line class="sep" x1="356.6" y1="456" x2="356.6" y2="474"/>
+    <line class="sep" x1="362.1" y1="456" x2="362.1" y2="474"/>
+    <line class="sep" x1="367.5" y1="456" x2="367.5" y2="474"/>
+    <line class="sep" x1="373" y1="456" x2="373" y2="474"/>
+    <line class="sep" x1="378.4" y1="456" x2="378.4" y2="474"/>
+    <line class="sep" x1="383.8" y1="456" x2="383.8" y2="474"/>
+    <line class="sep" x1="389.3" y1="456" x2="389.3" y2="474"/>
+    <line class="sep" x1="394.7" y1="456" x2="394.7" y2="474"/>
+    <line class="sep" x1="400.2" y1="456" x2="400.2" y2="474"/>
+    <rect class="upd" x="406.4" y="456" width="3" height="18"/>
+    <rect class="stp" x="410" y="456" width="54.4" height="18"/>
+    <line class="sep" x1="415.4" y1="456" x2="415.4" y2="474"/>
+    <line class="sep" x1="420.9" y1="456" x2="420.9" y2="474"/>
+    <line class="sep" x1="426.3" y1="456" x2="426.3" y2="474"/>
+    <line class="sep" x1="431.8" y1="456" x2="431.8" y2="474"/>
+    <line class="sep" x1="437.2" y1="456" x2="437.2" y2="474"/>
+    <line class="sep" x1="442.6" y1="456" x2="442.6" y2="474"/>
+    <line class="sep" x1="448.1" y1="456" x2="448.1" y2="474"/>
+    <line class="sep" x1="453.5" y1="456" x2="453.5" y2="474"/>
+    <line class="sep" x1="459" y1="456" x2="459" y2="474"/>
+    <rect class="upd" x="465.2" y="456" width="3" height="18"/>
+    <rect class="stp" x="468.8" y="456" width="54.4" height="18"/>
+    <line class="sep" x1="474.2" y1="456" x2="474.2" y2="474"/>
+    <line class="sep" x1="479.7" y1="456" x2="479.7" y2="474"/>
+    <line class="sep" x1="485.1" y1="456" x2="485.1" y2="474"/>
+    <line class="sep" x1="490.6" y1="456" x2="490.6" y2="474"/>
+    <line class="sep" x1="496" y1="456" x2="496" y2="474"/>
+    <line class="sep" x1="501.4" y1="456" x2="501.4" y2="474"/>
+    <line class="sep" x1="506.9" y1="456" x2="506.9" y2="474"/>
+    <line class="sep" x1="512.3" y1="456" x2="512.3" y2="474"/>
+    <line class="sep" x1="517.8" y1="456" x2="517.8" y2="474"/>
+    <rect class="upd" x="524" y="456" width="3" height="18"/>
+    <rect class="stp" x="527.6" y="456" width="54.4" height="18"/>
+    <line class="sep" x1="533" y1="456" x2="533" y2="474"/>
+    <line class="sep" x1="538.5" y1="456" x2="538.5" y2="474"/>
+    <line class="sep" x1="543.9" y1="456" x2="543.9" y2="474"/>
+    <line class="sep" x1="549.4" y1="456" x2="549.4" y2="474"/>
+    <line class="sep" x1="554.8" y1="456" x2="554.8" y2="474"/>
+    <line class="sep" x1="560.2" y1="456" x2="560.2" y2="474"/>
+    <line class="sep" x1="565.7" y1="456" x2="565.7" y2="474"/>
+    <line class="sep" x1="571.1" y1="456" x2="571.1" y2="474"/>
+    <line class="sep" x1="576.6" y1="456" x2="576.6" y2="474"/>
+    <rect class="upd" x="582.8" y="456" width="3" height="18"/>
+    <rect class="stp" x="586.4" y="456" width="54.4" height="18"/>
+    <line class="sep" x1="591.8" y1="456" x2="591.8" y2="474"/>
+    <line class="sep" x1="597.3" y1="456" x2="597.3" y2="474"/>
+    <line class="sep" x1="602.7" y1="456" x2="602.7" y2="474"/>
+    <line class="sep" x1="608.2" y1="456" x2="608.2" y2="474"/>
+    <line class="sep" x1="613.6" y1="456" x2="613.6" y2="474"/>
+    <line class="sep" x1="619" y1="456" x2="619" y2="474"/>
+    <line class="sep" x1="624.5" y1="456" x2="624.5" y2="474"/>
+    <line class="sep" x1="629.9" y1="456" x2="629.9" y2="474"/>
+    <line class="sep" x1="635.4" y1="456" x2="635.4" y2="474"/>
+    <rect class="upd" x="641.6" y="456" width="3" height="18"/>
+    <rect class="stp" x="645.2" y="456" width="54.4" height="18"/>
+    <line class="sep" x1="650.6" y1="456" x2="650.6" y2="474"/>
+    <line class="sep" x1="656.1" y1="456" x2="656.1" y2="474"/>
+    <line class="sep" x1="661.5" y1="456" x2="661.5" y2="474"/>
+    <line class="sep" x1="667" y1="456" x2="667" y2="474"/>
+    <line class="sep" x1="672.4" y1="456" x2="672.4" y2="474"/>
+    <line class="sep" x1="677.8" y1="456" x2="677.8" y2="474"/>
+    <line class="sep" x1="683.3" y1="456" x2="683.3" y2="474"/>
+    <line class="sep" x1="688.7" y1="456" x2="688.7" y2="474"/>
+    <line class="sep" x1="694.2" y1="456" x2="694.2" y2="474"/>
+    <rect class="upd" x="700.4" y="456" width="3" height="18"/>
+  </g>
+
+  <text class="m" x="16" y="501">plain loop</text>
+  <g>
+    <rect class="lt" x="116" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="121.9" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="127.8" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="133.6" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="139.5" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="145.4" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="151.3" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="157.2" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="163" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="168.9" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="174.8" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="180.7" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="186.6" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="192.4" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="198.3" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="204.2" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="210.1" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="216" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="221.8" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="227.7" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="233.6" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="239.5" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="245.4" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="251.2" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="257.1" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="263" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="268.9" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="274.8" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="280.6" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="286.5" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="292.4" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="298.3" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="304.2" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="310" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="315.9" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="321.8" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="327.7" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="333.6" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="339.4" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="345.3" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="351.2" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="357.1" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="363" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="368.8" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="374.7" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="380.6" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="386.5" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="392.4" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="398.2" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="404.1" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="410" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="415.9" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="421.8" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="427.6" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="433.5" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="439.4" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="445.3" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="451.2" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="457" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="462.9" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="468.8" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="474.7" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="480.6" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="486.4" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="492.3" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="498.2" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="504.1" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="510" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="515.8" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="521.7" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="527.6" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="533.5" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="539.4" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="545.2" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="551.1" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="557" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="562.9" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="568.8" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="574.6" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="580.5" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="586.4" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="592.3" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="598.2" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="604" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="609.9" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="615.8" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="621.7" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="627.6" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="633.4" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="639.3" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="645.2" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="651.1" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="657" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="662.8" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="668.7" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="674.6" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="680.5" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="686.4" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="692.2" y="490" width="1.6" height="14"/>
+    <rect class="lt" x="698.1" y="490" width="1.6" height="14"/>
+  </g>
+  <text class="m" x="116" y="518">a plain Python loop would dispatch 100 times instead</text>
+
+  <rect class="stp" x="16" y="530" width="12" height="10"/>
+  <text class="m" x="34" y="539">1 step, forward + psum + backward</text>
+  <rect class="upd" x="262" y="530" width="4" height="10"/>
+  <text class="m" x="272" y="539">1 optax update per 10 steps</text>
+  <line class="tick" x1="460" y1="529" x2="460" y2="541"/>
+  <text class="m" x="468" y="539">psum sync over NVLink</text>
+</svg>

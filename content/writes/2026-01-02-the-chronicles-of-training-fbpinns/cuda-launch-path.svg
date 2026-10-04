@@ -1,0 +1,222 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 587" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">How a kernel launch reaches an SM</title>
+  <desc id="desc">The CUDA driver writes methods into a pushbuffer, adds a GPFIFO entry that points at it, bumps GP_PUT in USERD, and rings the usermode doorbell register over PCIe. The GPU host PBDMA then reads GP_PUT, fetches the entry and the pushbuffer, and hands the methods to the compute front end, which spreads thread blocks over the SMs, or to one of two copy engines, which DMA pinned host memory into HBM2. Pageable memory needs an extra driver copy into a pinned buffer first. A timeline from NVIDIA's V100 measurement shows 2.9 microsecond kernels taking about 9.6 microseconds each with a sync after every kernel, about 3.8 with one sync per step, and about 3.4 inside a CUDA graph.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+    <marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#ff5f1f"/></marker>
+  </defs>
+  <style>
+    text { fill: #232333; font-size: 10.5px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; font-size: 10px; }
+    .h { font-size: 11.5px; font-weight: 700; }
+    .b { font-weight: 700; }
+    .o { fill: #c2410c; font-weight: 700; }
+    .host { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1; }
+    .gpu { fill: #f5f5f8; stroke: #a3a3b3; stroke-width: 1; }
+    .box { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .mem { fill: #fbf1cf; stroke: #d4b34a; stroke-width: 1.25; }
+    .cmp { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1; }
+    .free { fill: #ffffff; stroke: #7aa7d9; stroke-width: 1; }
+    .door { fill: #ffede4; stroke: #ff5f1f; stroke-width: 1.5; }
+    .idle { fill: #fbe5e3; stroke: #c62f2f; stroke-width: .75; }
+    .ln { stroke: #232333; stroke-width: 1.25; fill: none; }
+    .lo { stroke: #ff5f1f; stroke-width: 1.5; fill: none; }
+    .n { fill: #ff5f1f; }
+    .nt { fill: #ffffff; font-size: 9.5px; font-weight: 700; }
+  </style>
+
+  <text class="k" x="16" y="22">HOST → GPU</text>
+  <text class="t" x="16" y="42">How a kernel launch reaches an SM</text>
+  <text class="c" x="16" y="60">A launch is a few writes plus a doorbell, and a graph batches many launches into 1 CPU call.</text>
+
+  <text class="lane" x="16" y="84">HOST, CPU + RAM</text>
+  <text class="lane" x="342" y="84" text-anchor="middle">PCIe</text>
+  <text class="lane" x="388" y="84">GPU, V100</text>
+
+  <!-- panels -->
+  <rect class="host" x="16" y="92" width="290" height="204" rx="5"/>
+  <rect class="host" x="316" y="92" width="52" height="204" rx="4"/>
+  <rect class="gpu" x="378" y="92" width="326" height="204" rx="5"/>
+  <text class="m" transform="translate(337 176) rotate(-90)" text-anchor="middle">~16 GB/s each way</text>
+
+  <!-- host: process -->
+  <rect class="box" x="26" y="100" width="270" height="32" rx="4"/>
+  <text class="h" x="34" y="113">your process</text>
+  <text class="m" x="34" y="126">XLA runtime → CUDA driver</text>
+
+  <!-- host: streams -->
+  <text class="m" x="26" y="151">stream 1</text>
+  <rect class="cmp" x="90" y="140" width="34" height="14" rx="2"/><text class="m" x="107" y="151" text-anchor="middle" style="fill:#232333">k1</text>
+  <rect class="cmp" x="127" y="140" width="34" height="14" rx="2"/><text class="m" x="144" y="151" text-anchor="middle" style="fill:#232333">k2</text>
+  <rect class="cmp" x="164" y="140" width="34" height="14" rx="2"/><text class="m" x="181" y="151" text-anchor="middle" style="fill:#232333">k3</text>
+  <text class="m" x="26" y="169">stream 2</text>
+  <rect class="mem" x="90" y="158" width="40" height="14" rx="2"/><text class="m" x="110" y="169" text-anchor="middle" style="fill:#232333">H2D</text>
+  <rect class="mem" x="133" y="158" width="40" height="14" rx="2"/><text class="m" x="153" y="169" text-anchor="middle" style="fill:#232333">D2H</text>
+  <text class="m" x="204" y="151">in order in a</text>
+  <text class="m" x="204" y="164">stream, streams</text>
+  <text class="m" x="204" y="177">can overlap</text>
+
+  <!-- host: driver buffers -->
+  <rect class="mem" x="26" y="184" width="270" height="104" rx="4"/>
+  <text class="m" x="160" y="197">buffers the GPU reads</text>
+  <line class="ln" x1="92" y1="174" x2="92" y2="202" marker-end="url(#a)"/>
+  <text class="m" x="98" y="196">encode</text>
+
+  <rect class="box" x="34" y="204" width="116" height="46" rx="3"/>
+  <text class="b" x="42" y="218">pushbuffer</text>
+  <text class="m" x="42" y="231">methods, each an</text>
+  <text class="m" x="42" y="243">address + data</text>
+  <circle class="n" cx="150" cy="204" r="7"/><text class="nt" x="150" y="207.5" text-anchor="middle">1</text>
+
+  <rect class="box" x="160" y="204" width="128" height="46" rx="3"/>
+  <text class="b" x="196" y="218">GPFIFO ring</text>
+  <rect x="168" y="224" width="12" height="11" fill="#ffede4" stroke="#ff5f1f" stroke-width="1.25"/>
+  <rect x="183" y="224" width="12" height="11" fill="#ffffff" stroke="#a3a3b3"/>
+  <rect x="198" y="224" width="12" height="11" fill="#ffffff" stroke="#a3a3b3"/>
+  <rect x="213" y="224" width="12" height="11" fill="#ffffff" stroke="#a3a3b3"/>
+  <rect x="228" y="224" width="12" height="11" fill="#ffffff" stroke="#a3a3b3"/>
+  <rect x="243" y="224" width="12" height="11" fill="#ffffff" stroke="#a3a3b3"/>
+  <rect x="258" y="224" width="12" height="11" fill="#ffffff" stroke="#a3a3b3"/>
+  <text class="m" x="168" y="246">8 B entries → PB</text>
+  <line class="lo" x1="168" y1="229.5" x2="152" y2="229.5" marker-end="url(#ao)"/>
+  <circle class="n" cx="174" cy="211" r="7"/><text class="nt" x="174" y="214.5" text-anchor="middle">2</text>
+
+  <rect class="box" x="34" y="258" width="254" height="24" rx="3"/>
+  <text class="b" x="42" y="274">USERD</text>
+  <text class="o" x="96" y="274">GP_PUT ↑</text>
+  <text class="m" x="168" y="274">GP_GET, read-only</text>
+  <circle class="n" cx="280" cy="258" r="7"/><text class="nt" x="280" y="261.5" text-anchor="middle">3</text>
+
+  <!-- doorbell across PCIe -->
+  <line class="lo" x1="296" y1="116" x2="386" y2="116" marker-end="url(#ao)"/>
+  <circle class="n" cx="342" cy="106" r="7"/><text class="nt" x="342" y="109.5" text-anchor="middle">4</text>
+
+  <!-- PBDMA fetch across PCIe -->
+  <polyline class="ln" points="288,232 352,232 352,158 386,158" marker-end="url(#a)"/>
+  <circle class="n" cx="352" cy="200" r="7"/><text class="nt" x="352" y="203.5" text-anchor="middle">5</text>
+  <text class="m" x="342" y="276" text-anchor="middle">DMA</text>
+  <text class="m" x="342" y="288" text-anchor="middle">read</text>
+
+  <!-- GPU: doorbell -->
+  <rect class="door" x="388" y="100" width="306" height="30" rx="3"/>
+  <text class="b" x="396" y="113">NOTIFY_CHANNEL_PENDING</text>
+  <text class="m" x="396" y="125">the doorbell, an MMIO write of the channel id</text>
+  <line class="ln" x1="540" y1="130" x2="540" y2="137" marker-end="url(#a)"/>
+
+  <!-- GPU: PBDMA -->
+  <rect class="box" x="388" y="138" width="306" height="42" rx="3"/>
+  <text class="b" x="396" y="151">host · PBDMA</text>
+  <text class="m" x="396" y="163">reads GP_PUT from USERD, fetches the GP entry</text>
+  <text class="m" x="396" y="175">and pushbuffer, turns methods into commands</text>
+
+  <!-- engines -->
+  <line class="ln" x1="474" y1="180" x2="474" y2="187" marker-end="url(#a)"/>
+  <line class="ln" x1="598" y1="180" x2="598" y2="187" marker-end="url(#a)"/>
+  <line class="ln" x1="665" y1="180" x2="665" y2="187" marker-end="url(#a)"/>
+  <rect class="box" x="388" y="188" width="172" height="34" rx="3"/>
+  <text class="b" x="396" y="202">compute front end</text>
+  <text class="m" x="396" y="215">grid → thread blocks</text>
+  <rect class="mem" x="568" y="188" width="60" height="34" rx="3"/>
+  <text class="b" x="576" y="202">CE 0</text><text class="m" x="576" y="215">DMA</text>
+  <rect class="mem" x="636" y="188" width="58" height="34" rx="3"/>
+  <text class="b" x="644" y="202">CE 1</text><text class="m" x="644" y="215">DMA</text>
+  <circle class="n" cx="552" cy="188" r="7"/><text class="nt" x="552" y="191.5" text-anchor="middle">6</text>
+
+  <!-- SMs -->
+  <line class="ln" x1="474" y1="222" x2="474" y2="231" marker-end="url(#a)"/>
+  <g>
+    <rect class="cmp" x="396" y="234" width="12" height="12"/><rect class="cmp" x="411" y="234" width="12" height="12"/><rect class="cmp" x="426" y="234" width="12" height="12"/><rect class="cmp" x="441" y="234" width="12" height="12"/><rect class="cmp" x="456" y="234" width="12" height="12"/><rect class="cmp" x="471" y="234" width="12" height="12"/><rect class="cmp" x="486" y="234" width="12" height="12"/><rect class="cmp" x="501" y="234" width="12" height="12"/><rect class="free" x="516" y="234" width="12" height="12"/><rect class="cmp" x="531" y="234" width="12" height="12"/><rect class="free" x="546" y="234" width="12" height="12"/><rect class="free" x="561" y="234" width="12" height="12"/>
+    <rect class="cmp" x="396" y="249" width="12" height="12"/><rect class="cmp" x="411" y="249" width="12" height="12"/><rect class="cmp" x="426" y="249" width="12" height="12"/><rect class="free" x="441" y="249" width="12" height="12"/><rect class="cmp" x="456" y="249" width="12" height="12"/><rect class="cmp" x="471" y="249" width="12" height="12"/><rect class="cmp" x="486" y="249" width="12" height="12"/><rect class="free" x="501" y="249" width="12" height="12"/><rect class="cmp" x="516" y="249" width="12" height="12"/><rect class="free" x="531" y="249" width="12" height="12"/><rect class="free" x="546" y="249" width="12" height="12"/><rect class="free" x="561" y="249" width="12" height="12"/>
+  </g>
+  <text class="m" x="396" y="276">80 SMs, 24 drawn</text>
+  <text class="m" x="396" y="288">filled = busy</text>
+  <text class="m" x="590" y="244">blocks go to SMs</text>
+  <text class="m" x="590" y="256">with free room,</text>
+  <text class="m" x="590" y="268">new blocks refill</text>
+  <text class="m" x="590" y="280">freed SMs</text>
+  <circle class="n" cx="582" cy="240" r="7"/><text class="nt" x="582" y="243.5" text-anchor="middle">7</text>
+
+  <!-- COPIES strip -->
+  <text class="lane" x="16" y="318">COPIES</text>
+  <text class="m" x="80" y="318">the GPU can't read pageable memory directly, so the driver stages it</text>
+  <rect class="host" x="316" y="326" width="52" height="52" rx="4"/>
+
+  <rect class="box" x="16" y="328" width="100" height="20" rx="3"/>
+  <text x="66" y="342" text-anchor="middle">pageable</text>
+  <line class="ln" x1="116" y1="338" x2="188" y2="338" marker-end="url(#a)" stroke-dasharray="4 3"/>
+  <text class="m" x="152" y="334" text-anchor="middle" style="fill:#c62f2f">extra copy</text>
+  <rect class="mem" x="190" y="328" width="116" height="20" rx="3"/>
+  <text x="248" y="342" text-anchor="middle">pinned staging</text>
+
+  <text class="m" x="182" y="370" text-anchor="end">cudaHostAlloc, already</text>
+  <rect class="mem" x="190" y="356" width="116" height="20" rx="3"/>
+  <text x="248" y="370" text-anchor="middle">pinned buffer</text>
+
+  <line class="ln" x1="306" y1="338" x2="386" y2="346" marker-end="url(#a)"/>
+  <line class="ln" x1="306" y1="366" x2="386" y2="358" marker-end="url(#a)"/>
+  <text class="m" x="342" y="356" text-anchor="middle">DMA</text>
+  <rect class="mem" x="388" y="328" width="132" height="48" rx="3"/>
+  <text class="b" x="396" y="346">copy engine</text>
+  <text class="m" x="396" y="360">2 on V100, H2D and</text>
+  <text class="m" x="396" y="371">D2H at the same time</text>
+  <line class="ln" x1="520" y1="352" x2="594" y2="352" marker-end="url(#a)"/>
+  <rect class="mem" x="596" y="328" width="98" height="48" rx="3"/>
+  <text class="b" x="604" y="346">HBM2</text>
+  <text class="m" x="604" y="360">16 or 32 GB</text>
+  <text class="m" x="604" y="371">~900 GB/s</text>
+  <text class="m" x="16" y="394">copies and kernels overlap only when they sit in different, non-default streams</text>
+
+  <!-- LAUNCH OVERHEAD timeline -->
+  <line x1="16" y1="406" x2="704" y2="406" stroke="#c3c3cf" stroke-width="1"/>
+  <text class="lane" x="16" y="424">LAUNCH OVERHEAD, NVIDIA'S V100 RUN, 2.9 µs KERNELS</text>
+
+  <!-- row 1: 9.6 us per kernel, scale 11 px/us, x0 170 -->
+  <text x="16" y="443">sync each kernel</text>
+  <text class="m" x="16" y="455">~9.6 µs per kernel</text>
+  <g>
+    <rect class="cmp" x="170" y="438" width="31.9" height="14"/><rect class="idle" x="201.9" y="438" width="73.7" height="14"/>
+    <rect class="cmp" x="275.6" y="438" width="31.9" height="14"/><rect class="idle" x="307.5" y="438" width="73.7" height="14"/>
+    <rect class="cmp" x="381.2" y="438" width="31.9" height="14"/><rect class="idle" x="413.1" y="438" width="73.7" height="14"/>
+    <rect class="cmp" x="486.8" y="438" width="31.9" height="14"/><rect class="idle" x="518.7" y="438" width="73.7" height="14"/>
+    <rect class="cmp" x="592.4" y="438" width="31.9" height="14"/><rect class="idle" x="624.3" y="438" width="73.7" height="14"/>
+  </g>
+
+  <!-- row 2: 3.8 us -->
+  <text x="16" y="475">sync once per step</text>
+  <text class="m" x="16" y="487">~3.8 µs per kernel</text>
+  <g>
+    <rect class="cmp" x="170" y="470" width="31.9" height="14"/><rect class="idle" x="201.9" y="470" width="9.9" height="14"/>
+    <rect class="cmp" x="211.8" y="470" width="31.9" height="14"/><rect class="idle" x="243.7" y="470" width="9.9" height="14"/>
+    <rect class="cmp" x="253.6" y="470" width="31.9" height="14"/><rect class="idle" x="285.5" y="470" width="9.9" height="14"/>
+    <rect class="cmp" x="295.4" y="470" width="31.9" height="14"/><rect class="idle" x="327.3" y="470" width="9.9" height="14"/>
+    <rect class="cmp" x="337.2" y="470" width="31.9" height="14"/><rect class="idle" x="369.1" y="470" width="9.9" height="14"/>
+  </g>
+
+  <!-- row 3: 3.4 us -->
+  <text x="16" y="507" style="font-weight:700">CUDA graph</text>
+  <text class="m" x="16" y="519">~3.4 µs per kernel</text>
+  <g>
+    <rect class="cmp" x="170" y="502" width="31.9" height="14"/><rect class="idle" x="201.9" y="502" width="5.5" height="14"/>
+    <rect class="cmp" x="207.4" y="502" width="31.9" height="14"/><rect class="idle" x="239.3" y="502" width="5.5" height="14"/>
+    <rect class="cmp" x="244.8" y="502" width="31.9" height="14"/><rect class="idle" x="276.7" y="502" width="5.5" height="14"/>
+    <rect class="cmp" x="282.2" y="502" width="31.9" height="14"/><rect class="idle" x="314.1" y="502" width="5.5" height="14"/>
+    <rect class="cmp" x="319.6" y="502" width="31.9" height="14"/><rect class="idle" x="351.5" y="502" width="5.5" height="14"/>
+  </g>
+  <text class="m" x="372" y="513">same 5 kernels, 1 CPU call launches the lot</text>
+
+  <!-- legend + scale -->
+  <rect class="cmp" x="420" y="470" width="14" height="10"/><text class="m" x="440" y="479">kernel, 2.9 µs</text>
+  <rect class="idle" x="548" y="470" width="14" height="10"/><text class="m" x="568" y="479">GPU idle, launch gap</text>
+  <line x1="594" y1="530" x2="704" y2="530" stroke="#232333" stroke-width="1"/>
+  <line x1="594" y1="526" x2="594" y2="534" stroke="#232333" stroke-width="1"/>
+  <line x1="704" y1="526" x2="704" y2="534" stroke="#232333" stroke-width="1"/>
+  <text class="m" x="649" y="545" text-anchor="middle">10 µs</text>
+
+  <text class="m" x="16" y="545">graph instantiation costs ~400 µs once, the first launch is ~33% slower</text>
+  <text class="m" x="16" y="560">constant-time graph launch only came for Ampere and newer, on V100 it still</text>
+  <text class="m" x="16" y="573">grows with the number of nodes in the graph</text>
+</svg>

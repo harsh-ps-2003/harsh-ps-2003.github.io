@@ -1,0 +1,433 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 570" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">One Volta SM, four schedulers</title>
+  <desc id="desc">A Volta SM has an L1 instruction cache on top, four processing blocks each with an L0 instruction cache, one warp scheduler and one dispatch unit at 32 threads per clock, a 64 KB register file, 8 FP64, 16 INT32 and 16 FP32 units, 2 tensor cores, LD/ST units and an SFU, and at the bottom a shared 128 KB L1 data cache and shared memory plus 4 texture units. The side panel shows a kernel grid split into blocks, blocks placed on SMs with free resources, warps of 32 spread over the 4 schedulers, the compute capability 7.0 limits, the tensor core D = A times B plus C on 4 by 4 FP16 tiles, and that V100 has no BF16 or TF32.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+  </defs>
+  <style>
+    text { fill: #232333; font-size: 10.5px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; font-size: 10px; }
+    .s { font-size: 10px; }
+    .b { font-weight: 700; }
+    .v { font-weight: 600; }
+    .red { fill: #c62f2f; font-weight: 700; }
+    .sm { fill: #f5f5f8; stroke: #232333; stroke-width: 1.25; }
+    .blk { fill: #ffffff; stroke: #7aa7d9; stroke-width: 1.25; }
+    .mem { fill: #fbf1cf; stroke: #d4b34a; stroke-width: 1; }
+    .ctl { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1; }
+    .core { fill: #e3eefb; stroke: #7aa7d9; stroke-width: .8; }
+    .tc { fill: #e2f2e6; stroke: #5ea876; stroke-width: 1.25; }
+    .ls { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: .8; }
+    .step { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .note { fill: #fbe5e3; stroke: #c62f2f; stroke-width: 1.25; }
+    .ln { stroke: #232333; stroke-width: 1.25; fill: none; }
+    .grid { fill: #ffffff; stroke: #5ea876; stroke-width: .8; }
+  </style>
+
+  <text class="k" x="16" y="22">VOLTA SM</text>
+  <text class="t" x="16" y="42">One SM, four schedulers</text>
+  <text class="c" x="16" y="60">V100 has 80 of these, and each one juggles up to 64 warps across 4 schedulers.</text>
+
+  <rect class="sm" x="16" y="74" width="424" height="398" rx="5"/>
+  <rect class="mem" x="24" y="80" width="408" height="14" rx="2"/>
+  <text class="s" x="228" y="90.5" text-anchor="middle">L1 instruction cache</text>
+  <rect class="blk" x="24" y="100" width="200" height="156" rx="4"/>
+  <rect class="mem" x="30" y="106" width="188" height="12" rx="2"/>
+  <text class="s" x="124" y="115.5" text-anchor="middle">L0 i-cache · block 0</text>
+  <rect class="ctl" x="30" y="121" width="188" height="12" rx="2"/>
+  <text class="s" x="124" y="130.5" text-anchor="middle">warp scheduler · 32 thr/clk</text>
+  <rect class="ctl" x="30" y="136" width="188" height="12" rx="2"/>
+  <text class="s" x="124" y="145.5" text-anchor="middle">dispatch unit · 32 thr/clk</text>
+  <rect class="mem" x="30" y="151" width="188" height="16" rx="2" style="stroke-width:1.25"/>
+  <text class="s b" x="124" y="162.5" text-anchor="middle">register file · 64 KB</text>
+  <text class="m" x="30" y="180.5">FP64</text>
+  <rect class="core" x="68" y="173" width="8" height="8" rx="1"/>
+  <rect class="core" x="77" y="173" width="8" height="8" rx="1"/>
+  <rect class="core" x="86" y="173" width="8" height="8" rx="1"/>
+  <rect class="core" x="95" y="173" width="8" height="8" rx="1"/>
+  <rect class="core" x="104" y="173" width="8" height="8" rx="1"/>
+  <rect class="core" x="113" y="173" width="8" height="8" rx="1"/>
+  <rect class="core" x="122" y="173" width="8" height="8" rx="1"/>
+  <rect class="core" x="131" y="173" width="8" height="8" rx="1"/>
+  <text class="m" x="30" y="192.5">INT32</text>
+  <rect class="core" x="68" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="77" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="86" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="95" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="104" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="113" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="122" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="131" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="140" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="149" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="158" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="167" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="176" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="185" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="194" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="203" y="185" width="8" height="8" rx="1"/>
+  <text class="m" x="30" y="204.5">FP32</text>
+  <rect class="core" x="68" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="77" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="86" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="95" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="104" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="113" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="122" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="131" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="140" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="149" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="158" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="167" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="176" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="185" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="194" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="203" y="197" width="8" height="8" rx="1"/>
+  <rect class="tc" x="30" y="210" width="91" height="20" rx="3"/>
+  <text class="s" x="75.5" y="223.5" text-anchor="middle">tensor core</text>
+  <rect class="tc" x="127" y="210" width="91" height="20" rx="3"/>
+  <text class="s" x="172.5" y="223.5" text-anchor="middle">tensor core</text>
+  <text class="m" x="30" y="243.5">LD/ST</text>
+  <rect class="ls" x="68" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="77" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="86" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="95" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="104" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="113" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="122" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="131" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="148" y="234" width="70" height="12" rx="2"/>
+  <text class="s" x="183" y="243.5" text-anchor="middle">SFU</text>
+  <rect class="blk" x="232" y="100" width="200" height="156" rx="4"/>
+  <rect class="mem" x="238" y="106" width="188" height="12" rx="2"/>
+  <text class="s" x="332" y="115.5" text-anchor="middle">L0 i-cache · block 1</text>
+  <rect class="ctl" x="238" y="121" width="188" height="12" rx="2"/>
+  <text class="s" x="332" y="130.5" text-anchor="middle">warp scheduler · 32 thr/clk</text>
+  <rect class="ctl" x="238" y="136" width="188" height="12" rx="2"/>
+  <text class="s" x="332" y="145.5" text-anchor="middle">dispatch unit · 32 thr/clk</text>
+  <rect class="mem" x="238" y="151" width="188" height="16" rx="2" style="stroke-width:1.25"/>
+  <text class="s b" x="332" y="162.5" text-anchor="middle">register file · 64 KB</text>
+  <text class="m" x="238" y="180.5">FP64</text>
+  <rect class="core" x="276" y="173" width="8" height="8" rx="1"/>
+  <rect class="core" x="285" y="173" width="8" height="8" rx="1"/>
+  <rect class="core" x="294" y="173" width="8" height="8" rx="1"/>
+  <rect class="core" x="303" y="173" width="8" height="8" rx="1"/>
+  <rect class="core" x="312" y="173" width="8" height="8" rx="1"/>
+  <rect class="core" x="321" y="173" width="8" height="8" rx="1"/>
+  <rect class="core" x="330" y="173" width="8" height="8" rx="1"/>
+  <rect class="core" x="339" y="173" width="8" height="8" rx="1"/>
+  <text class="m" x="238" y="192.5">INT32</text>
+  <rect class="core" x="276" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="285" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="294" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="303" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="312" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="321" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="330" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="339" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="348" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="357" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="366" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="375" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="384" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="393" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="402" y="185" width="8" height="8" rx="1"/>
+  <rect class="core" x="411" y="185" width="8" height="8" rx="1"/>
+  <text class="m" x="238" y="204.5">FP32</text>
+  <rect class="core" x="276" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="285" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="294" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="303" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="312" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="321" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="330" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="339" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="348" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="357" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="366" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="375" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="384" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="393" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="402" y="197" width="8" height="8" rx="1"/>
+  <rect class="core" x="411" y="197" width="8" height="8" rx="1"/>
+  <rect class="tc" x="238" y="210" width="91" height="20" rx="3"/>
+  <text class="s" x="283.5" y="223.5" text-anchor="middle">tensor core</text>
+  <rect class="tc" x="335" y="210" width="91" height="20" rx="3"/>
+  <text class="s" x="380.5" y="223.5" text-anchor="middle">tensor core</text>
+  <text class="m" x="238" y="243.5">LD/ST</text>
+  <rect class="ls" x="276" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="285" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="294" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="303" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="312" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="321" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="330" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="339" y="236" width="8" height="8" rx="1"/>
+  <rect class="ls" x="356" y="234" width="70" height="12" rx="2"/>
+  <text class="s" x="391" y="243.5" text-anchor="middle">SFU</text>
+  <rect class="blk" x="24" y="262" width="200" height="156" rx="4"/>
+  <rect class="mem" x="30" y="268" width="188" height="12" rx="2"/>
+  <text class="s" x="124" y="277.5" text-anchor="middle">L0 i-cache · block 2</text>
+  <rect class="ctl" x="30" y="283" width="188" height="12" rx="2"/>
+  <text class="s" x="124" y="292.5" text-anchor="middle">warp scheduler · 32 thr/clk</text>
+  <rect class="ctl" x="30" y="298" width="188" height="12" rx="2"/>
+  <text class="s" x="124" y="307.5" text-anchor="middle">dispatch unit · 32 thr/clk</text>
+  <rect class="mem" x="30" y="313" width="188" height="16" rx="2" style="stroke-width:1.25"/>
+  <text class="s b" x="124" y="324.5" text-anchor="middle">register file · 64 KB</text>
+  <text class="m" x="30" y="342.5">FP64</text>
+  <rect class="core" x="68" y="335" width="8" height="8" rx="1"/>
+  <rect class="core" x="77" y="335" width="8" height="8" rx="1"/>
+  <rect class="core" x="86" y="335" width="8" height="8" rx="1"/>
+  <rect class="core" x="95" y="335" width="8" height="8" rx="1"/>
+  <rect class="core" x="104" y="335" width="8" height="8" rx="1"/>
+  <rect class="core" x="113" y="335" width="8" height="8" rx="1"/>
+  <rect class="core" x="122" y="335" width="8" height="8" rx="1"/>
+  <rect class="core" x="131" y="335" width="8" height="8" rx="1"/>
+  <text class="m" x="30" y="354.5">INT32</text>
+  <rect class="core" x="68" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="77" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="86" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="95" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="104" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="113" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="122" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="131" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="140" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="149" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="158" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="167" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="176" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="185" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="194" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="203" y="347" width="8" height="8" rx="1"/>
+  <text class="m" x="30" y="366.5">FP32</text>
+  <rect class="core" x="68" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="77" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="86" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="95" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="104" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="113" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="122" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="131" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="140" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="149" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="158" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="167" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="176" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="185" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="194" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="203" y="359" width="8" height="8" rx="1"/>
+  <rect class="tc" x="30" y="372" width="91" height="20" rx="3"/>
+  <text class="s" x="75.5" y="385.5" text-anchor="middle">tensor core</text>
+  <rect class="tc" x="127" y="372" width="91" height="20" rx="3"/>
+  <text class="s" x="172.5" y="385.5" text-anchor="middle">tensor core</text>
+  <text class="m" x="30" y="405.5">LD/ST</text>
+  <rect class="ls" x="68" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="77" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="86" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="95" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="104" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="113" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="122" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="131" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="148" y="396" width="70" height="12" rx="2"/>
+  <text class="s" x="183" y="405.5" text-anchor="middle">SFU</text>
+  <rect class="blk" x="232" y="262" width="200" height="156" rx="4"/>
+  <rect class="mem" x="238" y="268" width="188" height="12" rx="2"/>
+  <text class="s" x="332" y="277.5" text-anchor="middle">L0 i-cache · block 3</text>
+  <rect class="ctl" x="238" y="283" width="188" height="12" rx="2"/>
+  <text class="s" x="332" y="292.5" text-anchor="middle">warp scheduler · 32 thr/clk</text>
+  <rect class="ctl" x="238" y="298" width="188" height="12" rx="2"/>
+  <text class="s" x="332" y="307.5" text-anchor="middle">dispatch unit · 32 thr/clk</text>
+  <rect class="mem" x="238" y="313" width="188" height="16" rx="2" style="stroke-width:1.25"/>
+  <text class="s b" x="332" y="324.5" text-anchor="middle">register file · 64 KB</text>
+  <text class="m" x="238" y="342.5">FP64</text>
+  <rect class="core" x="276" y="335" width="8" height="8" rx="1"/>
+  <rect class="core" x="285" y="335" width="8" height="8" rx="1"/>
+  <rect class="core" x="294" y="335" width="8" height="8" rx="1"/>
+  <rect class="core" x="303" y="335" width="8" height="8" rx="1"/>
+  <rect class="core" x="312" y="335" width="8" height="8" rx="1"/>
+  <rect class="core" x="321" y="335" width="8" height="8" rx="1"/>
+  <rect class="core" x="330" y="335" width="8" height="8" rx="1"/>
+  <rect class="core" x="339" y="335" width="8" height="8" rx="1"/>
+  <text class="m" x="238" y="354.5">INT32</text>
+  <rect class="core" x="276" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="285" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="294" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="303" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="312" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="321" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="330" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="339" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="348" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="357" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="366" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="375" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="384" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="393" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="402" y="347" width="8" height="8" rx="1"/>
+  <rect class="core" x="411" y="347" width="8" height="8" rx="1"/>
+  <text class="m" x="238" y="366.5">FP32</text>
+  <rect class="core" x="276" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="285" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="294" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="303" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="312" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="321" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="330" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="339" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="348" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="357" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="366" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="375" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="384" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="393" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="402" y="359" width="8" height="8" rx="1"/>
+  <rect class="core" x="411" y="359" width="8" height="8" rx="1"/>
+  <rect class="tc" x="238" y="372" width="91" height="20" rx="3"/>
+  <text class="s" x="283.5" y="385.5" text-anchor="middle">tensor core</text>
+  <rect class="tc" x="335" y="372" width="91" height="20" rx="3"/>
+  <text class="s" x="380.5" y="385.5" text-anchor="middle">tensor core</text>
+  <text class="m" x="238" y="405.5">LD/ST</text>
+  <rect class="ls" x="276" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="285" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="294" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="303" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="312" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="321" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="330" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="339" y="398" width="8" height="8" rx="1"/>
+  <rect class="ls" x="356" y="396" width="70" height="12" rx="2"/>
+  <text class="s" x="391" y="405.5" text-anchor="middle">SFU</text>
+  <rect class="mem" x="24" y="424" width="408" height="22" rx="3" style="stroke-width:1.25"/>
+  <text x="228" y="439" text-anchor="middle"><tspan class="b">128 KB L1 data cache + shared memory</tspan> · smem up to 96 KB</text>
+  <rect class="ls" x="24" y="452" width="96" height="14" rx="2"/>
+  <text class="s" x="72" y="462.5" text-anchor="middle">Tex</text>
+  <rect class="ls" x="128" y="452" width="96" height="14" rx="2"/>
+  <text class="s" x="176" y="462.5" text-anchor="middle">Tex</text>
+  <rect class="ls" x="232" y="452" width="96" height="14" rx="2"/>
+  <text class="s" x="280" y="462.5" text-anchor="middle">Tex</text>
+  <rect class="ls" x="336" y="452" width="96" height="14" rx="2"/>
+  <text class="s" x="384" y="462.5" text-anchor="middle">Tex</text>
+  <text class="lane" x="16" y="492">TENSOR CORE MATH</text>
+  <rect class="grid" x="16" y="512" width="7" height="7"/>
+  <rect class="grid" x="23" y="512" width="7" height="7"/>
+  <rect class="grid" x="30" y="512" width="7" height="7"/>
+  <rect class="grid" x="37" y="512" width="7" height="7"/>
+  <rect class="grid" x="16" y="519" width="7" height="7"/>
+  <rect class="grid" x="23" y="519" width="7" height="7"/>
+  <rect class="grid" x="30" y="519" width="7" height="7"/>
+  <rect class="grid" x="37" y="519" width="7" height="7"/>
+  <rect class="grid" x="16" y="526" width="7" height="7"/>
+  <rect class="grid" x="23" y="526" width="7" height="7"/>
+  <rect class="grid" x="30" y="526" width="7" height="7"/>
+  <rect class="grid" x="37" y="526" width="7" height="7"/>
+  <rect class="grid" x="16" y="533" width="7" height="7"/>
+  <rect class="grid" x="23" y="533" width="7" height="7"/>
+  <rect class="grid" x="30" y="533" width="7" height="7"/>
+  <rect class="grid" x="37" y="533" width="7" height="7"/>
+  <text class="m" x="30" y="554" text-anchor="middle">FP16/32</text>
+  <text class="b" x="52" y="530" text-anchor="middle" style="font-size:13px">=</text>
+  <rect class="grid" x="62" y="512" width="7" height="7"/>
+  <rect class="grid" x="69" y="512" width="7" height="7"/>
+  <rect class="grid" x="76" y="512" width="7" height="7"/>
+  <rect class="grid" x="83" y="512" width="7" height="7"/>
+  <rect class="grid" x="62" y="519" width="7" height="7"/>
+  <rect class="grid" x="69" y="519" width="7" height="7"/>
+  <rect class="grid" x="76" y="519" width="7" height="7"/>
+  <rect class="grid" x="83" y="519" width="7" height="7"/>
+  <rect class="grid" x="62" y="526" width="7" height="7"/>
+  <rect class="grid" x="69" y="526" width="7" height="7"/>
+  <rect class="grid" x="76" y="526" width="7" height="7"/>
+  <rect class="grid" x="83" y="526" width="7" height="7"/>
+  <rect class="grid" x="62" y="533" width="7" height="7"/>
+  <rect class="grid" x="69" y="533" width="7" height="7"/>
+  <rect class="grid" x="76" y="533" width="7" height="7"/>
+  <rect class="grid" x="83" y="533" width="7" height="7"/>
+  <text class="m" x="76" y="554" text-anchor="middle">FP16</text>
+  <text class="b" x="98" y="530" text-anchor="middle" style="font-size:13px">×</text>
+  <rect class="grid" x="108" y="512" width="7" height="7"/>
+  <rect class="grid" x="115" y="512" width="7" height="7"/>
+  <rect class="grid" x="122" y="512" width="7" height="7"/>
+  <rect class="grid" x="129" y="512" width="7" height="7"/>
+  <rect class="grid" x="108" y="519" width="7" height="7"/>
+  <rect class="grid" x="115" y="519" width="7" height="7"/>
+  <rect class="grid" x="122" y="519" width="7" height="7"/>
+  <rect class="grid" x="129" y="519" width="7" height="7"/>
+  <rect class="grid" x="108" y="526" width="7" height="7"/>
+  <rect class="grid" x="115" y="526" width="7" height="7"/>
+  <rect class="grid" x="122" y="526" width="7" height="7"/>
+  <rect class="grid" x="129" y="526" width="7" height="7"/>
+  <rect class="grid" x="108" y="533" width="7" height="7"/>
+  <rect class="grid" x="115" y="533" width="7" height="7"/>
+  <rect class="grid" x="122" y="533" width="7" height="7"/>
+  <rect class="grid" x="129" y="533" width="7" height="7"/>
+  <text class="m" x="122" y="554" text-anchor="middle">FP16</text>
+  <text class="b" x="144" y="530" text-anchor="middle" style="font-size:13px">+</text>
+  <rect class="grid" x="154" y="512" width="7" height="7"/>
+  <rect class="grid" x="161" y="512" width="7" height="7"/>
+  <rect class="grid" x="168" y="512" width="7" height="7"/>
+  <rect class="grid" x="175" y="512" width="7" height="7"/>
+  <rect class="grid" x="154" y="519" width="7" height="7"/>
+  <rect class="grid" x="161" y="519" width="7" height="7"/>
+  <rect class="grid" x="168" y="519" width="7" height="7"/>
+  <rect class="grid" x="175" y="519" width="7" height="7"/>
+  <rect class="grid" x="154" y="526" width="7" height="7"/>
+  <rect class="grid" x="161" y="526" width="7" height="7"/>
+  <rect class="grid" x="168" y="526" width="7" height="7"/>
+  <rect class="grid" x="175" y="526" width="7" height="7"/>
+  <rect class="grid" x="154" y="533" width="7" height="7"/>
+  <rect class="grid" x="161" y="533" width="7" height="7"/>
+  <rect class="grid" x="168" y="533" width="7" height="7"/>
+  <rect class="grid" x="175" y="533" width="7" height="7"/>
+  <text class="m" x="168" y="554" text-anchor="middle">FP16/32</text>
+  <text class="b" x="30" y="507" text-anchor="middle">D</text>
+  <text class="b" x="76" y="507" text-anchor="middle">A</text>
+  <text class="b" x="122" y="507" text-anchor="middle">B</text>
+  <text class="b" x="168" y="507" text-anchor="middle">C</text>
+  <text x="204" y="514">D = A × B + C on 4×4 tiles, 64 FMA</text>
+  <text x="204" y="528">per clock per tensor core, so 512 FMA</text>
+  <text x="204" y="542">(1024 FLOP) per clock per SM, and CUDA</text>
+  <text x="204" y="556">sees warp-wide 16×16×16 wmma tiles</text>
+  <text class="lane" x="452" y="86">HOW WORK GETS HERE</text>
+  <rect class="step" x="452" y="94" width="252" height="30" rx="4"/>
+  <text x="460" y="106.5">kernel launch = a grid of blocks</text>
+  <text class="m" x="460" y="119">blocks run in any order</text>
+  <line class="ln" x1="578" y1="124" x2="578" y2="131" marker-end="url(#a)"/>
+  <rect class="step" x="452" y="132" width="252" height="30" rx="4"/>
+  <text x="460" y="144.5">each block goes to 1 SM</text>
+  <text class="m" x="460" y="157">that has free regs, smem, warp slots</text>
+  <line class="ln" x1="578" y1="162" x2="578" y2="169" marker-end="url(#a)"/>
+  <rect class="step" x="452" y="170" width="252" height="30" rx="4"/>
+  <text x="460" y="182.5">blocks split into warps of 32</text>
+  <text class="m" x="460" y="195">a warp issues 1 instruction (SIMT)</text>
+  <line class="ln" x1="578" y1="200" x2="578" y2="207" marker-end="url(#a)"/>
+  <rect class="step" x="452" y="208" width="252" height="30" rx="4"/>
+  <text x="460" y="220.5">warps split across 4 schedulers</text>
+  <text class="m" x="460" y="233">each issues 1 ready warp per clk</text>
+  <text class="s b" x="452" y="256">independent thread scheduling</text>
+  <text class="m" x="452" y="269">each thread keeps its own PC, so a warp</text>
+  <text class="m" x="452" y="282">can split and reconverge (__syncwarp)</text>
+  <text class="lane" x="452" y="304">LIMITS PER SM · CC 7.0</text>
+  <text class="m" x="452" y="320" style="font-size:10.5px">resident warps</text>
+  <text class="v" x="704" y="320" text-anchor="end">64</text>
+  <text class="m" x="452" y="334" style="font-size:10.5px">resident threads</text>
+  <text class="v" x="704" y="334" text-anchor="end">2048</text>
+  <text class="m" x="452" y="348" style="font-size:10.5px">resident blocks</text>
+  <text class="v" x="704" y="348" text-anchor="end">32</text>
+  <text class="m" x="452" y="362" style="font-size:10.5px">registers</text>
+  <text class="v" x="704" y="362" text-anchor="end">64K (256 KB)</text>
+  <text class="m" x="452" y="376" style="font-size:10.5px">per thread</text>
+  <text class="v" x="704" y="376" text-anchor="end">up to 255</text>
+  <text class="m" x="452" y="390" style="font-size:10.5px">shared memory</text>
+  <text class="v" x="704" y="390" text-anchor="end">up to 96 KB</text>
+  <text class="m" x="452" y="404" style="font-size:10.5px">threads per block</text>
+  <text class="v" x="704" y="404" text-anchor="end">1024</text>
+  <rect class="note" x="452" y="420" width="252" height="38" rx="4"/>
+  <text class="red" x="462" y="436">no BF16, no TF32 on V100</text>
+  <text class="m" x="462" y="450">both start at compute capability 8.0</text>
+</svg>
