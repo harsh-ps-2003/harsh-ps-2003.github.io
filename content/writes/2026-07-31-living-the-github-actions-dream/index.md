@@ -56,6 +56,7 @@ The fundamental problem is that cache mounts cannot be exported. BuildKit does n
 
 There is a workaround called the [buildkit-cache-dance](https://github.com/reproducible-containers/buildkit-cache-dance) pattern. The idea is to extract the cache from the previous build and inject it into the current build. You use the GitHub Actions cache to store the contents of your cache mount directorys, then restore them before the build and extract them after. It is hacky but it works.
 
+{% raw %}
 ```yaml
 - name: Cache
   uses: actions/cache@v4
@@ -72,6 +73,7 @@ There is a workaround called the [buildkit-cache-dance](https://github.com/repro
         "var-lib-apt": "/var/lib/apt"
       }
 ```
+{% endraw %}
 
 The cache dance action works by injecting the cached directories into the builder before the build starts, then extracting them after the build completes. It is not as fast as having the cache mounts persist natively, but it is much faster than starting from scratch every time.
 
@@ -199,10 +201,12 @@ rules:
 
 This configuration fails the build if efficiency drops below 95 percent, if wasted space exceeds 20MB, or if more than 10 percent of your added bytes are wasted. When a threshold is violated, dive returns a non-zero exit code and prints a clear report showing which rules failed and why.
 
+{% raw %}
 ```yaml
 - name: Analyze image efficiency
   run: CI=true dive myapp:${{ github.sha }}
 ```
+{% endraw %}
 
 The output in CI looks something like this when things go wrong. It shows the calculated metrics and which rules passed or failed, making it easy to understand what needs fixing.
 
@@ -402,6 +406,7 @@ Caching is where the real performance gains live, but it is also where things ge
 
 The GitHub Actions cache is the most commonly used. The `actions/cache` action lets you save and restore arbitrary directories between workflow runs. The typical use case is caching your dependency directories like node_modules, the pip cache, or the cargo registry. You specify a key that identifies the cache, and if a cache with that key exists, it gets restored at the start of your job.
 
+{% raw %}
 ```yaml
 - uses: actions/cache@v4
   with:
@@ -410,6 +415,7 @@ The GitHub Actions cache is the most commonly used. The `actions/cache` action l
     restore-keys: |
       cargo-
 ```
+{% endraw %}
 
 The key design is crucial. You want the cache to hit when your dependencies have not changed, but miss when they have. Using a hash of your lockfile is the standard pattern. The `restore-keys` provide fallback options if an exact match is not found. This way you can still get a partial cache hit even if your dependencies changed slightly.
 
@@ -906,6 +912,7 @@ For Rust projects, [cargo fuzz](https://rust-fuzz.github.io/book/cargo-fuzz.html
 
 The simplest way to run fuzzing in CI is as a smoke test. Build and run your fuzz targets for a small amount of time on every push.
 
+{% raw %}
 ```yaml
 jobs:
   fuzz:
@@ -925,6 +932,7 @@ jobs:
         name: fuzzing-artifacts-${{ matrix.fuzz_target }}
         path: fuzz/artifacts
 ```
+{% endraw %}
 
 But fuzzing gets much better when it keeps its corpus and just keeps running. It gets even better when several runners explore in parallel. More runners means more total executions, which usually means more chances to find new coverage.
 
@@ -934,6 +942,7 @@ Distributing also helps when the target is memory hungry. Fuzzing can eat memory
 
 The setup for distributed fuzzing uses the GitHub Actions cache to keep the corpus around. Caching is write once per key but can be searched by a prefix. You save the corpus with a unique key per run and restore it with a prefix match.
 
+{% raw %}
 ```yaml
 - name: Restore corpus from cache
   uses: actions/cache/restore@v4
@@ -954,6 +963,7 @@ The setup for distributed fuzzing uses the GitHub Actions cache to keep the corp
     path: fuzz/corpus
     key: fuzz-corpus-${{ steps.ts.outputs.ts }}
 ```
+{% endraw %}
 
 On restore, the prefix grabs the newest cache entry. After the run, you save with a fresh key using a timestamp. Old corpus entries age out when the cache is over size, so you get a rolling corpus history without too much extra storage.
 
@@ -1039,6 +1049,7 @@ How do you know if you are using the right size machine? Look at the resource gr
 
 Sharding breaks through the ceiling when parallelism maxes out. A single machine only gets so big, and many test suites stop scaling with cores long before that because they bottleneck on a shared database or on I/O. With sharding, each slice runs on its own machine autonomously.
 
+{% raw %}
 ```yaml
 strategy:
   fail-fast: false
@@ -1048,6 +1059,7 @@ steps:
   - name: Run tests
     run: playwright test --shard=${{ matrix.shard }}/6
 ```
+{% endraw %}
 
 Here is the catch. Every CI job pays a setup cost before a single test runs. Checkout, language runtimes, dependencies, browsers, service containers, seed data. That cost is fixed per machine, which means sharding multiplies it. Think about this as job density, the fraction of a job's wall time spent doing the work the job exists for. For a test job that is running tests. Everything else like setup, downloads, and cache restores is overhead you pay for but learn nothing from.
 
@@ -1114,6 +1126,7 @@ Resource constraints matter too. Parallelism improves wall clock time by overlap
 
 The matrix strategy is particularly powerful for building multiple Docker images in a monorepo. Instead of building images sequentially or writing complex parallel shell scripts, you define a matrix of configurations and let GitHub Actions fan out the work automatically.
 
+{% raw %}
 ```yaml
 jobs:
   build:
@@ -1135,6 +1148,7 @@ jobs:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
 ```
+{% endraw %}
 
 The include key lets you attach additional values to each matrix entry. Here we are specifying the build context for each Dockerfile so each image builds from its own directory. All three images build in parallel on separate runners, and the total wall clock time is roughly the time of the slowest build rather than the sum of all builds.
 
@@ -1206,6 +1220,7 @@ The danger with retries is that they can mask real problems. A test that fails 3
 
 GitHub Actions does not have a native way to cancel all jobs when one fails. The `fail-fast` option only works within a matrix strategy, not across separate jobs. Some teams work around this with sentinel cancel jobs that watch for failures and cancel the workflow run via the API.
 
+{% raw %}
 ```yaml
 cancel-if-build-failed:
   needs: [build]
@@ -1220,6 +1235,7 @@ cancel-if-build-failed:
           -H "Authorization: Bearer ${{ github.token }}" \
           "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/cancel"
 ```
+{% endraw %}
 
 This adds boilerplate but prevents wasting compute on jobs that are doomed to fail anyway.
 
@@ -1433,6 +1449,7 @@ There is also a path resolution problem that causes cache misses. The `github.wo
 
 Any action that interacts with the host system might break when running in a container. For example, some teams use sticky disk actions to mount NVMe drives for caching because GitHub's 10GB cache limit is not enough for large Rust projects. These actions need to interact with the host filesystem and block devices, which does not work inside a container without special configuration. You need to run the container in privileged mode and pass through specific environment variables.
 
+{% raw %}
 ```yaml
 container:
   image: my-dev-container:latest
@@ -1441,6 +1458,7 @@ container:
     VM_ID: ${{ env.VM_ID }}
     BLACKSMITH_STICKYDISK_TOKEN: ${{ env.BLACKSMITH_STICKYDISK_TOKEN }}
 ```
+{% endraw %}
 
 The `container` field itself has weird limitations. You cannot override the entrypoint. You cannot run some steps inside a container and others outside. If you need that flexibility, you have to use `docker run` manually in your steps, which defeats the convenience of the `container` field.
 
@@ -1677,7 +1695,7 @@ When GitHub Actions jobs fail unexpectedly, memory exhaustion is often the culpr
 
 This approach requires no external dependencies or API keys, just a few extra workflow steps that output directly to your job logs. The downside is that you now have to spend time searching through your logs to find where these values were outputted and keep track of them if there are multiple outputs.
 
-Exit code 137 means SIGKILL from the OOM Killer. You can check kernel logs with `dmesg | grep -i "oom\|killed process"` if you have the right permissions on self hosted runners. You can also check cgroup memory events with `cat /sys/fs/cgroup/$(cat /proc/self/cgroup | cut -d: -f3)/memory.events` and look for the oom_kill counter being greater than zero. For containerized jobs, `docker inspect <container_id> --format='{{.State.OOMKilled}}'` tells you directly.
+Exit code 137 means SIGKILL from the OOM Killer. You can check kernel logs with `dmesg | grep -i "oom\|killed process"` if you have the right permissions on self hosted runners. You can also check cgroup memory events with `cat /sys/fs/cgroup/$(cat /proc/self/cgroup | cut -d: -f3)/memory.events` and look for the oom_kill counter being greater than zero. For containerized jobs, `docker inspect <container_id> --format='{% raw %}{{.State.OOMKilled}}{% endraw %}'` tells you directly.
 
 The common root causes for memory issues include the host OOM Killer which shows up in dmesg, Docker memory limits which show up in docker inspect, cgroup v2 inheritance where the memory max is set too low, and concurrent jobs sharing one runner. The fixes are to increase runner RAM, reduce concurrency, raise or remove Docker memory flags, configure systemd slices for Docker, or set max parallel in your workflow matrix.
 
