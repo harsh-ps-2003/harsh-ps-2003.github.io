@@ -216,6 +216,23 @@ img.excalidraw,
     transition: filter 0.3s ease;
 }
 
+// Full-width figure; the link opens the SVG at full size for zooming
+figure.diagram {
+    margin: 1.5em 0;
+
+    a,
+    a:hover {
+        border-bottom: none;
+        background-color: transparent;
+    }
+
+    img {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+}
+
 // Dark mode - manual toggle
 [data-theme="dark"] {
     img.excalidraw,
