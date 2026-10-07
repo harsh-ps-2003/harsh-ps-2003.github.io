@@ -16,7 +16,7 @@ In my [last agent writeup](/writes/the-longer-you-chat-the-worse-your-agents-res
 
 ## Code you never wrote
 
-Containers, VMs, and serverless runtimes were built for code that an actual human wrote, reviewed, and shipped through a deploy path, where someone opened a PR, CI ran, ops deployed an artifact, and the runtime only had to isolate code whose behaviour was more or less bounded by that artifact. Those days are going away, because an agent sandbox does not recieve 1 known program, it gets a model that writes Python, bash, SQL, and shell one-liners as part of the task and runs them as soon as the tool call comes back, everything ASAP.
+Containers, VMs, and serverless runtimes were built for code that an actual real human wrote, reviewed, and shipped through a deploy path, where someone opened a PR, CI ran, ops deployed an artifact, and runtime only had to isolate code whose behaviour was more or less bounded by that artifact. Those days are long gonee, because an agent sandbox does not recieve 1 known program, it gets a model that writes Python, bash, SQL, and shell one-liners as part of the task and runs them as soon as the tool call comes back, everything ASAP.
 
 So the isolation problem changes from keeping service A away from service B into keeping the host and every connected system away from code that a model generated a few minutes ago and that never went through the normal build and review path. The stuff that breaks real agents is usually not model quality or prompt engineering, its infrastructure and isolation, and most people only find out after something already went wrong ༼ ༎ຶ ෴ ༎ຶ༽
 
@@ -24,7 +24,7 @@ So the isolation problem changes from keeping service A away from service B into
 
 Classic security models assume a human clicks approve on each sensitive action (human in the loop), but we all know how its going rn, we are vibe approving ;) That model breaks down when the human grants broad session authority once and the model then makes 100s of micro decisions on its own, because each decision inherits whatever authority the runtime gave the session, so 1 casual approval turns into file reads, tool calls, network requests, and writes that the human never looks at.
 
-3 things make this nasty, and they stack on top of each other.
+there are 3 things make this nasty, and the horrendous part is that they stack on top of each other :
 
 1. The input is adversarial by default, because user messages, retrieved docs, web pages, GitHub issue bodies, log lines, and email threads all become prompt context when the agent pulls them in, and any of them can carry instructions that somebody designed to hijack the agent.
 2. The policy is probabilistic, because the model does not reliably obey "never delete production data", it approximates obedience, and an approximation is not a security boundary.
@@ -40,7 +40,7 @@ Our isolation stack (containers, VMs, lambdas) is battle tested, but it was buil
 
 *Code is known at deploy time*
 
-The whole CI security story depends on this one, [you write code, CI runs SAST and SCA, the image gets scanned and signed, and ops deploys a known artifact](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-204D.pdf), so every gate in that pipeline assumes the code exists before it runs, which was obvious a few years ago but the world has changed. An agent breaks this by definition, because when you ask it to fix a bug it might import packages youve never heard of, read your env vars, or shell out to `curl`, and none of that code exists until the model generates it. Your SAST scanner never sees it, and your [image signature](https://project.linuxfoundation.org/hubfs/CNCF_SSCP_v1.pdf) covers the base image and not the Python the agent wrote 30 seconds ago, so every invocation produces unreviewed code that skips every gate you built.
+The whole CI security lala land story depends on this! [you write code, CI runs SAST and SCA, the image gets scanned and signed, and ops deploys a known artifact](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-204D.pdf), so every gate in that pipeline assumes the code exists before it runs, which was really obvious a few years ago but the world has changed. An agent breaks this by definition, because when you ask it to fix a bug it might import packages youve never heard of, read your env vars, or shell out to `curl`, and none of that code exists until the model generates it. Your SAST scanner never sees it, and your [image signature](https://project.linuxfoundation.org/hubfs/CNCF_SSCP_v1.pdf) covers the base image and not the Python the agent wrote 30 seconds ago, so every invocation produces unreviewed code that skips every gate you built.
 
 *Workload scope is bounded*
 
@@ -60,7 +60,7 @@ And it keeps happening, [hidden Slack channel instructions exfiltrated private d
 
 *Workloads are stateless or explicitly stateful*
 
-Containers were designed and operated as if they lived on 1 side of a state boundary, so either they were disposable workers that forgot everything after a request, or they were deliberate persistence layers that held durable data, like a web server on 1 side and a database on the other.
+Containers were designed and operated as if they lived on 1 side of a state boundary, so basically, either they were disposable workers that forgot everything after a request, or they were deliberate persistence layers that held durable data, like a web server on one side and a database on the other.
 
 Agents sit somewhere in between because they pick up state implicitly while they work, files get created, packages get installed, env vars get set, and OAuth tokens, API keys, SSH keys, and session cookies pile up mid session without anyone designing for it. Then you scale to 0 and the snapshot captures all of it, so secrets can exist in memory, on disk, in environment variables, and in snapshot storage at the same time, and when the runtime restores later those credentials can come back even if nobody wanted snapshots to become a secrets store.
 
@@ -104,7 +104,9 @@ At every step untrusted input shapes behaviour and the agent acts with real cred
 Agent access = user permissions ∩ tool permissions ∩ policy permissions
 ```
 
-The agent should never be more authorized than the user sitting in front of it, so if I cant read the `customers_pii` table in postgres, my coding agent should not be able to SELECT * FROM it just because I asked nicely, and if I cant merge to `main` without review, the agent should not get a bypass token because it found a lint error. These sound obvious, but agents are smarter than humans and sneaky sometimes.
+I cant believe i am saying this, but the damn agent should never be more authorized than the actual user sitting in front of it ಠ_ಠ
+
+so if I cant read the `customers_pii` table in postgres, my coding agent should not be able to SELECT * FROM it just because I asked nicely and made cute faces, and if I cant merge to `main` without review, the agent should not get a bypass token because it found a lint error. These sound obvious, but agents are smarter than humans and sneaky sometimes (claude code can do rm rf on your drives if you really set it free)
 
 Pass through permissions matter because agents actually combine information. A user with access to doc A and doc B might never correlate them by hand, but an agent asked to "summarize everything about customer X" will, and without row level and object level checks at the tool layer you have built a cross document exfiltration path.
 
@@ -128,7 +130,7 @@ Devin goes the other way with a cloud VM per session (desktop, browser, terminal
 
 OpenAI Code Interpreter uses a locked down container with no internet, so it cant install packages or make HTTP calls, which gives the strongest isolation of the bunch and also the least capable agent.
 
-Below containers you find a tier that most of these products skip. [Pydantic Monty](https://pydantic.dev/docs/monty/get-started/) is a Rust VM that runs a subset of Python, built for the exact "LLM wrote a short program that calls my tools" pattern ([Cloudflare code mode](https://blog.cloudflare.com/code-mode/), Anthropic programmatic tool calling, smolagents), with no filesystem, no env, and no network inside the sandbox, so host tools come in through `external_lookup` and the sandbox only ever sees return values. Their latency table is the fun part, OSS Monty claims around a millisecond for a new sandbox plus 10 REPL commands, vs ~900ms for local Docker and ~2s for a remote sandboxing service, and it gets there with a pool of worker subprocesses, a persistent session, and the option to dump and resume the whole state as bytes when you need a human in the loop, while Full Monty is the commercial WebSocket version with OS isolation around the same workers.
+Below containers you find a tier that most of these products skip. [Pydantic Monty](https://pydantic.dev/docs/monty/get-started/) is a Rust VM that runs a subset of Python, built for the exact "LLM wrote a short program that calls my tools" pattern ([Cloudflare code mode](https://blog.cloudflare.com/code-mode/), Anthropic programmatic tool calling, [smolagents](https://huggingface.co/docs/smolagents/index)), with no filesystem, no env, and no network inside the sandbox, so host tools come in through `external_lookup` and the sandbox only ever sees return values. Their latency table is the fun part, OSS Monty claims around a millise for a new sandbox + 10 REPL commands, vs 900ms for local Docker and ~2s for a remote sandboxing service, and it gets there with a pool of worker subprocesses, a persistent session, and the option to dump and resume the whole state as bytes when you need a human in the loop, while Full Monty is the commercial WebSocket version with OS isolation around the same workers.
 
 That is a different cage though, Monty will not run `curl`, `pip install`, or bash one-liners, and it wont save you when the agent needs a real Linux guest. Its the right answer when the model should do arithmetic and orchestration in code instead of a chain of tool calls, and the wrong answer when the agent needs a repo, a shell, and a browser, so interpreter sandbox vs OS sandbox is its own axis that sits under the Docker vs Firecracker debate rather than replacing it.
 
