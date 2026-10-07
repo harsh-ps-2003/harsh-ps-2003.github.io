@@ -280,7 +280,7 @@ It has [16+ device types vs Firecrackers handful](https://northflank.com/blog/gu
 
 The tradeoffs are a ~200ms boot vs Firecrackers ~125ms (irrelevant for long jobs, shit for 30 second ephemeral tasks) and snapshots that exist but are a lot younger than Lambdas trillions of restores. The community is smaller too, though [Fly.io uses it for GPU machines](https://news.ycombinator.com/item?id=39364738) and [Northflank pushes millions of microVMs a month](https://northflank.com/blog/how-to-sandbox-ai-agents) through Kata.
 
-The architecture is still KVM plus a minimal Rust VMM, and more devices means a somewhat larger surface than Firecracker and less battle testing than a Lambda decade, so pick it when the agent needs GPU or long running dynamic sizing and not when you need max density on short lived sandboxes.
+The architecture is still KVM + a minimal Rust VMM, and more devices means a somewhat larger surface than Firecracker and less battle testing than a Lambda decade, so pick it when the agent needs GPU or long running dynamic sizing and not when you need max density on short lived sandboxes.
 
 ### Kata
 
