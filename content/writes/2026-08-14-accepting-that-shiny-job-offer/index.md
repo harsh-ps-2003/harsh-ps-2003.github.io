@@ -42,7 +42,7 @@ Also, you can forget your GPA after your resume shortlisting. Like forget it aft
 
 Its a weird time for a new grad or early engineer. Companies are evaluating whether they are needed or they are better off blowing that money on a bigger token budget. Maybe I am a bit biased here, but I believe in the value proposition of good engineers. If you are a slopmachine, you are not a good engineer. Saying this as a somewhat privileged and maybe a bit entitled/egoistic new grad, a lot of folks, especially my hardworking friends who want to break into this 2026 cursed tech industry or switch for better roles, and juniors who are more often than not smarter than me, hop on the first offer they can get out of desperation and fear (sometimes excitement as well). It takes courage and leverage to negotiate for sure. I feel it's quite similar to dating girls you don't know much, one wrong move and and you are a gone case (now live with that embarassement boyyy), but if things go right (things will reallly go nice after that).
 
-Joining a pre-PMF lab with long work weeks and equity-heavy comp is a bet that's easier to make at 24 than at 40 for obvious reasons. AI startup culture intensity filters the applicant pool before recruiting even starts.
+A pre-PMF lab with long weeks and equity heavy pay is an easier bet at 24 than at 40, cuz you can afford to be wrong and brokeass. That intensity also filters people out before recruiting even starts, so the ones who show up already signed up for it, and are a bit cracked in their heads.
 
 ### What are startups hiring rn?
 
@@ -69,13 +69,13 @@ When it comes to senior people, I can see a lot of hiring of leadership roles in
 
 If you are aiming for management, there are fewer rungs. If you are staying IC, the path feels better. Companies need people who do the work more than people who measure it. Restructurings are narrowing focus onto fewer, higher leverage initiatives. The org is flattening and concentrating around the people who do the work.
 
-This org flattening has paved the way for a new kind of role, one person doing everything. An individual contributor operating at a scope historically reserved for managers and directors. As AI collapses the coordination and work that previously required five or six specialists, a single capable engineer can now own an end to end product surface alone. You can also see this in the rise of roles like Forward Deployed Engineers. These are not just engineers, and they are not just GTMs. One engineer owns the entire customer relationship from first call to production deployment. They combine software engineer, solutions architect, consultant, and startup CTO into one role.
+This flattening also made spacee for a new kind of role, 1 person doing everything, an IC working at a scope that used to belong to a manager or a director. As AI collapses the coordination and work that previously required five or six specialists, a single capable engineer can now own an e2e product surface alone. You can also see this in the rise of roles like Forward Deployed Engineers. These are not just engineers, and they are not just GTMs. 1 engineer owns the entire customer relationship from first call to production deployment. They combine software engineer, solutions architect, consultant, and startup CTO into one role, or maybe no roles and everyone running their own businesses? who knows
 
 ### Performance is the only currency now
 
-This is the market we are in. Years of experience no longer buy you seniority. Time in seat does not guarantee higher pay. Performance is the primary currency, and increasingly, it is the only one that matters.
+This is the hyper competetive market we are in. Years of experience dont buy you seniority anymore, and sitting in the same role longer doesnt guarantee higher pay, so performance is pretty much the only currency left.
 
-On one end, a concentrated group of top performers are being paid extremely well to take on scope that previously required much larger teams. On the other end, many capable engineers are struggling to find roles at all, or to find a role that meaningfully exceeds their current compensation. The middle has thinned out. Average no longer clears the bar.
+On one end, a concentrated group of top performers are being paid extremely well to take on scope that previously required much larger teams. On the other end, many capable engineers are struggling to find roles at all, or to find a role that meaningfully exceeds their current compensation. The middle has thinned out, and average doesnt clear the bar anymore.
 
 I talked to an AI engineer at a decacorn in San Francisco who said it is the greatest job market he has ever seen. The inbound top of the funnel is bonkers, and he finds himself saying no to places he would have once killed to work at. Meanwhile, a software engineer with 6 years of experience in London told me that as a developer without a specific specialization, he is struggling to get any interviews whatsoever. He spent a few years as frontend, then another few as backend, and most recently working on DevEx. In this market, he just does not get any callbacks for interviews, not even a first round.
 
@@ -91,7 +91,7 @@ One thing that became really clear to me in 2025 is that pay is no longer priced
 
 Companies still use pay bands. That has not gone away. What has changed is how often those bands are being stretched, bent, or quietly ignored in specific pockets of the org. AI teams are the clearest example. We have all seen the headlines about million dollar sign on bonuses and eye watering packages. But the more interesting part is why those numbers suddenly feel allowed. When a single model run costs tens of millions and infrastructure commitments reach into the hundreds of millions, the relative cost of an individual, even a very expensive one, starts to look almost trivial by comparison. In that context, salary caps get redefined.
 
-That economic shift is cascading through how compensation decisions get made. Teams closer to core differentiation are getting more discretion. Offers are being shaped role by role, not just level by level. There is more flexibility in how cash, equity, and upside are traded off depending on the person and the urgency. A lot of this is not formalized. It happens as exceptions. But when enough exceptions pile up, they stop being edge cases and start becoming the new reality.
+That shift shows up in how offers actually get made. Teams closer to whatever the company thinks is its real edge get more room to bend the band. Offers are being shaped role by role, not just level by level. There is more flexibility in how cash, equity, and upside are traded off depending on the person and the urgency. A lot of this is not formalized. It happens as exceptions. But when enough exceptions pile up, they stop being edge cases and start becoming the new reality.
 
 Layer on top of that the quiet golden handcuffs effect from the last few years. Many senior engineers who joined during the 2021 to 2022 window are sitting on massively appreciated equity and simply cannot be matched by today's market unless the role is AI critical.
 
@@ -101,7 +101,7 @@ So high impact talent stays put, lower paid roles churn more, and movement becom
 
 The tech sector, which built its global dominance on hiring smartass 22 year old kids and betting on their trajectory, has retired that playbook i guess.
 
-Stepping back and reflecting now at the start of 2026, this feels like a real inflection point. Compensation is no longer just a function of level, title, or geography. It is increasingly a function of how capital intensive your company is, how scarce the talent is, and how much leverage a single individual can exert on that capital. This is a winner take most market (it is brutal). It rewards the exceptional disproportionately and leaves little room for anything below that bar. If you are at the top of your game, have AI experience, and are senior enough, you can write your own ticket. If not, then the job market is tough. Referrals are a lifeline. It is impossible to get interviews for Staff or Principal Eng positions by cold applying as per the people I talked to. The only interviews people are getting from cold apply are Senior level roles.
+Looking at this at the start of 2026, pay is no longer just level, title, or city. It depends on how much capital the company is burning, how scarce you are, and how much one person can actually move that capital. This is a winner take most market (it is brutal). It rewards the exceptional disproportionately and leaves little room for anything below that bar. If you are at the top of your game, have AI experience, and are senior enough, you can write your own ticket. If not, then the job market is tough. Referrals are a lifeline. It is impossible to get interviews for Staff or Principal Eng positions by cold applying as per the people I talked to. The only interviews people are getting from cold apply are Senior level roles.
 
 ### Failure modes
 
@@ -134,7 +134,7 @@ A few years back, almost nobody outside of academia knew what this job was (I le
 
 What changed? The product changed. When the model is the product, the people who can make the model better become the most valuable people in the building. It is not about only shipping features anymore (people can do it with agents fast if they are decently smart). It is about whether your model can do something it could not do last month. The researchers who can push that boundary went from being a nice to have to being the entire competitive advantage.
 
-A software engineer ships the app (for now). A research scientist invents the thing that makes the app possible. They are the ones designing new architectures, figuring out why training is unstable, running experiments that take weeks to complete. Most of them have PhDs. Their job is to create capabilities that did not exist before, then hand those capabilities to the engineers who productionize them.
+A software engineer ships the app (for now), while a research scientist invents the thing that makes the app possible. They are the ones designing new architectures, figuring out why training is unstable, running experiments that take weeks to complete. Most of them have PhDs. Their job is to create capabilities that did not exist before, then hand those capabilities to the engineers who productionize them.
 
 The pay reflects this. At every level, research scientists earn more than software engineers. A fresh PhD with no industry experience starts at what roughly what a mid level software engineer makes. By the time you get to senior levels, the gap is even wider. Research scientists are basically paid a level ahead from day one.
 
@@ -146,7 +146,7 @@ The numbers at the top are fuck you money. Senior researchers at frontier labs p
 
 The traditional path is a strong PhD plus internships at top labs, then a research scientist offer at graduation. Takes about 5 to 7 years from undergrad. There is also a second path where you start as a research engineer, which is more engineering focused, and transition to research scientist after a few years of strong contributions. That transition often happens informally, a tap on the shoulder rather than a formal application.
 
-Here is something that might surprise you though. Anthropic says about half their technical staff have PhDs, but plenty of brilliant colleagues never went to college. The PhD is not strictly required. What matters is whether you can do original research. If you have a strong public portfolio, open source work that gets cited, papers you published independently, that can substitute for formal credentials. The PhD signals capacity for self directed research over long time horizons. If you can demonstrate that capacity another way, it still works.
+Anthropic says about half their technical staff have PhDs, but plenty of brilliant colleagues never went to college. The PhD is not strictly required. What matters is whether you can do original research. If you have a strong public portfolio, open source work that gets cited, papers you published independently, that can substitute for formal credentials. The PhD signals capacity for self directed research over long time horizons. If you can demonstrate that capacity another way, it still works. This one surprised me though, but still PHDs are strong wayo to go.
 
 One misconception I had when I was in undergrad was that research is purely theoretical. In 2026, frontier AI research is heavily empirical. You are not sitting in a room with a whiteboard deriving equations. You are running experiments on thousands of GPUs, debugging distributed training, iterating on ideas that might take weeks to validate. The line between research and engineering has blurred a lot.
 
@@ -162,7 +162,7 @@ Also keep in mind, [an academic brain is quite different from a founder's brain 
 
 ## New unicorn FDEs
 
-One AI company builds forward deployed engineering and then everyone decides they need an FDE team too. Forward deployed engineering works when your contracts are seven figures and integration takes 6+ months. It's unlikely a fit it you're selling a product at $20/month. Its just unending tech hype.
+One AI company (palantir) builds forward deployed engineering and then everyone decides they need an FDE team too. Forward deployed engineering might be needed when your contracts are 7 figures and integration takes 6+ months. It's unlikely a fit it you're selling a product at $20/month. Its just unending tech hype! I might even think that having FDS is a sign that your product is not having an enchanting effect on people, tbh
 
 And all the best to people hiring FDEs! The overlap between a great engineer and someone you’d confidently put in front of a customer is too small. The tech worlds hottest new role is hardest to hire. There interview process is beyond broken.
 
@@ -178,7 +178,7 @@ base salary tells a different story. Look at how the lines converge. At year zer
 
 What strikes me is how predictable base salary growth is compared to total compensation. Base salary at these companies grows roughly 5 to 7 percent per year for the first decade, then flattens. The curve looks almost identical across Amazon, Apple, Google, Meta, and Microsoft. This is not a coincidence. These companies benchmark against each other constantly. They know exactly what the others pay and they stay within a tight band.
 
-The implication is that if you are optimizing for base salary alone, it almost does not matter which of these companies you join. The differences are noise. The real compensation divergence comes from equity, and equity is where level matters far more than tenure. A Staff engineer at year 7 will out earn a Senior engineer at year 15 because the equity multiplier at Staff is so much higher. The base salary chart shows parallel lines. The total compensation chart shows exponential divergence based on level.
+So if you are only chasing base salary, it almost doesnt matter which of these companies you join. the differences are noise. The real compensation divergence comes from equity, and equity is where level matters far more than tenure. A Staff engineer at year 7 will out earn a Senior engineer at year 15 because the equity multiplier at Staff is so much higher. The base salary chart shows parallel lines. The total compensation chart shows exponential divergence based on level.
 
 Years of experience can be a useful proxy in aggregate. More time usually means more scope, more projects, more reps. But it is not prescriptive. The rising stars often joined hypergrowth companies early (note this), made big bets on hard problems (be audacious), or optimized for trajectory over comfort. The late bloomers might have spent years in slower moving industries, taken way too much linear paths, or prioritized factors beyond compensation (like WLB to the moon).
 
@@ -338,7 +338,7 @@ For me, joining startup in the UK made sense because of the EMI tax benefits, th
 
 ![Remote work became a junior tax](remote-work-junior-tax.png)
 
-I decided to join onsite for a reason. There is a price to working remotely, and that price is not the same at every level. When you are early in your career, you are harder to evaluate without in person signals. Your output is more tied to your environment. Mentorship happens through osmosis, watching how senior people behave, how they handle meetings, how they debug problems, how they navigate politics. That kind of learning does not transfer well over Zoom tbh. The career advice buried in this is simple. Early on, being in office is not just a financial decision, it's a compounding one.
+I decided to join onsite for a reason. There is a price to working remotely, and that price is not the same at every level. When you are early in your career, you are harder to evaluate without in person signals. Your output is more tied to your environment. Mentorship happens through osmosis, watching how senior people behave, how they handle meetings, how they debug problems, how they navigate politics. That kind of learning does not transfer well over Zoom tbh. Early on, being in the office is not just a money decision, it compounds.
 
 The consensus from people who study this stuff is that the first 2 to 3 years of your career are the period of maximum tacit knowledge acquisition. This is when you are building your fundamental mental models of how work happens. Fully remote during this window is a genuine disadvantage. Hybrid is fine. Fully remote is risky.
 

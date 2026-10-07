@@ -74,7 +74,7 @@ Now 1 agent session might hit GitHub with a PAT, Postgres with DB creds, S3 with
 
 Its defense in depth, and most teams skip half the layers and then wonder why shit blows up. The figure below walks 1 tool call through every gate, so here I only want to add the bits that dont fit in a box.
 
-* **Identity** should be the users own OAuth token and never some shared god account.
+* **Identity** is who this session is acting as, so it should be the users own OAuth token and never some shared god account that every run inherits.
 * **Policy engine** decides what this task is allowed to do, for example no prod writes during autonomous runs.
 * **Sandbox** keeps writes in the workspace and away from paths like `/etc`, where 1 write can change DNS, cert trust, or auth for every later process, and it blocks the host docker socket, because code that can talk to Docker on the host can start privileged containers and mount the host filesystem.
 * **Network egress** is default deny with an allowlist (package registries, the Git host, approved APIs), and it blocks cloud metadata endpoints like `169.254.169.254` (AWS IMDS), `metadata.google.internal`, and the Azure one, because they hand out temporary credentials to anything that can reach them.
@@ -114,7 +114,7 @@ Use the intersection and never the union, because the moment you grant the agent
 
 Everybody is doing it obviously, [Codex](https://codex.danielvaughan.com/2026/04/07/codex-cli-agentic-loop-internals/) runs the loop in a provisioned container with sandboxed tools, [Cursor sandboxes terminal commands](https://cursor.com/docs/agent/security/run-modes) with workspace scoped filesystem access and restricted network that you configure in [`sandbox.json`](https://cursor.com/docs/reference/sandbox), and [GitHub Agentic Workflows](https://github.blog/changelog/2025-05-28-github-agentic-workflows/) compile Markdown agents into workflows where writes (labels, comments, PRs) happen in separate permission gated jobs after the agent finishes, not inline while its still thinking.
 
-You see the same pattern everywhere, reasoning and side effects should not live at the same trust level, which feels obvious in hindsight and is still rare in production.
+You see the same pattern everywhere, reasoning and side effects should not live at the same trust level, which feels obvious once youve watched it go wrong, and is still rare in production.
 
 ### Every product got hit
 
@@ -136,7 +136,7 @@ That is a different cage though, Monty will not run `curl`, `pip install`, or ba
 
 ### Containers or microVMs
 
-Compute isolation is the foundational question, shared kernel (== shared attack surface) or not? Most agent sandboxes today mean Docker, where every container talks to the same Linux kernel through the same syscall interface, and the isolation is 5 separate kernel mechanisms that got folded together over 20ish years, mostly namespaces, cgroups, and seccomp sitting on top of that 1 kernel. If 1 tenants code finds a bug in any of those paths the compromise can reach the host and therefore the other tenants, so its worth understanding what youre actually buying.
+The first question is whether the agent shares the hosts kernel, cuz if it does, a bug in that kernel is a bug in everyones sandbox. Most agent sandboxes today mean Docker, where every container talks to the same Linux kernel through the same syscall interface, and the isolation is 5 separate kernel mechanisms that got folded together over 20ish years, mostly namespaces, cgroups, and seccomp sitting on top of that 1 kernel. If 1 tenants code finds a bug in any of those paths the compromise can reach the host and therefore the other tenants, so its worth understanding what youre actually buying.
 
 ## How containers isolate
 
@@ -232,7 +232,7 @@ We just traced 7ish years of runc escapes back to 1 architectural fact, namespac
 
 ### runc
 
-Its worth understanding the comparison point before the alternatives, because [runc](https://github.com/opencontainers/runc) (a container runtime) is what Docker, k8s, containerd, and CRI-O actually run under the hood. The project started as part of Docker (hence its written in Go) and later got pulled out into an independent CLI tool, and its whole job is to spawn a normal linux process inside an isolated enviroment (a dedicated root filesystem and a new process tree, built from namespaces and cgroups), where that process becomes PID 1 of the new container. runc is literally the reference implementation of the OCI runtime spec, and the figure below shows how it sits between dockerd, containerd, and the shim, builds the box, and then exits.
+Before the fancier cages, you kinda need the baseline, because [runc](https://github.com/opencontainers/runc) (a container runtime) is what Docker, k8s, containerd, and CRI-O actually run under the hood. The project started as part of Docker (hence its written in Go) and later got pulled out into an independent CLI tool, and its whole job is to spawn a normal linux process inside an isolated enviroment (a dedicated root filesystem and a new process tree, built from namespaces and cgroups), where that process becomes PID 1 of the new container. runc is literally the reference implementation of the OCI runtime spec, and the figure below shows how it sits between dockerd, containerd, and the shim, builds the box, and then exits.
 
 <figure class="diagram"><a href="runtime-stack.svg"><img src="runtime-stack.svg" alt="Process lifelines for docker run, showing dockerd, containerd, the shim, runc create, runc init, and the app, with runc exiting and the shim staying as parent while the host kernel enforces isolation." loading="lazy"></a></figure>
 
@@ -262,7 +262,7 @@ Production interception today is mostly [systrap](https://gvisor.dev/blog/2023/0
 
 <figure class="diagram"><a href="gvisor.svg"><img src="gvisor.svg" alt="gVisor traps application syscalls with systrap into the Sentry, a Go kernel that implements around 290 of the roughly 350 amd64 syscalls under its own seccomp allowlist, with a per container Gofer for files." loading="lazy"></a></figure>
 
-The coverage gap is the agent shaped problem, gVisor implements [around 290 of the ~350 syscalls on amd64](https://gvisor.dev/docs/architecture_guide/), which is fine for most web servers, but an agent that runs `pip install` and arbitrary Python with native extensions depends on whatever syscalls those wheels, build scripts, and runtime fallbacks need, and "usually works" is not "always works".
+The part that bites agents is the missing syscalls. gVisor implements [around 290 of the ~350 syscalls on amd64](https://gvisor.dev/docs/architecture_guide/), which is fine for a web server that does the same 50 calls forever, but an agent that runs `pip install` and arbitrary Python with native extensions depends on whatever syscalls those wheels, build scripts, and runtime fallbacks need, and "usually works" is not "always works".
 
 The other cost is performance, file IO through the Gofer proxy often costs [20 to 50% vs native](https://northflank.com/blog/firecracker-vs-gvisor), and you dont get a Firecracker style snapshot path for millisecond session restore.
 
@@ -299,7 +299,7 @@ You end up with 6 choices if you count the bridge and the interpreter tier, and 
 * Cloud Hypervisor gives you GPU and hotplug, and the price is a slower boot and a younger snapshot story, so its built for long GPU agent jobs.
 * Kata gives you Kubernetes native microVMs, and the price is an extra shim layer, so its built for teams that want microVM isolation without leaving the container workflow.
 
-None of them fixes creds in env vars, snapshot secret leakage, or prompt injection on its own, compute is just layer 1, and the next question is who actually ships this stuff as a product.
+None of them fixes creds sitting in env vars, secrets leaking into snapshots, or prompt injection on its own. Compute is just the first layer, and the next question is who actually ships this stuff as a product you can buy.
 
 ## Workload shapes
 
@@ -415,7 +415,7 @@ By mid 2026 the workload space has a lot more company than these 3 anchor vendor
 
 * Runhouse sits outside this model, since its a Python native remote compute library and not a sandbox product.
 
-The thing worth holding onto is that the same isolation architecture can ship as very different products, E2B and Sprites both use Firecracker but commercially they are nothing alike, because architecture answers what keeps the agents code from breaking out and product design answers what shape of agent workload that boundary makes possible. So pick the workload shape first and the vendor second.
+What I keep coming back to is that the same isolation architecture can ship as very different products, E2B and Sprites both use Firecracker but commercially they are nothing alike, because architecture answers what keeps the agents code from breaking out and product design answers what shape of agent workload that boundary makes possible. So pick the workload shape first and the vendor second.
 
 ## Copy Fail
 
@@ -485,7 +485,7 @@ AgentCore has the strongest written guarantee of the 4, and the [runtime session
 
 That names memory sanitization on session end explicitly, but AWS doesnt say what "sanitized" means in implementation. Terminating a Firecracker microVM frees its memfile from the running process, and whether the underlying host pages get zeroed before reuse is a host OS detail that the docs leave out, and the opt in [session storage](https://aws.amazon.com/about-aws/whats-new/2026/03/bedrock-agentcore-runtime-session-storage/) persists the filesystem across stop and resume without saying whether that storage is encrypted at rest or with what key. The [security best practices](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/runtime-security-best-practices.html) exist, but the mechanism depth doesnt.
 
-Summing up, E2B is the most thoughtful at the storage layer, AgentCore makes the strongest written cleanup claim, Modal pushes responsibility onto application code, and Fly is the fastest at checkpoint but doesnt remove the underlying memfile, and none of them removes the in memory window.
+If I had to say it plainly, E2B is the most thoughtful at the storage layer, AgentCore makes the strongest written cleanup claim, Modal pushes responsibility onto application code, and Fly is the fastest at checkpoint but doesnt remove the underlying memfile, and none of them removes the in memory window.
 
 ### Hands on with the memfile
 
@@ -531,7 +531,7 @@ This is not a bug, Firecracker warns about exactly this, but running it makes th
 
 ### Confidential computing
 
-The problem is that the host can read the guest memory file, and the architectural answer is to make that memory unreadable to the host, which is what confidential computing does.
+The problem is that the host can just read the guest memory file, so the way out is to make that memory unreadable to the host. Thats what confidential computing is for.
 
 [AMD SEV-SNP](https://www.amd.com/en/developer/sev.html) encrypts VM memory pages with a per VM key kept in the AMD Secure Processor, so the hypervisor only sees ciphertext, and [Reverse Map Tables](https://www.amd.com/system/files/TechDocs/SEV-SNP-strengthening-vm-isolation-with-integrity-protection-and-more.pdf) stop the hypervisor from remapping guest pages without the guest noticing, which moves the trust boundary toward silicon. You need a fairly recent EPYC (Milan or newer), and its available on [AWS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/sev-snp.html), Azure, and [Google Cloud](https://cloud.google.com/confidential-computing/confidential-vm/docs/confidential-vm-overview), while [Intel TDX](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-trust-domain-extensions.html) plays the same role with Trust Domains on recent Xeons.
 
@@ -545,9 +545,9 @@ Vendors dont lead with the operational limits though, [Azure confidential VMs](h
 
 ### What it doesnt fix
 
-The category will get oversold unless 3 limits stay visible, and the figure above already shows the first 1.
+People are going to oversell this, so keep 3 limits in your head, and the figure above already shows the first 1.
 
-First, guest code still sees the credential, so if a malicious package sends the token to an attacker URL, hardware memory encryption does nothing. Confidential computing protects against the host operator and not against in guest compromise, and for agent workloads where LLM generated code runs at request time the in guest threat model dominates, so its necessary but not sufficient.
+First, guest code still sees the credential. The encryption wraps the VM, and a malicious package is inside that wrap, so if it sends the token to an attacker URL, hardware memory encryption does nothing. Confidential computing protects against the host operator and not against in guest compromise, and for agent workloads where LLM generated code runs at request time the in guest threat model dominates, so its necessary but not sufficient.
 
 Second, attestation has to be wired in, because without attestation that proves the VM runs expected code on expected silicon, a platform can boot a non confidential VM that lies. Azure attestation, AMD KDS, and NVIDIA NRAS for H100 CC are real and all need integration work, and a confidential VM that nobody attests is a marketing checkbox.
 
@@ -580,7 +580,7 @@ Compare that with the Firecracker demo, on the nested virt c8i the host runs `st
 
 ### Who ships it
 
-The substrate exists but agent first packaging doesnt yet, and the [When Agents Handle Secrets survey](https://arxiv.org/abs/2605.03213) (May 2026) lists the moving pieces without a commercial per agent endpoint to point at, while [Trusted AI Agents in the Cloud](https://arxiv.org/html/2512.05951v1) tells the same story from a different angle.
+You can buy the hardware today, you just cant buy an agent sandbox that uses it, and the [When Agents Handle Secrets survey](https://arxiv.org/abs/2605.03213) (May 2026) lists the moving pieces without a commercial per agent endpoint to point at, while [Trusted AI Agents in the Cloud](https://arxiv.org/html/2512.05951v1) tells the same story from a different angle.
 
 Commercially, [Northflank](https://northflank.com/product/sandboxes) uses SEV-SNP in its multi tenant isolation story for general workloads but not as an agent specific SKU, Fortanix pitches verifiable trust for agentic AI but the offering is enterprise key management plus confidential inference and not a per agent sandbox primitive, and Azure NCCadsH100v5 is the cleanest substrate for confidential GPU agent workloads but nobody has packaged it. Its the same pattern as persistent plus GPU on the sandbox map, the capability is buyable and the agent first product layer is missing.
 
@@ -590,7 +590,7 @@ Tool gateways come next, because they are how you stop the agent from using what
 
 ## The tool gateway
 
-The tool gateway bullet above is the policy layer and MCP is the wire format underneath it, and MCP itself now gets continuous security attention, with [mcp-remote CVE-2025-6514](https://thehackernews.com/2025/07/critical-mcp-remote-vulnerability.html), [Anthropic filesystem MCP CVE-2025-53109/53110](https://cymulate.com/blog/cve-2025-53109-53110-escaperoute-anthropic/) (EscapeRoute), and [Git MCP CVE-2025-68143/44/45](https://thehackernews.com/2026/01/3-flaws-in-anthropic-mcp-git-server.html) all pointing at the same lesson, and people counting [30+ MCP CVEs in about 60 days](https://www.heyuan110.com/posts/ai/2026-03-10-mcp-security-2026/). Standardizing the wire format does not standardize safety, and [Clinejection](https://adnanthekhan.com/posts/clinejection/) showed the supply chain path through malicious MCP config too.
+The tool gateway bullet above is the policy layer and MCP is the wire format underneath it, and MCP itself now gets continuous security attention, with [mcp-remote CVE-2025-6514](https://thehackernews.com/2025/07/critical-mcp-remote-vulnerability.html), [Anthropic filesystem MCP CVE-2025-53109/53110](https://cymulate.com/blog/cve-2025-53109-53110-escaperoute-anthropic/) (EscapeRoute), and [Git MCP CVE-2025-68143/44/45](https://thehackernews.com/2026/01/3-flaws-in-anthropic-mcp-git-server.html) all pointing at the same lesson, and people counting [30+ MCP CVEs in about 60 days](https://www.heyuan110.com/posts/ai/2026-03-10-mcp-security-2026/). Making the wire format standard does not make the call safe, and [Clinejection](https://adnanthekhan.com/posts/clinejection/) showed the supply chain path through malicious MCP config too.
 
 The flow looks roughly like this, from the users question all the way back to a sanitized result.
 
@@ -618,7 +618,7 @@ Sanitized result returns to agent
 
 The gateway handles the unglamorous stuff, auth, authz, tenant boundaries, tool allowlists, arg validation, secrets injection (never paste API keys into the prompt, please), rate limits, audit logs, response redaction, approval routing, tool versioning, and circuit breaking, which is all boring right up until 3 a.m.
 
-Tool design is behaviour design too, because with 10 overlapping search tools the model burns half the turn just picking which search to use, so give it fewer and sharper tools.
+The tool list is the behaviour, cuz with 10 overlapping search tools the model burns half the turn just picking which search to use, so give it fewer and sharper ones.
 
 ## Prompt injection
 
@@ -637,7 +637,7 @@ Red team the interface like any other API surface, with hidden instructions in i
 
 ## Idempotency and receipts
 
-Sandboxed agents still do real work, which means actual backend engineering and not prompt only architecture, so use idempotency keys on writes so retry loops dont double charge or double deploy, use checkpoints so a crash at step 99 of 100 doesnt replay destructive steps, and use dead letter queues when human approval times out, because silent hangs are the worst.
+A sandbox doesnt make the side effects fake, so you still need boring backend engineering and not just a nicer prompt. Use idempotency keys on writes, cuz a retry loop will happily double charge or double deploy, use checkpoints so a crash at step 99 of 100 doesnt replay the destructive steps, and use a dead letter queue when human approval times out, because a silent hang is the worst kind.
 
 When pagerduty fires at 2 a.m. you need to answer what this thing thought it was allowed to do and who said yes, not "idk the model got creative lol".
 
