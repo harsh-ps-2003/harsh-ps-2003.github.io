@@ -1,7 +1,7 @@
 +++
 title = "Living the GitHub Actions Dream"
 date = 2026-07-31
-draft = true
+draft = false
 description = "Making Docker builds and GitHub Actions CI fast: BuildKit, layer caching, Arm runners, and why Rust builds hurt."
 
 [taxonomies]
