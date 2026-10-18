@@ -12,7 +12,7 @@ tags = ["ci", "github-actions", "docker", "devops"]
 
 Personally, for me its deeply frustrating when I watch a CI pipeline spin for 45 minutes when I know the actual work takes maybe 3 minutes. You push a one line fix, grab coffee, check Slack, and the build is still chugging away. The green checkmark feels less like validation and more like a hostage release tbh. I have mass cancelled CI runs more times than I can count during my internship, and every time I do it I wonder why we collectively decided this was acceptable.
 
-I did lot of to-and-fro with CI during internship at Sqwish. This post is my attempt to document everything I have learned about making Docker builds fast, GitHub Actions efficient, and CI pipelines that do not make you want to mass cancel runs. We will go deep on how Docker layers actually work, why BuildKit changed everything, the dark arts of caching, the Arm situation that everyone is suddenly dealing with, and why Rust builds are thier own special circle of CI hell. Along the way I will share the tricks that actually work and the ones that sound good but dont.
+I did lot of to-and-fro with CI during internships. This post is my attempt to document everything I have learned about making Docker builds fast, GitHub Actions efficient, and CI pipelines that do not make you want to mass cancel runs. We will go deep on how Docker layers actually work, why BuildKit changed everything, the dark arts of caching, the Arm situation that everyone is suddenly dealing with, and why Rust builds are thier own special circle of CI hell. Along the way I will share the tricks that actually work and the ones that sound good but dont.
 
 ## What even is a Docker layer?
 
