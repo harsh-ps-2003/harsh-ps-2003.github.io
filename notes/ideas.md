@@ -1,3 +1,5 @@
+* jane street and interesting ML findings you can work on for paper! you can explore the topics yourself
+* uni of cambrige seminar talks condence into blogs
 * Baremetal networking at eBGP/eBPF for sidecar less routing, L2-L7, Wireguard
 * Block storage, FS, kernel I/O paths, SPDK, io_uring, vhost-user-blk, ublk, linux 5/6 features for userspace block storage for device management, virtualization replication at petabyte scale (ZFS, Ceph, VirtioFS)
 * Efficient OCI build/transfer (BuildKit, SOCI, Zot, overlayfs)
