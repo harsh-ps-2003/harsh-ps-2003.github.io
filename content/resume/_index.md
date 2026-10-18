@@ -81,8 +81,6 @@ An asynchronous multidimensional in-memory distributed hash table implementation
 * Implemented robust **server lifecycle management** with readiness signalling, bounded startup timeouts, and graceful shutdown for clean drain of in-flight requests
 * Introduced **streaming handoff APIs** for efficient ownership transfer of large key ranges during join/leave, reducing tail latencies and avoiding head-of-line blocking
 
-> Skills - Rust, gRPC, libp2p, Distributed Systems, Consistent Hashing
-
 ---
 
 **Undergraduate Project**
