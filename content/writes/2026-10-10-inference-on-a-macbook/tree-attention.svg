@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 470" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">One request, five questions: what attention computes</title>
+  <desc id="desc">The query rows against the keys of a 2,000-token context followed by five 60-token questions. Before: one attention call under one mask over all 2,300 rows computes every query-key pair, 5.3 million per head, and masks more than half of them to zero, because the kernel can only skip blocks when the mask is plain causal. After: the context runs as plain causal attention, which skips the blocks above the diagonal, about 2.0 million pairs, and only the 300 question rows run under a mask, 0.69 million pairs. The answers are bit-identical; the request went from 739 to 676 ms.</desc>
+  <style>
+    text { fill: #232333; font-size: 10.5px; }
+    .t { font-size: 15px; font-weight: 700; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .h { font-size: 11.5px; font-weight: 700; }
+    .m { fill: #5c5c6e; font-size: 10px; }
+    .use { fill: #e3eefb; stroke: #7aa7d9; stroke-width: .75; }
+  </style>
+  <text x="20" y="28" class="t">One request, five questions: what attention computes</text>
+  <text x="20" y="46" class="m">a 2,000-token context, then five 60-token questions, each reading the context and itself</text>
+  <text x="90" y="80" class="k">BEFORE: ONE MASKED CALL</text>
+  <text x="410" y="80" class="k">AFTER: CAUSAL HEAD + MASKED TAILS</text>
+  <rect x="90" y="96" width="220.0" height="220.0" fill="#fbe5e3" stroke="#232333" stroke-width="1.25"/>
+  <polygon points="90,96 281.3,287.3 90,287.3" class="use"/>
+  <rect x="90" y="287.3" width="191.3" height="28.7" class="use"/>
+  <polygon points="281.3,287.3 287.0,293.0 281.3,293.0" class="use"/>
+  <polygon points="287.0,293.0 292.8,298.8 287.0,298.8" class="use"/>
+  <polygon points="292.8,298.8 298.5,304.5 292.8,304.5" class="use"/>
+  <polygon points="298.5,304.5 304.3,310.3 298.5,310.3" class="use"/>
+  <polygon points="304.3,310.3 310.0,316.0 304.3,316.0" class="use"/>
+  <line x1="90" y1="287.3" x2="310.0" y2="287.3" stroke="#232333" stroke-dasharray="3 2"/>
+  <line x1="281.3" y1="96" x2="281.3" y2="316.0" stroke="#232333" stroke-dasharray="3 2"/>
+  <rect x="90" y="96" width="220.0" height="220.0" fill="none" stroke="#ff5f1f" stroke-width="2"/>
+  <text x="300.0" y="126" class="m" text-anchor="end">computed, then</text>
+  <text x="300.0" y="139" class="m" text-anchor="end">thrown away</text>
+  <text x="82" y="192" class="m" text-anchor="end">context</text>
+  <text x="82" y="204" class="m" text-anchor="end">rows</text>
+  <text x="82" y="306" class="m" text-anchor="end">questions</text>
+  <text x="186" y="332" class="m" text-anchor="middle">context keys</text>
+  <text x="308" y="332" class="m" text-anchor="end">q keys</text>
+  <rect x="450" y="96" width="220.0" height="220.0" fill="#ffffff" stroke="#232333" stroke-width="1.25"/>
+  <polygon points="450,96 641.3,287.3 450,287.3" class="use"/>
+  <rect x="450" y="287.3" width="220.0" height="28.7" fill="#fbe5e3"/>
+  <rect x="450" y="287.3" width="191.3" height="28.7" class="use"/>
+  <polygon points="641.3,287.3 647.0,293.0 641.3,293.0" class="use"/>
+  <polygon points="647.0,293.0 652.8,298.8 647.0,298.8" class="use"/>
+  <polygon points="652.8,298.8 658.5,304.5 652.8,304.5" class="use"/>
+  <polygon points="658.5,304.5 664.3,310.3 658.5,310.3" class="use"/>
+  <polygon points="664.3,310.3 670.0,316.0 664.3,316.0" class="use"/>
+  <line x1="450" y1="287.3" x2="670.0" y2="287.3" stroke="#232333" stroke-dasharray="3 2"/>
+  <line x1="641.3" y1="96" x2="641.3" y2="316.0" stroke="#232333" stroke-dasharray="3 2"/>
+  <rect x="450" y="96" width="220.0" height="191.3" fill="none" stroke="#4a7fc1" stroke-width="2"/>
+  <rect x="450" y="287.3" width="220.0" height="28.7" fill="none" stroke="#ff5f1f" stroke-width="2"/>
+  <text x="660.0" y="126" class="m" text-anchor="end">causal call: the kernel</text>
+  <text x="660.0" y="139" class="m" text-anchor="end">never visits these</text>
+  <text x="660.0" y="152" class="m" text-anchor="end">blocks</text>
+  <text x="442" y="192" class="m" text-anchor="end">context</text>
+  <text x="442" y="204" class="m" text-anchor="end">rows</text>
+  <text x="442" y="306" class="m" text-anchor="end">questions</text>
+  <text x="546" y="332" class="m" text-anchor="middle">context keys</text>
+  <text x="668" y="332" class="m" text-anchor="end">q keys</text>
+  <text x="90" y="360" class="h">5.3M pairs per head computed</text>
+  <text x="90" y="376" class="m">2.6M of them used: under any mask but</text>
+  <text x="90" y="390" class="m">"causal" the kernel visits every block</text>
+  <text x="410" y="360" class="h">2.0M + 0.69M pairs per head</text>
+  <text x="410" y="376" class="m">two calls, their outputs joined by rows;</text>
+  <text x="410" y="390" class="m">per-row RoPE positions on 300 rows only</text>
+  <rect x="20" y="412" width="12" height="12" class="use"/><text x="38" y="422">computed and used</text>
+  <rect x="190" y="412" width="12" height="12" fill="#fbe5e3" stroke="#c62f2f" stroke-width=".75"/><text x="208" y="422">computed, then masked to zero</text>
+  <rect x="440" y="412" width="12" height="12" fill="#ffffff" stroke="#232333" stroke-width=".75"/><text x="458" y="422">never computed</text>
+  <text x="20" y="452" class="h">Same answers, bit for bit (119 of 119 decisions). The request: 739 → 676 ms.</text>
+</svg>

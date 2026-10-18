@@ -43,6 +43,7 @@ Novels and stories that stayed with me. Some are philosophical without being phi
 
 When I am talking about Philosophy, don't confuse it with Theology. I have a love affair with life, not with beliefs.
 
+* The Prophet
 * Affective Neuroscience
 * Age of Reason
 * Beyond Good and Evil
@@ -69,8 +70,6 @@ When I am talking about Philosophy, don't confuse it with Theology. I have a lov
 * The Feminine Mystique
 * The Mind-Body Problem
 * The Myth of Sisyphus
-* The Politics of Reality: Essays in Feminist Theory
-* The Prophet
 * The Right to Oblivion: Privacy and the Good Life
 * The Structure of Scientific Revolutions
 * Why I am an Atheist
@@ -82,11 +81,11 @@ These have been wonderful reads and have exposed me to a new me!
 
 Psychology, identity, parenting, work, love, aging, and the messy business of being a person.
 
+* Love (Stendhal)
 * A Life's Work: On becoming a Mother
 * All About Love
 * Courage to be Disliked
 * Flow
-* Love (Stendhal)
 * Several Short Sentences About Writing
 * Stories We Live By
 * The Burnout Society

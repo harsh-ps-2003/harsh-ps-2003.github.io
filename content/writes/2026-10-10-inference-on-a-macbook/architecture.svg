@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 869" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">The model, where each optimization lands, and Liquid's d1-3B</title>
+  <desc id="desc">A decision request's prompt holds the context twice plus the questions and their labels. Each of the model's 36 layers runs a fused add and grouped RMSNorm, the qkv matmul, RoPE, attention with 32 query heads of 128 and 8 KV heads, o_proj, another add and norm, gate_up with SwiGLU fused into its epilogue, and down_proj; the matmuls use tuned tiles, MLX's threadgroup shape and a prefetching loop, attention runs all questions in one pass with a causal head and masked tails, and the last layer runs only the rows read out, reading only the labels' logits. Liquid's d1-3B has 30 layers, 22 short convolutions and 8 attention, hidden 2,048, heads of 64, and reads its state once: 4.87 GFLOPs a token and 65,536 per query-key pair against this model's 7.55 GFLOPs and 589,824, so a decision is 3.6 times d1's work at a short state, 3.9 at 3.4k tokens, 6.3 at 16k and 8.9 at 32k.</desc>
+  <style>text { fill: #232333; font-size: 10.5px; } .t { font-size: 15px; font-weight: 700; } .h { font-size: 11.5px; font-weight: 700; } .b { font-size: 10.5px; font-weight: 700; } .s { fill: #5c5c6e; font-size: 9.8px; } .tag { fill: #c2410c; font-size: 9.8px; }</style>
+  <text x="20" y="30" class="t">The model, where each optimization lands, and d1-3B</text>
+  <text x="20" y="50" class="s">A decision model never generates a token: its whole cost is one forward pass over the prompt.</text>
+    <text x="20" y="84" class="h" text-anchor="start">One decision request</text>
+  <rect x="20" y="92" width="190" height="24" rx="4" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <text x="115.0" y="108" class="s" text-anchor="middle">context</text>
+  <rect x="216" y="92" width="190" height="24" rx="4" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <text x="311.0" y="108" class="s" text-anchor="middle">context, again</text>
+  <rect x="412" y="92" width="250" height="24" rx="4" fill="#ffe9df" stroke="#ff5f1f"/>
+  <text x="537.0" y="108" class="s" text-anchor="middle">the questions and their labels</text>
+  <text x="20" y="134" class="s" text-anchor="start">The prompt holds the context twice: about 2 x context + 85 tokens. (Lengths and order not to scale.)</text>
+  <text x="40" y="168" class="h" text-anchor="start">Each of the 36 layers, and what in this post speeds it up</text>
+  <text x="40" y="183" class="s" text-anchor="start">The 0.9B sibling has the same layer, 28 times, 1,536 wide, with heads of 64.</text>
+  <rect x="40" y="194" width="290" height="34" rx="5" fill="#f1f1f5" stroke="#a3a3b3" stroke-width="1.5"/>
+  <text x="50" y="208" class="b" text-anchor="start">add + RMSNorm</text>
+  <text x="50" y="221" class="s" text-anchor="start">2 groups of 1,280 channels, fp32 statistics</text>
+  <text x="344" y="215" class="tag" text-anchor="start">one fused kernel (section 6)</text>
+  <rect x="40" y="234" width="290" height="34" rx="5" fill="#e6eef8" stroke="#4a7fc1" stroke-width="1.5"/>
+  <text x="50" y="248" class="b" text-anchor="start">qkv matmul</text>
+  <text x="50" y="261" class="s" text-anchor="start">2,560 -> 6,144</text>
+  <text x="344" y="248" class="tag" text-anchor="start">tuned tiles, the right threadgroup shape,</text>
+  <text x="344" y="261" class="tag" text-anchor="start">the prefetching loop (section 6)</text>
+  <rect x="40" y="274" width="290" height="34" rx="5" fill="#f1f1f5" stroke="#a3a3b3" stroke-width="1.5"/>
+  <text x="50" y="288" class="b" text-anchor="start">RoPE</text>
+  <text x="50" y="301" class="s" text-anchor="start">rotate-half, theta = 10^7</text>
+  <rect x="40" y="314" width="290" height="34" rx="5" fill="#ffe9df" stroke="#ff5f1f" stroke-width="1.5"/>
+  <text x="50" y="328" class="b" text-anchor="start">attention</text>
+  <text x="50" y="341" class="s" text-anchor="start">32 query heads x 128, 8 KV heads, causal</text>
+  <text x="344" y="328" class="tag" text-anchor="start">all questions in one pass: a causal head and</text>
+  <text x="344" y="341" class="tag" text-anchor="start">masked tails only (section 4)</text>
+  <rect x="40" y="354" width="290" height="34" rx="5" fill="#e6eef8" stroke="#4a7fc1" stroke-width="1.5"/>
+  <text x="50" y="368" class="b" text-anchor="start">o_proj matmul</text>
+  <text x="50" y="381" class="s" text-anchor="start">4,096 -> 2,560</text>
+  <text x="344" y="375" class="tag" text-anchor="start">tuned tiles, the prefetching loop</text>
+  <rect x="40" y="394" width="290" height="34" rx="5" fill="#f1f1f5" stroke="#a3a3b3" stroke-width="1.5"/>
+  <text x="50" y="415.0" class="b" text-anchor="start">add + RMSNorm</text>
+  <text x="344" y="415" class="tag" text-anchor="start">one fused kernel</text>
+  <rect x="40" y="434" width="290" height="34" rx="5" fill="#e6eef8" stroke="#4a7fc1" stroke-width="1.5"/>
+  <text x="50" y="448" class="b" text-anchor="start">gate_up matmul + SwiGLU</text>
+  <text x="50" y="461" class="s" text-anchor="start">2,560 -> 20,480 -> 10,240</text>
+  <text x="344" y="455" class="tag" text-anchor="start">SwiGLU in the matmul's epilogue (section 6)</text>
+  <rect x="40" y="474" width="290" height="34" rx="5" fill="#e6eef8" stroke="#4a7fc1" stroke-width="1.5"/>
+  <text x="50" y="488" class="b" text-anchor="start">down matmul</text>
+  <text x="50" y="501" class="s" text-anchor="start">10,240 -> 2,560</text>
+  <text x="344" y="495" class="tag" text-anchor="start">tuned tiles, the prefetching loop</text>
+  <path d="M32,194 h-6 v314 h6" fill="none" stroke="#5c5c6e"/>
+  <text transform="rotate(-90 18 354)" x="18" y="354.0" class="s" text-anchor="middle">x 36</text>
+  <rect x="40" y="520" width="290" height="34" rx="5" fill="#ffe9df" stroke="#ff5f1f" stroke-width="1.5"/>
+  <text x="50" y="534" class="b" text-anchor="start">last layer: read-out rows only</text>
+  <text x="50" y="547" class="s" text-anchor="start">then only the labels' logits</text>
+  <text x="344" y="534" class="tag" text-anchor="start">no token is ever generated: a decision is</text>
+  <text x="344" y="547" class="tag" text-anchor="start">one forward pass (section 4)</text>
+  <text x="40" y="574" class="s" text-anchor="start">Around every request: the GPU kept awake and its memory wired (section 5), long prompts in</text>
+  <text x="40" y="588" class="s" text-anchor="start">4,096-token chunks, and a context already sent kept for the next question.</text>
+  <line x1="20" y1="610" x2="700" y2="610" stroke="#e9e9ef" stroke-width="1.5"/>
+  <text x="20" y="638" class="h" text-anchor="start">Liquid d1-3B, for contrast</text>
+  <rect x="20.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="29.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="38.0" y="648" width="7.0" height="18" rx="1.5" fill="#ffe9df" stroke="#ff5f1f"/>
+  <rect x="47.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="56.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="65.0" y="648" width="7.0" height="18" rx="1.5" fill="#ffe9df" stroke="#ff5f1f"/>
+  <rect x="74.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="83.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="92.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="101.0" y="648" width="7.0" height="18" rx="1.5" fill="#ffe9df" stroke="#ff5f1f"/>
+  <rect x="110.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="119.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="128.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="137.0" y="648" width="7.0" height="18" rx="1.5" fill="#ffe9df" stroke="#ff5f1f"/>
+  <rect x="146.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="155.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="164.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="173.0" y="648" width="7.0" height="18" rx="1.5" fill="#ffe9df" stroke="#ff5f1f"/>
+  <rect x="182.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="191.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="200.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="209.0" y="648" width="7.0" height="18" rx="1.5" fill="#ffe9df" stroke="#ff5f1f"/>
+  <rect x="218.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="227.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="236.0" y="648" width="7.0" height="18" rx="1.5" fill="#ffe9df" stroke="#ff5f1f"/>
+  <rect x="245.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="254.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="263.0" y="648" width="7.0" height="18" rx="1.5" fill="#ffe9df" stroke="#ff5f1f"/>
+  <rect x="272.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <rect x="281.0" y="648" width="7.0" height="18" rx="1.5" fill="#f1f1f5" stroke="#a3a3b3"/>
+  <text x="20" y="684" class="s" text-anchor="start">30 layers: 22 short convolutions (grey) and 8</text>
+  <text x="20" y="698" class="s" text-anchor="start">attention (orange), in their order; hidden 2,048,</text>
+  <text x="20" y="712" class="s" text-anchor="start">MLP 10,752, heads of 64, 8 KV heads; the prompt</text>
+  <text x="20" y="726" class="s" text-anchor="start">holds its state once.</text>
+  <text x="370" y="638" class="h" text-anchor="start">Work: this model, and d1-3B</text>
+  <text x="590" y="656" class="s" text-anchor="end">this model</text>
+  <text x="690" y="656" class="s" text-anchor="end">d1-3B</text>
+  <text x="370" y="674" class="s" text-anchor="start">FLOPs per token</text>
+  <text x="590" y="674" class="b" text-anchor="end">7.55 G</text>
+  <text x="690" y="674" class="s" text-anchor="end">4.87 G</text>
+  <text x="370" y="690" class="s" text-anchor="start">FLOPs per query-key pair</text>
+  <text x="590" y="690" class="b" text-anchor="end">589,824</text>
+  <text x="690" y="690" class="s" text-anchor="end">65,536</text>
+  <text x="370" y="714" class="s" text-anchor="start">A decision, this model's work over d1's:</text>
+  <text x="370" y="731" class="s" text-anchor="start">one question, a short state</text>
+  <text x="690" y="731" class="b" text-anchor="end">3.6x</text>
+  <text x="370" y="746" class="s" text-anchor="start">a 3.4k-token state</text>
+  <text x="690" y="746" class="b" text-anchor="end">3.9x</text>
+  <text x="370" y="761" class="s" text-anchor="start">a 16k-token state</text>
+  <text x="690" y="761" class="b" text-anchor="end">6.3x</text>
+  <text x="370" y="776" class="s" text-anchor="start">a 32k-token state</text>
+  <text x="690" y="776" class="b" text-anchor="end">8.9x</text>
+  <text x="20" y="811" class="s" text-anchor="start">All attention, at twice d1's head width, over a prompt twice as long: this model's work grows with the square</text>
+  <text x="20" y="825" class="s" text-anchor="start">of the context much faster than d1's. Nothing in an engine changes that; its job is to run that work as close to the</text>
+  <text x="20" y="839" class="s" text-anchor="start">chip's floor as it gets, which is what the rest of the post measures.</text>
+</svg>

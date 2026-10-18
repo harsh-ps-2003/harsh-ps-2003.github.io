@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 175" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">Flame graph: a 500-token question (149 ms of GPU time)</title>
+  <desc id="desc">A flame graph of one forward pass's GPU time from Instruments' Metal System Trace: the request at the bottom, then chunks, layers, blocks, steps and MLX kernels stacked above, each frame as wide as its share of 149 ms. Open the SVG on its own to hover frames and click to zoom.</desc>
+  <style>text { fill: #232333; font-size: 10.5px; pointer-events: none; } .t { font-size: 15px; font-weight: 700; } .m { fill: #5c5c6e; font-size: 10px; } g.f { cursor: pointer; } g.f:hover rect { stroke: #232333; stroke-width: 1; } #reset { cursor: pointer; }</style>
+  <rect width="720" height="175" fill="#ffffff"/>
+  <text x="10" y="24" class="t">Flame graph: a 500-token question (149 ms of GPU time)</text>
+  <text x="10" y="42" class="m">149.3 ms of GPU time; frame width = time; hover for numbers, click to zoom (open the SVG on its own)</text>
+  <text id="reset" x="710" y="42" class="m" text-anchor="end">reset zoom</text>
+    <g class="f" data-n="single500 (500 tokens) 149.3 ms" data-x="0.000" data-w="700.000" data-d="0"><title>single500 (500 tokens): 149.32 ms, 100.00%</title><rect x="10.00" y="128" width="699.00" height="16" rx="1.5" fill="rgb(221,211,45)"/><text x="13.00" y="140">single500 (500 tokens) 149.3 ms</text></g>
+  <g class="f" data-n="embed" data-x="0.000" data-w="3.028" data-d="1"><title>embed: 0.65 ms, 0.43%</title><rect x="10.00" y="111" width="2.03" height="16" rx="1.5" fill="rgb(243,150,5)"/><text x="13.00" y="123"></text></g>
+  <g class="f" data-n="gather_frontbfloat16_int32_int_2" data-x="0.000" data-w="3.028" data-d="2"><title>gather_frontbfloat16_int32_int_2: 0.65 ms, 0.43%</title><rect x="10.00" y="94" width="2.03" height="16" rx="1.5" fill="rgb(212,53,18)"/><text x="13.00" y="106"></text></g>
+  <g class="f" data-n="all 36 layers 147.9 ms" data-x="3.028" data-w="693.535" data-d="1"><title>all 36 layers: 147.94 ms, 99.08%</title><rect x="13.03" y="111" width="692.54" height="16" rx="1.5" fill="rgb(207,138,53)"/><text x="16.03" y="123">all 36 layers 147.9 ms</text></g>
+  <g class="f" data-n="add + norm 2.1 ms" data-x="3.028" data-w="9.667" data-d="2"><title>add + norm: 2.06 ms, 1.38%</title><rect x="13.03" y="94" width="8.67" height="16" rx="1.5" fill="rgb(247,92,18)"/><text x="16.03" y="106"></text></g>
+  <g class="f" data-n="add_norm (our Metal kernel) 2.1 ms" data-x="3.028" data-w="9.667" data-d="3"><title>add_norm (our Metal kernel): 2.06 ms, 1.38%</title><rect x="13.03" y="77" width="8.67" height="16" rx="1.5" fill="rgb(210,113,6)"/><text x="16.03" y="89"></text></g>
+  <g class="f" data-n="attention block 43.1 ms" data-x="12.695" data-w="202.079" data-d="2"><title>attention block: 43.11 ms, 28.87%</title><rect x="22.69" y="94" width="201.08" height="16" rx="1.5" fill="rgb(225,86,5)"/><text x="25.69" y="106">attention block 43.1 ms</text></g>
+  <g class="f" data-n="qkv 22.7 ms" data-x="12.695" data-w="106.220" data-d="3"><title>qkv: 22.66 ms, 15.17%</title><rect x="22.69" y="77" width="105.22" height="16" rx="1.5" fill="rgb(243,171,6)"/><text x="25.69" y="89">qkv 22.7 ms</text></g>
+  <g class="f" data-n="steel_gemm_fused_nax 64x128x256 22.7 ms" data-x="12.695" data-w="106.220" data-d="4"><title>steel_gemm_fused_nax 64x128x256: 22.66 ms, 15.17%</title><rect x="22.69" y="60" width="105.22" height="16" rx="1.5" fill="rgb(240,224,38)"/><text x="25.69" y="72">steel_gemm_fu..</text></g>
+  <g class="f" data-n="rope 1.7 ms" data-x="118.915" data-w="8.049" data-d="3"><title>rope: 1.72 ms, 1.15%</title><rect x="128.91" y="77" width="7.05" height="16" rx="1.5" fill="rgb(210,158,24)"/><text x="131.91" y="89"></text></g>
+  <g class="f" data-n="rope_bfloat16_ 1.7 ms" data-x="118.915" data-w="8.040" data-d="4"><title>rope_bfloat16_: 1.72 ms, 1.15%</title><rect x="128.91" y="60" width="7.04" height="16" rx="1.5" fill="rgb(209,222,50)"/><text x="131.91" y="72"></text></g>
+  <g class="f" data-n="unnamed" data-x="126.954" data-w="0.009" data-d="4"><title>unnamed: 0.00 ms, 0.00%</title><rect x="136.95" y="60" width="0.50" height="16" rx="1.5" fill="rgb(229,15,34)"/><text x="139.95" y="72"></text></g>
+  <g class="f" data-n="attention 5.1 ms" data-x="126.964" data-w="23.740" data-d="3"><title>attention: 5.06 ms, 3.39%</title><rect x="136.96" y="77" width="22.74" height="16" rx="1.5" fill="rgb(106,134,199)"/><text x="139.96" y="89"></text></g>
+  <g class="f" data-n="steel_attention bq64xbk32 5.0 ms" data-x="126.964" data-w="23.665" data-d="4"><title>steel_attention bq64xbk32: 5.05 ms, 3.38%</title><rect x="136.96" y="60" width="22.66" height="16" rx="1.5" fill="rgb(74,155,217)"/><text x="139.96" y="72"></text></g>
+  <g class="f" data-n="sdpa_vector_bfloat16_t_128_128_nomask_qn" data-x="150.629" data-w="0.075" data-d="4"><title>sdpa_vector_bfloat16_t_128_128_nomask_qn: 0.02 ms, 0.01%</title><rect x="160.63" y="60" width="0.50" height="16" rx="1.5" fill="rgb(235,45,52)"/><text x="163.63" y="72"></text></g>
+  <g class="f" data-n="o_proj 13.7 ms" data-x="150.704" data-w="64.070" data-d="3"><title>o_proj: 13.67 ms, 9.15%</title><rect x="160.70" y="77" width="63.07" height="16" rx="1.5" fill="rgb(238,100,37)"/><text x="163.70" y="89">o_proj..</text></g>
+  <g class="f" data-n="steel_gemm_fused_nax 64x128x256 13.7 ms" data-x="150.704" data-w="64.070" data-d="4"><title>steel_gemm_fused_nax 64x128x256: 13.67 ms, 9.15%</title><rect x="160.70" y="60" width="63.07" height="16" rx="1.5" fill="rgb(240,224,38)"/><text x="163.70" y="72">steel_..</text></g>
+  <g class="f" data-n="MLP block 102.8 ms" data-x="214.774" data-w="481.752" data-d="2"><title>MLP block: 102.76 ms, 68.82%</title><rect x="224.77" y="94" width="480.75" height="16" rx="1.5" fill="rgb(233,119,50)"/><text x="227.77" y="106">MLP block 102.8 ms</text></g>
+  <g class="f" data-n="gate_up 61.9 ms" data-x="214.774" data-w="290.292" data-d="3"><title>gate_up: 61.92 ms, 41.47%</title><rect x="224.77" y="77" width="289.29" height="16" rx="1.5" fill="rgb(209,174,6)"/><text x="227.77" y="89">gate_up 61.9 ms</text></g>
+  <g class="f" data-n="steel_gemm_fused_nax 64x128x256 61.9 ms" data-x="214.774" data-w="290.292" data-d="4"><title>steel_gemm_fused_nax 64x128x256: 61.92 ms, 41.47%</title><rect x="224.77" y="60" width="289.29" height="16" rx="1.5" fill="rgb(240,224,38)"/><text x="227.77" y="72">steel_gemm_fused_nax 64x128x256 61.9 ms</text></g>
+  <g class="f" data-n="swiglu 4.2 ms" data-x="505.066" data-w="19.568" data-d="3"><title>swiglu: 4.17 ms, 2.80%</title><rect x="515.07" y="77" width="18.57" height="16" rx="1.5" fill="rgb(224,19,20)"/><text x="518.07" y="89"></text></g>
+  <g class="f" data-n="compiled swiglu 4.2 ms" data-x="505.066" data-w="19.568" data-d="4"><title>compiled swiglu: 4.17 ms, 2.80%</title><rect x="515.07" y="60" width="18.57" height="16" rx="1.5" fill="rgb(222,156,37)"/><text x="518.07" y="72"></text></g>
+  <g class="f" data-n="down 36.7 ms" data-x="524.633" data-w="171.893" data-d="3"><title>down: 36.67 ms, 24.56%</title><rect x="534.63" y="77" width="170.89" height="16" rx="1.5" fill="rgb(221,2,51)"/><text x="537.63" y="89">down 36.7 ms</text></g>
+  <g class="f" data-n="steel_gemm_splitk_nax 128x128x512 36.7 ms" data-x="524.633" data-w="171.893" data-d="4"><title>steel_gemm_splitk_nax 128x128x512: 36.67 ms, 24.56%</title><rect x="534.63" y="60" width="170.89" height="16" rx="1.5" fill="rgb(251,181,6)"/><text x="537.63" y="72">steel_gemm_splitk_nax 1..</text></g>
+  <g class="f" data-n="other" data-x="696.526" data-w="0.038" data-d="2"><title>other: 0.01 ms, 0.01%</title><rect x="706.53" y="94" width="0.50" height="16" rx="1.5" fill="rgb(226,95,50)"/><text x="709.53" y="106"></text></g>
+  <g class="f" data-n="steel_gemm_fused_nax 64x128x256" data-x="696.526" data-w="0.014" data-d="3"><title>steel_gemm_fused_nax 64x128x256: 0.00 ms, 0.00%</title><rect x="706.53" y="77" width="0.50" height="16" rx="1.5" fill="rgb(240,224,38)"/><text x="709.53" y="89"></text></g>
+  <g class="f" data-n="gatherbfloat16int64_3_3_int" data-x="696.540" data-w="0.023" data-d="3"><title>gatherbfloat16int64_3_3_int: 0.01 ms, 0.00%</title><rect x="706.54" y="77" width="0.50" height="16" rx="1.5" fill="rgb(235,50,43)"/><text x="709.54" y="89"></text></g>
+  <g class="f" data-n="last row + readout" data-x="696.564" data-w="3.436" data-d="1"><title>last row + readout: 0.73 ms, 0.49%</title><rect x="706.56" y="111" width="2.44" height="16" rx="1.5" fill="rgb(231,39,34)"/><text x="709.56" y="123"></text></g>
+  <g class="f" data-n="unnamed" data-x="696.564" data-w="0.047" data-d="2"><title>unnamed: 0.01 ms, 0.01%</title><rect x="706.56" y="94" width="0.50" height="16" rx="1.5" fill="rgb(229,15,34)"/><text x="709.56" y="106"></text></g>
+  <g class="f" data-n="v_copyuint32int64" data-x="696.611" data-w="0.009" data-d="2"><title>v_copyuint32int64: 0.00 ms, 0.00%</title><rect x="706.61" y="94" width="0.50" height="16" rx="1.5" fill="rgb(210,217,16)"/><text x="709.61" y="106"></text></g>
+  <g class="f" data-n="gatherbfloat16int64_2_2_int" data-x="696.620" data-w="0.019" data-d="2"><title>gatherbfloat16int64_2_2_int: 0.00 ms, 0.00%</title><rect x="706.62" y="94" width="0.50" height="16" rx="1.5" fill="rgb(254,85,8)"/><text x="709.62" y="106"></text></g>
+  <g class="f" data-n="gemv_bfloat16_bm4_bn1_sm1_sn32_tm4_tn4_n" data-x="696.639" data-w="1.425" data-d="2"><title>gemv_bfloat16_bm4_bn1_sm1_sn32_tm4_tn4_n: 0.30 ms, 0.20%</title><rect x="706.64" y="94" width="0.50" height="16" rx="1.5" fill="rgb(213,176,47)"/><text x="709.64" y="106"></text></g>
+  <g class="f" data-n="add_norm (our Metal kernel)" data-x="698.064" data-w="0.042" data-d="2"><title>add_norm (our Metal kernel): 0.01 ms, 0.01%</title><rect x="708.06" y="94" width="0.50" height="16" rx="1.5" fill="rgb(210,113,6)"/><text x="711.06" y="106"></text></g>
+  <g class="f" data-n="gemv_bfloat16_bm8_bn1_sm1_sn32_tm4_tn4_n" data-x="698.106" data-w="1.856" data-d="2"><title>gemv_bfloat16_bm8_bn1_sm1_sn32_tm4_tn4_n: 0.40 ms, 0.27%</title><rect x="708.11" y="94" width="0.86" height="16" rx="1.5" fill="rgb(222,161,5)"/><text x="711.11" y="106"></text></g>
+  <g class="f" data-n="gather_frontbfloat16_int32_int_2" data-x="699.962" data-w="0.014" data-d="2"><title>gather_frontbfloat16_int32_int_2: 0.00 ms, 0.00%</title><rect x="709.96" y="94" width="0.50" height="16" rx="1.5" fill="rgb(212,53,18)"/><text x="712.96" y="106"></text></g>
+  <g class="f" data-n="v_copybfloat16float32" data-x="699.977" data-w="0.009" data-d="2"><title>v_copybfloat16float32: 0.00 ms, 0.00%</title><rect x="709.98" y="94" width="0.50" height="16" rx="1.5" fill="rgb(207,13,32)"/><text x="712.98" y="106"></text></g>
+  <g class="f" data-n="gemv_float32_bm1_bn8_sm1_sn32_tm1_tn4_nc" data-x="699.986" data-w="0.014" data-d="2"><title>gemv_float32_bm1_bn8_sm1_sn32_tm1_tn4_nc: 0.00 ms, 0.00%</title><rect x="709.99" y="94" width="0.50" height="16" rx="1.5" fill="rgb(221,126,18)"/><text x="712.99" y="106"></text></g>
+  <script><![CDATA[
+var W = 720, all = document.querySelectorAll('g.f');
+function fit(g, w) {
+  var t = g.querySelector('text'), n = g.getAttribute('data-n');
+  var room = Math.floor((w - 6) / 6.6);
+  t.textContent = n.length <= room ? n : (room > 3 ? n.slice(0, room - 2) + '..' : '');
+}
+function zoom(g0) {
+  var x0 = +g0.getAttribute('data-x'), w0 = +g0.getAttribute('data-w'), d0 = +g0.getAttribute('data-d');
+  all.forEach(function (g) {
+    var x = +g.getAttribute('data-x'), w = +g.getAttribute('data-w'), d = +g.getAttribute('data-d');
+    var r = g.querySelector('rect'), t = g.querySelector('text');
+    var inside = x >= x0 - 1e-6 && x + w <= x0 + w0 + 1e-6, below = d < d0 && x <= x0 && x + w >= x0 + w0;
+    if (inside || below) {
+      var nx = below ? 0 : (x - x0) / w0 * (W - 20), nw = below ? W - 20 : w / w0 * (W - 20);
+      r.setAttribute('x', 10 + nx); r.setAttribute('width', Math.max(nw - 1, 0.5));
+      t.setAttribute('x', 13 + nx); g.style.display = ''; fit(g, nw);
+      g.style.opacity = below && d < d0 ? 0.6 : 1;
+    } else { g.style.display = 'none'; }
+  });
+}
+all.forEach(function (g) { g.addEventListener('click', function () { zoom(g); }); });
+document.getElementById('reset').addEventListener('click', function () { zoom(all[0]); });
+]]></script>
+</svg>

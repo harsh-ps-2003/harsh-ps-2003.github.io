@@ -63,6 +63,7 @@ Books about how power, institutions, inequality, and collective stories shape th
 * The Revolt of the Elites
 * The Rights of Man
 * The Tyranny of Merit
+* Notes on Nationalism
 
 Some wonderful talks:
 

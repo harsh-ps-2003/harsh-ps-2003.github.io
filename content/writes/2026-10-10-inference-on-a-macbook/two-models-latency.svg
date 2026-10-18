@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 430" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">Two models, one MacBook: a decision's time by context length</title>
+  <desc id="desc">End-to-end time of a one-question decision against context length, log-log, for the 3.8B model and the 0.9B one, first requests and follow-up questions. 500 tokens: 3.8B 0.30 s; 1000 tokens: 3.8B 0.57 s; 2000 tokens: 3.8B 1.20 s; 4000 tokens: 3.8B 2.74 s; 8000 tokens: 3.8B 6.61 s; 16000 tokens: 3.8B 18.77 s; 24000 tokens: 3.8B 36.65 s; 30000 tokens: 3.8B 56.76 s. 500 tokens: 0.9B 0.07 s; 1000 tokens: 0.9B 0.15 s; 2000 tokens: 0.9B 0.31 s; 4000 tokens: 0.9B 0.77 s; 8000 tokens: 0.9B 2.10 s; 16000 tokens: 0.9B 6.07 s.</desc>
+  <style>text { fill: #232333; font-size: 10.5px; } .t { font-size: 15px; font-weight: 700; } .m { fill: #5c5c6e; font-size: 10px; } .grid { stroke: #e9e9ef; stroke-width: 1; }</style>
+  <text x="20" y="28" class="t">Two models, one MacBook: a decision's time by context length</text>
+  <text x="20" y="44" class="m">one question, end to end, M5 Pro, bf16; the 0.9B model takes contexts up to about 16k tokens</text>
+    <line x1="20" y1="58" x2="44" y2="58" stroke="#ff5f1f" stroke-width="2" /><circle cx="32" cy="58" r="3.5" fill="#ff5f1f"/><text x="52" y="62">3.8B model, first request</text>
+  <line x1="320" y1="58" x2="344" y2="58" stroke="#ff5f1f" stroke-width="2" stroke-dasharray="5 3"/><circle cx="332" cy="58" r="3.5" fill="#ff5f1f"/><text x="352" y="62">3.8B model, follow-up question</text>
+  <line x1="20" y1="75" x2="44" y2="75" stroke="#4a7fc1" stroke-width="2" /><circle cx="32" cy="75" r="3.5" fill="#4a7fc1"/><text x="52" y="79">0.9B model, first request</text>
+  <line x1="320" y1="75" x2="344" y2="75" stroke="#4a7fc1" stroke-width="2" stroke-dasharray="5 3"/><circle cx="332" cy="75" r="3.5" fill="#4a7fc1"/><text x="352" y="79">0.9B model, follow-up question</text>
+    <line x1="70" y1="370.0" x2="690" y2="370.0" class="grid"/><text x="62" y="373.5" class="m" text-anchor="end">30 ms</text>
+  <line x1="70" y1="329.3" x2="690" y2="329.3" class="grid"/><text x="62" y="332.8" class="m" text-anchor="end">0.1 s</text>
+  <line x1="70" y1="292.2" x2="690" y2="292.2" class="grid"/><text x="62" y="295.7" class="m" text-anchor="end">0.3 s</text>
+  <line x1="70" y1="251.6" x2="690" y2="251.6" class="grid"/><text x="62" y="255.1" class="m" text-anchor="end">1 s</text>
+  <line x1="70" y1="214.4" x2="690" y2="214.4" class="grid"/><text x="62" y="217.9" class="m" text-anchor="end">3 s</text>
+  <line x1="70" y1="173.8" x2="690" y2="173.8" class="grid"/><text x="62" y="177.3" class="m" text-anchor="end">10 s</text>
+  <line x1="70" y1="136.7" x2="690" y2="136.7" class="grid"/><text x="62" y="140.2" class="m" text-anchor="end">30 s</text>
+  <line x1="70" y1="96.0" x2="690" y2="96.0" class="grid"/><text x="62" y="99.5" class="m" text-anchor="end">100 s</text>
+  <line x1="100.0" y1="370" x2="100.0" y2="375" stroke="#5c5c6e"/><text x="100.0" y="388" class="m" text-anchor="middle">500</text>
+  <line x1="193.4" y1="370" x2="193.4" y2="375" stroke="#5c5c6e"/><text x="193.4" y="388" class="m" text-anchor="middle">1k</text>
+  <line x1="286.7" y1="370" x2="286.7" y2="375" stroke="#5c5c6e"/><text x="286.7" y="388" class="m" text-anchor="middle">2k</text>
+  <line x1="380.0" y1="370" x2="380.0" y2="375" stroke="#5c5c6e"/><text x="380.0" y="388" class="m" text-anchor="middle">4k</text>
+  <line x1="473.3" y1="370" x2="473.3" y2="375" stroke="#5c5c6e"/><text x="473.3" y="388" class="m" text-anchor="middle">8k</text>
+  <line x1="566.6" y1="370" x2="566.6" y2="375" stroke="#5c5c6e"/><text x="566.6" y="388" class="m" text-anchor="middle">16k</text>
+  <line x1="651.3" y1="370" x2="651.3" y2="375" stroke="#5c5c6e"/><text x="651.3" y="388" class="m" text-anchor="middle">30k</text>
+  <line x1="70" y1="370" x2="690" y2="370" stroke="#5c5c6e"/>
+  <text x="380" y="408" class="m" text-anchor="middle">tokens of context (log scale); the prompt holds about twice as many</text>
+    <path d="M100.0,292.1 L193.4,270.4 L286.7,245.3 L380.0,217.5 L473.3,187.8 L566.6,152.5 L621.2,129.9 L651.3,115.1" fill="none" stroke="#ff5f1f" stroke-width="2" />
+  <g><title>3.8B model, first request, 500 tokens of context: 0.30 s</title><circle cx="100.0" cy="292.1" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>3.8B model, first request, 1,000 tokens of context: 0.57 s</title><circle cx="193.4" cy="270.4" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>3.8B model, first request, 2,000 tokens of context: 1.20 s</title><circle cx="286.7" cy="245.3" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>3.8B model, first request, 4,000 tokens of context: 2.74 s</title><circle cx="380.0" cy="217.5" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>3.8B model, first request, 8,000 tokens of context: 6.61 s</title><circle cx="473.3" cy="187.8" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>3.8B model, first request, 16,000 tokens of context: 18.77 s</title><circle cx="566.6" cy="152.5" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>3.8B model, first request, 24,000 tokens of context: 36.65 s</title><circle cx="621.2" cy="129.9" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>3.8B model, first request, 30,000 tokens of context: 56.76 s</title><circle cx="651.3" cy="115.1" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <path d="M100.0,310.9 L193.4,291.3 L286.7,264.9 L380.0,237.1 L473.3,203.7 L566.6,165.9 L621.2,138.4 L651.3,125.7" fill="none" stroke="#ff5f1f" stroke-width="2" stroke-dasharray="5 3"/>
+  <g><title>3.8B model, follow-up question, 500 tokens of context: 0.17 s</title><circle cx="100.0" cy="310.9" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>3.8B model, follow-up question, 1,000 tokens of context: 0.31 s</title><circle cx="193.4" cy="291.3" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>3.8B model, follow-up question, 2,000 tokens of context: 0.67 s</title><circle cx="286.7" cy="264.9" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>3.8B model, follow-up question, 4,000 tokens of context: 1.54 s</title><circle cx="380.0" cy="237.1" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>3.8B model, follow-up question, 8,000 tokens of context: 4.12 s</title><circle cx="473.3" cy="203.7" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>3.8B model, follow-up question, 16,000 tokens of context: 12.61 s</title><circle cx="566.6" cy="165.9" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>3.8B model, follow-up question, 24,000 tokens of context: 28.49 s</title><circle cx="621.2" cy="138.4" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>3.8B model, follow-up question, 30,000 tokens of context: 41.56 s</title><circle cx="651.3" cy="125.7" r="4" fill="#ff5f1f" stroke="#fff" stroke-width="1.5"/></g>
+  <path d="M100.0,340.2 L193.4,316.5 L286.7,291.2 L380.0,260.3 L473.3,226.6 L566.6,190.6" fill="none" stroke="#4a7fc1" stroke-width="2" />
+  <g><title>0.9B model, first request, 500 tokens of context: 0.07 s</title><circle cx="100.0" cy="340.2" r="4" fill="#4a7fc1" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>0.9B model, first request, 1,000 tokens of context: 0.15 s</title><circle cx="193.4" cy="316.5" r="4" fill="#4a7fc1" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>0.9B model, first request, 2,000 tokens of context: 0.31 s</title><circle cx="286.7" cy="291.2" r="4" fill="#4a7fc1" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>0.9B model, first request, 4,000 tokens of context: 0.77 s</title><circle cx="380.0" cy="260.3" r="4" fill="#4a7fc1" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>0.9B model, first request, 8,000 tokens of context: 2.10 s</title><circle cx="473.3" cy="226.6" r="4" fill="#4a7fc1" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>0.9B model, first request, 16,000 tokens of context: 6.07 s</title><circle cx="566.6" cy="190.6" r="4" fill="#4a7fc1" stroke="#fff" stroke-width="1.5"/></g>
+  <path d="M100.0,356.1 L193.4,335.4 L286.7,309.6 L380.0,277.2 L473.3,241.7 L566.6,204.4" fill="none" stroke="#4a7fc1" stroke-width="2" stroke-dasharray="5 3"/>
+  <g><title>0.9B model, follow-up question, 500 tokens of context: 0.05 s</title><circle cx="100.0" cy="356.1" r="4" fill="#4a7fc1" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>0.9B model, follow-up question, 1,000 tokens of context: 0.08 s</title><circle cx="193.4" cy="335.4" r="4" fill="#4a7fc1" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>0.9B model, follow-up question, 2,000 tokens of context: 0.18 s</title><circle cx="286.7" cy="309.6" r="4" fill="#4a7fc1" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>0.9B model, follow-up question, 4,000 tokens of context: 0.47 s</title><circle cx="380.0" cy="277.2" r="4" fill="#4a7fc1" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>0.9B model, follow-up question, 8,000 tokens of context: 1.34 s</title><circle cx="473.3" cy="241.7" r="4" fill="#4a7fc1" stroke="#fff" stroke-width="1.5"/></g>
+  <g><title>0.9B model, follow-up question, 16,000 tokens of context: 4.04 s</title><circle cx="566.6" cy="204.4" r="4" fill="#4a7fc1" stroke="#fff" stroke-width="1.5"/></g>
+</svg>

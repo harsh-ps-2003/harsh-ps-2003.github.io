@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 500" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">The model's matmuls, tuned in a chain</title>
+  <desc id="desc">Achieved TFLOPS against rows, 8 to 8,192, for each of the four matmuls of a layer, timed as the model runs them, each matmul waiting on the one before: MLX's matmul, and the tile bench/tune_gemm.py picked (MLX's matmul where nothing beat it by 3%). The dotted line is the 33 TFLOPS peak.</desc>
+  <style>text { fill: #232333; font-size: 10.5px; } .t { font-size: 15px; font-weight: 700; } .h { font-size: 11px; font-weight: 700; } .m { fill: #5c5c6e; font-size: 9.5px; } .grid { stroke: #e9e9ef; stroke-width: 1; }</style>
+  <text x="20" y="28" class="t">The model's matmuls, tuned as the model runs them</text>
+  <text x="20" y="46" class="m">TFLOPS by rows (tokens), log scale, 8 dependent matmuls; dotted: the 33 TFLOPS peak</text>
+    <line x1="20" y1="66" x2="42" y2="66" stroke="#a3a3b3" stroke-width="2" stroke-dasharray="5 3"/><circle cx="31" cy="66" r="3.5" fill="#a3a3b3"/><text x="50" y="70">MLX's matmul</text>
+  <line x1="220" y1="66" x2="242" y2="66" stroke="#ff5f1f" stroke-width="2" /><circle cx="231" cy="66" r="3.5" fill="#ff5f1f"/><text x="250" y="70">the tile the tuner picked (or MLX's, where it was faster)</text>
+    <text x="50" y="90" class="h">qkv (6144 x 2560)</text>
+  <line x1="50" y1="260.0" x2="350" y2="260.0" class="grid"/><text x="44" y="263.5" class="m" text-anchor="end">0</text>
+  <line x1="50" y1="214.3" x2="350" y2="214.3" class="grid"/><text x="44" y="217.8" class="m" text-anchor="end">10</text>
+  <line x1="50" y1="168.6" x2="350" y2="168.6" class="grid"/><text x="44" y="172.1" class="m" text-anchor="end">20</text>
+  <line x1="50" y1="122.9" x2="350" y2="122.9" class="grid"/><text x="44" y="126.4" class="m" text-anchor="end">30</text>
+  <line x1="50" y1="109.1" x2="350" y2="109.1" stroke="#a3a3b3" stroke-dasharray="1 4" stroke-linecap="round" stroke-width="2"/>
+  <text x="55.5" y="274" class="m" text-anchor="middle">8</text>
+  <text x="112.8" y="274" class="m" text-anchor="middle">32</text>
+  <text x="159.8" y="274" class="m" text-anchor="middle">100</text>
+  <text x="205.2" y="274" class="m" text-anchor="middle">300</text>
+  <text x="254.9" y="274" class="m" text-anchor="middle">1k</text>
+  <text x="300.3" y="274" class="m" text-anchor="middle">3k</text>
+  <text x="341.8" y="274" class="m" text-anchor="middle">8k</text>
+  <path d="M55.5,252.5 L84.1,249.8 L112.8,239.0 L141.4,220.0 L156.8,206.0 L170.0,187.4 L186.8,168.0 L203.1,163.8 L224.7,138.6 L257.7,131.8 L284.5,139.0 L312.3,135.6 L341.8,124.9" fill="none" stroke="#a3a3b3" stroke-width="2" stroke-dasharray="5 3"/>
+  <g><title>MLX's matmul, 8 rows: 1.6 TFLOPS</title><circle cx="55.5" cy="252.5" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 16 rows: 2.2 TFLOPS</title><circle cx="84.1" cy="249.8" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 32 rows: 4.6 TFLOPS</title><circle cx="112.8" cy="239.0" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 64 rows: 8.7 TFLOPS</title><circle cx="141.4" cy="220.0" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 93 rows: 11.8 TFLOPS</title><circle cx="156.8" cy="206.0" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 128 rows: 15.9 TFLOPS</title><circle cx="170.0" cy="187.4" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 192 rows: 20.1 TFLOPS</title><circle cx="186.8" cy="168.0" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 285 rows: 21.0 TFLOPS</title><circle cx="203.1" cy="163.8" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 481 rows: 26.6 TFLOPS</title><circle cx="224.7" cy="138.6" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 1069 rows: 28.0 TFLOPS</title><circle cx="257.7" cy="131.8" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 2049 rows: 26.5 TFLOPS</title><circle cx="284.5" cy="139.0" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 4009 rows: 27.2 TFLOPS</title><circle cx="312.3" cy="135.6" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 8192 rows: 29.6 TFLOPS</title><circle cx="341.8" cy="124.9" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <path d="M55.5,252.5 L84.1,248.0 L112.8,235.1 L141.4,212.4 L156.8,192.3 L170.0,167.7 L186.8,148.6 L203.1,143.1 L224.7,133.5 L257.7,127.2 L284.5,139.0 L312.3,135.6 L341.8,124.9" fill="none" stroke="#ff5f1f" stroke-width="2" />
+  <g><title>the tuned tile, 8 rows: 1.6 TFLOPS</title><circle cx="55.5" cy="252.5" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 16 rows: 2.6 TFLOPS</title><circle cx="84.1" cy="248.0" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 32 rows: 5.4 TFLOPS</title><circle cx="112.8" cy="235.1" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 64 rows: 10.4 TFLOPS</title><circle cx="141.4" cy="212.4" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 93 rows: 14.8 TFLOPS</title><circle cx="156.8" cy="192.3" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 128 rows: 20.2 TFLOPS</title><circle cx="170.0" cy="167.7" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 192 rows: 24.4 TFLOPS</title><circle cx="186.8" cy="148.6" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 285 rows: 25.6 TFLOPS</title><circle cx="203.1" cy="143.1" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 481 rows: 27.7 TFLOPS</title><circle cx="224.7" cy="133.5" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 1069 rows: 29.0 TFLOPS</title><circle cx="257.7" cy="127.2" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 2049 rows: 26.5 TFLOPS</title><circle cx="284.5" cy="139.0" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 4009 rows: 27.2 TFLOPS</title><circle cx="312.3" cy="135.6" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 8192 rows: 29.6 TFLOPS</title><circle cx="341.8" cy="124.9" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <text x="400" y="90" class="h">o_proj (2560 x 4096)</text>
+  <line x1="400" y1="260.0" x2="700" y2="260.0" class="grid"/><text x="394" y="263.5" class="m" text-anchor="end">0</text>
+  <line x1="400" y1="214.3" x2="700" y2="214.3" class="grid"/><text x="394" y="217.8" class="m" text-anchor="end">10</text>
+  <line x1="400" y1="168.6" x2="700" y2="168.6" class="grid"/><text x="394" y="172.1" class="m" text-anchor="end">20</text>
+  <line x1="400" y1="122.9" x2="700" y2="122.9" class="grid"/><text x="394" y="126.4" class="m" text-anchor="end">30</text>
+  <line x1="400" y1="109.1" x2="700" y2="109.1" stroke="#a3a3b3" stroke-dasharray="1 4" stroke-linecap="round" stroke-width="2"/>
+  <text x="405.5" y="274" class="m" text-anchor="middle">8</text>
+  <text x="462.8" y="274" class="m" text-anchor="middle">32</text>
+  <text x="509.8" y="274" class="m" text-anchor="middle">100</text>
+  <text x="555.2" y="274" class="m" text-anchor="middle">300</text>
+  <text x="604.9" y="274" class="m" text-anchor="middle">1k</text>
+  <text x="650.3" y="274" class="m" text-anchor="middle">3k</text>
+  <text x="691.8" y="274" class="m" text-anchor="middle">8k</text>
+  <path d="M405.5,252.8 L434.1,251.1 L462.8,242.4 L491.4,227.6 L506.8,207.8 L520.0,192.0 L536.8,180.8 L553.1,179.5 L574.7,146.2 L607.7,144.5 L634.5,132.3 L662.3,131.3 L691.8,128.6" fill="none" stroke="#a3a3b3" stroke-width="2" stroke-dasharray="5 3"/>
+  <g><title>MLX's matmul, 8 rows: 1.6 TFLOPS</title><circle cx="405.5" cy="252.8" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 16 rows: 1.9 TFLOPS</title><circle cx="434.1" cy="251.1" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 32 rows: 3.9 TFLOPS</title><circle cx="462.8" cy="242.4" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 64 rows: 7.1 TFLOPS</title><circle cx="491.4" cy="227.6" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 93 rows: 11.4 TFLOPS</title><circle cx="506.8" cy="207.8" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 128 rows: 14.9 TFLOPS</title><circle cx="520.0" cy="192.0" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 192 rows: 17.3 TFLOPS</title><circle cx="536.8" cy="180.8" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 285 rows: 17.6 TFLOPS</title><circle cx="553.1" cy="179.5" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 481 rows: 24.9 TFLOPS</title><circle cx="574.7" cy="146.2" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 1069 rows: 25.3 TFLOPS</title><circle cx="607.7" cy="144.5" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 2049 rows: 27.9 TFLOPS</title><circle cx="634.5" cy="132.3" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 4009 rows: 28.2 TFLOPS</title><circle cx="662.3" cy="131.3" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 8192 rows: 28.7 TFLOPS</title><circle cx="691.8" cy="128.6" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <path d="M405.5,252.8 L434.1,251.1 L462.8,240.9 L491.4,222.4 L506.8,207.8 L520.0,187.5 L536.8,166.5 L553.1,166.4 L574.7,140.3 L607.7,136.9 L634.5,132.3 L662.3,131.3 L691.8,128.6" fill="none" stroke="#ff5f1f" stroke-width="2" />
+  <g><title>the tuned tile, 8 rows: 1.6 TFLOPS</title><circle cx="405.5" cy="252.8" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 16 rows: 1.9 TFLOPS</title><circle cx="434.1" cy="251.1" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 32 rows: 4.2 TFLOPS</title><circle cx="462.8" cy="240.9" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 64 rows: 8.2 TFLOPS</title><circle cx="491.4" cy="222.4" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 93 rows: 11.4 TFLOPS</title><circle cx="506.8" cy="207.8" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 128 rows: 15.9 TFLOPS</title><circle cx="520.0" cy="187.5" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 192 rows: 20.4 TFLOPS</title><circle cx="536.8" cy="166.5" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 285 rows: 20.5 TFLOPS</title><circle cx="553.1" cy="166.4" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 481 rows: 26.2 TFLOPS</title><circle cx="574.7" cy="140.3" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 1069 rows: 26.9 TFLOPS</title><circle cx="607.7" cy="136.9" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 2049 rows: 27.9 TFLOPS</title><circle cx="634.5" cy="132.3" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 4009 rows: 28.2 TFLOPS</title><circle cx="662.3" cy="131.3" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 8192 rows: 28.7 TFLOPS</title><circle cx="691.8" cy="128.6" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <text x="50" y="290" class="h">gate_up (20480 x 2560)</text>
+  <line x1="50" y1="460.0" x2="350" y2="460.0" class="grid"/><text x="44" y="463.5" class="m" text-anchor="end">0</text>
+  <line x1="50" y1="414.3" x2="350" y2="414.3" class="grid"/><text x="44" y="417.8" class="m" text-anchor="end">10</text>
+  <line x1="50" y1="368.6" x2="350" y2="368.6" class="grid"/><text x="44" y="372.1" class="m" text-anchor="end">20</text>
+  <line x1="50" y1="322.9" x2="350" y2="322.9" class="grid"/><text x="44" y="326.4" class="m" text-anchor="end">30</text>
+  <line x1="50" y1="309.1" x2="350" y2="309.1" stroke="#a3a3b3" stroke-dasharray="1 4" stroke-linecap="round" stroke-width="2"/>
+  <text x="55.5" y="474" class="m" text-anchor="middle">8</text>
+  <text x="112.8" y="474" class="m" text-anchor="middle">32</text>
+  <text x="159.8" y="474" class="m" text-anchor="middle">100</text>
+  <text x="205.2" y="474" class="m" text-anchor="middle">300</text>
+  <text x="254.9" y="474" class="m" text-anchor="middle">1k</text>
+  <text x="300.3" y="474" class="m" text-anchor="middle">3k</text>
+  <text x="341.8" y="474" class="m" text-anchor="middle">8k</text>
+  <path d="M55.5,450.6 L84.1,446.9 L112.8,433.3 L141.4,407.4 L156.8,394.5 L170.0,374.3 L186.8,349.4 L203.1,346.0 L224.7,331.4 L257.7,326.3 L284.5,321.0 L312.3,321.6 L341.8,321.2" fill="none" stroke="#a3a3b3" stroke-width="2" stroke-dasharray="5 3"/>
+  <g><title>MLX's matmul, 8 rows: 2.1 TFLOPS</title><circle cx="55.5" cy="450.6" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 16 rows: 2.9 TFLOPS</title><circle cx="84.1" cy="446.9" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 32 rows: 5.8 TFLOPS</title><circle cx="112.8" cy="433.3" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 64 rows: 11.5 TFLOPS</title><circle cx="141.4" cy="407.4" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 93 rows: 14.3 TFLOPS</title><circle cx="156.8" cy="394.5" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 128 rows: 18.7 TFLOPS</title><circle cx="170.0" cy="374.3" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 192 rows: 24.2 TFLOPS</title><circle cx="186.8" cy="349.4" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 285 rows: 24.9 TFLOPS</title><circle cx="203.1" cy="346.0" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 481 rows: 28.1 TFLOPS</title><circle cx="224.7" cy="331.4" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 1069 rows: 29.2 TFLOPS</title><circle cx="257.7" cy="326.3" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 2049 rows: 30.4 TFLOPS</title><circle cx="284.5" cy="321.0" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 4009 rows: 30.3 TFLOPS</title><circle cx="312.3" cy="321.6" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 8192 rows: 30.4 TFLOPS</title><circle cx="341.8" cy="321.2" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <path d="M55.5,450.6 L84.1,445.3 L112.8,431.4 L141.4,404.3 L156.8,381.4 L170.0,358.5 L186.8,334.9 L203.1,328.7 L224.7,331.4 L257.7,326.3 L284.5,321.0 L312.3,321.6 L341.8,316.8" fill="none" stroke="#ff5f1f" stroke-width="2" />
+  <g><title>the tuned tile, 8 rows: 2.1 TFLOPS</title><circle cx="55.5" cy="450.6" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 16 rows: 3.2 TFLOPS</title><circle cx="84.1" cy="445.3" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 32 rows: 6.3 TFLOPS</title><circle cx="112.8" cy="431.4" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 64 rows: 12.2 TFLOPS</title><circle cx="141.4" cy="404.3" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 93 rows: 17.2 TFLOPS</title><circle cx="156.8" cy="381.4" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 128 rows: 22.2 TFLOPS</title><circle cx="170.0" cy="358.5" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 192 rows: 27.4 TFLOPS</title><circle cx="186.8" cy="334.9" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 285 rows: 28.7 TFLOPS</title><circle cx="203.1" cy="328.7" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 481 rows: 28.1 TFLOPS</title><circle cx="224.7" cy="331.4" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 1069 rows: 29.2 TFLOPS</title><circle cx="257.7" cy="326.3" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 2049 rows: 30.4 TFLOPS</title><circle cx="284.5" cy="321.0" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 4009 rows: 30.3 TFLOPS</title><circle cx="312.3" cy="321.6" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 8192 rows: 31.3 TFLOPS</title><circle cx="341.8" cy="316.8" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <text x="400" y="290" class="h">down (2560 x 10240)</text>
+  <line x1="400" y1="460.0" x2="700" y2="460.0" class="grid"/><text x="394" y="463.5" class="m" text-anchor="end">0</text>
+  <line x1="400" y1="414.3" x2="700" y2="414.3" class="grid"/><text x="394" y="417.8" class="m" text-anchor="end">10</text>
+  <line x1="400" y1="368.6" x2="700" y2="368.6" class="grid"/><text x="394" y="372.1" class="m" text-anchor="end">20</text>
+  <line x1="400" y1="322.9" x2="700" y2="322.9" class="grid"/><text x="394" y="326.4" class="m" text-anchor="end">30</text>
+  <line x1="400" y1="309.1" x2="700" y2="309.1" stroke="#a3a3b3" stroke-dasharray="1 4" stroke-linecap="round" stroke-width="2"/>
+  <text x="405.5" y="474" class="m" text-anchor="middle">8</text>
+  <text x="462.8" y="474" class="m" text-anchor="middle">32</text>
+  <text x="509.8" y="474" class="m" text-anchor="middle">100</text>
+  <text x="555.2" y="474" class="m" text-anchor="middle">300</text>
+  <text x="604.9" y="474" class="m" text-anchor="middle">1k</text>
+  <text x="650.3" y="474" class="m" text-anchor="middle">3k</text>
+  <text x="691.8" y="474" class="m" text-anchor="middle">8k</text>
+  <path d="M405.5,451.6 L434.1,448.2 L462.8,436.3 L491.4,416.9 L506.8,403.9 L520.0,390.3 L536.8,376.8 L553.1,376.8 L574.7,350.1 L607.7,346.8 L634.5,344.8 L662.3,346.9 L691.8,337.0" fill="none" stroke="#a3a3b3" stroke-width="2" stroke-dasharray="5 3"/>
+  <g><title>MLX's matmul, 8 rows: 1.8 TFLOPS</title><circle cx="405.5" cy="451.6" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 16 rows: 2.6 TFLOPS</title><circle cx="434.1" cy="448.2" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 32 rows: 5.2 TFLOPS</title><circle cx="462.8" cy="436.3" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 64 rows: 9.4 TFLOPS</title><circle cx="491.4" cy="416.9" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 93 rows: 12.3 TFLOPS</title><circle cx="506.8" cy="403.9" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 128 rows: 15.2 TFLOPS</title><circle cx="520.0" cy="390.3" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 192 rows: 18.2 TFLOPS</title><circle cx="536.8" cy="376.8" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 285 rows: 18.2 TFLOPS</title><circle cx="553.1" cy="376.8" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 481 rows: 24.0 TFLOPS</title><circle cx="574.7" cy="350.1" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 1069 rows: 24.8 TFLOPS</title><circle cx="607.7" cy="346.8" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 2049 rows: 25.2 TFLOPS</title><circle cx="634.5" cy="344.8" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 4009 rows: 24.7 TFLOPS</title><circle cx="662.3" cy="346.9" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>MLX's matmul, 8192 rows: 26.9 TFLOPS</title><circle cx="691.8" cy="337.0" r="3.5" fill="#a3a3b3" stroke="#fff" stroke-width="1.2"/></g>
+  <path d="M405.5,451.6 L434.1,448.2 L462.8,436.3 L491.4,416.9 L506.8,400.0 L520.0,380.7 L536.8,351.0 L553.1,360.9 L574.7,331.7 L607.7,333.7 L634.5,333.5 L662.3,327.1 L691.8,328.3" fill="none" stroke="#ff5f1f" stroke-width="2" />
+  <g><title>the tuned tile, 8 rows: 1.8 TFLOPS</title><circle cx="405.5" cy="451.6" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 16 rows: 2.6 TFLOPS</title><circle cx="434.1" cy="448.2" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 32 rows: 5.2 TFLOPS</title><circle cx="462.8" cy="436.3" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 64 rows: 9.4 TFLOPS</title><circle cx="491.4" cy="416.9" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 93 rows: 13.1 TFLOPS</title><circle cx="506.8" cy="400.0" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 128 rows: 17.3 TFLOPS</title><circle cx="520.0" cy="380.7" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 192 rows: 23.8 TFLOPS</title><circle cx="536.8" cy="351.0" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 285 rows: 21.7 TFLOPS</title><circle cx="553.1" cy="360.9" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 481 rows: 28.1 TFLOPS</title><circle cx="574.7" cy="331.7" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 1069 rows: 27.6 TFLOPS</title><circle cx="607.7" cy="333.7" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 2049 rows: 27.7 TFLOPS</title><circle cx="634.5" cy="333.5" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 4009 rows: 29.1 TFLOPS</title><circle cx="662.3" cy="327.1" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+  <g><title>the tuned tile, 8192 rows: 28.8 TFLOPS</title><circle cx="691.8" cy="328.3" r="3.5" fill="#ff5f1f" stroke="#fff" stroke-width="1.2"/></g>
+</svg>
