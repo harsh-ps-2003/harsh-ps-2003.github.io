@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/missing-writing-go/"]
+path = "writes/2026-07-09-missing-writing-go"
 title = "missing writing some concurrency in Go"
 date = 2026-07-09
 description = "Go concurrency patterns from production: channels, CSP ideas, and synchronization beyond the happy path."

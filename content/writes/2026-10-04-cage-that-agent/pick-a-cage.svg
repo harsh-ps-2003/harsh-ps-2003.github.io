@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 516" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">Which sandbox fits your agent?</title>
+  <desc id="desc">A decision flow. If the code is trusted, plain runc containers are fine. If the agent only runs small snippets that call your tools, an interpreter sandbox such as Monty, WASI or Pyodide is enough. If it needs a GPU, short serverless jobs suit gVisor with nvproxy (Modal) and long jobs suit Cloud Hypervisor or Kata. Without KVM, use gVisor. With KVM, Kubernetes shops use Kata Containers and everyone else uses Firecracker, as E2B, Fly Sprites and Vercel do. None of these fixes credentials in env vars, secrets in snapshots or prompt injection on its own.</desc>
+
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+  </defs>
+  <style>
+    text { fill: #232333; font-size: 10px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; }
+    .b { font-size: 11.5px; font-weight: 700; }
+    .s { font-size: 10.5px; }
+    .red { fill: #c62f2f; }
+    .acc { fill: #c2410c; font-weight: 600; }
+    .grn { fill: #2f7a47; }
+    .step { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .y { fill: #fbf1cf; stroke: #d4b34a; stroke-width: 1; }
+    .r { fill: #fbe5e3; stroke: #c62f2f; stroke-width: 1; }
+    .g { fill: #e2f2e6; stroke: #5ea876; stroke-width: 1.25; }
+    .app { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1.25; }
+    .host { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1; }
+    .sentry { fill: #ece6f7; stroke: #9b86c9; stroke-width: 1.25; }
+    .band { fill: #f5f5f8; stroke: #c3c3cf; stroke-width: 1; }
+    .pip0 { fill: #ffffff; stroke: #c3c3cf; stroke-width: 1; }
+    .ln { stroke: #232333; stroke-width: 1.25; fill: none; }
+  </style>
+
+  <text class="k" x="16" y="22">PICK YOUR CAGE</text>
+  <text class="t" x="16" y="42">Which sandbox fits your agent?</text>
+  <text class="c" x="16" y="60">Start at the top. It&#x27;s a rough guide, the sections above have the fine print.</text>
+  <rect class="step" x="18" y="76" width="380" height="46" rx="4"/>
+  <text class="b" x="28" y="95">Is it code your team wrote and reviewed?</text>
+  <text class="m" x="28" y="111">known, trusted code with a normal deploy path</text>
+  <rect class="host" x="430" y="76" width="274" height="46" rx="4"/>
+  <text class="b" x="440" y="93">runc / plain Docker</text>
+  <text x="440" y="108">fast, shared kernel: trusted code only</text>
+  <line class="ln" x1="398" y1="99" x2="428" y2="99" marker-end="url(#a)"/>
+  <text class="acc" x="406" y="94">yes</text>
+  <line class="ln" x1="58" y1="122" x2="58" y2="144" marker-end="url(#a)"/>
+  <text class="acc" x="66" y="137">no</text>
+  <rect class="step" x="18" y="146" width="380" height="46" rx="4"/>
+  <text class="b" x="28" y="165">Does it only run small snippets that call tools?</text>
+  <text class="m" x="28" y="181">no shell, no pip install, no real Linux</text>
+  <rect class="app" x="430" y="146" width="274" height="46" rx="4"/>
+  <text class="b" x="440" y="163">interpreter sandbox</text>
+  <text x="440" y="178">Monty, WASI, Pyodide: ms start, no shell</text>
+  <line class="ln" x1="398" y1="169" x2="428" y2="169" marker-end="url(#a)"/>
+  <text class="acc" x="406" y="164">yes</text>
+  <line class="ln" x1="58" y1="192" x2="58" y2="214" marker-end="url(#a)"/>
+  <text class="acc" x="66" y="207">no</text>
+  <rect class="step" x="18" y="216" width="380" height="46" rx="4"/>
+  <text class="b" x="28" y="235">Does it need a GPU?</text>
+  <text class="m" x="28" y="251">local inference, CUDA, fine-tuning</text>
+  <rect class="g" x="430" y="216" width="274" height="56" rx="4"/>
+  <text class="b" x="440" y="233">GPU cages</text>
+  <text x="440" y="248">short + serverless: gVisor + nvproxy</text>
+  <text x="440" y="262">long-running: Cloud Hypervisor / Kata</text>
+  <line class="ln" x1="398" y1="239" x2="428" y2="239" marker-end="url(#a)"/>
+  <text class="acc" x="406" y="234">yes</text>
+  <line class="ln" x1="58" y1="262" x2="58" y2="294" marker-end="url(#a)"/>
+  <text class="acc" x="66" y="277">no</text>
+  <rect class="step" x="18" y="296" width="380" height="46" rx="4"/>
+  <text class="b" x="28" y="315">Can you get KVM on your hosts?</text>
+  <text class="m" x="28" y="331">bare metal, or nested virt like AWS c8i</text>
+  <rect class="sentry" x="430" y="296" width="274" height="46" rx="4"/>
+  <text class="b" x="440" y="313">gVisor (runsc)</text>
+  <text x="440" y="328">no KVM needed, ~60 syscalls missing</text>
+  <line class="ln" x1="398" y1="319" x2="428" y2="319" marker-end="url(#a)"/>
+  <text class="acc" x="406" y="314">no</text>
+  <line class="ln" x1="58" y1="342" x2="58" y2="364" marker-end="url(#a)"/>
+  <text class="acc" x="66" y="357">yes</text>
+  <rect class="step" x="18" y="366" width="380" height="46" rx="4"/>
+  <text class="b" x="28" y="385">Do you run everything on Kubernetes?</text>
+  <text class="m" x="28" y="401">and want kubectl and pod specs unchanged</text>
+  <rect class="g" x="430" y="366" width="274" height="46" rx="4"/>
+  <text class="b" x="440" y="383">Kata Containers</text>
+  <text x="440" y="398">a microVM per pod, picked by RuntimeClass</text>
+  <line class="ln" x1="398" y1="389" x2="428" y2="389" marker-end="url(#a)"/>
+  <text class="acc" x="406" y="384">yes</text>
+  <line class="ln" x1="58" y1="412" x2="58" y2="434" marker-end="url(#a)"/>
+  <text class="acc" x="66" y="427">no</text>
+  <rect class="g" x="18" y="436" width="380" height="46" rx="4"/>
+  <text class="b" x="28" y="455">Firecracker</text>
+  <text x="28" y="471">own kernel per agent: E2B, Fly Sprites, Vercel</text>
+  <text class="red" x="18" y="504">None of these fixes creds in env vars, secrets in snapshots or prompt injection on its own.</text>
+</svg>

@@ -1,0 +1,134 @@
+/* Shared look for every lab. Lab-specific rules live in lab-<name>.css. */
+.svd-lab {
+  /* Everything follows the site theme, so the labs only use the page background,
+     the text colour, greys mixed from those two and the one orange accent. */
+  --v-bg: var(--background-color);
+  --v-ink: var(--text-color);
+  --v-accent: var(--main-color);
+  --v-dim: color-mix(in srgb, var(--text-color) 58%, var(--background-color));
+  --v-faint: color-mix(in srgb, var(--text-color) 20%, transparent);
+  --v-grid: color-mix(in srgb, var(--text-color) 10%, transparent);
+  --v-tint: color-mix(in srgb, var(--main-color) 12%, transparent);
+  --v-panel: color-mix(in srgb, var(--text-color) 5%, var(--background-color));
+  /* one name per idea, shared by drawings (C in lab-core.mjs), text (.c-*) and keys (.dot-*) */
+  --v-light: color-mix(in srgb, var(--text-color) 40%, var(--background-color));
+  --v-s1: var(--v-ink); --v-s2: var(--v-dim); --v-x: var(--v-accent); --v-i: var(--v-light); --v-j: var(--v-light);
+  --v-pos: var(--v-accent); --v-neg: var(--v-dim); --v-purple: var(--v-dim);
+  --lab-accent: var(--main-color);
+  --lab-border: rgba(128, 128, 128, .3);
+  --lab-soft: var(--v-panel);
+  --lab-muted: color-mix(in srgb, var(--text-color) 68%, var(--background-color));
+  border: 1px solid var(--lab-border);
+  border-top: 3px solid var(--main-color);
+  border-radius: 3px;
+  padding: 22px 22px 18px;
+  margin: 34px 0;
+  background: var(--background-color);
+  color: var(--text-color);
+  font-size: .94em;
+}
+/* text needs more contrast than a thin line, so the light grey reads as dim grey here */
+.c-s1 { color: var(--v-s1); } .c-s2 { color: var(--v-s2); } .c-x { color: var(--v-x); } .c-i { color: var(--v-dim); }
+.c-j { color: var(--v-dim); } .c-pos { color: var(--v-pos); } .c-neg { color: var(--v-neg); } .c-purple { color: var(--v-purple); }
+.c-ink { color: var(--v-ink); } .c-dim { color: var(--v-dim); }
+.svd-lab b[class^="c-"] { font-weight: 700; }
+
+.svd-lab h3 { font-size: 1.25em; margin: 0 0 8px; }
+.svd-lab h4 { margin: 26px 0 6px; font-size: 1em; }
+.svd-lab p { margin: 8px 0; }
+.svd-lab .lab-intro { color: var(--lab-muted); font-size: .9em; line-height: 1.6; margin: 0 0 14px; }
+.svd-lab.lab-loading::after { content: "loading…"; display: block; color: var(--lab-muted); font-size: .85em; padding: 30px 0; text-align: center; }
+.svd-lab .lab-failure { color: var(--lab-accent); }
+
+/* controls */
+.svd-lab .lab-row { display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: end; margin: 14px 0; }
+.svd-lab .lab-field { display: flex; flex-direction: column; gap: 6px; flex: 1 1 170px; min-width: 0; }
+.svd-lab .lab-field-label { display: flex; justify-content: space-between; gap: 8px; font-size: .85em; }
+.svd-lab .lab-field-value { font-variant-numeric: tabular-nums; color: var(--lab-accent); font-weight: 700; }
+.svd-lab input, .svd-lab select, .svd-lab button { font: inherit; color: inherit; accent-color: var(--lab-accent); }
+.svd-lab select, .svd-lab button, .svd-lab input[type="number"] {
+  background: var(--background-color); border: 1px solid var(--lab-border); border-radius: 3px; padding: 7px 10px; min-height: 40px;
+}
+.svd-lab button { cursor: pointer; transition: border-color .15s, background-color .15s; }
+.svd-lab button:hover:not(:disabled) { border-color: var(--lab-accent); }
+.svd-lab button:disabled { opacity: .45; cursor: default; }
+.svd-lab :focus-visible { outline: 2px solid var(--main-color); outline-offset: 2px; }
+.svd-lab input[type="range"] { width: 100%; min-height: 30px; margin: 0; }
+
+/* playback */
+.svd-lab .lab-transport { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 12px 0 8px; }
+.svd-lab .lab-transport button { min-width: 44px; font-size: .9em; }
+.svd-lab .lab-transport .lab-play { min-width: 104px; border-color: var(--lab-accent); color: var(--lab-accent); font-weight: 700; }
+.svd-lab .lab-speed { margin-left: auto; font-size: .8em; color: var(--lab-muted); display: flex; align-items: center; gap: 6px; }
+.svd-lab .lab-speed select { min-height: 34px; padding: 3px 6px; }
+.svd-lab .lab-chapters { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 6px; margin: 8px 0 12px; }
+.svd-lab .lab-chapters button {
+  --p: 0; position: relative; overflow: hidden; font-size: .8em; padding: 8px 4px; min-height: 38px; color: var(--lab-muted);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--lab-accent) 16%, transparent) calc(var(--p) * 100%), transparent 0);
+}
+.svd-lab .lab-chapters button[data-state="done"] { color: var(--text-color); }
+.svd-lab .lab-chapters button[data-state="now"] { color: var(--lab-accent); border-color: var(--lab-accent); font-weight: 700; }
+
+/* the drawing surface is the page itself, with a hairline round it */
+.svd-lab .lab-stage { display: block; width: 100%; background: transparent; border: 1px solid var(--lab-border); border-radius: 3px;
+  color: var(--v-ink); font-family: var(--font-main, monospace); font-size: 13px; fill: var(--v-ink); }
+/* text inherits font and fill from the stage, so a lab's own fill/font-size attributes win */
+.svd-lab canvas { display: block; width: 100%; image-rendering: pixelated; border-radius: 3px; aspect-ratio: 1; }
+.svd-lab figure { margin: 0; min-width: 0; }
+.svd-lab figcaption { font-size: .8em; margin: 6px 0 0; text-align: center; color: var(--lab-muted); }
+.svd-lab .lab-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.svd-lab .lab-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+/* the narrator */
+.svd-lab .lab-narrator {
+  margin: 14px 0; padding: 12px 16px 10px; border-left: 3px solid var(--lab-accent); border-radius: 0 3px 3px 0;
+  background: var(--lab-soft);
+}
+.svd-lab .lab-narrator.lab-pulse { animation: lab-pulse .6s ease-out; }
+@keyframes lab-pulse { from { background: color-mix(in srgb, var(--lab-accent) 14%, var(--lab-soft)); } to { background: var(--lab-soft); } }
+.svd-lab .lab-narrator-step { margin: 0 0 4px; font-size: .84em; letter-spacing: .02em; font-weight: 700; color: var(--lab-accent); }
+.svd-lab .lab-narrator-text { margin: 0 0 8px; font-size: .98em; line-height: 1.65; }
+.svd-lab .lab-chips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin: 4px 0; font-size: .78em; }
+.svd-lab .lab-chips:empty { display: none; }
+.svd-lab .lab-chip-label { color: var(--lab-muted); min-width: 92px; }
+.svd-lab .lab-chip { border: 1px solid var(--lab-border); border-radius: 999px; padding: 1px 9px; background: var(--background-color); }
+.svd-lab .lab-moving .lab-chip { border-color: var(--lab-accent); }
+.svd-lab .lab-narrator-math {
+  margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--lab-border); font-family: monospace; font-size: .84em;
+  line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; color: var(--lab-muted);
+}
+.svd-lab .lab-narrator-math:empty { display: none; }
+
+/* numbers and keys */
+.svd-lab .lab-readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; padding: 12px 0; margin-top: 10px; border-top: 1px solid var(--lab-border); }
+.svd-lab .lab-readouts strong { display: block; font-size: 1.15em; font-variant-numeric: tabular-nums; }
+.svd-lab .lab-readouts div:not([class]) strong { color: var(--lab-accent); }
+.svd-lab .lab-readouts span { font-size: .76em; color: var(--lab-muted); }
+.svd-lab .lab-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .78em; color: var(--lab-muted); margin: 8px 0; }
+.svd-lab .lab-key { display: inline-flex; align-items: center; gap: 6px; }
+.svd-lab .lab-key i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.svd-lab .dot-s1 { background: var(--v-s1); } .svd-lab .dot-s2 { background: var(--v-s2); } .svd-lab .dot-x { background: var(--v-x); }
+.svd-lab .dot-i { background: var(--v-i); } .svd-lab .dot-j { background: var(--v-j); } .svd-lab .dot-pos { background: var(--v-pos); }
+.svd-lab .dot-neg { background: var(--v-neg); } .svd-lab .dot-purple { background: var(--v-purple); }
+.svd-lab .dot-ink { background: var(--v-ink); } .svd-lab .dot-dim { background: var(--v-dim); }
+.svd-lab details { margin-top: 10px; font-size: .9em; }
+.svd-lab summary { cursor: pointer; color: var(--lab-muted); }
+.svd-lab pre.lab-matrices { background: var(--lab-soft); padding: 12px; border-radius: 3px; overflow-x: auto; font-size: .85em; }
+
+/* page furniture used by the prose */
+.svd-equation { overflow-x: auto; padding: 14px 16px; background: var(--code-background-color); font-family: var(--font-main); line-height: 1.9; border-radius: 3px; margin: 18px 0; }
+.svd-application-table { overflow-x: auto; max-width: 100%; margin: 24px 0; }
+.svd-application-table:focus-visible { outline: 2px solid var(--main-color); outline-offset: 3px; }
+
+@media (max-width: 520px) {
+  .svd-lab { padding: 14px 12px; }
+  .svd-lab .lab-grid-2 { grid-template-columns: 1fr; }
+  .svd-lab .lab-grid-3 { gap: 8px; }
+  .svd-lab .lab-speed { margin-left: 0; }
+  .svd-lab .lab-chip-label { min-width: 0; width: 100%; }
+  /* labs size their own stage text, this only covers labels that set nothing */
+  .svd-lab .lab-stage text { font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .svd-lab *, .svd-lab *::before, .svd-lab *::after { animation: none !important; transition: none !important; }
+}

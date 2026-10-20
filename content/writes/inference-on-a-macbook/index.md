@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/inference-on-a-macbook/"]
+path = "writes/2026-10-10-inference-on-a-macbook"
 title = "squeezing a macbook for inference, kernel by kernel"
 date = 2026-10-10
 updated = 2026-10-12

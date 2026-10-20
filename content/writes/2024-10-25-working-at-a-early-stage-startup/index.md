@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/working-at-a-early-stage-startup/"]
+path = "writes/2024-10-25-working-at-a-early-stage-startup"
 title = "Working at a early-stage startup!"
 date = 2024-10-25
 description = "What early-stage startup work feels like versus internships: ownership, communication, unblocking people, and timeline estimation."

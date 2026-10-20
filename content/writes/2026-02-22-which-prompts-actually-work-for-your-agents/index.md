@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/which-prompts-actually-work-for-your-agents/"]
+path = "writes/2026-02-22-which-prompts-actually-work-for-your-agents"
 title = "Which Prompts Actually Work for your Agents?"
 date = 2026-02-22
 description = "How prompt saliency analysis finds which phrases in an agent system prompt actually drive behavior, so you can prune the rest."

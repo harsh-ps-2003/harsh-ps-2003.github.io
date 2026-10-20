@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/the-longer-you-chat-the-worse-your-agents-response/"]
+path = "writes/2026-03-19-the-longer-you-chat-the-worse-your-agents-response"
 title = "the longer you chat, the worse your agent's response"
 date = 2026-03-19
 description = "Why long agent chats degrade: context collapse, memory layers, compaction, evals, and how to keep agent state correct over time."

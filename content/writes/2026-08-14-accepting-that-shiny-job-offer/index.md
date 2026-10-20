@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/accepting-that-shiny-job-offer/"]
+path = "writes/2026-08-14-accepting-that-shiny-job-offer"
 title = "Accepting that shiny job offer?"
 date = 2026-08-14
 draft = false

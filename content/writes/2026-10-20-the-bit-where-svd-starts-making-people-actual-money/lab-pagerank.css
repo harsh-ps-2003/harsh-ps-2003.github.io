@@ -1,0 +1,13 @@
+.svd-lab .pr-main { align-items: center; margin-top: 4px; }
+.svd-lab .pr-side-title { font-size: .85em; margin: 0 0 6px; color: var(--lab-muted); }
+.svd-lab .pr-bar-row { display: grid; grid-template-columns: 16px 1fr 56px; align-items: center; gap: 10px; margin: 12px 0; font-variant-numeric: tabular-nums; }
+.svd-lab .pr-bar-name { font-weight: 700; }
+.svd-lab .pr-track { position: relative; height: 18px; background: var(--lab-soft); border-radius: 3px; }
+.svd-lab .pr-fill { height: 100%; background: var(--v-x); border-radius: 3px; }
+.svd-lab .pr-tick { position: absolute; top: -5px; bottom: -5px; width: 2px; background: var(--text-color); opacity: .75; transform: translateX(-1px); transition: left .5s ease; }
+.svd-lab .pr-bar-value { text-align: right; font-size: .88em; }
+.svd-lab .pr-note { font-size: .78em; color: var(--lab-muted); line-height: 1.5; }
+.svd-lab .pr-spark { margin-top: 14px; }
+.svd-lab .pr-compare-intro { font-size: .9em; line-height: 1.6; }
+.svd-lab .pr-compare-note { font-size: .9em; line-height: 1.6; padding: 10px 14px; border-left: 3px solid var(--v-dim); background: var(--lab-soft); border-radius: 0 3px 3px 0; }
+.svd-lab .pr-panel { margin-top: 10px; }

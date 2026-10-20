@@ -1,6 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 396" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
   <title id="title">One failing test, six steps</title>
-  <desc id="desc">Six steps of a routine coding agent task, which are git clone, read code, pnpm install, write fix, pnpm test, and git push. Under each step, a stack shows the credentials (yellow) and untrusted inputs (red) the session holds after that step. The stack only grows, from two items after clone to nine at push time. Under each stack is the worst case for that step.</desc>
+  <desc id="desc">Six steps of a routine coding-agent task: git clone, read code, pnpm install, write fix, pnpm test and git push. For each step the figure shows what the session newly holds (credentials in yellow, untrusted input in red), a meter of everything held so far that grows from 2 to 9 items, the worst case at that step, and which defense-in-depth gate stops it.</desc>
+
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
   </defs>
@@ -11,80 +12,172 @@
     .c { font-size: 11.5px; fill: #5c5c6e; }
     .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
     .m { fill: #5c5c6e; }
-    .cmd { font-size: 11.5px; font-weight: 700; }
-    .red, .red text { fill: #c62f2f; }
+    .b { font-size: 11.5px; font-weight: 700; }
+    .s { font-size: 10.5px; }
+    .red { fill: #c62f2f; }
+    .acc { fill: #c2410c; font-weight: 600; }
+    .grn { fill: #2f7a47; }
     .step { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
     .y { fill: #fbf1cf; stroke: #d4b34a; stroke-width: 1; }
     .r { fill: #fbe5e3; stroke: #c62f2f; stroke-width: 1; }
-    .old { opacity: .42; }
+    .g { fill: #e2f2e6; stroke: #5ea876; stroke-width: 1.25; }
+    .app { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1.25; }
+    .host { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1; }
+    .sentry { fill: #ece6f7; stroke: #9b86c9; stroke-width: 1.25; }
+    .band { fill: #f5f5f8; stroke: #c3c3cf; stroke-width: 1; }
+    .pip0 { fill: #ffffff; stroke: #c3c3cf; stroke-width: 1; }
+    .ln { stroke: #232333; stroke-width: 1.25; fill: none; }
   </style>
 
   <text class="k" x="16" y="22">IN PRACTICE</text>
-  <text class="t" x="16" y="42">One failing test, six steps</text>
-  <text class="c" x="16" y="60">Nothing gets handed back, so by git push the session holds every credential and every input.</text>
-
-  <!-- steps: x = 18 + 116c, w 104 -->
-  <g>
-    <rect class="step" x="18" y="74" width="104" height="36" rx="4"/>
-    <text class="cmd" x="26" y="89">git clone</text><text class="m" x="26" y="103">needs creds</text>
-    <rect class="step" x="134" y="74" width="104" height="36" rx="4"/>
-    <text class="cmd" x="142" y="89">read code</text><text class="m" x="142" y="103">test + source</text>
-    <rect class="step" x="250" y="74" width="104" height="36" rx="4"/>
-    <text class="cmd" x="258" y="89">pnpm install</text><text class="m" x="258" y="103">100s of pkgs</text>
-    <rect class="step" x="366" y="74" width="104" height="36" rx="4"/>
-    <text class="cmd" x="374" y="89">write fix</text><text class="m" x="374" y="103">LLM-generated</text>
-    <rect class="step" x="482" y="74" width="104" height="36" rx="4"/>
-    <text class="cmd" x="490" y="89">pnpm test</text><text class="m" x="490" y="103">runs everything</text>
-    <rect class="step" x="598" y="74" width="104" height="36" rx="4" style="stroke:#ff5f1f;stroke-width:1.75"/>
-    <text class="cmd" x="606" y="89">git push</text><text class="m" x="606" y="103">repo write</text>
-  </g>
-  <g stroke="#232333" stroke-width="1.25" marker-end="url(#a)">
-    <line x1="122" y1="92" x2="132" y2="92"/>
-    <line x1="238" y1="92" x2="248" y2="92"/>
-    <line x1="354" y1="92" x2="364" y2="92"/>
-    <line x1="470" y1="92" x2="480" y2="92"/>
-    <line x1="586" y1="92" x2="596" y2="92"/>
-  </g>
-
-  <text class="lane" x="18" y="134">HELD BY THE SESSION AFTER EACH STEP</text>
-
-  <!-- stacks: slot i top y = 300 - 20i, h 18; block x = col x, w 104 -->
-  <!-- col 0: new 0,1 -->
-  <rect class="y" x="18" y="300" width="104" height="18" rx="3"/><text x="24" y="313">SSH key / token</text>
-  <rect class="r" x="18" y="280" width="104" height="18" rx="3"/><text x="24" y="293">repo contents</text>
-  <!-- col 1: old 0,1 ; new 2 -->
-  <g class="old"><rect class="y" x="134" y="300" width="104" height="18" rx="3"/><rect class="r" x="134" y="280" width="104" height="18" rx="3"/></g>
-  <rect class="y" x="134" y="260" width="104" height="18" rx="3"/><text x="140" y="273">whole repo read</text>
-  <!-- col 2: old 0-2 ; new 3,4 -->
-  <g class="old"><rect class="y" x="250" y="300" width="104" height="18" rx="3"/><rect class="r" x="250" y="280" width="104" height="18" rx="3"/><rect class="y" x="250" y="260" width="104" height="18" rx="3"/></g>
-  <rect class="r" x="250" y="240" width="104" height="18" rx="3"/><text x="256" y="253">postinstall code</text>
-  <rect class="y" x="250" y="220" width="104" height="18" rx="3"/><text x="256" y="233">process.env</text>
-  <!-- col 3: old 0-4 ; new 5 -->
-  <g class="old"><rect class="y" x="366" y="300" width="104" height="18" rx="3"/><rect class="r" x="366" y="280" width="104" height="18" rx="3"/><rect class="y" x="366" y="260" width="104" height="18" rx="3"/><rect class="r" x="366" y="240" width="104" height="18" rx="3"/><rect class="y" x="366" y="220" width="104" height="18" rx="3"/></g>
-  <rect class="r" x="366" y="200" width="104" height="18" rx="3"/><text x="372" y="213">LLM-written fix</text>
-  <!-- col 4: old 0-5 ; new 6,7 -->
-  <g class="old"><rect class="y" x="482" y="300" width="104" height="18" rx="3"/><rect class="r" x="482" y="280" width="104" height="18" rx="3"/><rect class="y" x="482" y="260" width="104" height="18" rx="3"/><rect class="r" x="482" y="240" width="104" height="18" rx="3"/><rect class="y" x="482" y="220" width="104" height="18" rx="3"/><rect class="r" x="482" y="200" width="104" height="18" rx="3"/></g>
-  <rect class="r" x="482" y="180" width="104" height="18" rx="3"/><text x="488" y="193">test fixtures</text>
-  <rect class="y" x="482" y="160" width="104" height="18" rx="3"/><text x="488" y="173">exec + network</text>
-  <!-- col 5: old 0-7 ; new 8 -->
-  <g class="old"><rect class="y" x="598" y="300" width="104" height="18" rx="3"/><rect class="r" x="598" y="280" width="104" height="18" rx="3"/><rect class="y" x="598" y="260" width="104" height="18" rx="3"/><rect class="r" x="598" y="240" width="104" height="18" rx="3"/><rect class="y" x="598" y="220" width="104" height="18" rx="3"/><rect class="r" x="598" y="200" width="104" height="18" rx="3"/><rect class="r" x="598" y="180" width="104" height="18" rx="3"/><rect class="y" x="598" y="160" width="104" height="18" rx="3"/></g>
-  <rect class="y" x="598" y="140" width="104" height="18" rx="3"/><text x="604" y="153">repo write</text>
-
-  <line x1="16" y1="324" x2="704" y2="324" stroke="#232333" stroke-width="1"/>
-
-  <!-- worst case per step -->
-  <g class="red">
-    <text x="18" y="340">token readable</text><text x="18" y="353">by the process</text>
-    <text x="134" y="340">reads beyond</text><text x="134" y="353">the task</text>
-    <text x="250" y="340">install script</text><text x="250" y="353">steals env vars</text>
-    <text x="366" y="340">edits files it</text><text x="366" y="353">shouldn't touch</text>
-    <text x="482" y="340">test code runs</text><text x="482" y="353">fixture input</text>
-    <text x="598" y="340">pushes whatever</text><text x="598" y="353">changed</text>
-  </g>
-
-  <!-- legend -->
-  <rect class="y" x="18" y="372" width="14" height="10" rx="2"/><text class="m" x="38" y="381">authority the session holds</text>
-  <rect class="r" x="226" y="372" width="14" height="10" rx="2"/><text class="m" x="246" y="381">untrusted input shaping behaviour</text>
-  <g class="old"><rect class="y" x="476" y="372" width="14" height="10" rx="2"/></g><text class="m" x="496" y="381">carried from earlier steps</text>
-
+  <text class="t" x="16" y="42">One failing test: what each step adds, and what stops it</text>
+  <text class="c" x="16" y="60">Each step hands the session something new, nothing is handed back, and each risk has a gate.</text>
+  <rect class="step" x="18" y="74" width="104" height="36" rx="4"/>
+  <text class="b" x="26" y="89">git clone</text>
+  <text class="m" x="26" y="103">needs a token</text>
+  <line class="ln" x1="122" y1="92" x2="132" y2="92" marker-end="url(#a)"/>
+  <rect class="step" x="134" y="74" width="104" height="36" rx="4"/>
+  <text class="b" x="142" y="89">read code</text>
+  <text class="m" x="142" y="103">test + source</text>
+  <line class="ln" x1="238" y1="92" x2="248" y2="92" marker-end="url(#a)"/>
+  <rect class="step" x="250" y="74" width="104" height="36" rx="4"/>
+  <text class="b" x="258" y="89">pnpm install</text>
+  <text class="m" x="258" y="103">100s of pkgs</text>
+  <line class="ln" x1="354" y1="92" x2="364" y2="92" marker-end="url(#a)"/>
+  <rect class="step" x="366" y="74" width="104" height="36" rx="4"/>
+  <text class="b" x="374" y="89">write fix</text>
+  <text class="m" x="374" y="103">unreviewed</text>
+  <line class="ln" x1="470" y1="92" x2="480" y2="92" marker-end="url(#a)"/>
+  <rect class="step" x="482" y="74" width="104" height="36" rx="4"/>
+  <text class="b" x="490" y="89">pnpm test</text>
+  <text class="m" x="490" y="103">runs it all</text>
+  <line class="ln" x1="586" y1="92" x2="596" y2="92" marker-end="url(#a)"/>
+  <rect class="step" x="598" y="74" width="104" height="36" rx="4" style="stroke:#ff5f1f;stroke-width:1.75"/>
+  <text class="b" x="606" y="89">git push</text>
+  <text class="m" x="606" y="103">repo write</text>
+  <text class="lane" x="18" y="132">NEW IN THE SESSION</text>
+  <rect class="y" x="18" y="140" width="104" height="18" rx="3"/>
+  <text x="24" y="153">git token</text>
+  <rect class="r" x="18" y="161" width="104" height="18" rx="3"/>
+  <text x="24" y="174">repo contents</text>
+  <rect class="y" x="134" y="140" width="104" height="18" rx="3"/>
+  <text x="140" y="153">whole repo</text>
+  <rect class="r" x="250" y="140" width="104" height="18" rx="3"/>
+  <text x="256" y="153">postinstall</text>
+  <rect class="y" x="250" y="161" width="104" height="18" rx="3"/>
+  <text x="256" y="174">process.env</text>
+  <rect class="r" x="366" y="140" width="104" height="18" rx="3"/>
+  <text x="372" y="153">LLM-written fix</text>
+  <rect class="r" x="482" y="140" width="104" height="18" rx="3"/>
+  <text x="488" y="153">test fixtures</text>
+  <rect class="y" x="482" y="161" width="104" height="18" rx="3"/>
+  <text x="488" y="174">exec + network</text>
+  <rect class="y" x="598" y="140" width="104" height="18" rx="3"/>
+  <text x="604" y="153">repo write</text>
+  <text class="lane" x="18" y="202">HELD IN TOTAL (THE PILE ONLY GROWS)</text>
+  <rect class="y" x="18" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="29" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="40" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="51" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="62" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="73" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="84" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="95" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="106" y="210" width="9" height="12" rx="2"/>
+  <text class="m" x="18" y="236">2 of 9</text>
+  <rect class="y" x="134" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="145" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="156" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="167" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="178" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="189" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="200" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="211" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="222" y="210" width="9" height="12" rx="2"/>
+  <text class="m" x="134" y="236">3 of 9</text>
+  <rect class="y" x="250" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="261" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="272" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="283" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="294" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="305" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="316" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="327" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="338" y="210" width="9" height="12" rx="2"/>
+  <text class="m" x="250" y="236">5 of 9</text>
+  <rect class="y" x="366" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="377" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="388" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="399" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="410" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="421" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="432" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="443" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="454" y="210" width="9" height="12" rx="2"/>
+  <text class="m" x="366" y="236">6 of 9</text>
+  <rect class="y" x="482" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="493" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="504" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="515" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="526" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="537" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="548" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="559" y="210" width="9" height="12" rx="2"/>
+  <rect class="pip0" x="570" y="210" width="9" height="12" rx="2"/>
+  <text class="m" x="482" y="236">8 of 9</text>
+  <rect class="y" x="598" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="609" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="620" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="631" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="642" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="653" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="664" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="675" y="210" width="9" height="12" rx="2"/>
+  <rect class="y" x="686" y="210" width="9" height="12" rx="2"/>
+  <text class="m" x="598" y="236">9 of 9</text>
+  <line x1="16" y1="248" x2="704" y2="248" stroke="#232333" stroke-width="1"/>
+  <text class="lane" x="18" y="266">WORST CASE AT THIS STEP</text>
+  <text class="red" x="18" y="282">token readable</text>
+  <text class="red" x="18" y="295">by the process</text>
+  <text class="red" x="134" y="282">reads way beyond</text>
+  <text class="red" x="134" y="295">the task</text>
+  <text class="red" x="250" y="282">install script</text>
+  <text class="red" x="250" y="295">steals env vars</text>
+  <text class="red" x="366" y="282">edits files it</text>
+  <text class="red" x="366" y="295">shouldn&#x27;t touch</text>
+  <text class="red" x="482" y="282">test code runs</text>
+  <text class="red" x="482" y="295">fixture input</text>
+  <text class="red" x="598" y="282">pushes whatever</text>
+  <text class="red" x="598" y="295">changed</text>
+  <text class="lane" x="18" y="320">WHAT STOPS IT (GATES FROM DEFENSE IN DEPTH)</text>
+  <rect class="g" x="18" y="328" width="104" height="50" rx="4"/>
+  <text class="acc" x="24" y="342">gate 5</text>
+  <text x="24" y="356">scoped token</text>
+  <text x="24" y="369">minted per call</text>
+  <rect class="g" x="134" y="328" width="104" height="50" rx="4"/>
+  <text class="acc" x="140" y="342">gate 3</text>
+  <text x="140" y="356">fs scoped to</text>
+  <text x="140" y="369">the workspace</text>
+  <rect class="g" x="250" y="328" width="104" height="50" rx="4"/>
+  <text class="acc" x="256" y="342">gates 4 + 5</text>
+  <text x="256" y="356">empty env +</text>
+  <text x="256" y="369">allowlisted net</text>
+  <rect class="g" x="366" y="328" width="104" height="50" rx="4"/>
+  <text class="acc" x="372" y="342">gate 2</text>
+  <text x="372" y="356">path policy on</text>
+  <text x="372" y="369">which files</text>
+  <rect class="g" x="482" y="328" width="104" height="50" rx="4"/>
+  <text class="acc" x="488" y="342">gates 3 + 4</text>
+  <text x="488" y="356">microVM +</text>
+  <text x="488" y="369">default-deny</text>
+  <rect class="g" x="598" y="328" width="104" height="50" rx="4"/>
+  <text class="acc" x="604" y="342">gate 6</text>
+  <text x="604" y="356">push a branch,</text>
+  <text x="604" y="369">a human merges</text>
+  <rect class="y" x="18" y="386" width="14" height="10" rx="2"/>
+  <text class="m" x="38" y="395">authority the session holds</text>
+  <rect class="r" x="226" y="386" width="14" height="10" rx="2"/>
+  <text class="m" x="246" y="395">untrusted input shaping behaviour</text>
+  <rect class="g" x="476" y="386" width="14" height="10" rx="2"/>
+  <text class="m" x="496" y="395">the control that closes it</text>
 </svg>

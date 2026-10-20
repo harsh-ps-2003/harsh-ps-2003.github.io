@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/some-insights-on-hnsw/"]
+path = "writes/2026-04-16-some-insights-on-hnsw"
 title = "some insights on HNSW"
 date = 2026-04-16
 description = "How HNSW approximate nearest neighbor search works for RAG: small-world graphs, skip lists, and the recall versus latency tradeoff."

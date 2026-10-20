@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 452" role="img" aria-labelledby="title desc" font-family="'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+  <title id="title">Five locks on one shared kernel</title>
+  <desc id="desc">A primer on container isolation. An agent process asks the kernel for everything through syscalls. On the way, five Linux layers each answer one question: namespaces (what can it see), cgroups (how much can it use), capabilities (which root powers does it keep), seccomp (which syscalls may it make) and LSMs (which files and paths may it touch). All of them sit on one host kernel shared by every container, so a bug in that kernel is every container&#x27;s bug.</desc>
+
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
+  </defs>
+  <style>
+    text { fill: #232333; font-size: 10px; }
+    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .t { font-size: 15px; font-weight: 700; }
+    .c { font-size: 11.5px; fill: #5c5c6e; }
+    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
+    .m { fill: #5c5c6e; }
+    .b { font-size: 11.5px; font-weight: 700; }
+    .s { font-size: 10.5px; }
+    .red { fill: #c62f2f; }
+    .acc { fill: #c2410c; font-weight: 600; }
+    .grn { fill: #2f7a47; }
+    .step { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .y { fill: #fbf1cf; stroke: #d4b34a; stroke-width: 1; }
+    .r { fill: #fbe5e3; stroke: #c62f2f; stroke-width: 1; }
+    .g { fill: #e2f2e6; stroke: #5ea876; stroke-width: 1.25; }
+    .app { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1.25; }
+    .host { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1; }
+    .sentry { fill: #ece6f7; stroke: #9b86c9; stroke-width: 1.25; }
+    .band { fill: #f5f5f8; stroke: #c3c3cf; stroke-width: 1; }
+    .pip0 { fill: #ffffff; stroke: #c3c3cf; stroke-width: 1; }
+    .ln { stroke: #232333; stroke-width: 1.25; fill: none; }
+  </style>
+
+  <text class="k" x="16" y="22">HOW CONTAINERS ISOLATE</text>
+  <text class="t" x="16" y="42">5 locks on 1 shared kernel</text>
+  <text class="c" x="16" y="60">Each layer answers one question about the process. None of them gives it a kernel of its own.</text>
+  <rect class="app" x="18" y="76" width="200" height="40" rx="4"/>
+  <text class="b" x="28" y="92">agent process</text>
+  <text class="m" x="28" y="107">bash + python it wrote</text>
+  <text class="s" x="236" y="90">Opening a file, starting a program, sending a packet: every one of</text>
+  <text class="s" x="236" y="105">those is a request to the kernel, called a syscall (~400 kinds).</text>
+  <rect class="band" x="110" y="132" width="594" height="42" rx="4"/>
+  <text class="b" x="122" y="149">namespaces</text>
+  <text class="acc" x="122" y="164">what can it see?</text>
+  <text class="s" x="292" y="149">its own view of processes, files, network and hostname,</text>
+  <text class="m" x="292" y="164">like a flat with frosted windows: it cannot see the neighbours</text>
+  <rect class="band" x="110" y="180" width="594" height="42" rx="4"/>
+  <text class="b" x="122" y="197">cgroups</text>
+  <text class="acc" x="122" y="212">how much can it use?</text>
+  <text class="s" x="292" y="197">limits on CPU, memory, disk IO and number of processes,</text>
+  <text class="m" x="292" y="212">a fuse box: it stops hogging, it does not stop escaping</text>
+  <rect class="band" x="110" y="228" width="594" height="42" rx="4"/>
+  <text class="b" x="122" y="245">capabilities</text>
+  <text class="acc" x="122" y="260">which root powers?</text>
+  <text class="s" x="292" y="245">root split into 41 powers, and Docker keeps 14 of them,</text>
+  <text class="m" x="292" y="260">a keyring with the scariest keys taken off</text>
+  <rect class="band" x="110" y="276" width="594" height="42" rx="4"/>
+  <text class="b" x="122" y="293">seccomp</text>
+  <text class="acc" x="122" y="308">which syscalls?</text>
+  <text class="s" x="292" y="293">a filter at the kernel&#x27;s front door, ~44 syscalls blocked,</text>
+  <text class="m" x="292" y="308">a bouncer with a short list, so 300+ still walk in</text>
+  <rect class="band" x="110" y="324" width="594" height="42" rx="4"/>
+  <text class="b" x="122" y="341">LSMs</text>
+  <text class="acc" x="122" y="356">which files and paths?</text>
+  <text class="s" x="292" y="341">path rules like &quot;read /etc/ssl, never touch /home&quot;,</text>
+  <text class="m" x="292" y="356">house rules about which rooms you are allowed into</text>
+  <line class="ln" x1="32" y1="116" x2="32" y2="372" marker-end="url(#a)"/>
+  <text class="m" x="40" y="230">syscalls</text>
+  <text class="m" x="40" y="243">go down</text>
+  <text class="m" x="40" y="256">through</text>
+  <text class="m" x="40" y="269">all 5</text>
+  <text class="m" x="40" y="282">checks</text>
+  <rect class="host" x="18" y="376" width="686" height="44" rx="4"/>
+  <text class="b" x="30" y="394">1 host kernel</text>
+  <text class="m" x="140" y="394">shared by every container on the machine</text>
+  <text class="red" x="30" y="411">a bug down here is everyone&#x27;s bug, whatever the 5 layers above said</text>
+  <text class="m" x="18" y="442">The next section swaps this shared kernel for one per sandbox (gVisor, Firecracker, Kata).</text>
+</svg>

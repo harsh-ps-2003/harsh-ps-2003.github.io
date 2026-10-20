@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/db-joins-on-gpus/"]
+path = "writes/2026-02-26-db-joins-on-gpus"
 title = "DB Joins on GPUs!!"
 date = 2026-02-26
 description = "Why SQL joins run fast on GPUs: hash joins, radix partitioning, and how GPU parallelism beats CPU for OLAP join workloads."

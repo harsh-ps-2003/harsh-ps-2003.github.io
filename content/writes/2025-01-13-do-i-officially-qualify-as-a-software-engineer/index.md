@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/do-i-officially-qualify-as-a-software-engineer/"]
+path = "writes/2025-01-13-do-i-officially-qualify-as-a-software-engineer"
 title = "Do I officially qualify as a Software Engineer now?"
 date = 2025-01-13
 description = "Reflections after a year of systems programming internships, plus how I think about writing Rust applications going forward."

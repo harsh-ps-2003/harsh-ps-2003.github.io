@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/all-sorts-of-famous-attention-layers/"]
+path = "writes/2026-07-18-all-sorts-of-famous-attention-layers"
 title = "All sorts of famous Attention Layers"
 date = 2026-07-18
 description = "A tour of attention variants from classic softmax attention through modern efficient and sparse designs after Kimi K3."

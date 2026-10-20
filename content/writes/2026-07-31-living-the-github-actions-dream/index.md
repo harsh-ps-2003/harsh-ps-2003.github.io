@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/living-the-github-actions-dream/"]
+path = "writes/2026-07-31-living-the-github-actions-dream"
 title = "Living the GitHub Actions Dream"
 date = 2026-07-31
 draft = false

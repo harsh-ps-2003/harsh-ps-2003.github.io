@@ -1,0 +1,22 @@
+.svd-lab .faces-trio { max-width: 520px; margin: 12px auto 4px; }
+.svd-lab .faces-trio canvas { border: 1px solid var(--lab-border); }
+.svd-lab .faces-strip {
+  display: flex; align-items: center; gap: 6px; overflow-x: auto; padding: 10px 6px 12px;
+  border: 1px solid var(--lab-border); border-radius: 3px; scrollbar-width: thin;
+}
+.svd-lab .faces-term { flex: 0 0 64px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 4px; border-radius: 3px; border: 1px solid transparent; transition: opacity .2s; }
+.svd-lab .faces-term canvas { width: 52px; border-radius: 2px; }
+.svd-lab .faces-endcap { flex-basis: 70px; }
+.svd-lab .faces-term[data-active="true"] { border-color: var(--v-accent); background: var(--v-tint); }
+.svd-lab .faces-term-name { font-size: .66em; color: var(--lab-muted); text-align: center; line-height: 1.2; }
+.svd-lab .faces-coef { font-size: .74em; font-weight: 700; font-variant-numeric: tabular-nums; }
+.svd-lab .faces-meter { width: 52px; height: 4px; background: var(--v-grid); border-radius: 2px; overflow: hidden; }
+.svd-lab .faces-meter span { display: block; height: 100%; }
+.svd-lab .faces-op { flex: 0 0 auto; font-size: 1.15em; color: var(--lab-muted); }
+.svd-lab .faces-bars { margin-top: 10px; }
+.svd-lab .faces-note { margin-top: 10px; font-size: .82em; }
+/* the four people differ by marker shape, like on the map */
+.svd-lab .lab-key i[class^="dot-face"] { background: var(--v-ink); opacity: .8; }
+.svd-lab .lab-key i.dot-face1 { border-radius: 0; transform: scale(.85); }
+.svd-lab .lab-key i.dot-face2 { border-radius: 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.svd-lab .lab-key i.dot-face3 { border-radius: 0; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }

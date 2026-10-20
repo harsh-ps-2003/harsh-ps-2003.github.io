@@ -12,9 +12,8 @@ flowchart TB
         home["_index.md<br/>(Home page)"]
         
         subgraph writes ["writes/"]
-            writes_index["_index.md<br/>(sort_by: date, paginate: 20)"]
-            post1["post-slug/index.md"]
-            post2["another-post/index.md"]
+            writes_index["_index.md<br/>(sort_by: date)"]
+            post1["2026-07-28-my-new-post/index.md"]
         end
         
         subgraph reads ["reads/"]
@@ -174,15 +173,16 @@ pnpm run diagram:export
 ### New Blog Post
 
 ```bash
-mkdir content/writes/my-new-post
+mkdir content/writes/2026-07-28-my-new-post
 ```
 
-Create `content/writes/my-new-post/index.md`:
+Create `content/writes/2026-07-28-my-new-post/index.md`:
 
 ```toml
 +++
 title = "My Post Title"
 date = 2026-07-28
+path = "writes/2026-07-28-my-new-post"
 [taxonomies]
 tags = ["ai", "systems"]
 +++
@@ -219,7 +219,7 @@ harsh-ps-2003/
 │   ├── _index.md            # Home page
 │   ├── writes/
 │   │   ├── _index.md        # Section config
-│   │   └── */index.md       # Blog posts (24 posts)
+│   │   └── */index.md       # Blog posts
 │   ├── reads/
 │   │   ├── _index.md        # Section intro
 │   │   ├── stem/index.md
@@ -248,7 +248,7 @@ harsh-ps-2003/
 | Dark mode | CSS custom properties + `[data-theme]` + localStorage |
 | Search | Client-side filtering with debounced input |
 | Tags | Zola taxonomies with dedicated pages |
-| Pagination | 20 posts per page on writes section |
+| Pagination | Posts listed on the writes section |
 | Performance | Static HTML, no frameworks, ~5KB CSS |
 | SEO | Meta descriptions, sitemap.xml, robots.txt |
 

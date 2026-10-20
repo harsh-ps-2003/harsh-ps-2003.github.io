@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/sob/"]
+path = "writes/2024-07-12-sob"
 title = "Spent my summers exploring Bitcoin 💸"
 date = 2024-07-12
 description = "Summer of Bitcoin 2024 notes on Fedimint, escrow modules, and learning Bitcoin by verifying the tech before investing."

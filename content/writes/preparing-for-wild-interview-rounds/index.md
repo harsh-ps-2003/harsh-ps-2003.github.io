@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/preparing-for-wild-interview-rounds/"]
+path = "writes/2025-06-26-preparing-for-wild-interview-rounds"
 title = "Preparing for wild interview rounds"
 date = 2025-06-26
 draft = true

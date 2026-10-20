@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/pubgrub-for-dependency-resolution/"]
+path = "writes/2026-04-11-pubgrub-for-dependency-resolution"
 title = "how package managers use PubGrub for Dependency Resolution"
 date = 2026-04-11
 description = "How PubGrub dependency resolution works in package managers like uv: CDCL, conflict explanations, and smart backtracking."

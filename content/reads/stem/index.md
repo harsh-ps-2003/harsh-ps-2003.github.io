@@ -5,7 +5,7 @@ in_search_index = false
 
 +++
 
-Well, I used to hop around and read many STEM books for passing my time in boring undergrad classes. It was fun, and I am not the best sort of a student. Here I am listing my favorite reads till now and, what and why would I pick them up for if I wanted to read again. They have helped me enjoy in the midst of boring lectures in IITK and I want to sincerely thank the authors for putting in the work. Also, I have shared the lectures I watched to grasp the concepts better so that people can have reference material and broader understanding of the interesting topics. The best way to learn these concepts is to implement some intriguing idea that you have while slowly and sensually reading these beauties!
+Well, I used to hop around and read many STEM books for passing my time in boring undergrad classes. I was not into getting good grades unfortunately. It was fun, and I am not the best sort of a student. Here I am listing my favorite reads till now and, what and why would I pick them up for if I wanted to read again. They have helped me enjoy in the midst of boring lectures in IITK and I want to sincerely thank the authors for putting in the work. Also, I have shared the lectures I watched to grasp the concepts better so that people can have reference material and broader understanding of the interesting topics. The best way to learn these concepts is to implement some intriguing idea that you have while slowly and sensually reading these beauties!
 
 *The resources are in no particular order, I just enjoyed them, and you might also love them!*
 
@@ -108,7 +108,7 @@ Lectures:
 *  [CMU CS721](https://www.youtube.com/playlist?list=PLSE8ODhjZXja7K1hjZ01UTVDnGQdx5v5U)
 * [Seven Databases in Seven weeks](https://www.youtube.com/playlist?list=PLSE8ODhjZXjY2xvwxuKjZT5qFH0sQga8_)
 
-For real deep Database Enthusiasts [CMU DB Group](https://www.youtube.com/@CMUDatabaseGroup) is the GOLD STANDARD:
+For real deep Database Enthusiasts [CMU DB Group](https://www.youtube.com/@CMUDatabaseGroup) is the GOLD STANDARD
 
 ### Scalable Architecture and Distributed Systems
 

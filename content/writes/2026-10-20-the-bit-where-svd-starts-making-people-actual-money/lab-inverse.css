@@ -1,0 +1,5 @@
+.svd-lab .inv-eps { margin: 4px 0 10px; }
+.svd-lab .inv-panels { margin: 6px 0 10px; gap: 12px; }
+.svd-lab .inv-ruler { margin: 4px 0 6px; }
+.svd-lab .inv-fine { font-size: .8em; margin-top: 10px; }
+.svd-lab .lab-field.inv-direction { flex: 1 1 100%; }

@@ -1,0 +1,34 @@
+.svd-lab .rec-k { margin: 4px 0 12px; }
+.svd-lab .rec-map { margin: 4px 0 10px; }
+.svd-lab .lab-key i.gem { border-radius: 0; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.svd-lab .rec-map figcaption { text-align: left; }
+.svd-lab .rec-pt { cursor: pointer; }
+.svd-lab .rec-tables { align-items: start; }
+.svd-lab .rec-table-wrap { overflow-x: auto; }
+.svd-lab .rec-table { width: 100%; border-collapse: separate; border-spacing: 2px; font-size: .74em; font-variant-numeric: tabular-nums; table-layout: fixed; }
+.svd-lab .rec-table caption { text-align: left; font-size: 1.12em; margin: 0 0 4px; color: var(--lab-muted); }
+.svd-lab .rec-table th { font-weight: 500; padding: 2px 0; text-align: center; color: var(--lab-muted); border: 0; }
+.svd-lab .rec-table tbody th { text-align: right; padding-right: 6px; width: 3.6em; }
+.svd-lab .rec-table td { padding: 0; border: 0; border-radius: 3px; height: 30px; text-align: center; color: var(--v-ink); transition: background-color .25s; }
+.svd-lab .rec-table td[data-selected="true"] { outline: 2.5px solid var(--v-x); outline-offset: -1px; }
+.svd-lab .rec-table .rec-cell { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; min-height: 0; padding: 0; border: 0; border-radius: 3px; background: transparent; color: inherit; font: inherit; }
+.svd-lab .rec-table button.rec-cell:hover { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--v-ink) 55%, transparent); }
+.svd-lab .rec-fall { margin-top: 4px; }
+.svd-lab .rec-rate { align-items: end; }
+.svd-lab .rec-swap { flex: 0 0 auto; }
+.svd-lab .rec-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; }
+.svd-lab .rec-card { border: 1px solid var(--lab-border); border-radius: 3px; padding: 9px 8px 7px; text-align: center; transition: border-color .2s; }
+.svd-lab .rec-card[data-top="true"] { border-color: var(--v-x); box-shadow: inset 0 0 0 1px var(--v-x); }
+.svd-lab .rec-card-name { display: block; font-size: .8em; color: var(--lab-muted); }
+.svd-lab .rec-card strong { display: block; font-size: 1.5em; font-variant-numeric: tabular-nums; margin: 3px 0 5px; }
+.svd-lab .rec-card-track { display: block; height: 5px; border-radius: 3px; background: var(--lab-soft); overflow: hidden; }
+.svd-lab .rec-card-track i { display: block; height: 100%; border-radius: 3px; }
+.svd-lab .rec-card small { display: block; min-height: 1.4em; margin-top: 4px; font-size: .74em; color: var(--v-x); font-weight: 700; }
+.svd-lab .rec-notes { margin-top: 12px; font-size: .82em; }
+@media (max-width: 520px) {
+  .svd-lab .rec-cards { grid-template-columns: 1fr 1fr; }
+  .svd-lab .rec-table { font-size: .7em; }
+  .svd-lab .rec-map .lab-stage text { font-size: 21px; }
+  .svd-lab .rec-fall text { font-size: 19px; }
+  .svd-lab .rec-fall .rec-note { display: none; }
+}

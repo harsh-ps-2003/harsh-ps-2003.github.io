@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/building/"]
+path = "writes/2024-11-26-building"
 title = "The frenzy of building and observing seniors!"
 date = 2024-11-26
 description = "Why rebuilding systems from scratch helps debugging, decision-making, and owning the tech that powers a product."

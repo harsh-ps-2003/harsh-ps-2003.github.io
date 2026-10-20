@@ -1,0 +1,48 @@
+/* Rebuild a picture, one layer at a time */
+.svd-lab .cmp-pics { margin: 10px 0 4px; }
+.svd-lab .cmp-pics canvas { border: 1px solid var(--lab-border); }
+
+.svd-lab .cmp-op-box {
+  display: grid; grid-template-columns: minmax(0, 280px) minmax(0, 1fr); gap: 18px; align-items: center;
+  margin: 14px 0; padding: 14px; border: 1px solid var(--lab-border); border-radius: 3px;
+}
+.svd-lab .cmp-op { display: grid; grid-template-columns: 18px minmax(0, 1fr); grid-template-rows: 18px auto; gap: 5px; }
+.svd-lab .cmp-corner { display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--v-s1); font-weight: 700; }
+.svd-lab .cmp-strip { position: relative; }
+.svd-lab .cmp-strip canvas { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; border-radius: 2px; }
+.svd-lab .cmp-layer { position: relative; }
+.svd-lab .cmp-layer canvas { border-radius: 3px; cursor: crosshair; touch-action: none; }
+.svd-lab .cmp-mark { position: absolute; border: 1.5px solid var(--v-ink); border-radius: 1px; pointer-events: none; box-shadow: 0 0 0 1px var(--v-bg); }
+.svd-lab .cmp-strip-v .cmp-mark { top: -3px; bottom: -3px; width: calc(100% / 80); }
+.svd-lab .cmp-strip-u .cmp-mark { left: -3px; right: -3px; height: calc(100% / 80); }
+.svd-lab .cmp-cross { position: absolute; pointer-events: none; background: color-mix(in srgb, var(--v-ink) 45%, transparent); }
+.svd-lab .cmp-cross-h { left: 0; right: 0; height: 1px; }
+.svd-lab .cmp-cross-v { top: 0; bottom: 0; width: 1px; }
+
+.svd-lab .cmp-explain { font-size: .86em; line-height: 1.6; min-width: 0; }
+.svd-lab .cmp-explain p { margin: 0 0 8px; }
+.svd-lab .cmp-title { font-size: 1.1em; font-weight: 700; }
+.svd-lab .cmp-line { color: var(--lab-muted); }
+.svd-lab .cmp-weight { height: 6px; border-radius: 3px; background: var(--v-grid); overflow: hidden; margin: 4px 0 4px; }
+.svd-lab .cmp-weight span { display: block; height: 100%; background: var(--v-pos); }
+.svd-lab .cmp-weight-text { color: var(--v-pos); font-size: .92em; }
+.svd-lab .cmp-cell { font-family: monospace; font-size: .9em; color: var(--lab-muted); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.svd-lab .cmp-hint { color: var(--lab-muted); font-size: .85em; }
+
+.svd-lab .lab-stage + .lab-stage { margin-top: 12px; }
+.svd-lab .cmp-store { margin: 14px 0 4px; }
+.svd-lab .cmp-store-label { font-size: .82em; color: var(--lab-muted); margin: 0 0 6px; font-variant-numeric: tabular-nums; }
+.svd-lab .cmp-store-track { position: relative; height: 14px; border-radius: 7px; background: var(--lab-soft); margin-bottom: 20px; }
+.svd-lab .cmp-store-fill { display: block; height: 100%; border-radius: 7px; background: var(--v-pos); transition: background-color .2s; }
+.svd-lab .cmp-store-fill[data-over="true"] { background: var(--v-ink); }
+.svd-lab .cmp-store-one { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--text-color); }
+.svd-lab .cmp-store-one em { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: .72em; font-style: normal; color: var(--lab-muted); }
+.svd-lab .cmp-note { font-size: .8em; margin-top: 6px; }
+
+@media (max-width: 520px) {
+  .svd-lab .cmp-op-box { grid-template-columns: 1fr; }
+  .svd-lab .cmp-op { max-width: 300px; margin: 0 auto; width: 100%; }
+}
+@media (max-width: 520px) {
+  .svd-lab .cmp-pics.lab-grid-2 { grid-template-columns: 1fr 1fr; gap: 8px; }
+}

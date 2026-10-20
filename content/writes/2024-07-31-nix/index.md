@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/nix/"]
+path = "writes/2024-07-31-nix"
 title = "Starting to pick up Nix a bit!"
 date = 2024-07-31
 description = "A headstarter on Nix for reproducible systems: lockfiles at OS scale, flakes, Nixpacks, and useful resources for getting started."

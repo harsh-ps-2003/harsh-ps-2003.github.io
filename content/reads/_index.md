@@ -5,13 +5,11 @@ sort_by = "title"
 in_search_index = false
 +++
 
-A small library of [STEM](/reads/stem/) material that I have enjoyed till now! I will clean this up when I get some time
+A small library of [STEM](/reads/stem/) material that I have enjoyed till now! Its just neverending to be honest
 
 [Worldly](/reads/worldly/) reads on startups, wealth, and society, money, the practical knacks of the world
 
 [Otherworldly](/reads/otherworldly/) fiction, philosophy, and life ahhh
-
-My father was right, I should read newspaper sometimes :
 
 <div class="reads-gallery">
 <img src="reader1.jpg" alt="Reading newspaper">

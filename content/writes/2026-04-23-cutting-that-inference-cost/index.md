@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/cutting-that-inference-cost/"]
+path = "writes/2026-04-23-cutting-that-inference-cost"
 title = "cutting that inference cost"
 date = 2026-04-23
 description = "Practical notes on cutting LLM inference cost and latency: vLLM, SGLang, PagedAttention, KV cache, and serving tradeoffs."

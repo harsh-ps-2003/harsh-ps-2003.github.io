@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/istio-lfx/"]
+path = "writes/2025-05-23-istio-lfx"
 title = "The Rusty path to Secure Metrics in Ambient Mesh"
 date = 2025-05-23
 description = "Building secure metrics for Istio Ambient Mesh ztunnel in Rust during an LFX internship, and what that taught me about service meshes."

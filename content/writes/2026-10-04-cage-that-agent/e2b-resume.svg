@@ -71,7 +71,7 @@
   <!-- ===== resume band ===== -->
   <text class="lane" x="16" y="198">EVERY SPAWN</text>
   <rect x="10" y="204" width="350" height="398" rx="6" fill="#f5f5f8"/>
-  <text class="m" x="18" y="596">host attack surface, one Go binary run as raw_exec</text>
+  <text class="m" x="18" y="596">host attack surface, one Go binary</text>
 
   <rect class="host" x="18" y="210" width="156" height="34" rx="4"/>
   <text class="h" x="96" y="225" text-anchor="middle">orchestrator</text>

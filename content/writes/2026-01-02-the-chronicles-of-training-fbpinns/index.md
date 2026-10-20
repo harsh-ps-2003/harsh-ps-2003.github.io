@@ -1,4 +1,6 @@
 +++
+aliases = ["/writes/the-chronicles-of-training-fbpinns/"]
+path = "writes/2026-01-02-the-chronicles-of-training-fbpinns"
 title = "The chronicles of training FBPINNs"
 date = 2026-01-02
 description = "Notes from training FBPINNs on a supercomputer: GPU quirks, distributed training headaches, and squeezing V100 resources."
