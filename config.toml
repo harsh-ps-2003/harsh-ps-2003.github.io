@@ -40,6 +40,8 @@ feed = false
 
 [extra]
 author = "Harsh Pratap Singh"
+# Zola's built-in reading_time assumes 200 WPM; technical posts feel high at that rate.
+words_per_minute = 310
 
 main_menu = [
     { name = "home", url = "/" },
