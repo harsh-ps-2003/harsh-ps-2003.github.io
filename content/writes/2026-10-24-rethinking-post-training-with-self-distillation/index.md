@@ -1,8 +1,7 @@
 +++
-aliases = ["/writes/rethinking-post-training-with-self-distillation/"]
-path = "writes/2026-10-07-rethinking-post-training-with-self-distillation"
+path = "writes/2026-10-24-rethinking-post-training-with-self-distillation"
 title = "Rethinking Post-Training with Self-Distillation"
-date = 2026-10-07
+date = 2026-10-24
 draft = false
 description = "One reward for a thousand tokens throws away the explanation of what went wrong. A long walk from RL and distillation through OPSD, SDPO and SDFT to models that learn from their users, and what broke when Trajectory scaled SDPO to production-shaped traffic."
 
