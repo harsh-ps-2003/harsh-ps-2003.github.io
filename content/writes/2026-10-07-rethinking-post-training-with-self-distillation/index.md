@@ -10,15 +10,12 @@ description = "One reward for a thousand tokens throws away the explanation of w
 tags = ["ml", "rl", "sdpo", "sdft", "self-distillation", "training", "llms"]
 +++
 
-https://www.youtube.com/watch?v=mMQRr9TDJQ4
-
 okay, time for some RL research writing! I was reading SDPO paper on a cozy saturday. I think its a pretty important paper thats gonna have quite a lot of impact like GRPO did, so blogging about it seemed a nice idea to me.
 
-THese things are quite simple, for understanding, say the model is solving `3x + 7 = 22`. It moves the 7 across, forgets to flip the sign, and writes `3x = 22 + 7`. Everything after that is normal math, and it finishes at `x = 29/3`. The actual answer is 5, so the checker says wrong. 0 reward recieved, yayy
+THese things are quite simple, for understanding, say the model is solving `3x + 7 = 22`. It moves the 7 across, forgets to flip the sign, and writes `3x = 22 + 7`, and it finishes at `x = 29/3`. The actual answer is 5, so the checker says wrong. 0 reward recieved, yayy. This is what we will discuss.
 
-Observe, most of what the model generated was actually fine. The bad token was the +, its the only culprit. The only signal that came back was one number for the whole attempt, and that number is for every token, including `3x`, `=`, and `22`. now you must have gussed what this blog is about! its about getting a reward on every token, and about where that reward can come from, a bigger model, a CoT, an error message from the enviroment, and in the end the same weights reading the attempt again with extra text in the prompt.
+observe, most of what the model generated was actually fine. The bad token was the +, its the only culprit. The only signal that came back was one number for the whole attempt, and that number is for every token, including `3x`, `=`, and `22`. now you must have gussed what this blog is about! its about getting a reward on every token, and about where that reward can come from, a bigger model, a CoT, an error message from the enviroment, and in the end the same weights reading the attempt again with extra text in the prompt.
 
-I gave a talk on this sometime ago. this started as 1 paper and then turned into a 2 hour talk of 40 slides, my poor colleagues (ー_ー；) So this blog is the written version of that talk, with all the figures I drew for it. Its long, so grab a coffee. The sign flip in `3x + 7 = 22` follows us the whole way, so dont forget about that +.
 
 ## Post-training is kinda broken rn
 
