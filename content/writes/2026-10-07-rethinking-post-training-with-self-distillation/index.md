@@ -49,28 +49,28 @@ The 2nd is that the explanation gets thrown away. a compiler says the syntax is 
 
 ## moving learnings from the prompt into the weights
 
-The fix comes from something whihc is literally bread and butter of models capabilities these days, in-context learning. The context is everything the model is reading right now (your prompt, the conversation so far, pasted docs), and in-context learning means it changes behaviour because of what's in there, with zero training. write "shorter, please" and the answers get shorter! It works with messy data, and a tiny bit is enough. THis is the key, a magical key
+The fix comes from something whihc is literally bread and butter of models capabilities these days - in-context learning. The context is everything the model is reading right now (your prompt, the conversation so far, pasted docs), and in-context learning means it changes behaviour because of what's in there, with zero training whatsoever. when you write - "shorter, please", the answers actually get shorter! just think about it, this works with messy shit you are saying to you model, and just a tiny bit is enough. THis is the key, a magical key to continual learning world
 
 <figure class="diagram">
 <a href="icl-weights.svg"><img src="icl-weights.svg" alt="In-context learning changes behaviour from the prompt without changing weights, but the lesson is lost in a new session. Self-distillation runs the model with and without the extra text and trains the plain run toward the hinted one, so the lesson moves into the weights." loading="lazy"></a>
 </figure>
 
-But the problem is that it doesnt stay. Start a new session and the model is back where it was, and the window is finite anyway, so to keep a lesson the weights themselves have to change.
+But the problem is that it doesnt stay. as soon as i start a new session, the model to zero, and the context window is finite anyways, so to keep a lesson the weights themselves have to change. the model actually needs to learn
 
-Self-distillation moves the lesson into the weights. Run the same model twice on the same question, once with the extra text in its prompt, which I call the teacher, and once without, the student. Their next token probabilities differ because only the teacher read the feedback, so you train the student's probabilities toward the teacher's. The teacher's probabilities are what the model does when the lesson is in front of it, so once the student matches them without seeing the lesson, the lesson lives in the weights :) The teacher here is the same model, just shown more.
+Self-distillation moves the learnings into the weights. run the same model twice on the same question, once with the extra text in its prompt, which we call the teacher, and once without, the student. their next token probabilities differ because only the teacher read the feedback, so you train the student's probabilities toward the teacher's. The teacher's probabilities are what the model does when the lesson is in front of it, so once the student matches them without seeing the lesson, the lesson lives in the weights :) The teacher here is the same model, just shown more.
 
-THis just feels natural to me cuz people dont learn by copying an example 1 to 1 either, we act on whats in front of us, feedback included, and improve from it. Models are pretty good at reading feedback now, so the training algorithm should use that.
+THis just feels natural to me cuz people dont learn by copying an example 1 to 1 either, we act on whats in front of us, feedback included, and improve from it. models are pretty good at reading feedback now, so it feels natural that the training algorithm should use that.
 
 ## reread your own answer in hindsight
 
-Back to our equation. The right move is to subtract 7, so `3x = 15` and `x = 5`. Our model writes `3x = 22 + 7`, so `3x = 29` and `x = 29/3`, which is 1 bad token followed by correct algebra on a wrong line (－‸ლ)
+Back to our equation - the right move is to subtract 7, so `3x = 15` and `x = 5`. Our model writes `3x = 22 + 7`, so `3x = 29` and `x = 29/3`, which is 1 bad token followed by correct algebra on a wrong line (－‸ლ)
 
 There's 1 model with 1 set of weights, used with 2 prompts, and a training step goes like this:
 
-1. Write - The model reads only the question, exactly like at test time, and writes its attempt. This is the student, and its the only step that writes anything.
-2. Check - The environment says more than 0: plugging `x = 29/3` back in gives 36, not 22. That diagnoses the attempt without giving away the answer.
-3. Reread, 2wice - The same model reads the question, the feedback and the student's attempt pasted in unchanged, and I read off how likely it finds each token, the teacher's view. Then the same again without the feedback, the student's view.
-4. Update - The gap between the 2 views at each token is the grade. Move the student toward the teacher, then on to the next question.
+1. write - The model reads only the question, exactly like at test time, and writes its attempt. This is the student, and its the only step that writes anything.
+2. check - The environment says more than 0. plugging `x = 29/3` back in gives 36, not 22. That diagnoses the attempt without giving away the answer.
+3. reread, 2wice - The same model reads the question, the feedback and the student's attempt pasted in unchanged, and I read off how likely it finds each token, the teacher's view. Then the same again without the feedback, the student's view.
+4. update - The gap between the 2 views at each token is the grade. Move the student toward the teacher, then on to the next question.
 
 <figure class="diagram">
 <a href="intro-idea.svg"><img src="intro-idea.svg" alt="One training step: the student writes 3x = 22 + 7, the environment says x = 29/3 gives 36 not 22, the same model rereads the attempt with that feedback, and the plus becomes much less likely while other tokens barely change." loading="lazy"></a>
@@ -100,7 +100,7 @@ The first 2 come from [Self-Distillation Enables Continual Learning](https://arx
 
 Why a whole talk on it? There's no extra model and no labels, and it works ( ͡° ͜ °) On chemistry, SDPO matches GRPO's accuracy in a sixth of the wall clock time with answers up to 11x shorter, SDFT learns 3 skills in a row without losing the earlier ones, and its already in use, [OpenClaw-RL](https://github.com/Gen-Verse/OpenClaw-RL) trains agents from live conversations this way and [GLM-5](https://arxiv.org/abs/2602.15763) distils its own earlier stages back in on-policy.
 
-## How a model writes, and the 2 ways to teach it
+## how a model writes, and the 2 ways to teach it
 
 A model writes one token at a time, just your neighbourhood next token  you know. At every step it puts a probability on every candidate next token and draws one our. After `3x = 22` this one puts most of its mass on -, which is the right continuation, and a fat chunk on +. This time it drew the +. That map, from "what is written so far" to a distribution over the next token, is the policy. Training decides, for each token the model actually wrote, whether that token should become more likely or less.
 
