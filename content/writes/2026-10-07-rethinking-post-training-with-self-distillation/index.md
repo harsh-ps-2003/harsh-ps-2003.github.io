@@ -33,25 +33,21 @@ rn it has 3 problems :
 2. it needs hand-built data (aka synthetic data) - fine-tuning needs the right answer spoonfed, RL needs a program that can score any answer, and raw data like chats, documents or error logs comes in neither form, so theres literally companies converting it by hand (@д@)
 3. Brittle Generalization - if you phrase the prompt exactly right it works, but if you reword it a bit, it falls over (people call this jagged intelligence), because a model that learns by copying examples can succeed by matching their surface with no depth of understanding enough to generalize to think creatively
 
-I want a model that keeps improving without getting worse, learns from real data as it shows up, and generalises. THats continual leanring, and the prize is huge btw, chat assistants get billions of messages a day and learn from none of them ( ͡° ʖ̯ ͡°)
+I want a model that keeps improving without getting worse, learns from real data as it shows up, and generalises. THats continual learing, and the prize is hugeeee btw, chat assistants get billions of messages a day and learn from none of them ( ͡° ʖ̯ ͡°) which would be an awesome unlock
 
 ## 1 score for a 1000s tokens
 
-for basics, a token is a small piece of text, roughly a word, and a rollout (or attempt) is 1 complete answer. 
-
-The standard recipe today is RL with GRPO. Let the model write a few attempts at a problem, have a verifier score each one (a verifier is just a checking program, it compares the final number for maths and runs the tests for code), here 0, 1, 0, 0, and move the weights toward the attempts that scored well.
+the standard recipe today is RL with GRPO. it basically lets model write some attempts for a problem, have a verifier score each one (a verifier is just a checking program, it compares the final number for maths and runs the tests for code), here 0, 1, 0, 0, and move the weights toward the attempts that scored well. simple
 
 <figure class="diagram">
 <a href="intro-problem.svg"><img src="intro-problem.svg" alt="Four attempts at the same equation are scored 0, 1, 0, 0 by a verifier and the weights move toward the passing one. Next to it, a compiler error, a runtime exception and a judge's comment are reduced to a single zero." loading="lazy"></a>
 </figure>
 
-That recipe has 2 problems, and the 2nd one turns out to be the answer to the 1st. The first is that 1 score covers the whole attempt. Which token caused the 0, the 3rd line or the 500th?? One number cant say, so the model works it out statistically over many attempts, tokens that show up in passing answers drift up and tokens in failing ones drift down. It works, slowly, because each attempt carries almost no information about any single token. This is the credit assignment problem, deciding which steps deserve the credit or the blame.
+but this way of doing things has 2 problems, and the 2nd one turns out to be the answer to the 1st. The first is that 1 score covers the whole attempt, which is obviously not ideal. Which token caused the 0, the 3rd line or the 500th?? one number cant say, so the model works it out statistically over many attempts, tokens that show up in passing answers drift up and tokens in failing ones drift down. It works, slowly, because each attempt carries almost no information about any single token. this is the crazy credit assignment problem, deciding which steps deserve the credit or the blame.
 
-The 2nd is that the explanation gets thrown away. A compiler says the syntax is broken on line 12, a runtime exception says you did dumb thing of division by zero, a judge model says the units are wrong, whatever, and each of those points right at where the attempt went wrong, which is exactly the credit assignment the model was struggling with. RL keeps only the 0 (ー_ー；) 
+The 2nd is that the explanation gets thrown away. a compiler says the syntax is broken, a runtime exception says you did dumb thing of division by zero, whatever, and each of those points right at where the attempt went wrong, which is of importance as it is exactly the credit assignment the model was struggling with.obviously, you want to keep the info as well!
 
-obviously, you want to keep the info as well!
-
-## Moving a lesson from the prompt into the weights
+## moving learnings from the prompt into the weights
 
 The fix comes from something whihc is literally bread and butter of models capabilities these days, in-context learning. The context is everything the model is reading right now (your prompt, the conversation so far, pasted docs), and in-context learning means it changes behaviour because of what's in there, with zero training. write "shorter, please" and the answers get shorter! It works with messy data, and a tiny bit is enough. THis is the key, a magical key
 
