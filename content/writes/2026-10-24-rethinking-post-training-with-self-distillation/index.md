@@ -16,9 +16,9 @@ THese things are quite simple, for understanding, say the model is solving `3x +
 observe, most of what the model generated was actually fine. The bad token was the +, its the only culprit. The only signal that came back was one number for the whole attempt, and that number is for every token, including `3x`, `=`, and `22`. now you must have gussed what this blog is about! its about getting a reward on every token, and about where that reward can come from, a bigger model, a CoT, an error message from the enviroment, and in the end the same weights reading the attempt again with extra text in the prompt.
 
 
-## Post-training is kinda broken rn
+## post-training is kinda broken rn
 
-pretraining is the huge first phase, where the model reads trillions of words and learns to predict the next one, and thats where its knowledge comes from. post-training is everything after that, the part that turns a next word predictor into something that follows instructions, solves maths and writes code that actually runs. pretraining still determines the capability frontier, while post-training determines which capabilities become usable.  Reasoning, coding, and agentic behaviors seem heavily influenced by SFT, RL, and tool-use training, but those methods can only optimize capabilities already latent in the pretrained model. You can teach a strong model to reason better, but it's much harder to post-train knowledge or representations that were never learned during pretraining. just for clarity, fine-tuning by contrast, is a task-specific or domain-specific adaptation performed by downstream users or enterprises. It uses smaller datasets and optimises the model for a narrow use case: a legal document classifier, a medical coding assistant, a customer support chatbot for a specific product line. Fine-tuning takes an already post-trained model and sharpens it further. Both require deep knowledge of the same underlying techniques - SFT, LoRA, preference optimisation, but the scale, the dataset curation challenges, and the evaluation frameworks differ substantially.
+pretraining is the huge first phase, where the model reads trillions of words and learns to predict the next one, and thats where its knowledge comes from. post-training is everything after that, the part that turns a next word predictor into something that follows instructions, solves maths and writes code that actually runs. pretraining still determines the capability frontier, while post-training determines which capabilities become usable.  Reasoning, coding, and agentic behaviors seem heavily influenced by SFT, RL, and tool-use training, but those methods can only optimize capabilities already latent in the pretrained model. You can teach a strong model to reason better, but it's much harder to post-train knowledge or representations that were never learned during pretraining. just for clarity, fine-tuning by contrast, is a task-specific or domain-specific adaptation performed by downstream users or enterprises. It uses smaller datasets and optimises the model for a narrow use case - a legal document classifier, a medical coding assistant, a customer support chatbot for a specific product line. Fine-tuning takes an already post-trained model and sharpens it further. Both require deep knowledge of the same underlying techniques - SFT, LoRA, preference optimisation, but the scale, the dataset curation challenges, and the evaluation frameworks differ substantially.
 
 literally every major claim like cyber security, reasoning, or agentic capabilities are forced in in post training via synthetic data. labs make synthetic training data to teach models specific skills in post training because pre training stopped delivering i think
 
@@ -26,7 +26,7 @@ literally every major claim like cyber security, reasoning, or agentic capabilit
 <a href="paradigms.svg"><img src="paradigms.svg" alt="Three problems with post-training today: training on a new task makes old skills fall, each method needs hand-built data, and the model breaks when the prompt is reworded." loading="lazy"></a>
 </figure>
 
-rn it has 3 problems :
+rn it has 3 problems -
 
 1. Catastrophic Forgetting - you must have felt this, when you train on a new task, the model has tendency to get worse at old ones, which is catastrophic forgetting. post-training pulls the model toward the new data and nothing in that pull protects what the model already knew
 2. it needs hand-built data (aka synthetic data) - fine-tuning needs the right answer spoonfed, RL needs a program that can score any answer, and raw data like chats, documents or error logs comes in neither form, so theres literally companies converting it by hand (@д@)
@@ -64,7 +64,7 @@ THis just feels natural to me cuz people dont learn by copying an example 1 to 1
 
 Back to our equation - the right move is to subtract 7, so `3x = 15` and `x = 5`. Our model writes `3x = 22 + 7`, so `3x = 29` and `x = 29/3`, which is 1 bad token followed by correct algebra on a wrong line (－‸ლ)
 
-There's 1 model with 1 set of weights, used with 2 prompts, and a training step goes like this:
+There's 1 model with 1 set of weights, used with 2 prompts, and a training step goes like this -
 
 1. write - The model reads only the question, exactly like at test time, and writes its attempt. This is the student, and its the only step that writes anything.
 2. check - The environment says more than 0. plugging `x = 29/3` back in gives 36, not 22. That diagnoses the attempt without giving away the answer.
@@ -135,7 +135,7 @@ The simple intuition is "do more of what worked and less of what didn't". we are
 <a href="grade-one.svg"><img src="grade-one.svg" alt="A wrong attempt at 3x + 7 = 22 gets reward 0 and advantage -0.25, and that same advantage sits under every token, right or wrong." loading="lazy"></a>
 </figure>
 
-The update is easiest to read inside out:
+The update is easiest to read inside out -
 
 `∇_θ J ∝ Σ_t A · ∇_θ log π_θ(y_t | x, y_<t)`
 
@@ -153,13 +153,13 @@ the words "teacher" and "student" come from distillation, which is traditional i
 <a href="grade-distill.svg"><img src="grade-distill.svg" alt="A teacher's solution is graded on every token, but once the student slips onto 3x = 22 + 7 it is off the only path the data covers, and the remaining targets no longer match what it is writing." loading="lazy"></a>
 </figure>
 
-The simplest version copies the teacher's words. The teacher writes `3x = 22 − 7, 3x = 15, x = 5` and the student is trained to predict each token, with loss minus the log of its probability for the teacher's token. Thats exactly SFT with a teacher model writing the solutions: dense, because every token has a target, and off-policy, because the tokens are the teacher's. And it breaks the moment the student slips. The data only ever says what comes after `3x = 22 − 7`, so once the student writes plus its on a line the data never covers, it never practised recovering from its own mistake, and the errors compound ◔̯◔
+The simplest version copies the teacher's words. The teacher writes `3x = 22 − 7, 3x = 15, x = 5` and the student is trained to predict each token, with loss minus the log of its probability for the teacher's token. Thats exactly SFT with a teacher model writing the solutions - dense, because every token has a target, and off-policy, because the tokens are the teacher's. And it breaks the moment the student slips. The data only ever says what comes after `3x = 22 − 7`, so once the student writes plus its on a line the data never covers, it never practised recovering from its own mistake, and the errors compound ◔̯◔
 
 A richer version copies the teachers probabilities. say at some position the teacher puts 45% on "so", 43% on "thus", 8% on "hence" and almost nothing on "+". Copying only the word "so" tells the student "thus" was as wrong as "+", while copying the whole distribution keeps the ranking. That extra ranking is called the infamopus dark knowledge, it goes back to [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531), and the methods below use it wherever they can afford to. Compared with SFT only the feedback changed, from 1 word to a whole distribution, and the text being learned from is still the teacher's.
 
 obviously a teacher has to know something the student doesn't. [Towards Understanding Ensemble, Knowledge Distillation and Self-Distillation in Deep Learning](https://arxiv.org/abs/2012.09816) shows that 2 copies of the same network trained from different random starts learn different features (one spots cars by headlights, the other by wheels), so distilling one into the other teaches the missing feature even at the same size. If teacher and student are identical though, the update is exactly 0. Remember this one, because later the teacher IS the same model, and then the "something extra" can only come from its prompt ;)
 
-## The missing corner
+## the missing corner
 
 So far there are 3 ways to train, and they fit on a grid of whose tokens you learn from and how many grades you get.
 
@@ -196,7 +196,7 @@ the student's log probability for its own token (blue) minus the teacher's for t
 
 This only grades the token the student actually wrote though. Using dark knowledge needs a way to compare 2 whole distributions, which is the KL divergence.
 
-## Forward KL vs reverse KL
+## forward KL vs reverse KL
 
 KL is 1 number for how far the student's distribution is from the teacher's, zero only when they match. The annoying part is that it has 2 directions that push the student opposite ways, and the best explanation I've found is [Give me 19 min, I will make Reverse KL Divergence Click Forever](https://www.youtube.com/watch?v=mMQRr9TDJQ4), so I'm borrowing its example. Yeah it sounds AIish but who cares, its  good work.
 
@@ -208,13 +208,13 @@ Forward KL, `Σ_a p_T(a) log(p_T(a) / p_S(a))`, weights every token by the teach
 <a href="kl-directions.svg"><img src="kl-directions.svg" alt="A teacher splits probability between so and thus. Under forward KL a small student spreads out and puts some mass on wait and um. Under reverse KL it piles 0.86 onto so." loading="lazy"></a>
 </figure>
 
-Same story on words in the figure: the forward student hedges across "so" and "thus" and leaks some mass onto "wait" and "um", while the reverse student piles 0.86 onto "so" (◎＿◎;)
+Same story on words in the figure - the forward student hedges across "so" and "thus" and leaks some mass onto "wait" and "um", while the reverse student piles 0.86 onto "so" (◎＿◎;)
 
 2 more things from that video matter later. Forward KL's gradient is plain cross-entropy, which is what SFT and classic distillation do, while reverse KL's gradient is a policy gradient step with reward `log p_T − log p_S`, which is exactly the per-token penalty from the last section with the sign flipped, so reverse KL is basically RL with the teacher as the reward ([MiniLLM](https://arxiv.org/abs/2306.08543) made the case for it in 2023). And reverse KL gets stuck when the student starts far from every answer, because all the nearby gradients cancel, which is why people do forward first (SFT or mid-training) and reverse after. A blend of the 2, Jensen-Shannon, sits in between. Which one works best depends on the task, the methods below pick differently, and KL is measured in nats, which shows up again later.
 
-## On-policy distillation: the student writes, the teacher grades
+## on-policy distillation - the student writes, the teacher grades
 
-Now the pieces snap together. On-policy distillation is the empty corner: the student writes, and a separate bigger teacher grades every token with its full probabilities. Its the core idea's loop without the feedback step, because the teacher already knows more.
+Now the pieces snap together. On-policy distillation is the empty corner - the student writes, and a separate bigger teacher grades every token with its full probabilities. Its the core idea's loop without the feedback step, because the teacher already knows more.
 
 <figure class="diagram">
 <a href="opd-loop.svg"><img src="opd-loop.svg" alt="Loop: the student writes an attempt, the teacher scores every token in one pass, the student moves toward the teacher on those tokens, and writes fresh attempts." loading="lazy"></a>
@@ -230,15 +230,15 @@ A long maths attempt gets a grade at every token, on the order of a thousand gra
 
 So compared with what came before, the student writes, like RL, which kills compounding errors, the grade comes at every token, like distillation, which fixes credit assignment, and the grader is a separate, better model that knows way more than whether the final answer is right. The loop and the update stay the same as RL, only the advantage changed. The new cost is needing a better model to query, and the rest of this post is basically about getting rid of it (ง'̀-'́)ง
 
-## A company assistant, and your earlier self as the teacher
+## a company assistant, and your earlier self as the teacher
 
-So far the teacher has been a bigger model. Here's a case where it isnt, and its one tons of companies are in rn: they want an internal assistant that knows their own documents and still behaves like a good assistant. This is the personalisation experiment from the same [On-Policy Distillation](https://thinkingmachines.ai/blog/on-policy-distillation/) post, and you can watch forgetting happen and then get repaired.
+So far the teacher has been a bigger model. Here's a case where it isnt, and its one tons of companies are in rn - they want an internal assistant that knows their own documents and still behaves like a good assistant. This is the personalisation experiment from the same [On-Policy Distillation](https://thinkingmachines.ai/blog/on-policy-distillation/) post, and you can watch forgetting happen and then get repaired.
 
 <figure class="diagram">
 <a href="opd-repair.svg"><img src="opd-repair.svg" alt="Checkpoint A, Qwen3-8B, is mid-trained on company documents to give checkpoint B. Then B writes answers to chat prompts and a frozen A grades every token, which gives checkpoint C." loading="lazy"></a>
 </figure>
 
-Checkpoint A is Qwen3-8B as released, good at following instructions and clueless about the internal docs. Teaching it the docs the standard way, mid-training, is the same next word training as pretraining run on the raw documents, basically SFT on text, and that gives checkpoint B. Then 2 things get measured: knowledge, a quiz about the docs, and behaviour, IF-eval, a public set of instructions a program can check like "answer in under 100 words" or "use no commas".
+Checkpoint A is Qwen3-8B as released, good at following instructions and clueless about the internal docs. Teaching it the docs the standard way, mid-training, is the same next word training as pretraining run on the raw documents, basically SFT on text, and that gives checkpoint B. Then 2 things get measured - knowledge, a quiz about the docs, and behaviour, IF-eval, a public set of instructions a program can check like "answer in under 100 words" or "use no commas".
 
 | model | internal docs QA (%) | IF-eval (%) |
 | --- | --- | --- |
@@ -253,9 +253,9 @@ Mixing chat back in is the usual guard, and it helps, though it costs some of th
 
 The repair is on-policy distillation with A as the teacher. B gets ordinary public chat prompts, nothing about the company, writes its own answers, and a frozen A grades every token. Where B drifted, say it ignores "under 100 words", A gives low probability to what B wrote and pulls it back, and where they agree nothing moves. Both numbers nearly recover. It works because B writes fresh answers every step, so the grades always land on the mistakes B makes now, and A is frozen, so the target never moves. The facts survive because the prompts never mention the company and the student only changes where it disagrees with A, the smallest change that fixes the behaviour (same reason on-policy training forgets less, more on that under continual learning). Knowledge even went up compared with the data-mix run without a single document in this phase, which the post calls positive transfer. My reading is that the quiz is still a set of questions and answering questions well is part of following instructions, so restoring the behaviour lets more of what B knows show.
 
-So the teacher doesnt need to be bigger, it needs to be better at the skill being graded, and your own earlier self is better at what you just forgot. That smells like a recipe for a model that keeps learning - train on new data, distill your earlier self back in, repeat. The fine print: its a company blog with 1 model, internal docs nobody else can check, 1 run and no error bars, neither number quite gets back to its peak, the cost of the distillation phase isnt reported ("cheaply" is their word), and its 2 phases, damage first and repair after. SDFT, later, avoids the damage in the first place.
+So the teacher doesnt need to be bigger, it needs to be better at the skill being graded, and your own earlier self is better at what you just forgot. That smells like a recipe for a model that keeps learning - train on new data, distill your earlier self back in, repeat. The fine print - its a company blog with 1 model, internal docs nobody else can check, 1 run and no error bars, neither number quite gets back to its peak, the cost of the distillation phase isnt reported ("cheaply" is their word), and its 2 phases, damage first and repair after. SDFT, later, avoids the damage in the first place.
 
-## PPO vs GRPO: a trained critic, or a group of siblings
+## PPO vs GRPO - a trained critic, or a group of siblings
 
 On-policy distillation is the best corner of the grid, but it needs a teacher thats better at the skill, and when there isnt one the labs use RL. Every method from here on plugs into RL, so here's how its actually run today. The 2 big algorithms differ in 1 thing, where the baseline comes from. The diagram is my redraw of the one in [DeepSeekMath](https://arxiv.org/abs/2402.03300), yellow boxes are being trained and grey ones are frozen.
 
@@ -263,24 +263,24 @@ On-policy distillation is the best corner of the grid, but it needs a teacher th
 <a href="ppo-grpo.svg"><img src="ppo-grpo.svg" alt="PPO: the policy writes one answer, a reward model scores it, a frozen reference model adds a KL penalty, and a trained value model feeds GAE to give per-token advantages. GRPO: the policy writes a group of answers, each is scored, and the group's mean and spread turn the scores into one advantage per answer, with no value model." loading="lazy"></a>
 </figure>
 
-PPO, Proximal Policy Optimization, is from 2017, and for years it was THE way to do RL on language models, including the training that first made chat assistants follow instructions. Next to the policy and a reward model it has 2 extra pieces. A frozen reference model works like a rubber band, drifting far from where you started costs you. And the value model, the critic, is a second network, often as big as the policy, that reads a half-written answer and predicts the final score, like a chess commentator going "white's chances are now 60%" after every move. GAE turns the gap between what happened and what the critic expected into a grade per token. "Proximal" means nearby: generating is expensive, so PPO reuses each batch for several updates and reweights each token by `r_t = π_now(y_t) / π_old(y_t)`, clipped to roughly 0.8 to 1.2, so old data cant push the model too far. This ratio comes back to bite later, when SDPO meets real traffic ( ͡° ʖ̯ ͡°)
+PPO, Proximal Policy Optimization, is from 2017, and for years it was THE way to do RL on language models, including the training that first made chat assistants follow instructions. Next to the policy and a reward model it has 2 extra pieces. A frozen reference model works like a rubber band, drifting far from where you started costs you. And the value model, the critic, is a second network, often as big as the policy, that reads a half-written answer and predicts the final score, like a chess commentator going "white's chances are now 60%" after every move. GAE turns the gap between what happened and what the critic expected into a grade per token. "Proximal" means nearby - generating is expensive, so PPO reuses each batch for several updates and reweights each token by `r_t = π_now(y_t) / π_old(y_t)`, clipped to roughly 0.8 to 1.2, so old data cant push the model too far. This ratio comes back to bite later, when SDPO meets real traffic ( ͡° ʖ̯ ͡°)
 
-GRPO, Group Relative Policy Optimization, came out in 2024 with DeepSeekMath and trained DeepSeek-R1. Its the same flow minus the critic: write G answers to the same question, score each one, turn the scores into advantages against the group's average and spread, and give every token of answer i that answer's `A_i`. The rubber band and the clipped ratio stay. Its grading on a curve, you dont need a commentator to tell you how hard the question was because the siblings already show it :)
+GRPO, Group Relative Policy Optimization, came out in 2024 with DeepSeekMath and trained DeepSeek-R1. Its the same flow minus the critic - write G answers to the same question, score each one, turn the scores into advantages against the group's average and spread, and give every token of answer i that answer's `A_i`. The rubber band and the clipped ratio stay. Its grading on a curve, you dont need a commentator to tell you how hard the question was because the siblings already show it :)
 
 What GRPO gains is pretty clear. There's no critic to train, which is 1 less big network in memory and 1 less thing that can be wrong, and guessing the final score from the middle of a long chain of reasoning is really hard anyway. The baseline is honest, the real average score of other answers to the same question. And any scorer plugs in, tests, answer checks or a judge model, because GRPO only needs 1 number per answer.
 
-What it costs, and these 4 drive the rest of the post:
+What it costs, and these 4 drive the rest of the post -
 
 1. 1 grade for the whole answer, so the plus gets pushed down exactly as hard as the right tokens around it.
 2. Same-score groups teach nothing. All pass or all fail makes every advantage zero, and on hard questions early on everything fails.
 3. Many full answers per question, each finished before it can be scored, which is slow for long agent tasks, and in production a user asks once, so there's no group.
 4. Only the number survives. The error message, the judge's comment and the user's reply all get squashed into 1 score.
 
-SDPO keeps GRPO's gains and goes after all 4: a grade per token, a signal even when every attempt fails, 1 attempt is enough, and the text is kept.
+SDPO keeps GRPO's gains and goes after all 4 - a grade per token, a signal even when every attempt fails, 1 attempt is enough, and the text is kept.
 
 ## GRPO is still king
 
-So what do the labs actually run? If everyone builds on the same algorithm, improving what that algorithm learns from improves everything downstream, so I went through the recent tech reports:
+So what do the labs actually run? If everyone builds on the same algorithm, improving what that algorithm learns from improves everything downstream, so I went through the recent tech reports -
 
 | model | RL | what happens after RL |
 | --- | --- | --- |
@@ -293,35 +293,35 @@ OpenAI and Anthropic dont publish the algorithm. The [gpt-oss card](https://arxi
 
 Look at the last column. After RL, several of them merge their specialists into 1 model with on-policy distillation, so a grade on every token of the model's own text is already running at the frontier, and what it needs is a teacher. GRPO hasnt been replaced because of the gains above, and when one of its costs bites, people patch it locally, like masking some tokens, instead of giving those gains up. New methods also run inside it, on-policy distillation reuses the same loop with a different advantage and so does SDPO. So imo the practical question was never "what replaces GRPO", its "what should the advantage be made of" (☝ ՞ਊ ՞)
 
-## No bigger teacher? Then who grades the tokens?
+## no bigger teacher? then who grades the tokens?
 
-The reasoning goes like this:
+The reasoning goes like this -
 
 1. On-policy distillation needs a teacher thats better than the student at the skill being graded. That can be a bigger model, or, like the company assistant, the student's own earlier self for a skill it lost.
 2. But if you want the best model you have to get better than it has ever been, no version of it, bigger or earlier, knows more.
 3. A teacher identical to the student teaches nothing, it has to know something extra.
 4. So use the same model and put something extra in its prompt.
 
-That something extra is a hint: any text in the teacher's prompt that the student doesnt get to see, or privileged information if you want the fancy name. With the same weights on both sides, the hint is the only difference between teacher and student. A good hint changes the teacher's opinion about the student's mistakes and only those. A bad one either changes nothing, so there's nothing to learn, or gives away something the student could never work out, so the student learns to imitate a teacher that knows more than it can, and that trade-off decides how well every method from here on works.
+That something extra is a hint - any text in the teacher's prompt that the student doesnt get to see, or privileged information if you want the fancy name. With the same weights on both sides, the hint is the only difference between teacher and student. A good hint changes the teacher's opinion about the student's mistakes and only those. A bad one either changes nothing, so there's nothing to learn, or gives away something the student could never work out, so the student learns to imitate a teacher that knows more than it can, and that trade-off decides how well every method from here on works.
 
 <figure class="diagram">
 <a href="grade-three.svg"><img src="grade-three.svg" alt="The same student attempt graded three ways: by a separate larger model, by the same weights with a verified solution in the prompt (OPSD), and by the same weights with the environment's feedback in the prompt (SDPO)." loading="lazy"></a>
 </figure>
 
-The student is identical in all 3 panels, and what changes is who grades and what that grader is shown: a separate bigger model, the same weights with a verified solution (OPSD), or the same weights with the environment's feedback (SDPO). The rest of the post climbs this ladder of hints :) From here on the student writes, the feedback comes at every token and the update stays the same, and what changes rung by rung is who grades, what the grader knows, and so what you need.
+The student is identical in all 3 panels, and what changes is who grades and what that grader is shown - a separate bigger model, the same weights with a verified solution (OPSD), or the same weights with the environment's feedback (SDPO). The rest of the post climbs this ladder of hints :) From here on the student writes, the feedback comes at every token and the update stays the same, and what changes rung by rung is who grades, what the grader knows, and so what you need.
 
 ## OPSD - grading yourself with the answer key
 
 The first rung of the ladderr is [OPSD](https://arxiv.org/abs/2601.18734), on-policy self-distillation, where the hint is the answer key. Compared with on-policy distillation only the grader changes, its the student's own weights, frozen at the start, with a worked solution in the prompt, so what you need goes from a better model to a solution for every problem. And compared with plain SFT on those same solutions, the student never sees the solution at all, it only informs how the student's own attempt gets graded.
 
-Maths datasets come with a worked solution for every problem, and checking an attempt against a solution is easier than finding one, so the idea is to use the solution without copying it. On our equation:
+Maths datasets come with a worked solution for every problem, and checking an attempt against a solution is easier than finding one, so the idea is to use the solution without copying it. On our equation -
 
-1. The student reads only "Solve for x: 3x + 7 = 22" and writes 1 attempt, at most 1,024 tokens in the paper.
-2. The teacher is the same model with a longer prompt: the problem, "Here is a reference solution:" and the worked solution, then "After understanding the reference solution, please try to solve this problem using your own approach below:", and then the student's attempt pasted in as if it were the teacher's own answer. The "your own approach" bit asks it to act like a solver who now gets the problem, so it judges whether the attempt is heading somewhere sensible instead of whether it matches the reference word for word.
+1. The student reads only "Solve for x, 3x + 7 = 22" and writes 1 attempt, at most 1,024 tokens in the paper.
+2. The teacher is the same model with a longer prompt - the problem, "Here is a reference solution" and the worked solution, then "After understanding the reference solution, please try to solve this problem using your own approach below", and then the student's attempt pasted in as if it were the teacher's own answer. The "your own approach" bit asks it to act like a solver who now gets the problem, so it judges whether the attempt is heading somewhere sensible instead of whether it matches the reference word for word.
 3. At every position the teacher's full next token distribution is compared with the student's using forward KL, which worked best in their tests, and each position's contribution is capped because a few style tokens were dominating the signal. Hold on to that, its telling.
 4. Only the student moves. The teacher stays frozen at the starting weights, a fixed target and an anchor, because if it updated too, every change to the student would also move the target and training could end up chasing its own tail.
 
-On competition maths, OPSD clearly beats RL on the smallest Qwen3 model (1.7B) and roughly ties it at 4B and 8B, while using a single short attempt per problem instead of RL's 8 long rollouts and 5x as many steps. Every token of every attempt gets a grade, whereas more than half of RL's batches had no reward spread early on and taught nothing. And fine-tuning directly on those same reference solutions actually made the small model worse than where it started, because the solutions are written tersely, nothing like the model's own reasoning. Reading the solution helps and copying it hurts. Fine print: OPSD reports its best checkpoint from a shorter run than RL, and the clear win is only at the smallest model.
+On competition maths, OPSD clearly beats RL on the smallest Qwen3 model (1.7B) and roughly ties it at 4B and 8B, while using a single short attempt per problem instead of RL's 8 long rollouts and 5x as many steps. Every token of every attempt gets a grade, whereas more than half of RL's batches had no reward spread early on and taught nothing. And fine-tuning directly on those same reference solutions actually made the small model worse than where it started, because the solutions are written tersely, nothing like the model's own reasoning. Reading the solution helps and copying it hurts. Fine print - OPSD reports its best checkpoint from a shorter run than RL, and the clear win is only at the smallest model.
 
 ### the teacher has read the answer
 
@@ -331,16 +331,16 @@ OPSD is a cute idea, and ngl I dont think it survives most real training setups.
 <a href="opsd-bias.svg"><img src="opsd-bias.svg" alt="The teacher sees the solution 3x = 15, so x = 5 and the student does not. At one position the student prefers working it out (3x = 15, 0.74) while the teacher prefers stating x = 5 (0.64). Trained toward the teacher, the student later jumps to a confident wrong answer, x = 7." loading="lazy"></a>
 </figure>
 
-The figure has the whole thing on our equation, with made-up numbers: the teacher has read "x = 5", so it prefers jumping straight to the answer, the student has to work it out, and trained toward the teacher it learns to jump, all the way to a confident "x = 7" on a new problem. The habit transfers and the knowledge behind it doesnt (ー_ー；) The general version goes like this:
+The figure has the whole thing on our equation, with made-up numbers - the teacher has read "x = 5", so it prefers jumping straight to the answer, the student has to work it out, and trained toward the teacher it learns to jump, all the way to a confident "x = 7" on a new problem. The habit transfers and the knowledge behind it doesnt (ー_ー；) The general version goes like this -
 
 1. The teacher's probabilities depend on 2 things, the question, which the student also sees, and the solution, which it never sees.
 2. The part that comes from the question can be learned. The part that comes from the solution cant, because nothing in the student's prompt tells it the answer.
-3. Training still pushes the student toward that part, so the student copies what it can copy, how the teacher behaves once it knows the answer: confident, decisive, skipping steps.
+3. Training still pushes the student toward that part, so the student copies what it can copy, how the teacher behaves once it knows the answer - confident, decisive, skipping steps.
 4. The more the hint gives away, the bigger that unlearnable part, and the bigger the bias.
 
 its like practising for an exam where the marker has the answer sheet open and marks you on how much you sound like someone holding it, you'd learn to sound sure of yourself and not to solve anything lol.
 
-You can see it creeping in:
+You can see it creeping in -
 
 1. The biggest teacher/student disagreements are on hesitation words like "wait" and "maybe", not on the maths. A teacher that read the answer never hesitates, so the student gets trained to stop hesitating whether or not it knows the answer.
 2. Longer runs degrade. [OPASD](https://arxiv.org/abs/2609.33200) ran OPSD for twice as many steps as the original paper, and answers ballooned to nearly 6x their length while accuracy ended below where it started.
@@ -349,9 +349,9 @@ You can see it creeping in:
 
 2 papers test the mechanism head on. [Rethinking On-Policy Self-Distillation for Thinking Models](https://arxiv.org/abs/2607.05184) gives the teacher privileged context across several thinking models and sees accuracy drop the more information is withheld from the student (the final answer alone does mild damage, the full solution much more). [Why Does Self-Distillation (Sometimes) Degrade the Reasoning Capability of LLMs?](https://arxiv.org/abs/2603.24472) calls the same thing suppressed uncertainty and finds it in any method whose teacher reads a full solution, SDPO included.
 
-Then there's a production team's post, [Scaling On-Policy Self-Distillation with Hint Auto-Optimization](https://www.appliedcompute.com/research/scaling-on-policy-self-distillation). They used OPSD to teach a model to recover from failed tool calls, starting below 50% success, writing a hint for every failure and changing only how hints were filtered:
+Then there's a production team's post, [Scaling On-Policy Self-Distillation with Hint Auto-Optimization](https://www.appliedcompute.com/research/scaling-on-policy-self-distillation). They used OPSD to teach a model to recover from failed tool calls, starting below 50% success, writing a hint for every failure and changing only how hints were filtered -
 
-1. A 1-token check barely moved the needle: look at where teacher and student disagree most and keep the hint if the hinted teacher's next token there looks right. 1 token says nothing about whether the rest of the answer works.
+1. A 1-token check barely moved the needle - look at where teacher and student disagree most and keep the hint if the hinted teacher's next token there looks right. 1 token says nothing about whether the rest of the answer works.
 2. Hand-tuned hints jumped to 72%.
 3. Checking by actually rerunning the task from that point and keeping only hints that succeeded pushed it above 80%.
 
@@ -369,7 +369,7 @@ okay, the MC of the manga is hereee. SDPO, Self-Distillation Policy Optimization
 
 This is 1 training step on a coding question, "return all numbers from 1 to n", where the tests want n left out. The top half is any RL step - 4 attempts, the tests run each one, and each gets a reward and the feedback text, like "expected [1, 2, 3] for n = 4; got [1, 2, 3, 4]". GRPO stops there, keeps 1, 0, 0, 0, and pushes attempts 2, 3 and 4 down equally even though they failed in 3 different ways (－‸ლ)
 
-The bottom half is what SDPO adds, for each failed attempt, say attempt 2, `range(1, n + 1)`. The teacher's prompt is the question, "Correct solution:" with the sibling that passed, "The following is feedback from your unsuccessful earlier attempt:" with attempt 2's test output, "Correctly solve the original question.", and then attempt 2 pasted in unchanged. The teacher (the same model, in its slowly following version) reads all that and writes nothing, the student reads only the question and attempt 2, and a KL compares their probabilities token by token on attempt 2 only. Where they agree nothing happens, but at the + the teacher strongly disagrees, so thats where the update actually happens. Only the student gets updated, then the slow copy takes a small step toward it. If nothing in the batch passed, the prompt just has no "Correct solution" part and the feedback alone still works.
+The bottom half is what SDPO adds, for each failed attempt, say attempt 2, `range(1, n + 1)`. The teacher's prompt is the question, "Correct solution" with the sibling that passed, "The following is feedback from your unsuccessful earlier attempt" with attempt 2's test output, "Correctly solve the original question.", and then attempt 2 pasted in unchanged. The teacher (the same model, in its slowly following version) reads all that and writes nothing, the student reads only the question and attempt 2, and a KL compares their probabilities token by token on attempt 2 only. Where they agree nothing happens, but at the + the teacher strongly disagrees, so thats where the update actually happens. Only the student gets updated, then the slow copy takes a small step toward it. If nothing in the batch passed, the prompt just has no "Correct solution" part and the feedback alone still works.
 
 This feels similar to OPSD. the student and the per-token grade stay same, and the grader is still the model itself. the hint changes from a worked solution written in advance by someone else to what the environment said about this particular attempt+ a passing sibling if there is one. What you need changes from a solution for every problem to an environment that returns text, which most coding and agent environments already do. And the teacher follows the student slowly instead of staying frozen, which matters in the coding results below.
 
@@ -387,9 +387,9 @@ is the advantage of every candidate token `a` at that position, not only the one
 
 There are 2 ways to apply that number, and the figure shows both next to a plain verifier. As RL, take only the written token and use `A_t` as the multiplier in the RL update, so each token gets its own advantage instead of GRPO's shared one, which is a 1-line change to a GRPO trainer and still learns when every attempt in a group failed. As distillation, compare the student's and teacher's whole distributions at each position with a KL over the most likely candidates, the top 20 tokens on code and the top 100 on science, which also pushes up the token that should have been there. The teacher is held fixed in both, a stop-gradient in code, because with shared weights the gap could also close by moving the teacher toward the student, which means learning to ignore the feedback ( ͡° ͜ °) The 2 give the same update on average, the 1-token version is just noisier, and the full version won every comparison in the paper. DeepSeek-V4 also picked it for its own distillation because the 1-token version was unstable.
 
-## The teacher finds the plus
+## the teacher finds the plus
 
-Now on a real model, Qwen3-8B, to check the grade actually lands where it should. It writes `return list(range(1, n + 1))`, a totally fair reading of "from 1 to n", and the checker only says "Don't include n", no Python error and no corrected answer.
+now on a real model, Qwen3-8B, to check the grade actually lands where it should. It writes `return list(range(1, n + 1))`, a totally fair reading of "from 1 to n", and the checker only says "Don't include n", no Python error and no corrected answer.
 
 <figure class="diagram">
 <a href="sdpo-fig-logratios.png"><img src="sdpo-fig-logratios.png" alt="The question, the sampled range(1, n + 1) call, the feedback 'Don't include n', and the self-teacher's disagreement concentrated on the plus." loading="lazy"></a>
@@ -417,7 +417,7 @@ On Qwen3-8B, GRPO flattens out near 41% while SDPO climbs close to 49% and reach
 <a href="teacher_bootstrap.svg"><img src="teacher_bootstrap.svg" alt="Left: accuracy for GRPO, sequence-level, token-level and logit-level SDPO, finishing in that order from bottom to top. Right: the student's and the self-teacher's accuracy both rising during training, with the student passing the teacher's starting accuracy." loading="lazy"></a>
 </figure>
 
-an obvious thought that comes to mind is that - is SDPO better because it grades every token?, or just because it reads the feedback at all? The left plot separates the 2 with 4 ways to turn the teacher's reread into a training signal, coarsest to finest:
+an obvious thought that comes to mind is that - is SDPO better because it grades every token?, or just because it reads the feedback at all? The left plot separates the 2 with 4 ways to turn the teacher's reread into a training signal, coarsest to finest -
 
 1. Grey, plain GRPO, which doesnt read the feedback, so every token of the answer gets the same push.
 2. Blue, sequence-level SDPO, which averages the teacher-minus-student grade over the answer into 1 number. Exactly as coarse as GRPO, but the number now comes from how the feedback changed the model's view of this answer, so this one isolates the value of reading the feedback.
@@ -428,7 +428,7 @@ They finish in exactly that order. Reading the feedback helps on its own even wi
 
 The right plot is my favourite thing in the paper. Green is the student answering from the question alone, the way it would at test time, and orange is the teacher, the same model solving the problem with the feedback from a failed attempt in its prompt. At step 0 the teacher is way ahead of the student, and that gap is what the feedback is worth. A quarter of the way into training, the student passes the teacher's starting line, so from then on the student with NO feedback beats its teacher at the start WITH feedback, and both keep climbing together from there. The teacher is the student's weights plus the feedback, so every update that makes the student better at the task also makes the model better at reading feedback about the task. Better teacher, better grades, better student, better teacher again, thats the bootstrapping. In ordinary distillation the student can at best catch up with a fixed teacher, and here the teacher's ceiling rises with the student, which is also why "the model teaches itself" isnt circular, the feedback is new information every time.
 
-But for the teacher to improve its weights have to change, while its target moves, and a target that moves too much is hard to hit! The paper tried 3 options:
+But for the teacher to improve its weights have to change, while its target moves, and a target that moves too much is hard to hit! The paper tried 3 options -
 
 1. The current weights, the very ones being trained. If 1 update makes the student a bit worse, the teacher gets the exact same flaw instantly and nothing pulls it back, so errors feed on themselves and training collapses (╯°□°)╯︵ ┻━┻
 2. A frozen copy of the starting weights, like OPSD. Perfectly steady, but the teacher never improves.
@@ -461,11 +461,11 @@ now the setting most people (or benchmarks) actually have, an environment that o
 <a href="gen_results.svg"><img src="gen_results.svg" alt="Chemistry with Olmo3-7B-Instruct: SDPO reaches GRPO's five-hour accuracy in about fifty minutes and ends higher, and its answers shrink to a few hundred tokens while GRPO's grow past 2,000." loading="lazy"></a>
 </figure>
 
-In Chemistry, SDPO reaches GRPO's 5-hour accuracy in under an hour (6x faster) and ends more than 10 points higher, partly because each failed attempt gets a grade on every token instead of 1 shared number, and partly because SDPO's answers get way shorter, so each step takes less time to generate. It beats a tuned GRPO across most of the tasks they tried, though not all—it lost slightly on biology and on one tool task.
+In Chemistry, SDPO reaches GRPO's 5-hour accuracy in under an hour (6x faster) and ends more than 10 points higher, partly because each failed attempt gets a grade on every token instead of 1 shared number, and partly because SDPO's answers get way shorter, so each step takes less time to generate. It beats a tuned GRPO across most of the tasks they tried, though not all, it lost slightly on biology and on one tool task.
 
 GRPO's answers grow past 2,000 tokens as it trains and SDPO's drop to a few hundred, up to 11x shorter here and more than 3x shorter on average, at higher accuracy. On one question after 50 steps, GRPO writes over 5,500 tokens with 25 "Wait"s, repeats the same calculation 4 times, literally writes "Wait, I'm going in circles", and still picks the wrong answer xD SDPO writes ~750 tokens and gets it right.
 
-Why shorter? becuase of 2 reasons i think. Hindsight: critique an answer next to a working solution and you can see the loops it didnt need, so the teacher penalises them token by token, while GRPO upweights everything in a winning answer, filler included. And style, which is OPSD's bias again, a teacher that has read a correct solution is confident and concise, so it pushes "Wait" down whether or not the waiting helped, and [On Repulsive and Attractive Teachers](https://arxiv.org/abs/2609.21561) measured "Wait" becoming about 80x less likely under such a teacher. So some of the shortening is better reasoning and some is style (￣▽￣) Other work fits both. Reasoning models keep re-solving problems they already cracked, the first solution was already right in over 92% of the maths problems they got right ([Do NOT Think That Much for 2+3=?](https://arxiv.org/abs/2412.21187)), and part of GRPO's length growth comes from dividing each answer's loss by its length, which penalises long wrong answers less ([Understanding R1-Zero-Like Training](https://arxiv.org/abs/2503.20783)).
+Why shorter? becuase of 2 reasons i think. Hindsight - critique an answer next to a working solution and you can see the loops it didnt need, so the teacher penalises them token by token, while GRPO upweights everything in a winning answer, filler included. And style, which is OPSD's bias again, a teacher that has read a correct solution is confident and concise, so it pushes "Wait" down whether or not the waiting helped, and [On Repulsive and Attractive Teachers](https://arxiv.org/abs/2609.21561) measured "Wait" becoming about 80x less likely under such a teacher. So some of the shortening is better reasoning and some is style (￣▽￣) Other work fits both. Reasoning models keep re-solving problems they already cracked, the first solution was already right in over 92% of the maths problems they got right ([Do NOT Think That Much for 2+3=?](https://arxiv.org/abs/2412.21187)), and part of GRPO's length growth comes from dividing each answer's loss by its length, which penalises long wrong answers less ([Understanding R1-Zero-Like Training](https://arxiv.org/abs/2503.20783)).
 
 So is SDPO just better than OPSD? its a bit messy. In most published head2heads both methods read the same kind of privileged text, a reference solution or a sibling, on maths, and configured like that they mostly tie. The 1 big gap I found is search agents in [CRPO](https://arxiv.org/abs/2607.28026), where OPSD collapses on multi-hop questions and SDPO tracks GRPO. The controlled evidence is about what the teacher reads. [The Role of Feedback Alignment in Self-Distillation](https://arxiv.org/abs/2606.11173) gives the self-teacher either the reference solution or a critique aligned step by step to the student's own attempt, and the aligned critique wins cleanly, while [Why Does Self-Distillation (Sometimes) Degrade the Reasoning Capability of LLMs?](https://arxiv.org/abs/2603.24472) saw AIME accuracy drop by roughly 40% when SDPO's teacher read a sibling's full solution on maths. No paper I found compares SDPO reading real feedback against OPSD reading a solution on the same task under 1 protocol, so the way I'd put it, its feedback versus answers more than SDPO versus OPSD (☝ ՞ਊ ՞)
 
@@ -489,13 +489,13 @@ And "your own" has to mean the model as it is now, which is why in the company a
 
 ## SDFT is same trick, with demonstrations
 
-SDFT, Self-Distillation Fine-Tuning, from [Self-Distillation Enables Continual Learning](https://arxiv.org/abs/2601.19897), is the core loop with an expert demonstration as the hint. Demonstrations normally mean SFT, which forgets, and RL forgets less but needs a reward, which demonstrations dont come with.
+SDFT, Self-Distillation Fine-Tuning, from [Self-Distillation Enables Continual Learning](https://arxiv.org/abs/2601.19897), is the core loop with an expert demonstration as the hint. demonstrations normally mean SFT, which forgets, and RL forgets less but needs a reward, which demonstrations dont come with.
 
-How it differs from what we've seen:
+how it differs from what we've seen -
 
-- From SFT, the data is the same, but SFT trains the model to write the demonstration word for word, while SDFT never shows it to the student. The student writes its own answer and the demonstration only sits in the grader's prompt.
-- From OPSD, its almost the same machine, except the teacher follows the student slowly instead of being frozen, the demonstration can be any good example and not only a solution with a checkable answer, and the question being tested is whether the model can add a skill without losing old ones.
-- From SDPO, the hint arrives before any attempt, as a demonstration, instead of coming back from the environment as feedback, so it needs no checker and no environment at all.
+- from SFT, the data is the same, but SFT trains the model to write the demonstration word for word, while SDFT never shows it to the student. the student writes its own answer and the demonstration only sits in the grader's prompt.
+- from OPSD, its almost the same machine, except the teacher follows the student slowly instead of being frozen, the demonstration can be any good example and not only a solution with a checkable answer, and the question being tested is whether the model can add a skill without losing old ones.
+- from SDPO, the hint arrives before any attempt, as a demonstration, instead of coming back from the environment as feedback, so it needs no checker and no environment at all.
 
 <figure class="diagram">
 <a href="sdft-method.png"><img src="sdft-method.png" alt="SDFT: the model in student mode reads the query and writes, giving distribution P. In teacher mode it reads the query plus a demonstration and scores the same tokens, giving Q. The gradient flows only into the student." loading="lazy"></a>
@@ -529,7 +529,7 @@ THis is a really cool plot tbh. 1 model learns tool use, then science, then medi
 <a href="sdft-seq-sft.svg"><img src="sdft-seq-sft.svg" alt="SFT learning the same three skills in sequence: each time a new skill starts, the previous one falls sharply, often below its starting point." loading="lazy"></a>
 </figure>
 
-With SDFT each skill rises in its turn and the earlier ones stay up, and with SFT every new skill knocks the previous one off a cliff, often below where it started (╥﹏╥) SFT's examples pull the model toward each new skill's text and nothing protects the previous one, while SDFT's target is the model itself plus a demonstration, which still has all the old skills, so matching it doesnt push them away. Single skills say the same thing:
+With SDFT each skill rises in its turn and the earlier ones stay up, and with SFT every new skill knocks the previous one off a cliff, often below where it started (╥﹏╥) SFT's examples pull the model toward each new skill's text and nothing protects the previous one, while SDFT's target is the model itself plus a demonstration, which still has all the old skills, so matching it doesnt push them away. Single skills say the same thing -
 
 | skill | new skill, SFT | new skill, SDFT | old skills, SFT | old skills, SDFT |
 | --- | --- | --- | --- | --- |
@@ -541,21 +541,21 @@ Old skills started at 65.5 in all 3. One more I really like - a thinking model t
 
 The limits - it leans on in-context learning, so small models that cant make sense of the demonstration lose to SFT. It costs about 2.5x the compute and 4x the wall clock of SFT, because the student has to write its own answers first. It cant create a big new behaviour like chain of thought in a model that never had it, since the teacher can only produce what the model can already do with a hint. And most of this is 1 model, Qwen2.5-7B-Instruct, with 3 seeds and 3 skills in a row, and I'm generally suspicious of post-training results that are mostly Qwen2.5 (ಠ_ಠ)
 
-## Facts no amount of RL can find
+## facts no amount of RL can find
 
-Next, new knowledge, meaning facts, like what happened in an earthquake last year, as opposed to skills. Ask a model whose training data ends in 2024 about 2025 and however much it explores it wont guess a fact it has never seen, so no attempt succeeds, theres never a reward, and GRPO learns nothing (ー_ー；) With self-distillation the article goes in the teacher's prompt, tokens consistent with it go up and wrong ones go down, and the student learns it without ever seeing the article. The test is 9 Wikipedia articles about disasters in 2025:
+next, new knowledge, meaning facts, like what happened in an earthquake last year, as opposed to skills. ask a model whose training data ends in 2024 about 2025 and however much it explores it wont guess a fact it has never seen, so no attempt succeeds, theres never a reward, and GRPO learns nothing (ー_ー；) with self-distillation the article goes in the teacher's prompt, tokens consistent with it go up and wrong ones go down, and the student learns it without ever seeing the article. the test is 9 Wikipedia articles about disasters in 2025 -
 
 | what the model was given | strict | lenient | out of distribution |
 | --- | --- | --- | --- |
 | nothing, the base model | 0 | 0 | 0 |
 | the right article always in context (oracle RAG) | 91 | 100 | 100 |
 | continued pre-training on the articles | 9 | 37 | 7 |
-| SFT "self-study": synthetic questions, trained on answers written with the article in context | 80 | 95 | 80 |
+| SFT "self-study", synthetic questions, trained on answers written with the article in context | 80 | 95 | 80 |
 | SDFT on the same questions | 89 | 100 | 98 |
 
-Oracle RAG, the right article in the prompt at answer time, is the ceiling, and reading a text once with continued pre-training barely puts the facts in. The column I care about is out of distribution, questions that need the facts without asking about them directly, like "what were the ten worst natural disasters of the last decade?", where SFT plateaus at 80 and SDFT gets 98, nearly as good as having the article right there (ﾉ◕ヮ◕)ﾉ SFT trains on fixed answers to fixed questions, so it learns those answers, while SDFT trains the student to respond the way the model does when the article is in front of it, which carries over more like actually having read it. Caveats: its a small test, questions written and graded by GPT-5 models, 1 model, and the teacher read the article plus a worked answer (with the article alone it scored noticeably lower).
+Oracle RAG, the right article in the prompt at answer time, is the ceiling, and reading a text once with continued pre-training barely puts the facts in. The column I care about is out of distribution, questions that need the facts without asking about them directly, like "what were the ten worst natural disasters of the last decade?", where SFT plateaus at 80 and SDFT gets 98, nearly as good as having the article right there (ﾉ◕ヮ◕)ﾉ SFT trains on fixed answers to fixed questions, so it learns those answers, while SDFT trains the student to respond the way the model does when the article is in front of it, which carries over more like actually having read it. Caveats - its a small test, questions written and graded by GPT-5 models, 1 model, and the teacher read the article plus a worked answer (with the article alone it scored noticeably lower).
 
-## Bigger models make better self-teachers
+## bigger models make better self-teachers
 
 The self-teacher is the model reading a hint, so its only as good as the model's ability to understand its prompt, and bigger models understand prompts better. This is a great feature to have as models willobviously become bigger and bigger!
 
@@ -563,7 +563,7 @@ The self-teacher is the model reading a hint, so its only as good as the model's
 <a href="model_scaling.svg"><img src="model_scaling.svg" alt="Accuracy against Qwen3 model size from 0.6B to 8B for the base model, GRPO and SDPO. The gap between SDPO and GRPO grows with size." loading="lazy"></a>
 </figure>
 
-SDPO vs GRPO on competitive programming - at 0.6B the 2 lines almost touch, and by 8B SDPO has opened a wide lead. On an older, weaker model (Qwen2.5-1.5B), SDPO actually lost. Blending mostly GRPO's advantage with a little of SDPO's acts as a dial between an unbiased coarse signal and a dense one that relies on the model's reading—and that blend stopped the small model from losing, at a small cost on the bigger ones.
+SDPO vs GRPO on competitive programming - at 0.6B the 2 lines almost touch, and by 8B SDPO has opened a wide lead. On an older, weaker model (Qwen2.5-1.5B), SDPO actually lost. Blending mostly GRPO's advantage with a little of SDPO's acts as a dial between an unbiased coarse signal and a dense one that relies on the model's reading, and that blend stopped the small model from losing, at a small cost on the bigger ones.
 
 <figure class="diagram">
 <a href="sdft-scaling.svg"><img src="sdft-scaling.svg" alt="SDFT against SFT on science questions for Qwen2.5 at 3B, 7B and 14B: SDFT is behind at 3B and ahead at 7B and 14B." loading="lazy"></a>
@@ -571,11 +571,11 @@ SDPO vs GRPO on competitive programming - at 0.6B the 2 lines almost touch, and 
 
 SDFT vs SFT on science shows the same crossover - SDFT trails at 3B, overtakes SFT at 7B, and pulls further ahead at 14B (☞ﾟヮﾟ)☞ Judging your own attempt in hindsight is an ability that grows with scale, and in-context learning keeps getting better every year, so I expect these methods to ride that for free. The caveat is that both studies stop at 8B and 14B.
 
-## Test-time training - put the feedback in the weights
+## test-time training - put the feedback in the weights
 
-Now learning after deployment, the part that excites me the most. Today a deployed model's weights are frozen and all you can do is prompt it, and test-time training means continuing to train it on the task in front of it.
+now learning after deployment, the part that excites me the most tbh. today a deployed model's weights are frozen and all you can do is prompt it, and test-time training means continuing to train it on the task in front of it.
 
-SDPO's test-time experiment is my favourite in the paper. 1 very hard question at a time, attacked until something works. There are 19 problems Qwen3-8B rarely solves, and on the 9 hardest a batch of 64 attempts contains a success less than 3% of the time. GRPO cant even start, every attempt scores zero so every advantage is zero (ー_ー；) Best of k keeps sampling fresh attempts from the same unchanged model and hopes one works, so attempt 1,000 has the same small chance as attempt 1. Multi-turn keeps every attempt and its error in the prompt and asks again, which is in-context learning only, its history is mostly failures it can anchor on (remember the failed-attempt row in the hint table), and the context fills up after 800 to 1,000 attempts.
+SDPO's test-time experiment is my favourite in the paper. 1 very hard question at a time, attacked until something works. there are 19 problems Qwen3-8B rarely solves, and on the 9 hardest a batch of 64 attempts contains a success less than 3% of the time. GRPO cant even start, every attempt scores zero so every advantage is zero (ー_ー；) best of k keeps sampling fresh attempts from the same unchanged model and hopes one works, so attempt 1,000 has the same small chance as attempt 1. multi-turn keeps every attempt and its error in the prompt and asks again, which is in-context learning only, its history is mostly failures it can anchor on (remember the failed-attempt row in the hint table), and the context fills up after 800 to 1,000 attempts.
 
 <figure class="diagram">
 <a href="sdpo-fig-ttt.png"><img src="sdpo-fig-ttt.png" alt="Test-time SDPO: answer y1 gets feedback f1 and the weights are trained to theta1; the same question is asked again with an empty history, answered as y2, and trained again, instead of accumulating attempts in the prompt." loading="lazy"></a>
@@ -587,21 +587,21 @@ SDPO runs its loop on the same question over and over, answering, getting feedba
 <a href="TTT_pass_at_k_curves.svg"><img src="TTT_pass_at_k_curves.svg" alt="Discovery at k against attempts for SDPO, best-of-k and multi-turn, on very hard and hard tasks. SDPO pulls away on the very hard tasks after a few hundred attempts." loading="lazy"></a>
 </figure>
 
-The metric is discovery at k, the fraction of runs that found at least 1 correct solution within k attempts. On the very hard tasks SDPO pulls away after a few hundred attempts, solving over half the runs where best-of-k and multi-turn stay in the 35–42% range, and reaching early milestones with about 3x fewer attempts. 1 question only SDPO ever solves (ง'̀-'́)ง On the merely hard tasks everyone does fine and SDPO still leads.
+The metric is discovery at k, the fraction of runs that found at least 1 correct solution within k attempts. On the very hard tasks SDPO pulls away after a few hundred attempts, solving over half the runs where best-of-k and multi-turn stay in the 35-42% range, and reaching early milestones with about 3x fewer attempts. 1 question only SDPO ever solves (ง'̀-'́)ง On the merely hard tasks everyone does fine and SDPO still leads.
 
 the detail that matters is that on 78% of these questions the teacher, reading the feedback once, solves it 0% of the time. So no single reading of the hint gives the answer away, the progress comes from many small updates, each nudging the model the way the feedback points, which is what you'd expect if the model is actually getting better at the problem.
 
-## Learning from conversations
+## learning from conversations
 
-Learning from users is SDPO with the user's next message as the hint. Remember those billions of messages a day, this is the richest feedback a deployed model gets, and people react to the answer they just got, so when its wrong, too long or off target, the next message usually says so, which is the same kind of diagnosis a failing test gives.
+learning from users is SDPO with the user's next message as the hint. remember those billions of messages a day, this is the richest feedback a deployed model gets, and people react to the answer they just got, so when its wrong, too long or off target, the next message usually says so, which is the same kind of diagnosis a failing test gives.
 
-On the hint ladder, OPSD's hint is the answer key (the most informative and the most biased), SDPO's is what the environment said about the attempt, SDFT's is a demonstration, and here its the user's reply. The 1 new difference is who wrote the text being graded, which in logged chats is often an older model and not the one being trained, more on that in a sec.
+on the hint ladder, OPSD's hint is the answer key (the most informative and the most biased), SDPO's is what the environment said about the attempt, SDFT's is a demonstration, and here its the user's reply. the 1 new difference is who wrote the text being graded, which in logged chats is often an older model and not the one being trained, more on that in a sec.
 
 <figure class="diagram">
 <a href="uia-overview.png"><img src="uia-overview.png" alt="A conversation cut into x (history ending with a question about standardising features), y (a reply starting 'Good question!') and o (the user saying 'Get to the point'). The hindsight teacher reads x, o and y; 'Good' and the exclamation mark are pushed down and 'Yes, you should standardize' is pushed up." loading="lazy"></a>
 </figure>
 
-From [Aligning Language Models from User Interactions](https://arxiv.org/abs/2603.12273): cut each conversation into triples, `x` the history ending with the user's question, `y` the model's reply, and `o` the user's next message. The student read `x` and wrote `y` back when the conversation happened. The teacher reads `x`, then `o`, then `y`, and its prompt literally says "The following is a future user message. Use this to guide your answer to the user prompt." The advantage is SDPO's log ratio with `o` in place of the feedback, so in the figure the "Good question!" filler goes red and the direct answer goes blue. No reward model, no preference pairs, no human raters (◕▽◕) There's a cute bit of theory behind it too: if users reply according to how much they liked the answer and the model updates on its context like a perfect Bayesian reasoner, this advantage equals the user's hidden reward, up to a normalising term. Strong assumptions, but a good intuition.
+From [Aligning Language Models from User Interactions](https://arxiv.org/abs/2603.12273) - cut each conversation into triples, `x` the history ending with the user's question, `y` the model's reply, and `o` the user's next message. The student read `x` and wrote `y` back when the conversation happened. The teacher reads `x`, then `o`, then `y`, and its prompt literally says "The following is a future user message. Use this to guide your answer to the user prompt." The advantage is SDPO's log ratio with `o` in place of the feedback, so in the figure the "Good question!" filler goes red and the direct answer goes blue. No reward model, no preference pairs, no human raters (◕▽◕) There's a cute bit of theory behind it too - if users reply according to how much they liked the answer and the model updates on its context like a perfect Bayesian reasoner, this advantage equals the user's hidden reward, up to a normalising term. Strong assumptions, but a good intuition.
 
 The obvious worry is that most of what users say isnt feedback on the last answer. Each heatmap below is 24 replies over their first 128 tokens, red pushed down and blue up.
 
@@ -615,7 +615,7 @@ The obvious worry is that most of what users say isnt feedback on the last answe
 
 After "Rewrite in a formal, professional tone" under a friendly email, there's strong red on "Quick", "Hey" and "Just", and after an unrelated "What is 27 times 4?" its nearly white everywhere. If the next message is about something else, reading it doesnt change how the model judges the reply, so every grade is near zero, and nobody has to filter the chats, which is honestly pretty neat ( ͡° ͜ °)
 
-## Real chat logs, and personalisation in 50 messages
+## real chat logs, and personalisation in 50 messages
 
 2 experiments. First, real logs. WildChat is a big public set of real conversations with GPT-3.5 and GPT-4, and WildFeedback is the 3% of those where users push back, about 50,000 triples. Chat quality, hard prompts and creative are win rates judged by a model, instructions checks rules like "no commas", and knowledge is a hard multiple choice exam.
 
@@ -639,13 +639,13 @@ My reading, because this is early work. The WildChat replies came from GPT-3.5 a
 
 ## OpenClaw-RL 
 
-Is anyone doing this outside a paper? The most complete attempt i found so far is [OpenClaw-RL](https://arxiv.org/abs/2603.10165), which turns whatever happens after each of an agent's actions into training signal, while the agent is in use.
+is anyone doing this outside a paper? the most complete attempt i found so far is [OpenClaw-RL](https://arxiv.org/abs/2603.10165), which turns whatever happens after each of an agent's actions into training signal, while the agent is in use.
 
 <figure class="diagram">
 <a href="openclaw-framework.png"><img src="openclaw-framework.png" alt="OpenClaw-RL: personal, terminal, GUI, software engineering and tool-calling agents feed three asynchronous servers, a training engine, a policy server and a judge server." loading="lazy"></a>
 </figure>
 
-A training engine, a policy server and a judge server run side by side and all async, so learning never makes the user wait. After every action comes a next state, the user's reply, a tool's output or a screen change, and a judge model reads it and votes +1, −1 or 0 (a redo request counts as −1). If the next state contains a usable correction, the judge also writes a short hint. Votes come often and hints carry more information.
+a training engine, a policy server and a judge server run side by side and all async, so learning never makes the user wait. after every action comes a next state, the user's reply, a tool's output or a screen change, and a judge model reads it and votes +1, −1 or 0 (a redo request counts as −1). if the next state contains a usable correction, the judge also writes a short hint. votes come often and hints carry more info.
 
 <figure class="diagram">
 <a href="openclaw-method.png"><img src="openclaw-method.png" alt="Three ways to learn from a conversation: a binary reward shared by every token, on-policy distillation with the hinted model as teacher, and a step-wise reward for agentic tasks." loading="lazy"></a>
@@ -653,17 +653,17 @@ A training engine, a policy server and a judge server run side by side and all a
 
 Of the 3 ways to use a conversation in the figure, the middle one, on-policy distillation with the hinted model as teacher, is our self-distillation advantage. The judge writes the hint and the teacher only reads it, and the hint problem shows up here too. The judge writes 3 hints and keeps the one whose teacher agrees most with the student's own top 4 tokens, because a vague hint shifts the teacher everywhere while a precise one moves only the tokens that matter, and a hint picked at random was no better than GRPO alone ◔̯◔ The final objective is GRPO on the votes plus distillation toward the hinted teacher, weighted equally, with each token's gap clipped, and without the clip answers doubled in length (@д@)
 
-With simulated personal users, combining votes and hints learns a user's preference in about 10 sessions, noticeably faster than GRPO alone, hints alone, or a memory system that stores notes without changing weights. Votes arrive after every turn but say very little, hints say a lot but only arrive when the user corrects something, and together the model learns on every turn and gets the detail when its there. Train 1 model per user though and it only ties the memory system. It also gives a solid bump on tool-using AIME maths. The catch: the users are simulated, the preferences are cosmetic (formatting, length, tone), and the tables report means with no variance. Its a promising system and a real adoption signal, but not yet a result on real users.
+With simulated personal users, combining votes and hints learns a user's preference in about 10 sessions, noticeably faster than GRPO alone, hints alone, or a memory system that stores notes without changing weights. Votes arrive after every turn but say very little, hints say a lot but only arrive when the user corrects something, and together the model learns on every turn and gets the detail when its there. Train 1 model per user though and it only ties the memory system. It also gives a solid bump on tool-using AIME maths. The catch - the users are simulated, the preferences are cosmetic (formatting, length, tone), and the tables report means with no variance. Its a promising system and a real adoption signal, but not yet a result on real users.
 
-## Agents - 1 wrong move and the run is gone
+## agents - 1 wrong move and the run is gone
 
-Everything so far treats an attempt as text, where a bad line can be ignored by the next one and graded afterwards. An agent's turns are actions in an environment, open the fridge, call an API, edit a file, and each one changes what the agent sees next, so an agent cant un-take an action.
+everything so far treats an attempt as text, where a bad line can be ignored by the next one and graded afterwards. an agent's turns are actions in an environment, open the fridge, call an API, edit a file, and each one changes what the agent sees next, so an agent cant un-take an action.
 
 <figure class="diagram">
 <a href="pivot-turns.svg"><img src="pivot-turns.svg" alt="The sign flip in 3x + 7 = 22 as a pivotal turn, and a household agent that takes a tomato instead of an egg; after PivotOPD it puts the tomato down and takes the egg." loading="lazy"></a>
 </figure>
 
-Write our equation the way an agent would, 1 line per turn, and turn 1 is the sign flip while turns 2 and 3 are correct algebra on the wrong equation. [PivotOPD](https://arxiv.org/abs/2609.40285) calls that a pivotal mistake, an action that makes the shortest route to the goal longer, or impossible, so every later move can be sensible and the run is still dead. The household version comes from ALFWorld, a simulator where an agent does chores through text commands: told to put a cool egg in the microwave, the agent finds no egg in the fridge, takes a tomato, microwaves it, and then wanders around for turns 6 to 30 looking for an egg, score 0 (ー_ー；)
+Write our equation the way an agent would, 1 line per turn, and turn 1 is the sign flip while turns 2 and 3 are correct algebra on the wrong equation. [PivotOPD](https://arxiv.org/abs/2609.40285) calls that a pivotal mistake, an action that makes the shortest route to the goal longer, or impossible, so every later move can be sensible and the run is still dead. The household version comes from ALFWorld, a simulator where an agent does chores through text commands - told to put a cool egg in the microwave, the agent finds no egg in the fridge, takes a tomato, microwaves it, and then wanders around for turns 6 to 30 looking for an egg, score 0 (ー_ー；)
 
 ALFWorld knows the shortest route from any state, so these mistakes can be counted exactly. 59% of the failed runs of 3 Qwen3 models contain one, usually by turn 8 to 12 of 30, followed by about 20 wasted turns.
 
@@ -673,7 +673,7 @@ ALFWorld knows the shortest route from any state, so these mistakes can be count
 
 This replay of 72 failed Qwen3-8B runs is the plot that convinced me. Fixing the pivotal turn gets 59%, and keeping the mistake but playing the next 2 moves right gets 58%, so 2 right moves after the mistake are as good as never making it. The mistakes are recoverable, and the recovery move is just one the model basically never makes.
 
-Why doesnt practising on its own attempts teach recovery? An update built from your own attempts can only reweight what you sampled, and RL's Razor cuts the other way here, staying close to what you already do is exactly the problem when what you already do never includes the fix. Their OPSD-style baseline shows it nicely: training drove the probability of the initial mistake down to almost zero, yet the right recovery move still stayed below 1% at every pivotal turn. With 8 attempts per task nothing ever samples or reinforces the recovery, so overall failures barely budged. Thats what a model going bad looks like from the inside, it learns to stop making the mistake and still has no clue how to get out of one ( >︹<)
+Why doesnt practising on its own attempts teach recovery? An update built from your own attempts can only reweight what you sampled, and RL's Razor cuts the other way here, staying close to what you already do is exactly the problem when what you already do never includes the fix. Their OPSD-style baseline shows it nicely - training drove the probability of the initial mistake down to almost zero, yet the right recovery move still stayed below 1% at every pivotal turn. With 8 attempts per task nothing ever samples or reinforces the recovery, so overall failures barely budged. Thats what a model going bad looks like from the inside, it learns to stop making the mistake and still has no clue how to get out of one ( >︹<)
 
 ## PivotOPD - train the fix and the recovery
 
@@ -684,40 +684,40 @@ PivotOPD finds the turn that decided a failed run and trains 2 things there, avo
 </figure>
 
 1. Find the pivotal turn. A teacher, a bigger model or the student itself, reads the finished attempt and its score and names the right action at a few turns, here `3x = 22 − 7` at turn 1, and where the student did something else, that turn is pivotal. It lands within 1 turn of the true pivotal turn in 71% to 84% of failed runs depending on the teacher, against about 30% for random turns.
-2. Prevent. OPSD's trick with a tiny hint: the frozen student gets "A reasonable approach at this step is 3x = 22 − 7. Reason from scratch in your own style" and rescores the student's own line, so the plus goes down and the hinted minus goes up, with the token grades coming from the student's own weights.
-3. Recover. The new part, where the self-teacher writes a line instead of only scoring one. From the state the mistake created (`3x = 22 + 7` already on the page, or the tomato already in hand), the teacher names the next action, undo it, the hinted self-teacher writes that line in its own words, "Wait: the 7 moves over as −7. 3x = 15", and the student, without the hint, learns a line it would almost never write itself. In an agent this runs in a copy of the environment.
+2. Prevent. OPSD's trick with a tiny hint - the frozen student gets "A reasonable approach at this step is 3x = 22 − 7. Reason from scratch in your own style" and rescores the student's own line, so the plus goes down and the hinted minus goes up, with the token grades coming from the student's own weights.
+3. Recover. The new part, where the self-teacher writes a line instead of only scoring one. From the state the mistake created (`3x = 22 + 7` already on the page, or the tomato already in hand), the teacher names the next action, undo it, the hinted self-teacher writes that line in its own words, "Wait - the 7 moves over as −7. 3x = 15", and the student, without the hint, learns a line it would almost never write itself. In an agent this runs in a copy of the environment.
 
-The loss is GRPO plus those 2 terms:
+The loss is GRPO plus those 2 terms -
 
 `L = L_GRPO + w_prev Σ_pivotal KL( π_θ(· | c) ‖ π̄(· | c, h(a*)) ) + w_rec Σ_recovery KL( π̄(· | c̃, h(a*)) ‖ π_θ(· | c̃) )`
 
 `L_GRPO` keeps the checker deciding what counts as success, `π̄` is the student frozen at the start of the step, `h(a*)` is the hint naming the right action, `c` is the context at the pivotal turn and `c̃` the state after the mistake, and the 2 weights set how much the new terms count next to the real reward (too large and a wrong hint does real damage). The 2 KL directions are the forward vs reverse KL section doing actual work. The prevent term has the student first, reverse KL, which is fine at the pivotal turn because the student did write the wrong line. After the mistake though, the useful move is one the student never writes, and reverse KL, like GRPO, can only reweight what was written, so the recover term has the teacher first, forward KL, and the recovery line gets trained even though the student never sampled it. Honestly the cleanest use of "the direction matters" I've seen (◕‿◕)
 
-Its the best of 13 baselines on household chores, search questions and a web shop, and when replaying those 72 failed runs it recovers 73% of the time (vs 8% untrained and 20% for the OPSD variant). Scoring the pivotal turn is cheap, and 1 recovery turn adds only a modest overhead, but training a second recovery turn nearly doubles the step time because you have to replay the episode inside a copy of the environment—so the real requirement is an environment you can reset and replay exactly, and a live website isnt one ;) And a wrong named action becomes a wrong target, the self-teacher will happily teach whatever the hint says.
+Its the best of 13 baselines on household chores, search questions and a web shop, and when replaying those 72 failed runs it recovers 73% of the time (vs 8% untrained and 20% for the OPSD variant). Scoring the pivotal turn is cheap, and 1 recovery turn adds only a modest overhead, but training a second recovery turn nearly doubles the step time because you have to replay the episode inside a copy of the environment, so the real requirement is an environment you can reset and replay exactly, and a live website isnt one ;) And a wrong named action becomes a wrong target, the self-teacher will happily teach whatever the hint says.
 
-## Where self-distillation wont help
+## where self-distillation wont help
 
-When plain GRPO is the better tool:
+when plain GRPO is the better tool -
 
-1. Weak models - the teacher is the model reading the hint, and if the model cant make sense of the hint its grades are noise. Thats what we saw with the small models, and its true of today's robot policies (－‸ლ)
-2. Pure sharpening - if the model already solves a problem half the time and you want it every time, the hint barely changes the teacher's view, so the grades are near zero, while GRPO's group comparison still works because some attempts pass and some fail.
-3. Bias vs variance - GRPO's signal is unbiased but super noisy, 1 number smeared over a thousand tokens, and the self-teacher's is much less noisy but biased, because each grade is only as right as the model's reading of the hint. With unlimited compute and well balanced groups I'd probably run the unbiased one.
+1. weak models - the teacher is the model reading the hint, and if the model cant make sense of the hint its grades are noise. thats what we saw with the small models, and its true of today's robot policies (－‸ლ)
+2. pure sharpening - if the model already solves a problem half the time and you want it every time, the hint barely changes the teacher's view, so the grades are near zero, while GRPO's group comparison still works because some attempts pass and some fail.
+3. bias vs variance - GRPO's signal is unbiased but super noisy, 1 number smeared over a thousand tokens, and the self-teacher's is much less noisy but biased, because each grade is only as right as the model's reading of the hint. with unlimited compute and well balanced groups I'd probably run the unbiased one.
 
-Messy feedback is a mixed bag. Subjective feedback works (the personalisation runs), and so does incomplete feedback, a runtime error points the right way without leaking the answer, which is the test-time experiment. Feedback that needs interpreting is still open, and 1 untried idea is to let the teacher think about the feedback in a short chain of thought before the part you distil over (free project idea if anyone wants it ;)). And wrong feedback gets distilled faithfully, the method cant check the hint, it only reads it, so where the feedback comes from matters a lot.
+messy feedback is a mixed bag. subjective feedback works (the personalisation runs), and so does incomplete feedback, a runtime error points the right way without leaking the answer, which is the test-time experiment. feedback that needs interpreting is still open, and 1 untried idea is to let the teacher think about the feedback in a short CoT before the part you distil over (free project idea if anyone wants it ;)). and wrong feedback gets distilled faithfully, the method cant check the hint, it only reads it, so where the feedback comes from matters a lot.
 
-What I want to see next is scale, since every study here stops at 14B or below and the self-teacher gets better with size. Then sample efficiency, because in-context learning changes behaviour from 1 sentence while gradient descent only nudges, and the dream is that a user says "never use the letter F" and 1 update is enough (☆▽☆) And models that go and seek the feedback they need, the way people choose whom to ask.
+what I want to see next is scale, since every study here stops at 14B or below and the self-teacher gets better with size. then sample efficiency, because in-context learning changes behaviour from 1 sentence while gradient descent only nudges, and the dream is that a user says "never use the letter F" and 1 update is enough (☆▽☆) and models that go and seek the feedback they need, the way people choose whom to ask.
 
-If you wanna try any of this, Hugging Face's [TRL](https://huggingface.co/docs/trl/example_overview) has experimental SDPO and SDFT trainers. What excites me most are the settings where no method could learn from the data at all before, user conversations and agents that learn as you use them, because the lesson of 2 decades of deep learning is scale, and this is a way to put way more data into a model.
+if you wanna try any of this, Hugging Face's [TRL](https://huggingface.co/docs/trl/example_overview) has experimental SDPO and SDFT trainers. what excites me most are the settings where no method could learn from the data at all before, user conversations and agents that learn as you use them, because the lesson of 2 decades of deep learning is scale, and this is a way to put way more data into a model.
 
-## Scaling SDPO in production
+## scaling SDPO in production
 
-The question I care about most is whether SDPO can run on production shaped traffic, where every request gets answered once. The best answer I've seen is [Scaling SDPO](https://www.trajectory.ai/field-notes/scaling-sdpo), from Trajectory, who build continual learning infra for companies. All the experiments and plots in this part are from their post. 
+the question I care about most is whether SDPO can run on production shaped traffic, where every request gets answered once. the best answer I've seen is [Scaling SDPO](https://www.trajectory.ai/field-notes/scaling-sdpo), from Trajectory, who build continual learning infra for companies. all the experiments and plots in this part are from their post. 
 
 <figure class="diagram">
 <a href="setting.svg"><img src="setting.svg" alt="GRPO needs a group of attempts at the same question. A real user asks once, giving one attempt and whatever the user did next." loading="lazy"></a>
 </figure>
 
-A real user asks once, so you get 1 attempt and whatever the user did next (accepted it, edited it, retried, replied, or closed the window), and making a group would mean rerunning the request in a simulator, training on an environment you dont deploy. SDPO doesnt need a group, the teacher's grade exists as soon as there's 1 attempt and some text about how it went. They tested this on τ-bench retail, an agent serving simulated customers of an online shop through tools, with Qwen3-4B and 3 SDPO runs that differ only in G, the number of attempts per question.
+a real user asks once, so you get 1 attempt and whatever the user did next (accepted it, edited it, retried, replied, or closed the window), and making a group would mean rerunning the request in a simulator, training on an environment you dont deploy. SDPO doesnt need a group, the teacher's grade exists as soon as there's 1 attempt and some text about how it went. they tested this on τ-bench retail, an agent serving simulated customers of an online shop through tools, with Qwen3-4B and 3 SDPO runs that differ only in G, the number of attempts per question.
 
 <figure class="diagram">
 <a href="tau-group.svg"><img src="tau-group.svg" alt="Accuracy on tau-bench retail against attempts and against wall-clock hours. G = 1 climbs steepest per attempt; the run that drops all-fail groups is the slowest and is still climbing after eight hours." loading="lazy"></a>
@@ -725,7 +725,7 @@ A real user asks once, so you get 1 attempt and whatever the user did next (acce
 
 G = 1 with failures kept learns the most per attempt, and G = 4 throwing away groups where all 4 failed, like a lot of GRPO pipelines do, is the slowest, still climbing past 8 hours. The failures were where the learning signal was, because SDPO learns from a failed attempt plus its feedback, so throwing those away throws away its best data ( >︹<)
 
-## Long tasks make data stale, and the textbook fix blows up
+## long tasks make data stale, and the textbook fix blows up
 
 <figure class="diagram">
 <a href="async-flow.svg"><img src="async-flow.svg" alt="Six user tasks on a timeline crossing trainer steps. User 3's attempt was written at theta0 but consumed at step 4, three updates stale." loading="lazy"></a>
@@ -741,7 +741,7 @@ The textbook correction is PPO's ratio with the old model now K updates behind, 
 
 With no cap at 3 updates stale, accuracy rises for about 15 steps and then falls, the agent starts giving up early, and broken tool calls climb to half, so training collapses ༼ ༎ຶ ෴ ༎ຶ༽ It hurts SDPO more than GRPO because in GRPO every token shares 1 advantage, so 1 wild token gets diluted among its neighbours, while in SDPO each token has its own advantage and the wild ratio is the whole update at that position.
 
-## Cap the ratio, and cap each token's advantage too
+## cap the ratio, and cap each token's advantage too
 
 Each token's push is the product of 2 numbers, the ratio, which corrects for an older writer, and the advantage, which says how much the token should move, so a fix has to handle both. Each row below is 1 fix, with the same 3 plots as before, and the shaded bands are the range across runs, where wide means the result depends on luck.
 
@@ -763,13 +763,13 @@ Fix 2 tests that suspicion with PPO's rubber band again, a KL penalty toward a f
 
 Fix 3 caps the advantage itself, at 3x a running average of how big advantages typically are. A relative cap adapts as the typical size changes during training and from task to task, so normal tokens are untouched and only the outliers get trimmed. Accuracy climbs about as well as with the reference model, without the extra pass and without the tie to the start. Its not perfect, the bands are still wide and broken calls creep up late, and the 3 came out of an ablation, nobody derived it (￣▽￣) The ratio cap limits how much a stale token gets reweighted and the advantage cap limits how hard any single token can push, and both caps together is what Trajectory calls SDPO++. Kimi and GLM-5 have their own per-token guards for the same reason, and the SDPO paper caps advantages in its test-time runs.
 
-## With both caps, a bit of staleness is fine, even at 120B
+## with both caps, a bit of staleness is fine, even at 120B
 
 <figure class="diagram">
 <a href="staleness.svg"><img src="staleness.svg" alt="Accuracy against hours on tau-bench retail with both caps, at staleness 0, 1, 3, 5 and 10. K = 1 and 3 track fresh data, K = 5 gets there later, K = 10 stalls near 0.35." loading="lazy"></a>
 </figure>
 
-With both caps, data up to 3 updates stale ends about as well as fresh data, 5 gets there slower, and 10 stalls out. They pick 3, the stalest setting that loses nothing, because then the trainer doesnt wait for the slowest task and training runs about twice as fast (ﾉ◕ヮ◕)ﾉ My reading of why 10 stalls: the writer is further from the current model, more tokens look surprising and get clipped, so less of each batch carries signal.
+With both caps, data up to 3 updates stale ends about as well as fresh data, 5 gets there slower, and 10 stalls out. They pick 3, the stalest setting that loses nothing, because then the trainer doesnt wait for the slowest task and training runs about twice as fast (ﾉ◕ヮ◕)ﾉ My reading of why 10 stalls - the writer is further from the current model, more tokens look surprising and get clipped, so less of each batch carries signal.
 
 <figure class="diagram">
 <a href="apex.svg"><img src="apex.svg" alt="Mean reward on APEX-Agents with GPT-OSS-120B: about 5% before training, 16% with plain SDPO, 25% with SDPO++." loading="lazy"></a>
@@ -779,7 +779,7 @@ Then they took the same caps, no retuning, to [APEX-Agents](https://www.mercor.c
 
 ## 1 model, 2 prompts
 
-Here's every method in this post in 1 table.
+here's every method in this post in 1 table.
 
 | method | who writes the text learned from | who grades it | what the grader knows that the student doesn't | feedback | what you need |
 | --- | --- | --- | --- | --- | --- |
@@ -792,19 +792,17 @@ Here's every method in this post in 1 table.
 | SDPO from user interactions | the student (or, in logged chats, another model) | the same model | the user's next message | a grade per written token | conversations where people react, guardrails |
 | PivotOPD | the student, and after its mistake the self-teacher | the same model, frozen for the step, inside GRPO | the action a teacher named for that turn | probabilities at the pivotal and recovery turns | a model that can name the right action, an environment you can replay |
 
-Read top to bottom, its the story of this post, and each row keeps what worked in the row above and changes 1 thing :) From OPSD down the grader is the student's own weights, it always knows something the student wont have at test time, and the last column decides which method you can actually use.
+read top to bottom, its the story of this post, and each row keeps what worked in the row above and changes 1 thing :) from OPSD down the grader is the student's own weights, it always knows something the student wont have at test time, and the last column decides which method you can actually use.
 
-3 things I actually believe after drawing all of this.
+3 things I actually believe after drawing all of this -
 
-The teacher is a prompt. Everything the teacher knows beyond the student comes from its prompt, so the hint decides what gets learned. A wrong hint teaches wrong things, like the production team found, and a hint that gives away the answer teaches style, like OPSD showed, so first check the hint is right, then keep it small.
+1. the teacher is a prompt - everything the teacher knows beyond the student comes from its prompt, so the hint decides what gets learned. a wrong hint teaches wrong things, like the production team found, and a hint that gives away the answer teaches style, like OPSD showed, so first check the hint is right, then keep it small.
+2. full probabilities beat 1 number - a ranking over the candidates at every position carries way more info than 1 number per answer and its less noisy, and the credit assignment ablation, dark knowledge and DeepSeek-V4's choice all point the same way.
+3. GRPO stays the chassis - every method here keeps the RL update and only changes what the advantage is made of, so you can adopt it inside the trainer you already have. in agents, copying a hinted teacher token by token taught confidence without the content and fell below plain GRPO, while PivotOPD, which keeps the reward in charge, didnt. and your own text forgets less, which is RL's Razor.
 
-Full probabilities beat 1 number. A ranking over the candidates at every position carries way more information than 1 number per answer and its less noisy, and the credit assignment ablation, dark knowledge and DeepSeek-V4's choice all point the same way.
+## so which one do I use?
 
-GRPO stays the chassis. Every method here keeps the RL update and only changes what the advantage is made of, so you can adopt it inside the trainer you already have. In agents, copying a hinted teacher token by token taught confidence without the content and fell below plain GRPO, while PivotOPD, which keeps the reward in charge, didnt. And your own text forgets less, which is RL's Razor.
-
-## So which one do I use?
-
-Depends on what your environment gives you:
+depends on what your environment gives you -
 
 | if you have… | …use |
 | --- | --- |
@@ -820,12 +818,12 @@ Depends on what your environment gives you:
 
 I find 1 coding agent easier to think about than a table, so here's one that uses most of the rows.
 
-A user asks it to fix a failing test, and CI says `AssertionError: expected 4, got 5`. Thats feedback text about this patch, exactly what SDPO turns into per-token grades, so I'd run SDPO with the CI log in the teacher's prompt and let the grade land on the line that caused the failure. 1 attempt per request is enough, and the user's later edit to the patch is feedback too. If traces take more than a few seconds you'll be training async, so cap the ratio and cap the per-token advantage.
+a user asks it to fix a failing test, and CI says `AssertionError - expected 4, got 5`. thats feedback text about this patch, exactly what SDPO turns into per-token grades, so I'd run SDPO with the CI log in the teacher's prompt and let the grade land on the line that caused the failure. 1 attempt per request is enough, and the user's later edit to the patch is feedback too. if traces take more than a few seconds you'll be training async, so cap the ratio and cap the per-token advantage.
 
-Some tickets have the patch a senior engineer merged. Thats a verified solution, the hint that gives away the most, so OPSD's bias applies, and I'd use it only in short runs with the tests still deciding the reward, and watch the length, a per-token teacher will happily teach "wait" (ー_ー；)
+some tickets have the patch a senior engineer merged. thats a verified solution, the hint that gives away the most, so OPSD's bias applies, and I'd use it only in short runs with the tests still deciding the reward, and watch the length, a per-token teacher will happily teach "wait" (ー_ー；)
 
-A bigger internal model, or specialists for say Python and Rust, means on-policy distillation, the cheapest, densest signal there is when a better teacher already exists, which is also how DeepSeek and Kimi merge their domain experts after the GRPO stage. A session that goes wrong early, editing the wrong file at turn 3 and then spending 40 turns patching around it, is the PivotOPD shape, so if you can replay the sandbox, have a stronger model name that turn and the right action. Tickets you can retry with mixed results still get GRPO, because when groups have mixed results its baseline is honest and its signal unbiased. And the 2 SDFT rows are for a new skill from demonstrations, or new docs. Through all of it the test suite stays the final judge, it just stops being the only thing the model learns from.
+a bigger internal model, or specialists for say Python and Rust, means on-policy distillation, the cheapest, densest signal there is when a better teacher already exists, which is also how DeepSeek and Kimi merge their domain experts after the GRPO stage. a session that goes wrong early, editing the wrong file at turn 3 and then spending 40 turns patching around it, is the PivotOPD shape, so if you can replay the sandbox, have a stronger model name that turn and the right action. tickets you can retry with mixed results still get GRPO, because when groups have mixed results its baseline is honest and its signal unbiased. and the 2 SDFT rows are for a new skill from demonstrations, or new docs. through all of it the test suite stays the final judge, it just stops being the only thing the model learns from.
 
-The through-line I keep coming back to is tiny. The model already writes 1 token at a time, so the grade should be allowed to be 1 token at a time too. GRPO is what you do when the only thing you trust is a checker and a group, and the moment the environment or the user writes a sentence about the attempt, that sentence can go into a second prompt on the same weights, and the advantage can finally sit on the plus. A sentence that gives away the answer is a different thing, and it teaches a different thing.
+the through-line I keep coming back to is tiny. the model already writes 1 token at a time, so the grade should be allowed to be 1 token at a time too. GRPO is what you do when the only thing you trust is a checker and a group, and the moment the environment or the user writes a sentence about the attempt, that sentence can go into a second prompt on the same weights, and the advantage can finally sit on the plus. a sentence that gives away the answer is a different thing, and it teaches a different thing.
 
-Okay thats it, if you made it till here you deserve a medal, or atleast a nap (￣▽￣) The talk this follows is mostly built on [this video](https://youtu.be/7ng3RLFB144) and [this one](https://youtu.be/OgEGV7apEzI), the KL part leans on [this one](https://www.youtube.com/watch?v=mMQRr9TDJQ4), the production runs are from Trajectory's [Scaling SDPO](https://www.trajectory.ai/field-notes/scaling-sdpo) field note, and the papers are linked inline wherever they show up. If you try SDPO or SDFT on something real, ping me, I really wanna know how it goes.
+okay thats it, if you made it till here you deserve a medal, or atleast a nap (￣▽￣) the talk this follows is mostly built on [this video](https://youtu.be/7ng3RLFB144) and [this one](https://youtu.be/OgEGV7apEzI), the KL part leans on [this one](https://www.youtube.com/watch?v=mMQRr9TDJQ4), the production runs are from Trajectory's [Scaling SDPO](https://www.trajectory.ai/field-notes/scaling-sdpo) field note, and the papers are linked inline wherever they show up. if you try SDPO or SDFT on something real, ping me, I really wanna know how it goes.

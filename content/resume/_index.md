@@ -4,7 +4,7 @@ template = "single_section.html"
 in_search_index = false
 +++
 
-This is a brief resume that contains everything I did since I chose Software Engineering, Applied Research and overall Product Building as a career for the time being. Might become a goose farmer later in life, who knows :)
+This is a brief resume that contains everything I did since I chose Engineering, Applied Research and overall Product Building as a career for the time being. Might become a goose farmer later in life, who knows :)
 
 ## Work Experience
 
