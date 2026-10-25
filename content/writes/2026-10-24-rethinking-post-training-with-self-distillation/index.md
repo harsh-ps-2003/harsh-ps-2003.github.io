@@ -192,13 +192,13 @@ A teacher, a bigger model for now, reads the student's text and reports how like
 
 `log π_student(y_t | x, y_<t) − log π_teacher(y_t | x, y_<t)`
 
-the student's log probability for its own token (blue) minus the teacher's for that same token after the same prefix (orange), and blue is the student and orange the teacher for the rest of the post. A difference of logs is the log of a ratio, "how many times more likely did the student find this token than the teacher". Agreement gives zero, an overconfident student gets a penalty, and a token the teacher liked more gets a reward. At the plus the student put 0.30 and the teacher 0.03, 10x more likely, and log 10 is about 2.3, the only big bar in the attempt (^^ ) The log is there so that going from 0.03 to 0.06, which is a big change, and going from 0.50 to 0.53, which is a tiny one, land on the same scale.
+the student's log probability for its own token (blue) minus the teacher's for that same token after the same prefix (orange), and blue is the student and orange the teacher for the rest of the post. A difference of logs is the log of a ratio, "how many times more likely did the student find this token than the teacher". Agreement gives 0, an overconfident student gets a penalty, and a token the teacher liked more gets a reward. At the + the student put 0.30 and the teacher 0.03, 10x more likely, and log 10 is about 2.3, the only big bar in the attempt (^^ ) The log is there so that going from 0.03 to 0.06, which is a big change, and going from 0.50 to 0.53, which is a tiny one, land on the same scale.
 
 This only grades the token the student actually wrote though. Using dark knowledge needs a way to compare 2 whole distributions, which is the KL divergence.
 
 ## Forward KL vs reverse KL
 
-KL is 1 number for how far the student's distribution is from the teacher's, zero only when they match. The annoying part is that it has 2 directions that push the student opposite ways, and the best explanation I've found is [Give me 19 min, I will make Reverse KL Divergence Click Forever](https://www.youtube.com/watch?v=mMQRr9TDJQ4), so I'm borrowing its example.
+KL is 1 number for how far the student's distribution is from the teacher's, zero only when they match. The annoying part is that it has 2 directions that push the student opposite ways, and the best explanation I've found is [Give me 19 min, I will make Reverse KL Divergence Click Forever](https://www.youtube.com/watch?v=mMQRr9TDJQ4), so I'm borrowing its example. Yeah it sounds AIish but who cares, its  good work.
 
 Fill in "water boils at ___". The teacher knows 2 right answers, 100 (Celsius) and 212 (Fahrenheit), and nothing in between. The student is smaller and can only hold 1 peak, so it has to get something wrong, and the direction of KL decides what. Train it with forward KL and it lands at 150, the teacher's average, which is wrong in both units lol. Train it with reverse KL and it locks onto 100 and stays there.
 
