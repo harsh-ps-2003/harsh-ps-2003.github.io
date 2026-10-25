@@ -145,9 +145,9 @@ Why an advantage and not the raw score? If every reward were +ve, every attempt 
 
 The catch is right there in the figure. That one advantage hangs under every token, so the plus gets pushed down and so do `3x`, the equals sign and `22`, which were all fine ( >︹<) RL learns on its own path, but from a sparse signal. The obvious alternative is a target at every token, and that exists, its called distillation.
 
-## Distillation: dense, but on someone else's path
+## distillation - dense, but on someone else's path
 
-The words "teacher" and "student" come from distillation, an older idea where a student learns to behave like a teacher, usually a different and bigger model.
+the words "teacher" and "student" come from distillation, which is traditional idea where a student learns to behave like a teacher, usually a different and bigger model.
 
 <figure class="diagram">
 <a href="grade-distill.svg"><img src="grade-distill.svg" alt="A teacher's solution is graded on every token, but once the student slips onto 3x = 22 + 7 it is off the only path the data covers, and the remaining targets no longer match what it is writing." loading="lazy"></a>
@@ -155,9 +155,9 @@ The words "teacher" and "student" come from distillation, an older idea where a 
 
 The simplest version copies the teacher's words. The teacher writes `3x = 22 − 7, 3x = 15, x = 5` and the student is trained to predict each token, with loss minus the log of its probability for the teacher's token. Thats exactly SFT with a teacher model writing the solutions: dense, because every token has a target, and off-policy, because the tokens are the teacher's. And it breaks the moment the student slips. The data only ever says what comes after `3x = 22 − 7`, so once the student writes plus its on a line the data never covers, it never practised recovering from its own mistake, and the errors compound ◔̯◔
 
-A richer version copies the teacher's probabilities. Say at some position the teacher puts 45% on "so", 43% on "thus", 8% on "hence" and almost nothing on "+". Copying only the word "so" tells the student "thus" was as wrong as "+", while copying the whole distribution keeps the ranking. That extra ranking is called dark knowledge, it goes back to [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531), and the methods below use it wherever they can afford to. Compared with SFT only the feedback changed, from 1 word to a whole distribution, and the text being learned from is still the teacher's.
+A richer version copies the teachers probabilities. say at some position the teacher puts 45% on "so", 43% on "thus", 8% on "hence" and almost nothing on "+". Copying only the word "so" tells the student "thus" was as wrong as "+", while copying the whole distribution keeps the ranking. That extra ranking is called the infamopus dark knowledge, it goes back to [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531), and the methods below use it wherever they can afford to. Compared with SFT only the feedback changed, from 1 word to a whole distribution, and the text being learned from is still the teacher's.
 
-One more thing a teacher needs: it has to know something the student doesn't. [Towards Understanding Ensemble, Knowledge Distillation and Self-Distillation in Deep Learning](https://arxiv.org/abs/2012.09816) shows that 2 copies of the same network trained from different random starts learn different features (one spots cars by headlights, the other by wheels), so distilling one into the other teaches the missing feature even at the same size. If teacher and student are identical though, the update is exactly zero. Remember this one, because later the teacher IS the same model, and then the "something extra" can only come from its prompt ;)
+obviously a teacher has to know something the student doesn't. [Towards Understanding Ensemble, Knowledge Distillation and Self-Distillation in Deep Learning](https://arxiv.org/abs/2012.09816) shows that 2 copies of the same network trained from different random starts learn different features (one spots cars by headlights, the other by wheels), so distilling one into the other teaches the missing feature even at the same size. If teacher and student are identical though, the update is exactly 0. Remember this one, because later the teacher IS the same model, and then the "something extra" can only come from its prompt ;)
 
 ## The missing corner
 
@@ -167,9 +167,9 @@ So far there are 3 ways to train, and they fit on a grid of whose tokens you lea
 <a href="grade-grid.svg"><img src="grade-grid.svg" alt="A grid of whose tokens and how many grades: copying is dense and off-policy, RL is sparse and on-policy, and the empty corner, dense and on-policy, is on-policy distillation." loading="lazy"></a>
 </figure>
 
-The empty corner, where the student writes its own attempt and a teacher grades every token, is on-policy distillation. The chess analogy from the [On-Policy Distillation](https://thinkingmachines.ai/blog/on-policy-distillation/) blog post is the one that stuck with me: RL is only hearing who won, copying is watching a grandmaster in positions you'll never reach, and on-policy distillation is a coach grading every move of your own games.
+The empty corner, where the student writes its own attempt and a teacher grades every token, is on-policy distillation. The chess analogy from the [On-Policy Distillation](https://thinkingmachines.ai/blog/on-policy-distillation/) blog is i think really cool. RL only knows who won, just blind copying is watching a GM in positions you'll never reach, and on-policy distillation is a coach grading every move of your own games.
 
-Why should "your own attempts" matter so much? The cleanest evidence I know is [SFT Memorizes, RL Generalizes](https://arxiv.org/abs/2501.17161). 1 vision-language model gets post-trained 2 ways on the same tasks, by copying expert answers or by RL, and then the rules change at test time. In a card game J, Q and K count as 10 in training and as 11, 12 and 13 at test, and in navigation "go north" becomes "turn left", or the city is new.
+Why should "your own attempts" matter so much? The cleanest evidence I found is from [SFT Memorizes, RL Generalizes](https://arxiv.org/abs/2501.17161). 1 vision-language model gets post-trained 2 ways on the same tasks, by copying expert answers or by RL, and then the rules change at test time. In a card game J, Q and K count as 10 in training and as 11, 12 and 13 at test, and in navigation "go north" becomes "turn left", or the city is new.
 
 | changed rule | before | after RL | after copying |
 | --- | --- | --- | --- |
@@ -178,11 +178,11 @@ Why should "your own attempts" matter so much? The cleanest evidence I know is [
 | card colours | 23.6 | 41.2 | 13.7 |
 | new cities | 16.7 | 77.8 | 11.1 |
 
-Copying memorised the old answers and RL picked up the rule (◕‿◕) My reading of why: copying rewards reproducing the exact answers it was shown, so memorising them is enough, while RL rewards whatever the model's own attempts got right across tons of different deals and routes, and the cheapest way to be right on all of them is to learn the rule. 2 details I like. Some copying first was still needed, just so the model learned the output format. And the RL model saw the checker's message and could retry, and more retries transferred better, so reading feedback already helped here, which is exactly where SDPO is heading.
+Copying memorised the old answers and RL picked up the rule (◕‿◕) copying rewards reproducing the exact answers it was shown, so memorising them is enough, while RL rewards whatever the model's own attempts got right across tons of different deals and routes, and the cheapest way to be right on all of them is to learn the rule. some copying first was still needed, just so the model learned the output format. And the RL model saw the checker's message and could retry, and more retries transferred better, so reading feedback already helped here, which is exactly where SDPO is heading.
 
-## Grading every token
+## grading every token
 
-To fill the empty corner I need a grade for every token of the student's own attempt, which is also the "gap at each token" from the core idea.
+To fill the empty corner I need a grade for every token of the student's own attempt.
 
 <figure class="diagram">
 <a href="grade-token.svg"><img src="grade-token.svg" alt="Student and teacher log probabilities on 3x = 22 + 7, x = 29/3. They roughly agree everywhere except the plus, where the student gave 0.30 and the teacher 0.03, a penalty of about 2.3." loading="lazy"></a>
