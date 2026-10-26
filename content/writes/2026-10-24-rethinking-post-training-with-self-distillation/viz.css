@@ -1,0 +1,94 @@
+/* Shared look for the animated figures in this post. Each one also has viz-<name>.css.
+   The palette is the one the static figures use, student blue and teacher orange,
+   with a dark version so nothing needs the invert filter the images get. */
+.sd-viz {
+  --sd-ink: #111111;
+  --sd-muted: #75746e;
+  --sd-faint: #a9a8a2;
+  --sd-line: #dcdbd5;
+  --sd-panel: #f6f5f2;
+  --sd-card: #ffffff;
+  --sd-student: #2a78d6;
+  --sd-student-soft: #eaf2fc;
+  --sd-student-edge: #9fc3ee;
+  --sd-teacher: #eb6834;
+  --sd-teacher-soft: #fdece4;
+  --sd-sans: "Public Sans", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  --sd-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --sd-ease: cubic-bezier(.2, .7, .2, 1);
+}
+[data-theme="dark"] .sd-viz {
+  --sd-ink: #e9e7e2; --sd-muted: #a3a29c; --sd-faint: #6f6e69; --sd-line: #3a3936; --sd-panel: #171716; --sd-card: #0c0c0c;
+  --sd-student: #5c9ff0; --sd-student-soft: #14263b; --sd-student-edge: #2f5683;
+  --sd-teacher: #f27c4a; --sd-teacher-soft: #3a2117;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .sd-viz {
+    --sd-ink: #e9e7e2; --sd-muted: #a3a29c; --sd-faint: #6f6e69; --sd-line: #3a3936; --sd-panel: #171716; --sd-card: #0c0c0c;
+    --sd-student: #5c9ff0; --sd-student-soft: #14263b; --sd-student-edge: #2f5683;
+    --sd-teacher: #f27c4a; --sd-teacher-soft: #3a2117;
+  }
+}
+
+figure.sd-viz { margin: 1.6em 0; }
+figure.sd-viz.sd-ready {
+  background: var(--sd-panel); color: var(--sd-ink); border-radius: 12px; padding: 18px 20px 16px;
+  font-family: var(--sd-sans); font-size: 15px; line-height: 1.45;
+}
+.sd-viz * { box-sizing: border-box; }
+.sd-viz .sd-failed { font-size: .85em; color: var(--sd-muted); margin: 8px 0 0; }
+
+/* small caps label above a block, like the static figures */
+.sd-viz .sd-kicker { font-size: 11.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--sd-muted); margin: 0 0 8px; }
+.sd-viz .sd-caption { font-size: 14px; color: var(--sd-muted); margin: 12px 0 0; min-height: 2.9em; }
+.sd-viz .sd-caption b, .sd-viz .sd-caption strong { color: var(--sd-ink); font-weight: 600; }
+.sd-viz .sd-label { font-size: 13px; font-weight: 600; color: var(--sd-muted); margin: 0 0 8px; }
+.sd-viz .sd-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin: 12px 0 0; }
+.sd-viz .sd-note { font-size: 12px; color: var(--sd-faint); }
+.sd-viz .sd-student { color: var(--sd-student); }
+.sd-viz .sd-teacher { color: var(--sd-teacher); }
+.sd-viz .sd-mono { font-family: var(--sd-mono); }
+
+/* controls */
+.sd-viz .sd-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 14px; }
+.sd-viz button {
+  font: inherit; font-size: 13.5px; color: var(--sd-ink); background: var(--sd-card); border: 1px solid var(--sd-line);
+  border-radius: 7px; padding: 6px 11px; min-height: 34px; cursor: pointer; transition: border-color .15s, background-color .15s, color .15s;
+}
+.sd-viz button:hover:not(:disabled) { border-color: var(--sd-muted); }
+.sd-viz button:disabled { opacity: .45; cursor: default; }
+.sd-viz button:focus-visible, .sd-viz input:focus-visible { outline: 2px solid var(--sd-teacher); outline-offset: 2px; }
+/* hairlines between the buttons come from the 1px gap showing the background */
+.sd-viz .sd-seg { display: inline-grid; grid-auto-flow: column; gap: 1px; border: 1px solid var(--sd-line); border-radius: 8px; overflow: hidden; background: var(--sd-line); }
+.sd-viz .sd-seg button { border: 0; border-radius: 0; background: var(--sd-card); color: var(--sd-muted); }
+.sd-viz .sd-seg button[aria-pressed="true"] { background: var(--sd-ink); color: var(--sd-card); }
+.sd-viz .sd-play { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+.sd-viz .sd-play svg { width: 11px; height: 11px; fill: currentColor; }
+.sd-viz label.sd-range { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--sd-muted); min-width: 0; flex: 1 1 200px; }
+.sd-viz label.sd-range span { display: flex; justify-content: space-between; gap: 8px; }
+.sd-viz label.sd-range output { color: var(--sd-ink); font-family: var(--sd-mono); font-variant-numeric: tabular-nums; }
+.sd-viz input[type="range"] { width: 100%; margin: 0; accent-color: var(--sd-teacher); min-height: 26px; }
+
+/* token chips, the same boxes the static figures draw */
+.sd-viz .sd-tok {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 2.3em; height: 2.15em; padding: 0 .5em;
+  font-family: var(--sd-mono); font-size: 16px; color: var(--sd-ink); background: var(--sd-student-soft);
+  border: 1.5px solid var(--sd-student-edge); border-radius: 7px; white-space: pre;
+}
+.sd-viz .sd-tok.is-bad { border: 2px solid var(--sd-ink); }
+.sd-viz .sd-tok.is-teacher { background: var(--sd-teacher-soft); border-color: color-mix(in srgb, var(--sd-teacher) 45%, transparent); }
+.sd-viz .sd-tok.is-plain { background: var(--sd-card); border-color: var(--sd-line); }
+
+/* the drawing surface for SVG charts, sized in real pixels by viz-core */
+.sd-viz .sd-svg { display: block; width: 100%; overflow: visible; font-family: var(--sd-sans); }
+.sd-viz .sd-svg text { fill: var(--sd-muted); font-size: 12px; }
+
+@media (max-width: 560px) {
+  figure.sd-viz.sd-ready { padding: 14px 12px 12px; border-radius: 10px; font-size: 14px; margin-left: -4px; margin-right: -4px; }
+  .sd-viz .sd-tok { font-size: 13.5px; min-width: 2.1em; padding: 0 .35em; border-radius: 6px; }
+  .sd-viz button { font-size: 13px; padding: 6px 9px; }
+  .sd-viz .sd-seg { display: grid; grid-auto-flow: row; grid-template-columns: 1fr 1fr; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sd-viz *, .sd-viz *::before, .sd-viz *::after { transition: none !important; animation: none !important; }
+}

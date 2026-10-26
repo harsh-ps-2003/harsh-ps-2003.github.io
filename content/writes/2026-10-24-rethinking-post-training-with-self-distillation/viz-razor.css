@@ -1,0 +1,63 @@
+.sd-viz .rz-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+.sd-viz .rz-map, .sd-viz .rz-plot { min-width: 0; }
+
+/* the map */
+.sd-viz .rz-bg { fill: var(--sd-card); }
+.sd-viz .rz-shade { fill: var(--sd-ink); fill-opacity: .032; }
+.sd-viz .rz-ring { fill: none; stroke: var(--sd-ink); stroke-opacity: .28; stroke-width: 1; stroke-dasharray: 2 4; }
+.sd-viz .sd-svg text.rz-ring-label { font-size: 11px; font-weight: 600; fill: var(--sd-muted); font-family: var(--sd-mono); }
+.sd-viz .rz-oval { fill: var(--sd-card); fill-opacity: .72; stroke: var(--sd-muted); stroke-width: 1.2; }
+.sd-viz .sd-svg text.rz-oval-label { font-size: 11.5px; fill: var(--sd-muted); }
+.sd-viz .sd-svg text.rz-label { font-size: 12px; fill: var(--sd-ink); paint-order: stroke; stroke: var(--sd-card); stroke-width: 4px; stroke-linejoin: round; }
+.sd-viz .sd-svg text.rz-key { font-size: 11px; fill: var(--sd-faint); }
+.sd-viz .rz-base { fill: var(--sd-muted); stroke: var(--sd-card); stroke-width: 2; }
+
+.sd-viz .rz-line { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; transition: opacity .3s; }
+.sd-viz .rz-path[data-state="done"] .rz-line { opacity: .38; }
+.sd-viz .sd-svg text.rz-path-label { font-size: 12.5px; font-weight: 700; paint-order: stroke; stroke: var(--sd-card); stroke-width: 4px; stroke-linejoin: round; transition: opacity .3s; }
+.sd-viz .rz-path[data-state="done"] text.rz-path-label { opacity: .55; }
+.sd-viz .rz-rl .rz-line { stroke: var(--sd-ink); }
+.sd-viz .rz-sft .rz-line { stroke: var(--sd-muted); stroke-dasharray: 6 5; }
+.sd-viz .rz-sdft .rz-line { stroke: var(--sd-student); }
+.sd-viz .sd-svg .rz-rl text, .sd-viz .sd-svg text.rz-rl { fill: var(--sd-ink); }
+.sd-viz .sd-svg .rz-sft text, .sd-viz .sd-svg text.rz-sft { fill: var(--sd-muted); }
+.sd-viz .sd-svg .rz-sdft text, .sd-viz .sd-svg text.rz-sdft { fill: var(--sd-student); }
+.sd-viz .rz-dot { stroke: var(--sd-card); stroke-width: 2.5; }
+.sd-viz .rz-dot.rz-rl { fill: var(--sd-ink); }
+.sd-viz .rz-dot.rz-sft { fill: var(--sd-muted); }
+.sd-viz .rz-dot.rz-sdft { fill: var(--sd-student); }
+
+.sd-viz .rz-demo circle { fill: var(--sd-card); stroke: var(--sd-ink); stroke-width: 2; }
+.sd-viz .rz-teacher circle { fill: var(--sd-teacher); stroke: var(--sd-card); stroke-width: 2; }
+.sd-viz .sd-svg text.rz-teacher-label { fill: var(--sd-teacher); font-weight: 600; }
+.sd-viz .rz-demo, .sd-viz .rz-teacher { transition: opacity .35s; }
+.sd-viz .rz-arrow { fill: none; stroke: var(--sd-muted); stroke-width: 1.5; }
+.sd-viz .rz-arrow-head { fill: var(--sd-muted); }
+.sd-viz .sd-svg text.rz-arrow-label { font-size: 11.5px; fill: var(--sd-muted); font-style: italic; paint-order: stroke; stroke: var(--sd-card); stroke-width: 4px; transition: opacity .3s; }
+
+/* the live plot */
+.sd-viz .rz-plot-bg { fill: var(--sd-card); }
+.sd-viz .rz-axis { stroke: var(--sd-faint); }
+.sd-viz .rz-ninety { stroke: var(--sd-line); stroke-dasharray: 3 4; }
+.sd-viz .sd-svg text.rz-tick { font-size: 11px; fill: var(--sd-faint); font-family: var(--sd-mono); }
+.sd-viz .sd-svg text.rz-axis-label { font-size: 11.5px; fill: var(--sd-muted); }
+.sd-viz .rz-trace { fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: opacity .3s; }
+.sd-viz .rz-trace[data-state="done"] { opacity: .38; }
+.sd-viz .rz-trace.rz-rl { stroke: var(--sd-ink); }
+.sd-viz .rz-trace.rz-sft { stroke: var(--sd-muted); stroke-dasharray: 6 5; }
+.sd-viz .rz-trace.rz-sdft { stroke: var(--sd-student); }
+.sd-viz .sd-svg text.rz-trace-label { font-size: 12px; font-weight: 700; paint-order: stroke; stroke: var(--sd-card); stroke-width: 4px; }
+.sd-viz .sd-svg text.rz-trace-label[data-state="done"] { fill-opacity: .55; }
+
+.sd-viz .rz-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 12px 0 0; padding: 10px 0 0; border-top: 1px solid var(--sd-line); }
+.sd-viz .rz-stats strong { display: block; font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.sd-viz .rz-stats span { display: block; font-size: 12px; color: var(--sd-muted); }
+.sd-viz .rz-who.rz-rl { color: var(--sd-ink); }
+.sd-viz .rz-who.rz-sft { color: var(--sd-muted); }
+.sd-viz .rz-who.rz-sdft { color: var(--sd-student); }
+
+@media (max-width: 560px) {
+  .sd-viz .rz-grid { grid-template-columns: 1fr; }
+  .sd-viz[data-viz="razor"] .sd-seg { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); grid-auto-flow: column; }
+  .sd-viz .rz-stats { grid-template-columns: 1fr 1fr; }
+}

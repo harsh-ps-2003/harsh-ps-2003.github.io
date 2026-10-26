@@ -1,0 +1,38 @@
+.sd-viz .kl-actions { display: inline-flex; gap: 8px; margin-left: auto; }
+.sd-viz .kl-train { border-color: var(--sd-ink); font-weight: 600; }
+.sd-viz .kl-plot { position: relative; margin: 4px 0 0; background: var(--sd-card); border-radius: 10px; padding: 6px 4px 2px; }
+.sd-viz .kl-plot .sd-svg { touch-action: none; }
+.sd-viz .kl-axis { stroke: var(--sd-faint); stroke-width: 1; }
+.sd-viz .kl-tick { stroke: var(--sd-faint); }
+.sd-viz .kl-teacher { fill: color-mix(in srgb, var(--sd-teacher) 26%, transparent); stroke: var(--sd-teacher); stroke-width: 1.6; stroke-linejoin: round; }
+.sd-viz .kl-student { fill: color-mix(in srgb, var(--sd-student) 16%, transparent); stroke: var(--sd-student); stroke-width: 2.4; stroke-linejoin: round; pointer-events: none; }
+.sd-viz .kl-handle { fill: var(--sd-card); stroke: var(--sd-student); stroke-width: 2.4; pointer-events: none; }
+.sd-viz .sd-svg text.kl-peak, .sd-viz .sd-svg text.kl-says { font-size: 12.5px; font-weight: 600; font-family: var(--sd-mono);
+  paint-order: stroke; stroke: var(--sd-card); stroke-width: 4px; stroke-linejoin: round; }
+.sd-viz .sd-svg text.kl-peak { fill: var(--sd-teacher); }
+.sd-viz .sd-svg text.kl-says { fill: var(--sd-student); }
+.sd-viz .sd-svg text.kl-key { font-size: 12px; font-weight: 600; }
+.sd-viz .sd-svg .kl-key-t { fill: var(--sd-teacher); }
+.sd-viz .sd-svg .kl-key-s { fill: var(--sd-student); }
+.sd-viz .sd-svg text.kl-strip-label { font-size: 11px; fill: var(--sd-faint); }
+.sd-viz .kl-strip { fill: color-mix(in srgb, var(--sd-teacher) 55%, transparent); transition: fill .3s; }
+.sd-viz .kl-strip[data-dir="reverse"] { fill: color-mix(in srgb, var(--sd-student) 55%, transparent); }
+.sd-viz .kl-hit { fill: transparent; cursor: grab; }
+.sd-viz .kl-hit:active { cursor: grabbing; }
+
+.sd-viz .kl-formula { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 12px 0 0; font-size: 14px; }
+.sd-viz .kl-formula b { font-weight: 600; }
+.sd-viz .kl-weight { font-size: 13px; color: var(--sd-muted); }
+.sd-viz .kl-stats { display: grid; grid-template-columns: 1fr 1.2fr 2fr; gap: 10px; margin: 12px 0 0; padding: 10px 0 0; border-top: 1px solid var(--sd-line); }
+.sd-viz .kl-stats strong { display: block; font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.sd-viz .kl-stats span { display: block; font-size: 12px; color: var(--sd-muted); }
+.sd-viz .kl-stats .kl-verdict strong { font-family: var(--sd-sans); font-size: 15px; padding-top: 2px; }
+.sd-viz[data-dir="forward"] .kl-stats div:first-child strong { color: var(--sd-teacher); }
+.sd-viz[data-dir="reverse"] .kl-stats div:first-child strong { color: var(--sd-student); }
+
+@media (max-width: 560px) {
+  .sd-viz .kl-actions { margin-left: 0; width: 100%; }
+  .sd-viz .kl-actions button { flex: 1 1 auto; }
+  .sd-viz .kl-stats { grid-template-columns: 1fr 1fr; }
+  .sd-viz .kl-stats .kl-verdict { grid-column: 1 / -1; }
+}
