@@ -1,0 +1,28 @@
+.sd-viz .al-range { margin: 0 0 14px; max-width: 420px; }
+.sd-viz .al-body { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 18px; align-items: center; }
+.sd-viz .al-ring { min-width: 0; }
+.sd-viz .al-arc { fill: none; stroke-linecap: butt; transition: stroke .3s; }
+.sd-viz .al-arc.is-work { stroke: var(--sd-ink); }
+.sd-viz .al-arc.is-wait { stroke: var(--sd-accent); }
+.sd-viz .sd-svg .al-big { fill: var(--sd-ink); font-size: 34px; font-weight: 700; }
+.sd-viz .sd-svg .al-small { fill: var(--sd-muted); font-size: 11.5px; }
+.sd-viz .al-side { min-width: 0; }
+.sd-viz .al-hour { display: flex; height: 18px; border-radius: 4px; overflow: hidden; background: var(--sd-line); gap: 0; }
+.sd-viz .al-seg { display: block; height: 100%; flex: 0 0 auto; box-shadow: inset -1px 0 0 var(--sd-panel); }
+.sd-viz .al-seg.is-work { background: var(--sd-ink); }
+.sd-viz .al-seg.is-wait { background: var(--sd-accent); }
+.sd-viz .al-hour-axis { display: flex; justify-content: space-between; font-size: 11px; color: var(--sd-faint); margin: 3px 0 12px; }
+.sd-viz .al-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.sd-viz .al-steps li { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); align-items: center; gap: 8px; font-size: 12.5px; }
+.sd-viz .al-name { color: var(--sd-ink); white-space: nowrap; }
+.sd-viz .al-len { display: block; height: 8px; border-radius: 0 3px 3px 0; transition: width .35s var(--sd-ease); }
+.sd-viz .al-steps li.is-work .al-len { background: var(--sd-ink); }
+.sd-viz .al-steps li.is-wait .al-len { background: var(--sd-accent); }
+.sd-viz .al-steps li.is-wait .al-name { color: var(--sd-accent-ink); }
+.sd-viz .al-key { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 11.5px; color: var(--sd-muted); }
+.sd-viz .al-sw { display: inline-block; width: 14px; height: 9px; border-radius: 2px; background: var(--sd-ink); margin-right: -6px; vertical-align: middle; }
+.sd-viz .al-sw.is-wait { background: var(--sd-accent); }
+@media (max-width: 560px) {
+  .sd-viz .al-body { grid-template-columns: 1fr; gap: 10px; }
+  .sd-viz .al-ring { max-width: 220px; margin: 0 auto; width: 100%; }
+}

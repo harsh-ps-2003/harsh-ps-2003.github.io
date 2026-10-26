@@ -1,0 +1,32 @@
+.sd-viz .sh-controls { gap: 12px 24px; }
+.sd-viz .sh-chart { background: var(--sd-card); border: 1px solid var(--sd-line); border-radius: 8px; padding: 12px 14px; }
+.sd-viz .sh-lanes { display: flex; flex-direction: column; gap: 3px; min-height: 120px; }
+.sd-viz .sh-lane { display: flex; height: 6px; transition: opacity .3s; }
+.sd-viz .sh-lane.is-off { opacity: 0; height: 0; margin-top: -3px; transition: opacity .2s, height .3s, margin .3s; }
+.sd-viz .sh-setup, .sd-viz .sh-tests { display: block; height: 100%; transition: width .35s var(--sd-ease); }
+.sd-viz .sh-setup { background: var(--sd-accent); border-radius: 3px 0 0 3px; opacity: .85; }
+.sd-viz .sh-tests { background: var(--sd-ink); border-radius: 0 3px 3px 0; margin-left: 1px; }
+/* one big job gets a thick bar, many shards get thin ones */
+.sd-viz .sh-lanes[data-single="true"] .sh-lane:first-child { height: 24px; }
+.sd-viz .sh-key { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 10px 0 0; font-size: 11.5px; color: var(--sd-muted); }
+.sd-viz .sh-key span { display: inline-flex; align-items: center; gap: 6px; }
+.sd-viz .sh-sw { display: inline-block; width: 12px; height: 8px; border-radius: 2px; }
+.sd-viz .sh-sw-setup { background: var(--sd-accent); }
+.sd-viz .sh-sw-tests { background: var(--sd-ink); }
+
+.sd-viz .sh-gauge { margin: 14px 0 0; }
+.sd-viz .sh-gauge-track { position: relative; display: block; height: 10px; border-radius: 5px; background: var(--sd-line); }
+.sd-viz .sh-gauge-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; background: var(--sd-accent); transition: width .35s var(--sd-ease), background-color .3s; }
+.sd-viz[data-ok="true"] .sh-gauge-fill { background: var(--sd-ok); }
+.sd-viz .sh-gauge-line { position: absolute; left: 80%; top: -4px; bottom: -4px; width: 2px; background: var(--sd-ink); }
+.sd-viz .sh-gauge-label { position: absolute; left: 80%; top: 14px; transform: translateX(-50%); font-style: normal; font-size: 11px; color: var(--sd-muted); }
+.sd-viz .sh-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 24px 0 0; }
+.sd-viz .sh-stats strong { display: block; font-size: 18px; font-variant-numeric: tabular-nums; }
+.sd-viz .sh-stats span { font-size: 11.5px; color: var(--sd-muted); }
+.sd-viz .sh-density { color: var(--sd-accent-ink); }
+.sd-viz[data-ok="true"] .sh-density { color: var(--sd-ok); }
+
+@media (max-width: 560px) {
+  .sd-viz .sh-chart { padding: 10px; }
+  .sd-viz .sh-stats strong { font-size: 16px; }
+}

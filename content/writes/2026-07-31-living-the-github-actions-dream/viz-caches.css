@@ -1,0 +1,29 @@
+.sd-viz .ca-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.sd-viz .ca-card {
+  display: flex; flex-direction: column; gap: 6px; padding: 10px 11px; background: var(--sd-card);
+  border: 1px solid var(--sd-line); border-radius: 8px; transition: border-color .3s, background-color .3s;
+}
+.sd-viz .ca-card[data-state="ok"] { border-color: var(--sd-ok); }
+.sd-viz .ca-card[data-state="bad"] { border-color: var(--sd-accent); }
+.sd-viz .ca-name { margin: 0; font-weight: 700; font-size: 13px; }
+.sd-viz .ca-role { margin: 0; font-size: 11.5px; color: var(--sd-muted); line-height: 1.4; flex: 1 1 auto; }
+.sd-viz .ca-chip { align-self: flex-start; height: auto; min-height: 24px; padding: 2px 8px; white-space: normal; font-size: 11.5px; }
+
+.sd-viz .ca-results-label { margin: 16px 0 6px; }
+.sd-viz .ca-results { display: flex; flex-direction: column; gap: 6px; }
+.sd-viz .ca-row { display: grid; grid-template-columns: 9.5em minmax(0, 1fr) 3.4em; align-items: center; gap: 10px; opacity: .55; transition: opacity .3s; }
+.sd-viz .ca-row[data-current="true"] { opacity: 1; }
+.sd-viz .ca-row-name { font-size: 12px; color: var(--sd-muted); }
+.sd-viz .ca-row[data-current="true"] .ca-row-name { color: var(--sd-ink); font-weight: 700; }
+.sd-viz .ca-track { display: block; height: 12px; border-radius: 6px; background: var(--sd-line); overflow: hidden; }
+.sd-viz .ca-fill { display: block; height: 100%; width: 0; border-radius: 6px; background: var(--sd-muted); }
+.sd-viz .ca-row[data-current="true"] .ca-fill { background: var(--sd-accent); }
+.sd-viz .ca-num { font-size: 13px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 560px) {
+  .sd-viz .ca-cards { grid-template-columns: 1fr; }
+  .sd-viz .ca-card { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+  .sd-viz .ca-role { flex: 1 1 100%; order: 3; }
+  .sd-viz .ca-row { grid-template-columns: 7.2em minmax(0, 1fr) 3em; gap: 8px; }
+  .sd-viz .sd-seg > button:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}

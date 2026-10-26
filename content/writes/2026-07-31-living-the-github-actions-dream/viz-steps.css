@@ -1,0 +1,28 @@
+.sd-viz .st-chart { background: var(--sd-card); border: 1px solid var(--sd-line); border-radius: 8px; padding: 10px 8px 4px; }
+.sd-viz .st-svg text { font-size: 12px; }
+.sd-viz .st-label { fill: var(--sd-ink); }
+.sd-viz .st-row { cursor: pointer; outline: none; }
+.sd-viz .st-hit { fill: transparent; }
+.sd-viz .st-row:hover .st-hit, .sd-viz .st-row:focus-visible .st-hit { fill: var(--sd-panel); }
+.sd-viz .st-row.is-picked .st-hit { fill: var(--sd-panel); }
+.sd-viz .st-row.is-picked .st-label { font-weight: 700; }
+.sd-viz .st-work { fill: var(--sd-ink); }
+.sd-viz .st-boot { fill: var(--sd-line); }
+.sd-viz .st-wait { fill: var(--sd-accent-soft); stroke: var(--sd-accent); stroke-width: 1.2; }
+.sd-viz .st-axis { stroke: var(--sd-line); }
+.sd-viz .st-head { stroke: var(--sd-accent); stroke-width: 1.5; }
+.sd-viz .st-end { stroke: var(--sd-ink); stroke-width: 1.5; }
+.sd-viz .st-end-text { fill: var(--sd-ink); font-weight: 700; }
+.sd-viz .st-ghost { stroke: var(--sd-faint); stroke-dasharray: 3 3; }
+.sd-viz .st-saved { stroke: var(--sd-ok); stroke-width: 2; }
+.sd-viz .st-saved-text { fill: var(--sd-ok); font-weight: 700; }
+.sd-viz .st-note { margin: 10px 0 0; font-size: 13px; min-height: 1.5em; color: var(--sd-muted); }
+.sd-viz .st-note b { color: var(--sd-ink); margin-right: 6px; }
+.sd-viz .st-key { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 11.5px; color: var(--sd-muted); }
+.sd-viz .st-sw { display: inline-block; width: 14px; height: 9px; border-radius: 2px; background: var(--sd-ink); margin-right: -6px; vertical-align: middle; }
+.sd-viz .st-sw.is-boot { background: var(--sd-line); }
+.sd-viz .st-sw.is-wait { background: var(--sd-accent-soft); box-shadow: inset 0 0 0 1.2px var(--sd-accent); }
+@media (max-width: 560px) {
+  .sd-viz .st-svg text { font-size: 11px; }
+  .sd-viz .st-chart { padding: 8px 4px 2px; }
+}
