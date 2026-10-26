@@ -65,7 +65,38 @@
     </div>
 
     {% if page.toc %}
-    <details class="toc">
+    <aside class="toc-rail" aria-label="On this page">
+        <p class="toc-rail__header">On this page</p>
+        <nav class="toc-rail__nav">
+            <ul class="toc-rail__list">
+            {% for h1 in page.toc %}
+                <li class="toc-rail__group">
+                    <a class="toc-rail__link toc-rail__link--h1" href="#{{ h1.id }}">{{ h1.title }}</a>
+                    {% if h1.children %}
+                    <ul class="toc-rail__sublist">
+                        {% for h2 in h1.children %}
+                        <li class="toc-rail__subitem">
+                            <a class="toc-rail__link toc-rail__link--h2" href="#{{ h2.id }}">{{ h2.title }}</a>
+                            {% if h2.children %}
+                            <ul class="toc-rail__sublist toc-rail__sublist--nested">
+                                {% for h3 in h2.children %}
+                                <li class="toc-rail__subitem">
+                                    <a class="toc-rail__link toc-rail__link--h3" href="#{{ h3.id }}">{{ h3.title }}</a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </li>
+            {% endfor %}
+            </ul>
+        </nav>
+    </aside>
+
+    <details class="toc toc-mobile">
         <summary>Table of Contents</summary>
         <nav>
             <ul>
@@ -88,4 +119,81 @@
 
     {{ page.content | safe }}
 </article>
+
+{% if page.toc %}
+<script>
+(function() {
+    const rail = document.querySelector('.toc-rail');
+    if (!rail) return;
+
+    const links = Array.from(rail.querySelectorAll('.toc-rail__link'));
+    if (!links.length) return;
+
+    const items = links.map(function(link) {
+        const id = decodeURIComponent(link.getAttribute('href').slice(1));
+        const target = document.getElementById(id);
+        return target ? { link: link, target: target } : null;
+    }).filter(Boolean);
+
+    if (!items.length) return;
+
+    let activeLink = null;
+    let ticking = false;
+
+    function setActive(nextLink) {
+        if (activeLink === nextLink) return;
+        if (activeLink) {
+            activeLink.classList.remove('is-active');
+            activeLink.removeAttribute('aria-current');
+        }
+        activeLink = nextLink;
+        if (activeLink) {
+            activeLink.classList.add('is-active');
+            activeLink.setAttribute('aria-current', 'location');
+            // Keep active item visible inside the floating TOC rail without scrolling the window
+            const railRect = rail.getBoundingClientRect();
+            const linkRect = activeLink.getBoundingClientRect();
+            const pad = 28;
+            if (linkRect.top < railRect.top + pad) {
+                rail.scrollTop -= (railRect.top + pad - linkRect.top);
+            } else if (linkRect.bottom > railRect.bottom - pad) {
+                rail.scrollTop += (linkRect.bottom - (railRect.bottom - pad));
+            }
+        }
+    }
+
+    function updateActive() {
+        ticking = false;
+        const threshold = 130;
+        let current = null;
+
+        for (let i = 0; i < items.length; i++) {
+            const rect = items[i].target.getBoundingClientRect();
+            if (rect.top <= threshold) {
+                current = items[i].link;
+            } else {
+                break;
+            }
+        }
+
+        if (window.scrollY > 0 && (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 8)) {
+            current = items[items.length - 1].link;
+        }
+
+        setActive(current);
+    }
+
+    function onScroll() {
+        if (!ticking) {
+            ticking = true;
+            window.requestAnimationFrame(updateActive);
+        }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    updateActive();
+})();
+</script>
+{% endif %}
 {% endblock content %}
