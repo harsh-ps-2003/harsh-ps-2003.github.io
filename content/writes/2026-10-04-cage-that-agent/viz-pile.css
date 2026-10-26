@@ -1,0 +1,36 @@
+.sd-viz .pl-gates { margin-left: auto; }
+.sd-viz .pl-stage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.sd-viz .pl-step, .sd-viz .pl-bag { background: var(--sd-card); border: 1px solid var(--sd-line); border-radius: 8px; padding: 12px 14px; min-width: 0; }
+.sd-viz .pl-cmd { display: inline-block; background: transparent; color: var(--sd-ink); font-family: var(--sd-mono); font-size: 17px; font-weight: 700; padding: 6px 12px; border: 2px solid var(--sd-ink); border-radius: 7px; }
+.sd-viz .pl-gap { margin-top: 14px; }
+.sd-viz .pl-adds, .sd-viz .pl-held { display: flex; flex-wrap: wrap; gap: 6px; }
+.sd-viz .pl-adds { min-height: 28px; }
+.sd-viz .pl-item.is-new { animation: pl-drop .55s var(--sd-ease) both; }
+.sd-viz .pl-held .pl-item:not(.is-new) { opacity: .8; }
+@keyframes pl-drop { from { opacity: 0; transform: translateY(-10px) scale(.92); } }
+
+.sd-viz .pl-risk { margin: 14px 0 0; padding: 8px 10px; border-radius: 7px; font-size: 13px; min-height: 2.6em;
+  transition: background-color .3s, color .3s; }
+.sd-viz .pl-risk[data-state="open"] { background: var(--sd-accent-soft); color: var(--sd-accent-ink); }
+.sd-viz .pl-risk[data-state="closed"] { background: var(--sd-ok-soft); color: var(--sd-ok); }
+.sd-viz .pl-risk b { font-weight: 700; color: inherit; }
+
+.sd-viz .pl-meter { height: 6px; border-radius: 3px; background: var(--sd-line); overflow: hidden; margin: 0 0 12px; }
+.sd-viz .pl-meter-fill { display: block; height: 100%; width: 0; background: var(--sd-ink); border-radius: 3px; transition: width .6s var(--sd-ease); }
+
+.sd-viz .pl-key { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 11.5px; color: var(--sd-muted); }
+.sd-viz .pl-swatch { display: inline-block; width: 12px; height: 12px; border: 1px solid var(--sd-line); background: var(--sd-card); border-radius: 3px; }
+.sd-viz .pl-swatch.is-bad { border-color: var(--sd-accent); background: var(--sd-accent-soft); margin-left: 6px; }
+
+@media (max-width: 560px) {
+  .sd-viz .pl-stage { grid-template-columns: 1fr; }
+  .sd-viz .pl-gates { margin-left: 0; }
+  .sd-viz .pl-cmd { font-size: 15px; }
+}
+
+/* a switch with a visible knob, green while the thing is on */
+.sd-viz .pl-gates { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 30px; padding: 4px 2px; border: 0; background: transparent; }
+.sd-viz .pl-gates::before { content: ""; width: 30px; height: 17px; border-radius: 9px; background: var(--sd-line); box-shadow: none; flex: 0 0 auto; transition: background-color .2s; }
+.sd-viz .pl-gates::after { content: ""; position: absolute; left: 4px; top: 50%; width: 13px; height: 13px; margin-top: -6.5px; border-radius: 50%; background: var(--sd-card); box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .2s var(--sd-ease); }
+.sd-viz .pl-gates[aria-pressed="true"]::before { background: var(--sd-ok); box-shadow: none; }
+.sd-viz .pl-gates[aria-pressed="true"]::after { transform: translateX(13px); }
