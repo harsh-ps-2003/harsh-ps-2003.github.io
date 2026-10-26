@@ -2,6 +2,7 @@
 aliases = ["/writes/the-bit-where-svd-starts-making-people-actual-money/"]
 title = "The bit where SVD starts making people actual money"
 date = 2026-10-29
+draft=true
 path = "writes/2026-10-29-the-bit-where-svd-starts-making-people-actual-money"
 description = "A hands-on, animated look at SVD, from stretching a circle to compressing pictures, eigenfaces, movie recommendations, PageRank and inverses that blow up."
 [taxonomies]
