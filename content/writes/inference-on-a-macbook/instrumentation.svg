@@ -69,7 +69,7 @@
   <rect x="20" y="340" width="680" height="62" rx="8" class="box"/>
   <text x="32" y="360" class="k">4 · NAME BY PLACE</text>
   <text x="32" y="378">Every layer runs the same ops in the same order. A buffer's step is its place after that</text>
-  <text x="32" y="392">layer's attention kernel, named by what most of the 36 layers' buffers at that place were.</text>
+  <text x="32" y="392">layer's attention kernel, named by what most layers' buffers at that place were.</text>
   <path d="M360 402 V420" class="ln" marker-end="url(#a)"/>
 
   <rect x="20" y="422" width="680" height="24" rx="6" class="out"/>

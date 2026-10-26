@@ -61,5 +61,5 @@
   <rect x="20" y="412" width="12" height="12" class="use"/><text x="38" y="422">computed and used</text>
   <rect x="190" y="412" width="12" height="12" fill="#fbe5e3" stroke="#c62f2f" stroke-width=".75"/><text x="208" y="422">computed, then masked to zero</text>
   <rect x="440" y="412" width="12" height="12" fill="#ffffff" stroke="#232333" stroke-width=".75"/><text x="458" y="422">never computed</text>
-  <text x="20" y="452" class="h">Same answers, bit for bit (119 of 119 decisions). The request: 739 → 676 ms.</text>
+  <text x="20" y="452" class="h">Same answers, bit for bit: the blocks it skips only ever added zeros.</text>
 </svg>

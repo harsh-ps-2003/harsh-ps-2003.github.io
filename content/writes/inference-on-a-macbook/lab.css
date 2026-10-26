@@ -1,0 +1,70 @@
+/* The post's interactive figures. Everything follows the site theme: the page background, the text colour,
+   greys mixed from those two and the one orange accent. */
+.mac-lab {
+  --l-bg: var(--background-color);
+  --l-ink: var(--text-color);
+  --l-accent: var(--main-color);
+  --l-dim: color-mix(in srgb, var(--text-color) 60%, var(--background-color));
+  --l-light: color-mix(in srgb, var(--text-color) 35%, var(--background-color));
+  --l-faint: color-mix(in srgb, var(--text-color) 18%, transparent);
+  --l-grid: color-mix(in srgb, var(--text-color) 9%, transparent);
+  --l-tint: color-mix(in srgb, var(--main-color) 16%, transparent);
+  --l-panel: color-mix(in srgb, var(--text-color) 5%, var(--background-color));
+  border: 1px solid rgba(128, 128, 128, .3);
+  border-top: 3px solid var(--main-color);
+  border-radius: 3px;
+  padding: 20px 20px 16px;
+  margin: 32px 0;
+  background: var(--l-bg);
+  color: var(--l-ink);
+  font-size: .94em;
+}
+.mac-lab h3 { font-size: 1.2em; margin: 0 0 6px; }
+.mac-lab .lab-intro { color: var(--l-dim); font-size: .9em; line-height: 1.6; margin: 0 0 12px; }
+.mac-lab.lab-loading::after { content: "loading…"; display: block; color: var(--l-dim); font-size: .85em; padding: 24px 0; text-align: center; }
+.mac-lab .lab-failure { color: var(--l-dim); font-size: .85em; }
+
+.lab-controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 0 0 12px; font-size: .88em; }
+.lab-group { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.lab-group > span { color: var(--l-dim); margin-right: 4px; }
+.lab-btn {
+  font: inherit; font-size: .95em; color: var(--l-ink); background: var(--l-panel);
+  border: 1px solid var(--l-faint); border-radius: 3px; padding: 3px 9px; cursor: pointer;
+}
+.lab-btn[aria-pressed="true"] { border-color: var(--l-accent); background: var(--l-tint); }
+.lab-btn:focus-visible, .lab-range:focus-visible { outline: 2px solid var(--l-accent); outline-offset: 2px; }
+.lab-btn:disabled { opacity: .5; cursor: default; }
+.lab-slider { display: flex; align-items: center; gap: 8px; flex: 1 1 260px; }
+.lab-slider > span { color: var(--l-dim); white-space: nowrap; }
+.lab-slider output { font-variant-numeric: tabular-nums; min-width: 6.5em; }
+.lab-range { flex: 1; accent-color: var(--l-accent); min-width: 120px; }
+
+.lab-figure { width: 100%; height: auto; display: block; overflow: visible; touch-action: manipulation; }
+.lab-figure text { fill: var(--l-ink); font-size: 11px; font-family: inherit; }
+.lab-figure .dim { fill: var(--l-dim); }
+.lab-figure .small { font-size: 10px; }
+.lab-figure .grid { stroke: var(--l-grid); stroke-width: 1; }
+.lab-figure .axis { stroke: var(--l-faint); stroke-width: 1; }
+
+.lab-readout { margin: 10px 0 0; font-size: .9em; line-height: 1.6; min-height: 3.2em; }
+.lab-readout b { font-weight: 700; }
+.lab-key { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .82em; color: var(--l-dim); margin-top: 6px; }
+.lab-key i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.lab-note { font-size: .8em; color: var(--l-dim); margin: 8px 0 0; }
+
+/* flame graph */
+.flame-frame { cursor: pointer; }
+.flame-frame rect { stroke: var(--l-bg); stroke-width: 1; }
+.flame-frame:hover rect, .flame-frame:focus rect { stroke: var(--l-ink); }
+.flame-frame:focus { outline: none; }
+.flame-frame text { font-size: 10.5px; pointer-events: none; }
+.fill-matmul { fill: var(--l-accent); }
+.fill-attn { fill: var(--l-ink); }
+.fill-other { fill: var(--l-light); }
+.fill-frame { fill: var(--l-faint); }
+.text-on-ink { fill: var(--l-bg) !important; }
+
+@media (max-width: 520px) {
+  .mac-lab { padding: 16px 12px 12px; }
+  .lab-figure text { font-size: 12px; }
+}
