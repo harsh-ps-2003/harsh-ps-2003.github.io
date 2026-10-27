@@ -401,8 +401,8 @@ blockquote {
 
 @media (min-width: 900px) {
     body:has(.toc-rail) {
-        --toc-width: clamp(184px, 19vw, 224px);
-        margin-left: max(calc((100vw - var(--width)) / 2), calc(var(--toc-width) + 28px));
+        --toc-width: clamp(156px, 15.5vw, 192px);
+        margin-left: max(calc((100vw - var(--width)) / 2), calc(var(--toc-width) + 24px));
         margin-right: auto;
     }
 
@@ -411,34 +411,34 @@ blockquote {
     }
 
     .toc-rail {
-        --toc-width: clamp(184px, 19vw, 224px);
+        --toc-width: clamp(156px, 15.5vw, 192px);
         display: block;
         position: fixed;
         top: 88px;
-        left: max(14px, calc((100vw - var(--width)) / 2 - var(--toc-width) - 24px));
+        left: max(12px, calc((100vw - var(--width)) / 2 - var(--toc-width) - 20px));
         width: var(--toc-width);
         max-height: calc(100vh - 120px);
         overflow-y: auto;
         overscroll-behavior: contain;
-        padding: 4px 8px 16px;
+        padding: 2px 6px 12px;
         z-index: 20;
         scrollbar-width: thin;
         scrollbar-color: color-mix(in srgb, var(--text-color) 20%, transparent) transparent;
 
         &::-webkit-scrollbar {
-            width: 4px;
+            width: 3px;
         }
 
         &::-webkit-scrollbar-thumb {
             background: color-mix(in srgb, var(--text-color) 20%, transparent);
-            border-radius: 4px;
+            border-radius: 3px;
         }
     }
 
     .toc-rail__header {
-        margin: 0 0 10px 0;
-        padding: 0 10px;
-        font-size: 0.76rem;
+        margin: 0 0 6px 0;
+        padding: 0 6px;
+        font-size: 0.66rem;
         font-weight: 500;
         color: color-mix(in srgb, var(--text-color) 48%, var(--background-color));
         letter-spacing: 0.01em;
@@ -457,7 +457,7 @@ blockquote {
     }
 
     .toc-rail__group {
-        margin-top: 10px;
+        margin-top: 5px;
 
         &:first-child {
             margin-top: 0;
@@ -465,25 +465,27 @@ blockquote {
     }
 
     .toc-rail__sublist {
-        margin-top: 2px;
+        margin-top: 1px;
+        padding-left: 6px;
     }
 
     .toc-rail__sublist--nested {
-        padding-left: 10px;
+        padding-left: 8px;
     }
 
     .toc-rail__subitem {
-        margin-top: 2px;
+        margin-top: 1px;
     }
 
     .toc-rail__link {
         display: block;
         margin: 0;
-        padding: 5px 10px;
-        border-radius: 6px;
-        border-bottom: 2px solid transparent;
+        padding: 2px 6px;
+        border-radius: 4px;
+        border-bottom: 1.5px solid transparent;
         text-decoration: none;
-        line-height: 1.35;
+        line-height: 1.22;
+        letter-spacing: -0.015em;
         transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 
         &:hover {
@@ -501,14 +503,14 @@ blockquote {
     }
 
     .toc-rail__link--h1 {
-        font-size: 0.82rem;
+        font-size: 0.7rem;
         font-weight: 600;
         color: var(--heading-color);
     }
 
     .toc-rail__link--h2,
     .toc-rail__link--h3 {
-        font-size: 0.78rem;
+        font-size: 0.65rem;
         font-weight: 400;
         color: color-mix(in srgb, var(--text-color) 58%, var(--background-color));
     }
