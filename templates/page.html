@@ -126,7 +126,6 @@
     const rail = document.querySelector('.toc-rail');
     if (!rail) return;
 
-    const scroller = rail.querySelector('.toc-rail__nav') || rail;
     const links = Array.from(rail.querySelectorAll('.toc-rail__link'));
     if (!links.length) return;
 
@@ -139,7 +138,6 @@
     if (!items.length) return;
 
     let activeLink = null;
-    let activeGroup = null;
     let ticking = false;
 
     function setActive(nextLink) {
@@ -148,25 +146,18 @@
             activeLink.classList.remove('is-active');
             activeLink.removeAttribute('aria-current');
         }
-        if (activeGroup) {
-            activeGroup.classList.remove('is-active-group');
-        }
         activeLink = nextLink;
-        activeGroup = activeLink ? activeLink.closest('.toc-rail__group') : null;
-        if (activeGroup) {
-            activeGroup.classList.add('is-active-group');
-        }
         if (activeLink) {
             activeLink.classList.add('is-active');
             activeLink.setAttribute('aria-current', 'location');
-            // Keep active item visible inside the floating TOC nav without scrolling the window
-            const railRect = scroller.getBoundingClientRect();
+            // Keep active item visible inside the floating TOC rail without scrolling the window
+            const railRect = rail.getBoundingClientRect();
             const linkRect = activeLink.getBoundingClientRect();
-            const pad = 20;
+            const pad = 28;
             if (linkRect.top < railRect.top + pad) {
-                scroller.scrollTop -= (railRect.top + pad - linkRect.top);
+                rail.scrollTop -= (railRect.top + pad - linkRect.top);
             } else if (linkRect.bottom > railRect.bottom - pad) {
-                scroller.scrollTop += (linkRect.bottom - (railRect.bottom - pad));
+                rail.scrollTop += (linkRect.bottom - (railRect.bottom - pad));
             }
         }
     }

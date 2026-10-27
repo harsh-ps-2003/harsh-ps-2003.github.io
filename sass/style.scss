@@ -401,7 +401,7 @@ blockquote {
 
 @media (min-width: 900px) {
     body:has(.toc-rail) {
-        --toc-width: clamp(148px, 14.5vw, 180px);
+        --toc-width: clamp(156px, 15.5vw, 192px);
         margin-left: max(calc((100vw - var(--width)) / 2), calc(var(--toc-width) + 24px));
         margin-right: auto;
     }
@@ -411,41 +411,17 @@ blockquote {
     }
 
     .toc-rail {
-        --toc-width: clamp(148px, 14.5vw, 180px);
-        display: flex;
-        flex-direction: column;
+        --toc-width: clamp(156px, 15.5vw, 192px);
+        display: block;
         position: fixed;
-        top: 116px;
+        top: 88px;
         left: max(12px, calc((100vw - var(--width)) / 2 - var(--toc-width) - 20px));
         width: var(--toc-width);
-        max-height: min(42vh, 270px);
-        padding: 8px 8px 10px;
-        border: 1px solid color-mix(in srgb, var(--text-color) 14%, transparent);
-        border-radius: 8px;
-        background-color: color-mix(in srgb, var(--background-color) 92%, var(--text-color) 4%);
-        backdrop-filter: blur(6px);
-        z-index: 20;
-    }
-
-    .toc-rail__header {
-        flex: 0 0 auto;
-        margin: 0 0 6px 0;
-        padding: 0 6px 5px;
-        border-bottom: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
-        font-size: 0.64rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        color: color-mix(in srgb, var(--text-color) 48%, var(--background-color));
-        letter-spacing: 0.04em;
-    }
-
-    .toc-rail__nav {
-        margin: 0;
-        display: block;
-        flex: 1 1 auto;
-        min-height: 0;
+        max-height: calc(100vh - 120px);
         overflow-y: auto;
         overscroll-behavior: contain;
+        padding: 2px 6px 12px;
+        z-index: 20;
         scrollbar-width: thin;
         scrollbar-color: color-mix(in srgb, var(--text-color) 20%, transparent) transparent;
 
@@ -459,6 +435,20 @@ blockquote {
         }
     }
 
+    .toc-rail__header {
+        margin: 0 0 6px 0;
+        padding: 0 6px;
+        font-size: 0.66rem;
+        font-weight: 500;
+        color: color-mix(in srgb, var(--text-color) 48%, var(--background-color));
+        letter-spacing: 0.01em;
+    }
+
+    .toc-rail__nav {
+        margin: 0;
+        display: block;
+    }
+
     .toc-rail__list,
     .toc-rail__sublist {
         list-style: none;
@@ -467,26 +457,20 @@ blockquote {
     }
 
     .toc-rail__group {
-        margin-top: 3px;
+        margin-top: 5px;
 
         &:first-child {
             margin-top: 0;
         }
-
-        &:not(.is-active-group) > .toc-rail__sublist {
-            display: none;
-        }
     }
 
     .toc-rail__sublist {
-        margin-top: 2px;
-        padding-left: 7px;
-        border-left: 1px solid color-mix(in srgb, var(--text-color) 14%, transparent);
-        margin-left: 6px;
+        margin-top: 1px;
+        padding-left: 6px;
     }
 
     .toc-rail__sublist--nested {
-        padding-left: 7px;
+        padding-left: 8px;
     }
 
     .toc-rail__subitem {
@@ -496,11 +480,11 @@ blockquote {
     .toc-rail__link {
         display: block;
         margin: 0;
-        padding: 3px 6px;
+        padding: 2px 6px;
         border-radius: 4px;
         border-bottom: 1.5px solid transparent;
         text-decoration: none;
-        line-height: 1.24;
+        line-height: 1.22;
         letter-spacing: -0.015em;
         transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 
@@ -519,19 +503,14 @@ blockquote {
     }
 
     .toc-rail__link--h1 {
-        font-size: 0.68rem;
-        font-weight: 500;
-        color: color-mix(in srgb, var(--heading-color) 82%, var(--background-color));
-    }
-
-    .toc-rail__group.is-active-group > .toc-rail__link--h1 {
-        color: var(--heading-color);
+        font-size: 0.7rem;
         font-weight: 600;
+        color: var(--heading-color);
     }
 
     .toc-rail__link--h2,
     .toc-rail__link--h3 {
-        font-size: 0.64rem;
+        font-size: 0.65rem;
         font-weight: 400;
         color: color-mix(in srgb, var(--text-color) 58%, var(--background-color));
     }
