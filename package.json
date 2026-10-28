@@ -6,7 +6,8 @@
   "scripts": {
     "diagram:export": "./scripts/export-diagrams.sh",
     "diagram:svg": "excalidraw-export --svg",
-    "diagram:png": "excalidraw-export --scale 2"
+    "diagram:png": "excalidraw-export --scale 2",
+    "resume:build": "tectonic content/resume/resume.tex && pdftoppm -png -r 200 content/resume/resume.pdf /tmp/resume-page"
   },
   "devDependencies": {
     "@moona3k/excalidraw-export": "^0.2.1"

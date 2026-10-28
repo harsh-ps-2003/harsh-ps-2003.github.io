@@ -12,3 +12,6 @@ public/
 node_modules/
 .pnpm-store/
 pnpm-lock.yaml
+
+# Local LaTeX resume build output
+content/resume/resume.pdf

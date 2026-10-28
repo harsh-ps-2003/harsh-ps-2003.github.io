@@ -9,7 +9,7 @@ build_search_index = true
 minify_html = false
 generate_feeds = true
 feed_filenames = ["atom.xml", "rss.xml"]
-ignored_content = ["**/.DS_Store"]
+ignored_content = ["**/.DS_Store", "**/resume.tex", "**/resume.pdf"]
 
 [markdown]
 smart_punctuation = true

@@ -1,0 +1,198 @@
+%-----------------------------------------------------------------------------------------------------------------------------------------------%
+%   The MIT License (MIT)
+%
+%   Copyright (c) 2021 Jitin Nair
+%
+%   Permission is hereby granted, free of charge, to any person obtaining a copy
+%   of this software and associated documentation files (the "Software"), to deal
+%   in the Software without restriction, including without limitation the rights
+%   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+%   copies of the Software, and to permit persons to whom the Software is
+%   furnished to do so, subject to the following conditions:
+%
+%   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+%   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+%   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+%   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+%   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+%   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+%   THE SOFTWARE.
+%
+%-----------------------------------------------------------------------------------------------------------------------------------------------%
+
+%----------------------------------------------------------------------------------------
+%   DOCUMENT DEFINITION
+%----------------------------------------------------------------------------------------
+
+% article class because we want to fully customize the page and not use a cv template
+\documentclass[a4paper,10pt]{article}
+
+%----------------------------------------------------------------------------------------
+%   FONT
+%----------------------------------------------------------------------------------------
+
+% % fontspec allows you to use TTF/OTF fonts directly
+% \usepackage{fontspec}
+% \defaultfontfeatures{Ligatures=TeX}
+
+% % modified for ShareLaTeX use
+% \setmainfont[
+% SmallCapsFont = Fontin-SmallCaps.otf,
+% BoldFont = Fontin-Bold.otf,
+% ItalicFont = Fontin-Italic.otf
+% ]
+% {Fontin.otf}
+
+%----------------------------------------------------------------------------------------
+%   PACKAGES
+%----------------------------------------------------------------------------------------
+\usepackage{url}
+\usepackage{parskip}
+
+%other packages for formatting
+\RequirePackage{color}
+\RequirePackage{graphicx}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage[scale=0.92]{geometry}
+
+%tabularx environment
+\usepackage{tabularx}
+
+%for lists within experience section
+\usepackage{enumitem}
+
+% centered version of 'X' col. type
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+
+%to prevent spillover of tabular into next pages
+\usepackage{supertabular}
+\usepackage{tabularx}
+\newlength{\fullcollw}
+\setlength{\fullcollw}{0.47\textwidth}
+
+%custom \section
+\usepackage{titlesec}
+\usepackage{multicol}
+\usepackage{multirow}
+
+%CV Sections inspired by:
+%http://stefano.italians.nl/archives/26
+\titleformat{\section}{\Large\scshape\raggedright}{}{0em}{}[\titlerule]
+\titlespacing{\section}{0pt}{8pt}{6pt}
+
+%for publications
+% \usepackage[style=authoryear,sorting=ynt, maxbibnames=2]{biblatex}
+
+%Setup hyperref package, and colours for links
+\usepackage[unicode, draft=false]{hyperref}
+\definecolor{linkcolour}{rgb}{0,0.2,0.6}
+\hypersetup{colorlinks,breaklinks,urlcolor=linkcolour,linkcolor=linkcolour}
+% \addbibresource{citations.bib}
+% \setlength\bibitemsep{1em}
+
+%for social icons
+\usepackage{fontawesome5}
+
+%debug page outer frames
+%\usepackage{showframe}
+
+%----------------------------------------------------------------------------------------
+%   BEGIN DOCUMENT
+%----------------------------------------------------------------------------------------
+\begin{document}
+
+% non-numbered pages
+\pagestyle{empty}
+
+%----------------------------------------------------------------------------------------
+%   TITLE
+%----------------------------------------------------------------------------------------
+
+\begin{tabularx}{\linewidth}{@{} C @{}}
+\Huge{HARSH PRATAP SINGH} \\[7.5pt]
+\href{https://github.com/harsh-ps-2003}{\raisebox{-0.05\height}\faGithub\ harsh-ps-2003} \ $|$ \
+\href{https://harsh-ps-2003.bearblog.dev/}{\raisebox{-0.05\height}\faGlobe \ harsh-ps-2003.bearblog.dev} \ $|$ \
+\href{mailto:harshpratapsingh8210@gmail.com}{\raisebox{-0.05\height}\faEnvelope \ harshpratapsingh8210@gmail.com}
+\end{tabularx}
+
+%----------------------------------------------------------------------------------------
+% EXPERIENCE SECTIONS
+%----------------------------------------------------------------------------------------
+
+\section{Work Experience}
+
+\begin{tabularx}{\linewidth}{@{}l r@{}}
+    \textbf{Sqwish AI} & Feburary 2026 -- Present \\
+    \textit{Member of Technical Staff - Intern} & \\
+    \multicolumn{2}{@{}X@{}}{
+        Building low-latency contextual bandit inference for \href{https://routeworks.github.io/}{Sqwish Router}, enabling sub-50ms routing decisions for AI agents.
+    } \\
+\end{tabularx}
+
+\begin{tabularx}{\linewidth}{@{}l r@{}}
+    \textbf{Jenkins} - Google Summer of Code & \\
+    \textit{Open Source Maintainer} & May 2023 - Present \\[1pt]
+    % \multicolumn{2}{@{}X@{}}{\textit{Skills - Java, Python, RAG, MCP, Docker, GitLab, Ngnix, CI/CD}} \\[1pt]
+    \multicolumn{2}{@{}X@{}}{
+    \begin{minipage}[t]{\linewidth}
+        \begin{itemize}[nosep,after=\strut, leftmargin=1em, itemsep=2pt]
+            \item[--] \textbf{Mentored Google Summer of Code contributors} building an \textbf{agentic AI diagnostic system}, architecting a \textbf{filesystem-first debugging stack} that combines live Jenkins state via \textbf{Jenkins MCP server} with \textbf{LightRAG} graph-backed plugin knowledge to automate failure diagnosis across \textbf{2{,}000+ Jenkins plugins}
+            \item[--] Built \textbf{semantic log retrieval} with structure-aware chunking, metadata indexing, query expansion, reranking, and an \textbf{async resumable ETL pipeline} for continuous Jenkins knowledge-graph ingestion, achieving an \textbf{F1 of 0.93} on curated Jenkins failure-pattern queries 
+            \item[--] Designed secure multi-instance Jenkins operations with URL-based routing, instance-aware caching, file-lock-protected concurrency, \textbf{credential redaction for 15+ secret types}, CSRF handling, and API-token authentication
+            \item[--] Migrated the \href{https://www.jenkins.io/blog/2023/08/24/gitlab-plugin-modernization-report/}{Jenkins GitLab Plugin} from RESTEasy to GitLab4J-API with reverse-proxy support and integration tests as a \textbf{Google Summer of Code 2023 mentee}
+        \end{itemize}
+    \end{minipage}
+    }
+\end{tabularx}
+
+\begin{tabularx}{\linewidth}{@{}l r@{}}
+    \textbf{Ethereum Foundation} & June 2025 -- November 2025 \\
+    \textit{Protocol Engineering Grantee -- EF Protocol Consensus Team} & \\
+    \multicolumn{2}{@{}X@{}}{
+        Implemented \href{https://arxiv.org/pdf/2405.00549}{Fast Confirmation Rule} in Ethereum Clients, providing block confirmation in \textbf{12-24 seconds vs traditional 13-19 minutes} on the Ethereum Blockchain
+    } \\
+\end{tabularx}
+
+\begin{tabularx}{\linewidth}{@{}l r@{}}
+    \textbf{Cloud Native Computing Foundation (CNCF)} & \\
+    \textit{Linux Foundation Mentee} & March 2025 – May 2025 \\
+    \multicolumn{2}{@{}X@{}}{\href{https://docs.google.com/document/d/19vMr22inhLAPjWcVJkZWiG_GY6ZG3PLxG9QqAmIlnIc/edit?tab=t.0\#heading=h.5d4q82tdn6qhq}{Designed} and \href{https://github.com/istio/ztunnel/pull/1507}{implemented} support for \textbf{mTLS via HBONE} for the metrics endpoint in Istio's Ambient mesh, improving security posture; became a \textit{Member of Istio's Networking Working Group} after the internship.} \\
+\end{tabularx}
+
+\begin{tabularx}{\linewidth}{ @{}l r@{} }
+\textbf{uv} & \\
+\textit{Open Source Contributor} &  \\[1pt]
+\multicolumn{2}{@{}X@{}}{
+\begin{minipage}[t]{\linewidth}
+    \begin{itemize}[nosep,after=\strut, leftmargin=1em, itemsep=2pt]
+        \item [ -- ]Added GitLab trusted publisher support with \textbf{secure OIDC token discovery} for passwordless PyPI authentication - \href{https://github.com/astral-sh/uv/pull/15583}{PR}
+        \item [ -- ]Improved packaging UX with compressed package size reporting - \href{https://github.com/astral-sh/uv/pull/15531}{PR}, authoritative local-over-global pin resolution - \href{https://github.com/astral-sh/uv/pull/15473}{PR}, and a context-aware warning for conflicting VIRTUALENV setups - \href{https://github.com/astral-sh/uv/pull/15467}{PR}
+    \end{itemize}
+\end{minipage}
+}
+\end{tabularx}
+
+%----------------------------------------------------------------------------------------
+%   RESEARCH
+%----------------------------------------------------------------------------------------
+
+\section{Research \& Projects}
+\begin{itemize}[nosep, leftmargin=1em, itemsep=3pt]
+    \item[--] \textit{Forward and Inverse Waveform Inversion via \href{https://arxiv.org/pdf/2107.07871}{Finite Basis PINNs} - \href{https://harsh-ps-2003.bearblog.dev/the-chronicles-of-training-fbpinns/}{blog}}\\
+    Architected \textbf{multiscale Finite Basis PINNs} for \textbf{2D acoustic and elastic wave equations} using JAX \textbf{JIT}, domain decomposition, and partition-of-unity windows to improve training efficiency by \textbf{1.7x} for full waveform inversion. Designed a \textbf{model-parallel multi-GPU architecture} with \textbf{topology-aware sharding}, \textbf{NVLink exchange}, and chunked evaluation, demonstrating \textbf{15x speedup}, \textbf{56\% per-device memory reduction}, and \textbf{1000+ subdomain scaling}.
+    \item[--] \textit{\href{https://drive.google.com/file/d/1cCOtJc3lEBJhSC3eeF50Ef5EUvJmHScG/view?usp=sharing}{Multi-GPU hash table optimization under Unified Virtual Memory oversubscription}}\\
+    Implemented \textbf{pipelined radix partitioning and routing} to make oversubscribed multi-GPU hash table workloads compute-bound, delivering a \textbf{7.3x throughput gain} (\textbf{24.68M to 180.86M ops/s}) and reducing DtoD PCIe traffic by \textbf{76x} (\textbf{24.4 GB to 320 MB}) via partition alignment.
+    \item[--] \textit{A distributed hash table implementation based on \href{https://pdos.csail.mit.edu/papers/chord:sigcomm01/chord_sigcomm.pdf}{Chord} DHT - \href{https://github.com/harsh-ps-2003/pikachu}{Pikachu}}\\
+    Built an asynchronous in-memory DHT with multidimensional keyspaces, finger tables, and recursive lookups, achieving \textbf{average O(log N) hop count} under churn. Engineered a \textbf{connection-pooled gRPC transport} with streaming handoff APIs, backpressure, bounded buffers, readiness signaling, and graceful shutdown for low-latency high-volume key transfers.
+\end{itemize}
+
+%----------------------------------------------------------------------------------------
+%   EDUCATION
+%----------------------------------------------------------------------------------------
+
+\section{Education}
+
+\noindent
+Bachelor's in Earth Science (major) and Computer Science (minors) -- \textit{Indian Institute of Technology, Kanpur}\\
+\textit{Relevant Coursework}: Data Structures and Algorithms, Introduction to Machine Learning, Generative Artificial Intelligence, High Performance Computing with Applications, Big Data Visual Analytics, Applied Cryptography, Cryptography for Privacy Protection, Peer-to-Peer Networks, Fundamentals of Remote Sensing and GIS, Analysis of Concurrent Programs
+\end{document}

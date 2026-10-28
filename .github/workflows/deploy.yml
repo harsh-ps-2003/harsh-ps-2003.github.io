@@ -9,6 +9,7 @@ on:
       - "scripts/**"
       - "package.json"
       - ".gitignore"
+      - "content/resume/resume.tex"
   workflow_dispatch:
 
 permissions:
