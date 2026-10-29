@@ -34,7 +34,7 @@
 
 figure.sd-viz { margin: 1.6em 0; }
 figure.sd-viz.sd-ready {
-  background: transparent; color: var(--sd-ink); border-radius: 0; padding: 0;
+  background: transparent; color: var(--sd-ink); border-radius: 0; padding: 16px 18px;
   font-family: var(--sd-sans); font-size: 14px; line-height: 1.45;
 }
 .sd-viz * { box-sizing: border-box; }

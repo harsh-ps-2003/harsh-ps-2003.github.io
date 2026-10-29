@@ -240,6 +240,7 @@ figure.diagram {
 
 figure.sd-viz.sd-ready {
     border: 1px solid var(--heading-color);
+    padding: 16px 18px;
 }
 
 // Dark mode - manual toggle
@@ -372,7 +373,7 @@ article i {
 @media (min-width: 900px) {
     body:has(.toc-rail) {
         --toc-width: clamp(220px, 20vw, 260px);
-        margin-left: max(calc((100vw - var(--width)) / 2), calc(var(--toc-width) + 28px));
+        margin-left: max(calc((100vw - var(--width)) / 2), calc(var(--toc-width) + 44px));
         margin-right: auto;
     }
 
@@ -385,12 +386,14 @@ article i {
         display: block;
         position: fixed;
         top: 88px;
-        left: max(12px, calc((100vw - var(--width)) / 2 - var(--toc-width) - 24px));
+        left: max(16px, calc((100vw - var(--width)) / 2 - var(--toc-width) - 36px));
         width: var(--toc-width);
         max-height: calc(100vh - 120px);
         overflow-y: auto;
         overscroll-behavior: contain;
-        padding: 0;
+        padding: 14px 14px 16px;
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--background-color) 88%, var(--text-color) 12%);
         z-index: 20;
     }
 
