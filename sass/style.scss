@@ -117,6 +117,32 @@ a:hover {
     text-decoration: none;
 }
 
+.socials {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin: 0.4em 0 1.2em;
+
+    a,
+    a:hover {
+        border-bottom: none;
+        background: none;
+        color: var(--text-color);
+        line-height: 0;
+    }
+
+    a:hover {
+        color: var(--main-color);
+    }
+
+    svg {
+        display: block;
+        width: 32px;
+        height: 32px;
+        fill: currentColor;
+    }
+}
+
 // Header styling - centered title, left-aligned nav like Bear
 header {
     text-align: center;
