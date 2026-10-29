@@ -391,23 +391,24 @@ article i {
         max-height: calc(100vh - 120px);
         overflow-y: auto;
         overscroll-behavior: contain;
-        padding: 14px 14px 16px;
+        padding: 12px 12px 14px;
         border-radius: 8px;
         background: color-mix(in srgb, var(--background-color) 88%, var(--text-color) 12%);
         z-index: 20;
     }
 
     .toc-rail__header {
-        margin: 0 0 10px 0;
+        margin: 0 0 8px 0;
         padding: 0;
-        font-size: 0.9rem;
-        font-weight: 600;
+        font-size: 0.75rem;
+        font-weight: 500;
         color: var(--heading-color);
     }
 
     .toc-rail__nav {
         margin: 0;
         display: block;
+        padding-left: 12px;
     }
 
     .toc-rail__list,
@@ -418,7 +419,7 @@ article i {
     }
 
     .toc-rail__group {
-        margin-top: 10px;
+        margin-top: 6px;
 
         &:first-child {
             margin-top: 0;
@@ -426,7 +427,7 @@ article i {
     }
 
     .toc-rail__sublist {
-        margin-top: 4px;
+        margin-top: 2px;
         padding-left: 12px;
     }
 
@@ -435,18 +436,18 @@ article i {
     }
 
     .toc-rail__subitem {
-        margin-top: 3px;
+        margin-top: 1px;
     }
 
     .toc-rail__link {
         display: block;
         margin: 0;
-        padding: 3px 4px;
+        padding: 1px 0 2px;
         border-radius: 0;
         border-bottom: 2px solid transparent;
         background: none;
         text-decoration: none;
-        line-height: 1.4;
+        line-height: 1.3;
         transition: color 0.15s ease, border-color 0.15s ease;
 
         &:hover {
@@ -464,14 +465,14 @@ article i {
     }
 
     .toc-rail__link--h1 {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         font-weight: 600;
         color: var(--heading-color);
     }
 
     .toc-rail__link--h2,
     .toc-rail__link--h3 {
-        font-size: 0.85rem;
+        font-size: 0.76rem;
         font-weight: 400;
         color: var(--text-color);
     }
