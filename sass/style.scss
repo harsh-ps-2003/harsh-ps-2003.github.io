@@ -14,6 +14,7 @@
     --code-background-color: #f2f2f2;
     --code-color: #222;
     --blockquote-color: #222;
+    --toc-rail-background: color-mix(in srgb, var(--background-color) 96%, var(--text-color) 4%);
 }
 
 // Dark mode - system preference
@@ -27,6 +28,7 @@
         --code-background-color: #2d2d44;
         --code-color: #d4d4d4;
         --blockquote-color: #d4d4d4;
+        --toc-rail-background: color-mix(in srgb, var(--background-color) 88%, var(--text-color) 12%);
     }
 }
 
@@ -40,6 +42,7 @@
     --code-background-color: #2d2d44;
     --code-color: #d4d4d4;
     --blockquote-color: #d4d4d4;
+    --toc-rail-background: color-mix(in srgb, var(--background-color) 88%, var(--text-color) 12%);
 }
 
 // Light mode - manual toggle (override system dark preference)
@@ -53,6 +56,7 @@
     --code-background-color: #f2f2f2;
     --code-color: #222;
     --blockquote-color: #222;
+    --toc-rail-background: color-mix(in srgb, var(--background-color) 96%, var(--text-color) 4%);
 }
 
 // Required for Zola giallo syntax highlighting
@@ -409,7 +413,7 @@ article i {
         }
         padding: 12px 12px 14px;
         border-radius: 8px;
-        background: color-mix(in srgb, var(--background-color) 88%, var(--text-color) 12%);
+        background: var(--toc-rail-background);
         z-index: 20;
     }
 
