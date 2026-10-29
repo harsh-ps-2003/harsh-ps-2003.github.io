@@ -391,6 +391,13 @@ article i {
         max-height: calc(100vh - 120px);
         overflow-y: auto;
         overscroll-behavior: contain;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
+        }
         padding: 12px 12px 14px;
         border-radius: 8px;
         background: color-mix(in srgb, var(--background-color) 88%, var(--text-color) 12%);
@@ -474,7 +481,15 @@ article i {
     .toc-rail__link--h3 {
         font-size: 0.76rem;
         font-weight: 400;
-        color: var(--text-color);
+        color: color-mix(in srgb, var(--text-color) 58%, var(--background-color));
+
+        &:hover {
+            color: color-mix(in srgb, var(--text-color) 58%, var(--background-color));
+        }
+
+        &.is-active {
+            color: var(--heading-color);
+        }
     }
 }
 
