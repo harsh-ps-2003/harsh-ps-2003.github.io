@@ -217,12 +217,12 @@ img.excalidraw,
     transition: filter 0.3s ease;
 }
 
-// Full-width figure; the link opens the SVG at full size for zooming
+// Full-width figure; the link opens the SVG at full size for zooming.
+// Same closed boundary as the interactive figures.
 figure.diagram {
     margin: 1.6em 0;
-    padding: 12px 0;
-    border-top: 1px solid var(--heading-color);
-    border-bottom: 1px solid var(--heading-color);
+    padding: 16px 18px;
+    border: 1px solid var(--heading-color);
 
     a,
     a:hover {
@@ -241,6 +241,15 @@ figure.diagram {
 figure.sd-viz.sd-ready {
     border: 1px solid var(--heading-color);
     padding: 16px 18px;
+}
+
+article p > img {
+    display: block;
+    width: 100%;
+    height: auto;
+    box-sizing: border-box;
+    margin: 1.6em 0;
+    border: 1px solid var(--heading-color);
 }
 
 // Dark mode - manual toggle
