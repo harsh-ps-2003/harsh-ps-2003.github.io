@@ -219,12 +219,16 @@ img.excalidraw,
 
 // Full-width figure; the link opens the SVG at full size for zooming
 figure.diagram {
-    margin: 1.5em 0;
+    margin: 1.6em 0;
+    padding: 12px 0;
+    border-top: 1px solid var(--heading-color);
+    border-bottom: 1px solid var(--heading-color);
 
     a,
     a:hover {
         border-bottom: none;
         background-color: transparent;
+        color: inherit;
     }
 
     img {
@@ -232,6 +236,10 @@ figure.diagram {
         width: 100%;
         height: auto;
     }
+}
+
+figure.sd-viz.sd-ready {
+    border: 1px solid var(--heading-color);
 }
 
 // Dark mode - manual toggle
@@ -343,10 +351,15 @@ article i {
         font-size: 0.9em;
         text-decoration: none;
         border-bottom: none;
-        
+        background: none;
+
         &:hover {
+            background: none;
+            color: var(--heading-color);
             text-decoration: underline;
             text-decoration-color: var(--main-color);
+            text-decoration-thickness: 2px;
+            text-underline-offset: 3px;
         }
     }
 }
@@ -426,20 +439,24 @@ article i {
         display: block;
         margin: 0;
         padding: 3px 4px;
-        border-radius: 4px;
-        border-bottom: 1.5px solid transparent;
+        border-radius: 0;
+        border-bottom: 2px solid transparent;
+        background: none;
         text-decoration: none;
         line-height: 1.4;
-        transition: color 0.15s ease;
+        transition: color 0.15s ease, border-color 0.15s ease;
 
         &:hover {
+            background: none;
             color: var(--heading-color);
-            border-bottom-color: transparent;
+            border-bottom-color: var(--main-color);
         }
 
         &.is-active {
+            background: none;
             color: var(--heading-color);
             font-weight: 600;
+            border-bottom-color: var(--main-color);
         }
     }
 

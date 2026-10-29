@@ -7,7 +7,7 @@ const X0 = 40, X1 = 272, STEP = .5;              // symmetric round 156 so neith
 const X = []; for (let x = X0; x <= X1 + 1e-9; x += STEP) X.push(x);
 const PEAKS = [100, 212], WIDTH = 6;
 const START = {mu: 128, sd: 20};
-const YMAX = .07;                                 // density at the top of the plot
+const YMAX = .11;                                 // room for a reverse-KL peak about 2× the teacher
 const SD_MIN = 4, SD_MAX = 90, STEPS = 320;
 
 const lse = a => { let m = -Infinity; for (const v of a) if (v > m) m = v; let s = 0; for (const v of a) s += Math.exp(v - m); return m + Math.log(s); };
@@ -34,12 +34,12 @@ const TEXT = {
   forward: {
     formula: 'KL(p<sub>T</sub> ‖ p<sub>S</sub>) = Σ <b class="sd-teacher">p<sub>T</sub></b> log(p<sub>T</sub> / p<sub>S</sub>)',
     weight: 'every answer weighted by the <b class="sd-teacher">teacher</b>',
-    idle: 'Forward KL weighs each answer by how much the teacher uses it, so <b>missing one of the teacher’s answers costs without limit.</b> Drag the blue bump to pick a start, then train.',
+    idle: 'Forward KL averages where the <b class="sd-teacher">teacher</b> lives. <b>Missing 100 or 212 costs without limit.</b> Mass in the valley is free, because the teacher has none there. Drag the blue bell, then train.',
   },
   reverse: {
     formula: 'KL(p<sub>S</sub> ‖ p<sub>T</sub>) = Σ <b class="sd-student">p<sub>S</sub></b> log(p<sub>S</sub> / p<sub>T</sub>)',
     weight: 'every answer weighted by the <b class="sd-student">student</b>',
-    idle: 'Reverse KL weighs each answer by how much the student uses it, so <b>saying something the teacher never says costs without limit</b>, while dropping one of its answers is cheap.',
+    idle: 'Reverse KL averages where the <b class="sd-student">student</b> lives. <b>Mass in the valley costs without limit</b>, so the bell is forced off the empty stretch. Dropping one of the teacher’s answers is cheap.',
   },
 };
 
@@ -102,7 +102,8 @@ export function mount(figure) {
     const stripTop = base + M.axis;
     svg.append(sv('text', {x: px(X0) + 2, y: stripTop + M.strip + 12, class: 'kl-strip-label', text: 'where the penalty comes from'}));
     const strip = sv('path', {class: 'kl-strip'});
-    svg.append(strip, student, ...peakLabels, handle, says);
+    const valley = sv('text', {x: px(156), y: base - 10, 'text-anchor': 'middle', class: 'kl-valley', text: 'teacher is empty'});
+    svg.append(strip, student, ...peakLabels, valley, handle, says);
     svg.append(sv('rect', {x: M.left, y: M.top - 6, width: w - M.left - M.right, height: H + 6, class: 'kl-hit'}));
     L = {px, py, base, H, w, student, handle, says, strip, stripTop, curve};
     paint();
@@ -133,14 +134,17 @@ export function mount(figure) {
     attrs(klOut, {text: k > 99 ? '> 99' : fmt(k, 2)});
     attrs(answerOut, {text: Math.round(mu)});
     const near = PEAKS.find(p => Math.abs(mu - p) < 8 && sd < 15);
-    const verdict = near ? `locks onto ${near}, right in ${near === 100 ? 'Celsius' : 'Fahrenheit'}`
-      : sd > 30 && mu > 125 && mu < 190 ? 'hedges, wrong in both units' : 'still somewhere in between';
+    const teacherPeak = 0.5 / (WIDTH * Math.sqrt(2 * Math.PI));
+    const studentPeak = 1 / (sd * Math.sqrt(2 * Math.PI));
+    const times = studentPeak / teacherPeak;
+    const verdict = near ? `locks onto ${near}, about ${fmt(times, 1)}× the teacher’s peak`
+      : sd > 30 && mu > 125 && mu < 190 ? 'mean in the valley, wrong in both units' : 'still somewhere in between';
     attrs(verdictOut, {text: verdict});
     let text = TEXT[dir].idle;
-    if (trained && dir === 'forward') text = `The student spreads out to cover both answers, so <b>its peak sits near ${Math.round(mu)}, the teacher’s average, wrong in both units.</b>`;
+    if (trained && dir === 'forward') text = `The bell covers both answers, so <b>its top sits in the valley, near ${Math.round(mu)}</b>. That is not a mode the teacher has. A single bell that has to stay up at 100 and at 212 has nowhere else to put its mean.`;
     if (trained && dir === 'reverse') text = near
-      ? `The student <b>commits to ${near}, the peak it started nearer</b>, and gives up the other answer completely. Start it on the other side of 156 and it picks the other one.`
-      : `<b>Stuck.</b> Started wide and near the middle, the pulls toward 100 and 212 cancel out, which is why people train with forward KL first and reverse after.`;
+      ? `Zero-forcing. The student puts all of its mass on <b>${near}</b> and drops the other answer. The peak is about <b>${fmt(times, 1)}×</b> the teacher’s, because the teacher had split its mass in half. Start on the other side of 156 and it picks the other one.`
+      : `<b>The two pulls cancel.</b> Wide and in the middle, the valley under the student is not empty, so reverse KL does not snap. That is why people train with forward KL first and reverse after.`;
     caption.innerHTML = text;
   }
 

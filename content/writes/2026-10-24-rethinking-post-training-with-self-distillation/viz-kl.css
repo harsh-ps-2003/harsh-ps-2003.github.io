@@ -10,6 +10,8 @@
 .sd-viz .sd-svg text.kl-peak, .sd-viz .sd-svg text.kl-says { font-size: 12.5px; font-weight: 600; font-family: var(--sd-mono);
   paint-order: stroke; stroke: var(--sd-card); stroke-width: 4px; stroke-linejoin: round; }
 .sd-viz .sd-svg text.kl-peak { fill: var(--sd-teacher); }
+.sd-viz .sd-svg text.kl-valley { font-size: 11px; font-weight: 600; fill: var(--sd-muted);
+  paint-order: stroke; stroke: var(--sd-card); stroke-width: 4px; stroke-linejoin: round; }
 .sd-viz .sd-svg text.kl-says { fill: var(--sd-student); }
 .sd-viz .sd-svg text.kl-key { font-size: 12px; font-weight: 600; }
 .sd-viz .sd-svg .kl-key-t { fill: var(--sd-teacher); }
