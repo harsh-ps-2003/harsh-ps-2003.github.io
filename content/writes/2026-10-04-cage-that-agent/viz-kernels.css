@@ -1,6 +1,6 @@
 .sd-viz .kn-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .sd-viz .kn-col { position: relative; display: flex; flex-direction: column; min-width: 0; padding: 10px; border-radius: 8px;
-  background: var(--sd-card); border: 1px solid var(--sd-line); transition: border-color .2s, box-shadow .2s; }
+  background: var(--sd-card); border: 1px solid var(--sd-line); transition: border-color 0.12s, box-shadow 0.12s; }
 .sd-viz .kn-col[role="button"] { cursor: pointer; }
 .sd-viz .kn-col[role="button"]:hover { border-color: var(--sd-muted); }
 .sd-viz .kn-col[aria-pressed="true"] { border-color: var(--sd-ink); box-shadow: 0 0 0 1px var(--sd-ink); }
@@ -12,7 +12,7 @@
 /* one row per layer, the same heights in every column so the host kernels line up */
 .sd-viz .kn-stack { display: grid; grid-template-rows: 52px 72px 48px 60px; gap: 6px; }
 .sd-viz .kn-box { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 6px 8px; border-radius: 6px;
-  border: 1px solid var(--sd-line); background: var(--sd-card); transition: background-color .35s, border-color .35s; }
+  border: 1px solid var(--sd-line); background: var(--sd-card); transition: background-color 0.22s, border-color 0.22s; }
 .sd-viz .kn-box b { font-size: 12.5px; }
 .sd-viz .kn-box small { font-size: 11px; color: var(--sd-muted); line-height: 1.3; }
 .sd-viz .kn-agent { border-style: dashed; border-color: var(--sd-accent); background: var(--sd-accent-soft); }
@@ -31,7 +31,7 @@
 .sd-viz .kn-note.is-ok { opacity: 1; }
 .sd-viz .kn-host.kn-hit, .sd-viz .kn-guest.kn-hit { border-color: var(--sd-accent); }
 .sd-viz .kn-host.kn-safe { border-color: var(--sd-ok); }
-.sd-viz .kn-flash { animation: kn-flash .7s ease-out; }
+.sd-viz .kn-flash { animation: kn-flash 0.43s ease-out; }
 @keyframes kn-flash { from { box-shadow: 0 0 0 4px color-mix(in srgb, var(--sd-accent) 35%, transparent); } to { box-shadow: 0 0 0 0 transparent; } }
 
 /* copy fail hides the boxes it doesn't use yet */
@@ -40,7 +40,7 @@
 
 /* dots run down the right edge, clear of the box text */
 .sd-viz .kn-dot { position: absolute; left: calc(100% - 26px); top: 0; width: 13px; height: 13px; border-radius: 50%; background: var(--sd-accent);
-  box-shadow: 0 0 0 3px var(--sd-card); opacity: 0; pointer-events: none; z-index: 2; transition: opacity .2s; }
+  box-shadow: 0 0 0 3px var(--sd-card); opacity: 0; pointer-events: none; z-index: 2; transition: opacity 0.12s; }
 .sd-viz .kn-small { width: 8px; height: 8px; background: var(--sd-ink); }
 
 .sd-viz .kn-verdict { font-size: 11.5px; line-height: 1.35; margin: 8px 0 0; min-height: 2.7em; color: var(--sd-muted); }

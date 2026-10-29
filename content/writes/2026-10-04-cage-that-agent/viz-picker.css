@@ -2,7 +2,7 @@
 .sd-viz .pk-wrap { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 14px; align-items: start; }
 .sd-viz .pk-questions { display: flex; flex-direction: column; gap: 5px; }
 .sd-viz .pk-q { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 8px 6px 10px; border-radius: 6px;
-  border-left: 3px solid transparent; background: var(--sd-card); transition: opacity .25s, border-color .25s; }
+  border-left: 3px solid transparent; background: var(--sd-card); transition: opacity 0.15s, border-color 0.15s; }
 .sd-viz .pk-q.pk-under { margin-left: 18px; }
 .sd-viz .pk-q[data-state="asked"] { border-left-color: var(--sd-line); }
 .sd-viz .pk-q[data-state="last"] { border-left-color: var(--sd-accent); }
@@ -17,7 +17,7 @@
 .sd-viz .pk-name { font-size: 17px; font-weight: 700; margin: 0 0 8px; line-height: 1.25; }
 .sd-viz .pk-line { font-size: 12.5px; margin: 4px 0; line-height: 1.4; }
 .sd-viz .pk-who { font-size: 11.5px; color: var(--sd-muted); margin: 10px 0 0; }
-.sd-viz .pk-pop { animation: pk-pop .45s var(--sd-ease); }
+.sd-viz .pk-pop { animation: pk-pop 0.28s var(--sd-ease); }
 @keyframes pk-pop { from { opacity: .3; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
 /* the workload map, two small 2x2 grids */

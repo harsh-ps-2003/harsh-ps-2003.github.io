@@ -7,25 +7,25 @@
   </defs>
   <style>
     text { fill: #232333; font-size: 10px; }
-    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .k { font-size: 10.5px; font-weight: 600; fill: #232333; }
     .t { font-size: 15px; font-weight: 700; }
-    .c { font-size: 11.5px; fill: #5c5c6e; }
-    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
-    .m { fill: #5c5c6e; }
+    .c { font-size: 11.5px; fill: #232333; }
+    .lane { font-size: 10px; font-weight: 600; fill: #232333; }
+    .m { fill: #232333; }
     .b { font-size: 11.5px; font-weight: 700; }
     .s { font-size: 10.5px; }
-    .red { fill: #c62f2f; }
-    .acc { fill: #c2410c; font-weight: 600; }
-    .grn { fill: #2f7a47; }
+    .red { fill: #232333; }
+    .acc { fill: #232333; font-weight: 600; }
+    .grn { fill: #232333; }
     .step { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
-    .y { fill: #fbf1cf; stroke: #d4b34a; stroke-width: 1; }
-    .r { fill: #fbe5e3; stroke: #c62f2f; stroke-width: 1; }
-    .g { fill: #e2f2e6; stroke: #5ea876; stroke-width: 1.25; }
-    .app { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1.25; }
-    .host { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1; }
-    .sentry { fill: #ece6f7; stroke: #9b86c9; stroke-width: 1.25; }
-    .band { fill: #f5f5f8; stroke: #c3c3cf; stroke-width: 1; }
-    .pip0 { fill: #ffffff; stroke: #c3c3cf; stroke-width: 1; }
+    .y { fill: #ffffff; stroke: #232333; stroke-width: 1; }
+    .r { fill: #ffffff; stroke: #232333; stroke-width: 1; }
+    .g { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .app { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .host { fill: #ffffff; stroke: #232333; stroke-width: 1; }
+    .sentry { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .band { fill: #ffffff; stroke: #232333; stroke-width: 1; }
+    .pip0 { fill: #ffffff; stroke: #232333; stroke-width: 1; }
     .ln { stroke: #232333; stroke-width: 1.25; fill: none; }
   </style>
 

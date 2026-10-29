@@ -3,29 +3,29 @@
   <desc id="desc">The same Copy Fail exploit (an AF_ALG socket, algif_aead, spliced file pages, a 4-byte write into the page cache, and a cached setuid binary that gives root) against three boundaries. In a container the AF_ALG path and the page cache are part of the shared host kernel, so cached files of other tenants get corrupted. In a Firecracker microVM the write stays in the guest kernel's own page cache and stops at the KVM boundary, and E2B's guest kernel does not even build AF_ALG AEAD. In gVisor the Sentry has no AF_ALG socket support and returns EAFNOSUPPORT, so the host kernel path is never reached. Cloudflare protected its shared-kernel fleet with a bpf-lsm program on socket_bind.</desc>
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
-    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#c62f2f"/></marker>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#232333"/></marker>
   </defs>
   <style>
     text { fill: #232333; font-size: 10px; }
-    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .k { font-size: 10.5px; font-weight: 600; fill: #232333; }
     .t { font-size: 15px; font-weight: 700; }
-    .c { font-size: 11.5px; fill: #5c5c6e; }
-    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
-    .m { fill: #5c5c6e; }
+    .c { font-size: 11.5px; fill: #232333; }
+    .lane { font-size: 10px; font-weight: 600; fill: #232333; }
+    .m { fill: #232333; }
     .h { font-size: 12.5px; font-weight: 700; }
     .e1 { font-size: 10.5px; font-weight: 600; }
     .b { font-weight: 700; font-size: 10.5px; }
-    .red { fill: #c62f2f; }
+    .red { fill: #232333; }
     .box { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
-    .atk { fill: #e3eefb; stroke: #c62f2f; stroke-width: 1.4; }
-    .usr { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1.25; }
-    .kern { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1.25; }
-    .hot { fill: #fbe5e3; stroke: #c62f2f; stroke-width: 1.25; }
-    .rbox { fill: #ffffff; stroke: #c62f2f; stroke-width: 1.25; }
-    .guest { fill: #e2f2e6; stroke: #5ea876; stroke-width: 1.25; }
-    .sentry { fill: #ece6f7; stroke: #9b86c9; stroke-width: 1.25; }
+    .atk { fill: #ffffff; stroke: #232333; stroke-width: 1.4; }
+    .usr { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .kern { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .hot { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .rbox { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .guest { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
+    .sentry { fill: #ffffff; stroke: #232333; stroke-width: 1.25; }
     .ctr { text-anchor: middle; }
-    .ra { stroke: #c62f2f; stroke-width: 1.4; fill: none; }
+    .ra { stroke: #232333; stroke-width: 1.4; fill: none; }
   </style>
 
   <text class="k" x="16" y="22">CVE-2026-31431 · COPY FAIL</text>
@@ -54,7 +54,7 @@
   </g>
 
   <!-- column separators -->
-  <g stroke="#dcdce4" stroke-width="1">
+  <g stroke="#232333" stroke-width="1">
     <line x1="243" y1="150" x2="243" y2="416"/>
     <line x1="476" y1="150" x2="476" y2="416"/>
   </g>
@@ -64,7 +64,7 @@
   <text class="m" x="24" y="180">runc / Sysbox (Daytona)</text>
   <rect class="atk" x="24" y="192" width="94" height="24" rx="4"/><text class="ctr" x="71" y="208">tenant A</text>
   <rect class="usr" x="134" y="192" width="95" height="24" rx="4"/><text class="ctr" x="181.5" y="208">tenant B</text>
-  <rect x="24" y="224" width="205" height="16" rx="3" fill="none" stroke="#7aa7d9" stroke-width="1" stroke-dasharray="4 3"/>
+  <rect x="24" y="224" width="205" height="16" rx="3" fill="none" stroke="#232333" stroke-width="1" stroke-dasharray="4 3"/>
   <text class="m ctr" x="126.5" y="235.5">ns · cgroups · seccomp</text>
   <rect class="kern" x="24" y="248" width="205" height="94" rx="4"/>
   <rect class="rbox" x="34" y="258" width="84" height="22" rx="3"/><text class="ctr" x="76" y="273">algif_aead</text>
@@ -75,7 +75,7 @@
   <text class="m" x="34" y="300">one page cache for</text>
   <text class="m" x="34" y="313">every tenant on the host</text>
   <text class="lane" x="34" y="334">HOST KERNEL · SHARED</text>
-  <circle cx="28" cy="353" r="3.5" fill="#c62f2f"/>
+  <circle cx="28" cy="353" r="3.5" fill="#232333"/>
   <text class="b red" x="36" y="357">co-tenant files corrupted</text>
   <text class="red" x="36" y="371">path to root on the host</text>
   <text class="m" x="24" y="389">Daytona blacklisted algif_aead,</text>
@@ -89,15 +89,15 @@
   <rect class="atk" x="265" y="198" width="94" height="22" rx="4"/><text class="ctr" x="312" y="213">agent code</text>
   <rect class="rbox" x="267" y="238" width="84" height="22" rx="3"/><text class="ctr" x="309" y="253">algif_aead</text>
   <rect class="hot" x="367" y="238" width="87" height="22" rx="3"/><text class="ctr" x="410.5" y="253">guest cache</text>
-  <text class="lane" x="454" y="232" text-anchor="end" style="fill:#2f6b43">GUEST KERNEL</text>
+  <text class="lane" x="454" y="232" text-anchor="end" style="fill: #232333">GUEST KERNEL</text>
   <line class="ra" x1="309" y1="220" x2="309" y2="236" marker-end="url(#ar)"/>
   <line class="ra" x1="351" y1="249" x2="365" y2="249" marker-end="url(#ar)"/>
   <text class="m" x="267" y="282">write stays in this guest</text>
-  <line x1="257" y1="303" x2="462" y2="303" stroke="#5ea876" stroke-width="3"/>
+  <line x1="257" y1="303" x2="462" y2="303" stroke="#232333" stroke-width="3"/>
   <text class="m" x="462" y="315" text-anchor="end">KVM boundary</text>
   <rect class="kern" x="257" y="320" width="205" height="22" rx="4"/>
   <text class="lane" x="265" y="335">HOST KERNEL · UNTOUCHED</text>
-  <circle cx="261" cy="353" r="3.5" fill="#5ea876"/>
+  <circle cx="261" cy="353" r="3.5" fill="#232333"/>
   <text class="b" x="269" y="357">contained to one guest</text>
   <text class="m" x="269" y="371">escaping needs a 2nd bug (VMM)</text>
   <text class="m" x="257" y="389">E2B builds its guest kernel</text>
@@ -108,17 +108,17 @@
   <text class="h" x="490" y="166">gVisor</text>
   <text class="m" x="490" y="180">Modal, GKE Agent Sandbox</text>
   <rect class="atk" x="490" y="192" width="94" height="22" rx="4"/><text class="ctr" x="537" y="207">app code</text>
-  <line x1="537" y1="214" x2="537" y2="225" stroke="#c62f2f" stroke-width="1.4" marker-end="url(#ar)"/>
+  <line x1="537" y1="214" x2="537" y2="225" stroke="#232333" stroke-width="1.4" marker-end="url(#ar)"/>
   <rect class="sentry" x="490" y="227" width="205" height="66" rx="5"/>
-  <text class="lane" x="687" y="242" text-anchor="end" style="fill:#5b4794">SENTRY</text>
+  <text class="lane" x="687" y="242" text-anchor="end" style="fill: #232333">SENTRY</text>
   <text x="500" y="244">socket(AF_ALG, ...)</text>
   <text x="500" y="262">no AF_ALG provider</text>
   <text class="b" x="500" y="280">-&gt; EAFNOSUPPORT</text>
-  <rect x="490" y="299" width="205" height="15" rx="3" fill="none" stroke="#9b86c9" stroke-width="1" stroke-dasharray="4 3"/>
+  <rect x="490" y="299" width="205" height="15" rx="3" fill="none" stroke="#232333" stroke-width="1" stroke-dasharray="4 3"/>
   <text class="m ctr" x="592.5" y="310">Sentry's own seccomp filter</text>
   <rect class="kern" x="490" y="320" width="205" height="22" rx="4"/>
   <text class="lane" x="498" y="335">HOST KERNEL · NOT REACHED</text>
-  <circle cx="494" cy="353" r="3.5" fill="#9b86c9"/>
+  <circle cx="494" cy="353" r="3.5" fill="#232333"/>
   <text class="b" x="502" y="357">bug unreachable</text>
   <text class="m" x="502" y="371">the call never leaves Sentry</text>
   <text class="m" x="490" y="389">the Sentry only has unix,</text>
@@ -126,7 +126,7 @@
   <text class="m" x="490" y="415">packet sockets</text>
 
   <!-- shared-kernel mitigation -->
-  <line x1="16" y1="430" x2="704" y2="430" stroke="#c3c3cf" stroke-width="1"/>
+  <line x1="16" y1="430" x2="704" y2="430" stroke="#232333" stroke-width="1"/>
   <text class="lane" x="16" y="448">IF YOU MUST SHARE THE KERNEL · CLOUDFLARE'S FLEET FIX</text>
   <text x="16" y="465" style="font-size:10.5px">A bpf-lsm program on socket_bind denies AF_ALG unless the binary is on an allowlist.</text>
   <text class="m" x="16" y="480">They used an eBPF exporter to find real AF_ALG users first, then enforced, and patched kernels ~5 days later.</text>

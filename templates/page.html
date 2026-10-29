@@ -55,13 +55,6 @@
         {% set wpm = config.extra.words_per_minute | default(value=300) %}
         {% set read_mins = (page.word_count / wpm) | round(method="ceil") | int %}
         <span class="read-time">· {{ read_mins }} min read</span>
-        {% if page.taxonomies.tags %}
-        <div class="tags">
-            {% for tag in page.taxonomies.tags %}
-            <a class="tag" href="{{ get_taxonomy_url(kind='tags', name=tag) }}">#{{ tag }}</a>
-            {% endfor %}
-        </div>
-        {% endif %}
     </div>
 
     {% if page.toc %}

@@ -3,19 +3,19 @@
   <desc id="desc">The thirteen steps runc takes to create a container, in source order, and the moment each protection switches on, cgroup at step 3, namespaces at steps 4 and 5, masked paths at step 10, capabilities at step 11 and seccomp at step 12. Seven runc CVEs hit steps 2, 3, 6, 8, 9, 10 and 11, mostly before the masks, the capability drop and the seccomp filter are in place. Escapes in docker cp, the containerd shim and CRI-O follow the same pattern in other parts of the stack.</desc>
   <style>
     text { fill: #232333; font-size: 10.5px; }
-    .k { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; fill: #ff5f1f; }
+    .k { font-size: 10.5px; font-weight: 600; fill: #232333; }
     .t { font-size: 15px; font-weight: 700; }
-    .c { font-size: 11.5px; fill: #5c5c6e; }
-    .lane { font-size: 10px; font-weight: 600; letter-spacing: .08em; fill: #5c5c6e; }
-    .m { fill: #5c5c6e; font-size: 10px; }
+    .c { font-size: 11.5px; fill: #232333; }
+    .lane { font-size: 10px; font-weight: 600; fill: #232333; }
+    .m { fill: #232333; font-size: 10px; }
     .cv { font-size: 10px; }
-    .id { fill: #c62f2f; font-weight: 700; font-size: 10px; }
-    .num { fill: #a0a0b0; font-size: 10px; }
-    .host { fill: #e9e9ef; stroke: #a3a3b3; stroke-width: 1; }
-    .init { fill: #e3eefb; stroke: #7aa7d9; stroke-width: 1; }
+    .id { fill: #232333; font-weight: 700; font-size: 10px; }
+    .num { fill: #232333; font-size: 10px; }
+    .host { fill: #ffffff; stroke: #232333; stroke-width: 1; }
+    .init { fill: #ffffff; stroke: #232333; stroke-width: 1; }
     .pill { font-size: 9.5px; font-weight: 600; }
-    .bar { fill: #ff5f1f; }
-    .dot { fill: #c62f2f; }
+    .bar { fill: #232333; }
+    .dot { fill: #232333; }
   </style>
 
   <text class="k" x="16" y="22">ANATOMY OF ESCAPES</text>
@@ -24,18 +24,18 @@
 
   <text class="lane" x="16" y="86">RUNC CREATE, IN SOURCE ORDER</text>
   <text class="m" x="361" y="76" text-anchor="middle">guard on?</text>
-  <g text-anchor="middle" style="font-size:9.5px;font-weight:600;fill:#5c5c6e">
-    <text x="309" y="86" style="fill:#5c5c6e">cg</text>
-    <text x="335" y="86" style="fill:#5c5c6e">ns</text>
-    <text x="361" y="86" style="fill:#5c5c6e">mask</text>
-    <text x="387" y="86" style="fill:#5c5c6e">cap</text>
-    <text x="413" y="86" style="fill:#5c5c6e">sec</text>
+  <g text-anchor="middle" style="font-size:9.5px;font-weight:600;fill: #232333">
+    <text x="309" y="86" style="fill: #232333">cg</text>
+    <text x="335" y="86" style="fill: #232333">ns</text>
+    <text x="361" y="86" style="fill: #232333">mask</text>
+    <text x="387" y="86" style="fill: #232333">cap</text>
+    <text x="413" y="86" style="fill: #232333">sec</text>
   </g>
   <text class="lane" x="434" y="86">WHAT BROKE HERE</text>
   <line x1="16" y1="91" x2="704" y2="91" stroke="#232333" stroke-width="1"/>
 
   <!-- zebra: rows top = 94 + 28(i-1) -->
-  <g fill="#f5f5f8">
+  <g fill="#ffffff">
     <rect x="16" y="122" width="688" height="28"/>
     <rect x="16" y="178" width="688" height="28"/>
     <rect x="16" y="234" width="688" height="28"/>
@@ -127,7 +127,7 @@
   <line x1="16" y1="458" x2="704" y2="458" stroke="#232333" stroke-width="1"/>
 
   <!-- elsewhere in the stack -->
-  <rect x="16" y="470" width="688" height="70" rx="5" fill="#ffffff" stroke="#c3c3cf" stroke-width="1"/>
+  <rect x="16" y="470" width="688" height="70" rx="5" fill="#ffffff" stroke="#232333" stroke-width="1"/>
   <text class="lane" x="26" y="486">SAME LESSON, OTHER LAYERS</text>
   <text class="cv" x="26" y="503"><tspan class="id">CVE-2019-14271</tspan> docker cp chroots into the container, then loads its libnss as host root</text>
   <text class="cv" x="26" y="518"><tspan class="id">CVE-2020-15257</tspan> containerd shim API on an abstract socket, reachable with --net=host</text>

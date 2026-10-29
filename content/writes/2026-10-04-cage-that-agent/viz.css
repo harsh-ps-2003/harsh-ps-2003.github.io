@@ -1,41 +1,45 @@
-/* Shared look for the animated figures in this post. Each one also has viz-<name>.css.
-   Minimal on purpose, the blog's ink and greys, its orange-red for attacks and danger,
-   and one green for "held", with a dark version so nothing needs the invert filter. */
+/* Ink, plus one orange for the thing that matters. No second green, no panel. */
 .sd-viz {
   --sd-ink: #232333;
-  --sd-muted: #6b6b78;
-  --sd-faint: #a4a4ae;
-  --sd-line: #dcdce2;
-  --sd-panel: #f6f6f4;
-  --sd-card: #ffffff;
+  --sd-muted: #232333;
+  --sd-faint: #232333;
+  --sd-line: #232333;
+  --sd-panel: transparent;
+  --sd-card: var(--background-color);
   --sd-accent: #ff5f1f;
-  --sd-accent-ink: #d2470f;
-  --sd-accent-soft: #ffebe2;
-  --sd-ok: #17845a;
-  --sd-ok-soft: #e2f3ea;
+  --sd-accent-ink: #ff5f1f;
+  --sd-accent-soft: transparent;
+  --sd-ok: #232333;
+  --sd-ok-soft: transparent;
   --sd-sans: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --sd-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --sd-ease: cubic-bezier(.2, .7, .2, 1);
 }
 [data-theme="dark"] .sd-viz {
-  --sd-ink: #dcdcdc; --sd-muted: #9b9ba5; --sd-faint: #64646d; --sd-line: #34343b; --sd-panel: #141416; --sd-card: #0a0a0b;
-  --sd-accent: #ff6a2d; --sd-accent-ink: #ff8a5c; --sd-accent-soft: #3a1a0e; --sd-ok: #45c48c; --sd-ok-soft: #0f2a1e;
+  --sd-ink: #eaeaea;
+  --sd-muted: #eaeaea;
+  --sd-faint: #eaeaea;
+  --sd-line: #eaeaea;
+  --sd-ok: #eaeaea;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .sd-viz {
-    --sd-ink: #dcdcdc; --sd-muted: #9b9ba5; --sd-faint: #64646d; --sd-line: #34343b; --sd-panel: #141416; --sd-card: #0a0a0b;
-    --sd-accent: #ff6a2d; --sd-accent-ink: #ff8a5c; --sd-accent-soft: #3a1a0e; --sd-ok: #45c48c; --sd-ok-soft: #0f2a1e;
+    --sd-ink: #eaeaea;
+    --sd-muted: #eaeaea;
+    --sd-faint: #eaeaea;
+    --sd-line: #eaeaea;
+    --sd-ok: #eaeaea;
   }
 }
 
 figure.sd-viz { margin: 1.6em 0; }
 figure.sd-viz.sd-ready {
-  background: var(--sd-panel); color: var(--sd-ink); border-radius: 10px; padding: 18px 20px 16px;
-  font-family: var(--sd-sans); font-size: 14px; line-height: 1.5;
+  background: transparent; color: var(--sd-ink); border-radius: 0; padding: 0;
+  font-family: var(--sd-sans); font-size: 14px; line-height: 1.45;
 }
 .sd-viz * { box-sizing: border-box; }
 
-.sd-viz .sd-kicker { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--sd-accent-ink); margin: 0 0 4px; }
+.sd-viz .sd-kicker { font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--sd-ink); margin: 0 0 4px; }
 .sd-viz .sd-title { font-size: 15px; font-weight: 700; margin: 0 0 12px; }
 .sd-viz .sd-label { font-size: 12.5px; font-weight: 600; color: var(--sd-muted); margin: 0 0 8px; }
 .sd-viz .sd-caption { font-size: 13.5px; color: var(--sd-muted); margin: 12px 0 0; min-height: 3em; }
@@ -50,15 +54,15 @@ figure.sd-viz.sd-ready {
 .sd-viz .sd-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 14px; }
 .sd-viz button {
   font: inherit; font-size: 13px; color: var(--sd-ink); background: var(--sd-card); border: 1px solid var(--sd-line);
-  border-radius: 6px; padding: 6px 10px; min-height: 34px; cursor: pointer; transition: border-color .15s, background-color .15s, color .15s;
+  border-radius: 6px; padding: 6px 10px; min-height: 34px; cursor: pointer; transition: border-color 0.09s, background-color 0.09s, color 0.09s;
 }
 .sd-viz button:hover:not(:disabled) { border-color: var(--sd-muted); }
 .sd-viz button:disabled { opacity: .45; cursor: default; }
 .sd-viz button:focus-visible, .sd-viz input:focus-visible { outline: 2px solid var(--sd-accent); outline-offset: 2px; }
 /* hairlines between the buttons come from the 1px gap showing the background */
-.sd-viz .sd-seg { display: inline-grid; grid-auto-flow: column; gap: 1px; border: 1px solid var(--sd-line); border-radius: 7px; overflow: hidden; background: var(--sd-line); }
+.sd-viz .sd-seg { display: inline-grid; grid-auto-flow: column; gap: 12px; border: none; border-radius: 0; overflow: visible; background: transparent; }
 .sd-viz .sd-seg button { border: 0; border-radius: 0; background: var(--sd-card); color: var(--sd-muted); }
-.sd-viz .sd-seg button[aria-pressed="true"] { background: var(--sd-ink); color: var(--sd-card); }
+.sd-viz .sd-seg button[aria-pressed="true"] { background: transparent; color: var(--sd-ink); font-weight: 700; border-bottom: 2px solid var(--sd-accent); }
 .sd-viz .sd-play { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; }
 .sd-viz .sd-play svg { width: 11px; height: 11px; fill: currentColor; }
 .sd-viz label.sd-range { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--sd-muted); min-width: 0; flex: 1 1 200px; }
@@ -67,10 +71,10 @@ figure.sd-viz.sd-ready {
 .sd-viz input[type="range"] { width: 100%; margin: 0; accent-color: var(--sd-accent); min-height: 26px; }
 /* a toggle with a knob, green while the thing is on */
 .sd-viz .sd-switch { --sw-pad: 10px; position: relative; display: inline-flex; align-items: center; gap: 8px; }
-.sd-viz .sd-switch::before { content: ""; width: 30px; height: 17px; border-radius: 9px; background: var(--sd-line); flex: 0 0 auto; transition: background-color .2s; }
+.sd-viz .sd-switch::before { content: ""; width: 30px; height: 17px; border-radius: 9px; background: var(--sd-line); flex: 0 0 auto; transition: background-color 0.12s; }
 .sd-viz .sd-switch::after { content: ""; position: absolute; left: calc(var(--sw-pad) + 2px); top: 50%; width: 13px; height: 13px; margin-top: -6.5px;
-  border-radius: 50%; background: var(--sd-card); box-shadow: 0 1px 2px rgba(0, 0, 0, .25); transition: transform .2s var(--sd-ease); }
-.sd-viz .sd-switch[aria-pressed="true"]::before { background: var(--sd-ok); }
+  border-radius: 50%; background: var(--sd-card); box-shadow: 0 1px 2px rgba(0, 0, 0, .25); transition: transform 0.12s var(--sd-ease); }
+.sd-viz .sd-switch[aria-pressed="true"]::before { background: var(--sd-ink); }
 .sd-viz .sd-switch[aria-pressed="true"]::after { transform: translateX(13px); }
 
 /* the site styles every code element, figures want plain monospace */
@@ -80,7 +84,7 @@ figure.sd-viz.sd-ready {
 .sd-viz .sd-chip {
   display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 9px; font-size: 12.5px; white-space: nowrap;
   color: var(--sd-ink); background: var(--sd-card); border: 1px solid var(--sd-line); border-radius: 6px;
-  transition: background-color .3s, border-color .3s, color .3s, opacity .3s, transform .3s var(--sd-ease);
+  transition: background-color 0.19s, border-color 0.19s, color 0.19s, opacity 0.19s, transform 0.19s var(--sd-ease);
 }
 .sd-viz .sd-chip.is-bad { border-color: var(--sd-accent); background: var(--sd-accent-soft); color: var(--sd-accent-ink); }
 .sd-viz .sd-chip.is-ok { border-color: var(--sd-ok); background: var(--sd-ok-soft); color: var(--sd-ok); }

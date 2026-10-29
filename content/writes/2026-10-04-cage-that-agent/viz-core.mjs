@@ -64,6 +64,8 @@ export function animate(ms, onFrame, curve = ease.inOut) {
 // Story runner. story.run(async go => { await go.wait(400); await go.tween(600, t => ...); })
 // A newer run, or story.stop(), ends the old one at its next await.
 const STOP = Symbol('stop');
+// A bit quicker than the first cut. One place, so every figure speeds up together.
+const PACE = 0.5;
 export function story() {
   let token = 0, current = null;
   const api = {
@@ -77,11 +79,11 @@ export function story() {
         alive: () => mine === token,
         wait: ms => new Promise((resolve, reject) => {
           if (reduced.matches) { resolve(); return; }
-          setTimeout(() => (mine === token ? resolve() : reject(STOP)), ms);
+          setTimeout(() => (mine === token ? resolve() : reject(STOP)), ms * PACE);
         }),
         tween: async (ms, onFrame, curve) => {
           alive();
-          const a = animate(ms, onFrame, curve); current = a;
+          const a = animate(ms * PACE, onFrame, curve); current = a;
           await a; alive();
         },
       };
