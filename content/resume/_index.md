@@ -61,7 +61,7 @@ I explored a lot of topics around SciML for Geophysics during the 2 years! From 
 
 Advisor: *Prof. Swarnendu Biswas (Department of Computer Science)*
 
-[Multi-GPU hash table optimization under Unified Virtual Memory (UVM) oversubscription](/resume/CS636.pdf)
+[Multi-GPU hash table optimization under Unified Virtual Memory (UVM) oversubscription](/resume/CS636.pdf) - preliminary work toward [OOPSLA 2026](https://www.cse.iitk.ac.in/users/swarnendu/files/papers/gpu-ovs-ds-oopsla26.pdf)
 
 * Achieved a **7.3x throughput improvement (24.68M to 180.86M ops/s)** on oversubscribed multi-GPU workloads by implementing a **radix-routing scheduler** with GPU routing, local radix partitioning, and bucketed execution phases
 * Eliminated page-thrashing via partition alignment, routing keys to their owning GPU reduced DtoD PCIe traffic by **76x (24.4 GB to 320 MB)**, cutting amplification from 38x down to the theoretical in-memory minimum.

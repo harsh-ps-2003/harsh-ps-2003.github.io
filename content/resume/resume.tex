@@ -53,7 +53,7 @@
 \RequirePackage{color}
 \RequirePackage{graphicx}
 \usepackage[usenames,dvipsnames]{xcolor}
-\usepackage[scale=0.92]{geometry}
+\usepackage[margin=0.36in]{geometry}
 
 %tabularx environment
 \usepackage{tabularx}
@@ -78,7 +78,24 @@
 %CV Sections inspired by:
 %http://stefano.italians.nl/archives/26
 \titleformat{\section}{\Large\scshape\raggedright}{}{0em}{}[\titlerule]
-\titlespacing{\section}{0pt}{8pt}{6pt}
+\titlespacing{\section}{0pt}{8pt}{4pt}
+
+\setlist[itemize]{
+    nosep,
+    leftmargin=1.2em,
+    itemsep=2pt,
+    topsep=2pt,
+    parsep=0pt,
+    partopsep=0pt
+}
+
+\newcommand{\jobheader}[2]{%
+    \par\noindent\textbf{#1}\hfill #2\par
+}
+\newcommand{\jobrole}[1]{%
+    \textit{#1}\par
+}
+\newcommand{\jobgap}{\par\addvspace{8pt}}
 
 %for publications
 % \usepackage[style=authoryear,sorting=ynt, maxbibnames=2]{biblatex}
@@ -100,6 +117,10 @@
 %   BEGIN DOCUMENT
 %----------------------------------------------------------------------------------------
 \begin{document}
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\linespread{0.97}\selectfont
+\emergencystretch=2em
 
 % non-numbered pages
 \pagestyle{empty}
@@ -108,83 +129,145 @@
 %   TITLE
 %----------------------------------------------------------------------------------------
 
-\begin{tabularx}{\linewidth}{@{} C @{}}
-\Huge{HARSH PRATAP SINGH} \\[7.5pt]
+{\centering
+{\Huge HARSH PRATAP SINGH}\\[4pt]
 \href{https://github.com/harsh-ps-2003}{\raisebox{-0.05\height}\faGithub\ harsh-ps-2003} \ $|$ \
 \href{https://harsh-ps-2003.bearblog.dev/}{\raisebox{-0.05\height}\faGlobe \ harsh-ps-2003.bearblog.dev} \ $|$ \
-\href{mailto:harshpratapsingh8210@gmail.com}{\raisebox{-0.05\height}\faEnvelope \ harshpratapsingh8210@gmail.com}
-\end{tabularx}
+\href{mailto:harshpratapsingh8210@gmail.com}{\raisebox{-0.05\height}\faEnvelope \ harshpratapsingh8210@gmail.com}\par
+}
 
 %----------------------------------------------------------------------------------------
 % EXPERIENCE SECTIONS
 %----------------------------------------------------------------------------------------
 
-\section{Work Experience}
+\section{Professional Experience}
 
-\begin{tabularx}{\linewidth}{@{}l r@{}}
-    \textbf{Sqwish AI} & Feburary 2026 -- Present \\
-    \textit{Member of Technical Staff - Intern} & \\
-    \multicolumn{2}{@{}X@{}}{
-        Building low-latency contextual bandit inference for \href{https://routeworks.github.io/}{Sqwish Router}, enabling sub-50ms routing decisions for AI agents.
-    } \\
-\end{tabularx}
+\jobheader{Sqwish AI, Cambridge, England, UK}{September 2026 -- Present}
+\jobrole{Founding Member of Technical Staff}
+Building low-latency contextual bandit inference for \href{https://routeworks.github.io/}{Sqwish Router}, enabling sub-50ms routing decisions for AI agents.
 
-\begin{tabularx}{\linewidth}{@{}l r@{}}
-    \textbf{Jenkins} - Google Summer of Code & \\
-    \textit{Open Source Maintainer} & May 2023 - Present \\[1pt]
-    % \multicolumn{2}{@{}X@{}}{\textit{Skills - Java, Python, RAG, MCP, Docker, GitLab, Ngnix, CI/CD}} \\[1pt]
-    \multicolumn{2}{@{}X@{}}{
-    \begin{minipage}[t]{\linewidth}
-        \begin{itemize}[nosep,after=\strut, leftmargin=1em, itemsep=2pt]
-            \item[--] \textbf{Mentored Google Summer of Code contributors} building an \textbf{agentic AI diagnostic system}, architecting a \textbf{filesystem-first debugging stack} that combines live Jenkins state via \textbf{Jenkins MCP server} with \textbf{LightRAG} graph-backed plugin knowledge to automate failure diagnosis across \textbf{2{,}000+ Jenkins plugins}
-            \item[--] Built \textbf{semantic log retrieval} with structure-aware chunking, metadata indexing, query expansion, reranking, and an \textbf{async resumable ETL pipeline} for continuous Jenkins knowledge-graph ingestion, achieving an \textbf{F1 of 0.93} on curated Jenkins failure-pattern queries 
-            \item[--] Designed secure multi-instance Jenkins operations with URL-based routing, instance-aware caching, file-lock-protected concurrency, \textbf{credential redaction for 15+ secret types}, CSRF handling, and API-token authentication
-            \item[--] Migrated the \href{https://www.jenkins.io/blog/2023/08/24/gitlab-plugin-modernization-report/}{Jenkins GitLab Plugin} from RESTEasy to GitLab4J-API with reverse-proxy support and integration tests as a \textbf{Google Summer of Code 2023 mentee}
-        \end{itemize}
-    \end{minipage}
-    }
-\end{tabularx}
+\jobgap
+\jobheader{Cloud Native Computing Foundation (CNCF)}{March 2025 -- May 2025}
+\jobrole{Linux Foundation Mentee $|$ Member of Istio's Networking Working Group}
+\href{https://docs.google.com/document/d/19vMr22inhLAPjWcVJkZWiG_GY6ZG3PLxG9QqAmIlnIc/edit?tab=t.0\#heading=h.5d4q82tdn6qhq}{Designed} and \href{https://github.com/istio/ztunnel/pull/1507}{implemented} support for \textbf{mTLS via HBONE} for the metrics endpoint in Istio's Ambient mesh.
 
-\begin{tabularx}{\linewidth}{@{}l r@{}}
-    \textbf{Ethereum Foundation} & June 2025 -- November 2025 \\
-    \textit{Protocol Engineering Grantee -- EF Protocol Consensus Team} & \\
-    \multicolumn{2}{@{}X@{}}{
-        Implemented \href{https://arxiv.org/pdf/2405.00549}{Fast Confirmation Rule} in Ethereum Clients, providing block confirmation in \textbf{12-24 seconds vs traditional 13-19 minutes} on the Ethereum Blockchain
-    } \\
-\end{tabularx}
+\jobgap
+% \jobheader{Ethereum Foundation}{June 2025 -- November 2025}
+% \jobrole{Protocol Engineering Grantee -- EF Protocol Consensus Team}
+% Implemented \href{https://arxiv.org/pdf/2405.00549}{Fast Confirmation Rule} in Ethereum Clients, providing block confirmation in \textbf{12-24 seconds vs traditional 13-19 minutes} on the Ethereum Blockchain.
+%
+% \jobgap
+\jobheader{Jenkins}{May 2023 -- Present}
+\jobrole{Open Source Maintainer $|$ Google Summer of Code}
+\begin{itemize}
+    \item[--] \textbf{Mentored Google Summer of Code contributors} building an \textbf{agentic AI diagnostic system}, architecting a \textbf{filesystem-first debugging stack} that combines live Jenkins state via \textbf{Jenkins MCP server} with \textbf{LightRAG} graph-backed plugin knowledge to automate failure diagnosis across \textbf{2{,}000+ Jenkins plugins}
+    \item[--] Built \textbf{semantic log retrieval} with structure-aware chunking, metadata indexing, query expansion, reranking, and an \textbf{async resumable ETL pipeline} for continuous Jenkins knowledge-graph ingestion, achieving an \textbf{F1 of 0.93} on curated Jenkins failure-pattern queries
+    \item[--] Designed secure multi-instance Jenkins operations with URL-based routing, instance-aware caching, file-lock-protected concurrency, \textbf{credential redaction for 15+ secret types}, CSRF handling, and API-token authentication
+    \item[--] Migrated the \href{https://www.jenkins.io/blog/2023/08/24/gitlab-plugin-modernization-report/}{Jenkins GitLab Plugin} from RESTEasy to GitLab4J-API with reverse-proxy support and integration tests as a \textbf{Google Summer of Code 2023 mentee}
+\end{itemize}
 
-\begin{tabularx}{\linewidth}{@{}l r@{}}
-    \textbf{Cloud Native Computing Foundation (CNCF)} & \\
-    \textit{Linux Foundation Mentee} & March 2025 – May 2025 \\
-    \multicolumn{2}{@{}X@{}}{\href{https://docs.google.com/document/d/19vMr22inhLAPjWcVJkZWiG_GY6ZG3PLxG9QqAmIlnIc/edit?tab=t.0\#heading=h.5d4q82tdn6qhq}{Designed} and \href{https://github.com/istio/ztunnel/pull/1507}{implemented} support for \textbf{mTLS via HBONE} for the metrics endpoint in Istio's Ambient mesh, improving security posture; became a \textit{Member of Istio's Networking Working Group} after the internship.} \\
-\end{tabularx}
-
-\begin{tabularx}{\linewidth}{ @{}l r@{} }
-\textbf{uv} & \\
-\textit{Open Source Contributor} &  \\[1pt]
-\multicolumn{2}{@{}X@{}}{
-\begin{minipage}[t]{\linewidth}
-    \begin{itemize}[nosep,after=\strut, leftmargin=1em, itemsep=2pt]
-        \item [ -- ]Added GitLab trusted publisher support with \textbf{secure OIDC token discovery} for passwordless PyPI authentication - \href{https://github.com/astral-sh/uv/pull/15583}{PR}
-        \item [ -- ]Improved packaging UX with compressed package size reporting - \href{https://github.com/astral-sh/uv/pull/15531}{PR}, authoritative local-over-global pin resolution - \href{https://github.com/astral-sh/uv/pull/15473}{PR}, and a context-aware warning for conflicting VIRTUALENV setups - \href{https://github.com/astral-sh/uv/pull/15467}{PR}
-    \end{itemize}
-\end{minipage}
-}
-\end{tabularx}
+\jobgap
+\jobheader{uv}{}
+\jobrole{Open Source Contributor}
+\begin{itemize}
+    \item[--] Added GitLab trusted publisher support with \textbf{secure OIDC token discovery} for passwordless PyPI auth - \href{https://github.com/astral-sh/uv/pull/15583}{PR}
+    \item[--] Improved packaging UX with compressed package size reporting - \href{https://github.com/astral-sh/uv/pull/15531}{PR}, authoritative local-over-global pin resolution - \href{https://github.com/astral-sh/uv/pull/15473}{PR}, and a context-aware warning for conflicting VIRTUALENV setups - \href{https://github.com/astral-sh/uv/pull/15467}{PR}
+\end{itemize}
 
 %----------------------------------------------------------------------------------------
 %   RESEARCH
 %----------------------------------------------------------------------------------------
 
-\section{Research \& Projects}
-\begin{itemize}[nosep, leftmargin=1em, itemsep=3pt]
-    \item[--] \textit{Forward and Inverse Waveform Inversion via \href{https://arxiv.org/pdf/2107.07871}{Finite Basis PINNs} - \href{https://harsh-ps-2003.bearblog.dev/the-chronicles-of-training-fbpinns/}{blog}}\\
-    Architected \textbf{multiscale Finite Basis PINNs} for \textbf{2D acoustic and elastic wave equations} using JAX \textbf{JIT}, domain decomposition, and partition-of-unity windows to improve training efficiency by \textbf{1.7x} for full waveform inversion. Designed a \textbf{model-parallel multi-GPU architecture} with \textbf{topology-aware sharding}, \textbf{NVLink exchange}, and chunked evaluation, demonstrating \textbf{15x speedup}, \textbf{56\% per-device memory reduction}, and \textbf{1000+ subdomain scaling}.
-    \item[--] \textit{\href{https://drive.google.com/file/d/1cCOtJc3lEBJhSC3eeF50Ef5EUvJmHScG/view?usp=sharing}{Multi-GPU hash table optimization under Unified Virtual Memory oversubscription}}\\
-    Implemented \textbf{pipelined radix partitioning and routing} to make oversubscribed multi-GPU hash table workloads compute-bound, delivering a \textbf{7.3x throughput gain} (\textbf{24.68M to 180.86M ops/s}) and reducing DtoD PCIe traffic by \textbf{76x} (\textbf{24.4 GB to 320 MB}) via partition alignment.
-    \item[--] \textit{A distributed hash table implementation based on \href{https://pdos.csail.mit.edu/papers/chord:sigcomm01/chord_sigcomm.pdf}{Chord} DHT - \href{https://github.com/harsh-ps-2003/pikachu}{Pikachu}}\\
-    Built an asynchronous in-memory DHT with multidimensional keyspaces, finger tables, and recursive lookups, achieving \textbf{average O(log N) hop count} under churn. Engineered a \textbf{connection-pooled gRPC transport} with streaming handoff APIs, backpressure, bounded buffers, readiness signaling, and graceful shutdown for low-latency high-volume key transfers.
+\section{Research}
+Advisors: \textit{Prof. Dibakar Ghosal and Subhajit Roy (Department of Earth Science \& Computer Science)} \\
+Forward and Inverse Waveform Inversions via \href{https://arxiv.org/pdf/2107.07871}{Finite Basis Physics-Informed Neural Networks} - \href{https://harsh-ps-2003.github.io/writes/2026-01-02-the-chronicles-of-training-fbpinns/}{blog} $|$ \textit{Accepted at \href{https://ai4sciencecommunity.github.io/neurips26.html}{NeurIPS 2026 AI for Science}} (\href{https://harsh-ps-2003.github.io/about/neurIPS_ai4science.pdf}{paper})
+\begin{itemize}
+    \item[--] Proved that pressure-only neural surrogates (\textbf{FNO}, \textbf{DeepONet}, \textbf{SIREN}) with \textbf{0.10\% receiver error} violate the \textbf{1e-4 CPML recurrence residual} (\textbf{0.0283}) due to hidden boundary-memory state, inducing \textbf{11/100 harmful FWI steps} (\textbf{56/100} memory-free vs \textbf{0/100} full-state tangent readouts across 5 verification levels)
+    \item[--] Architected \textbf{multiscale Finite Basis Physics-Informed Neural Network} for \textbf{subsurface modelling}, solving \textbf{2D acoustic and elastic wave equations} via JAX \textbf{JIT compilation} (\textbf{2x training speedup}), domain decomposition with \textbf{partition-of-unity windows}, and architectures tackling \textbf{spectral bias} in \textbf{full waveform inversion}
+    \item[--] Designed scalable model-parallel architecture for \textbf{arbitrary subdomain distribution} across GPU clusters using \textbf{topology-aware sharding} with \textbf{NVLink field exchange} (300 GB/s), block-accumulation sync, and chunked evaluation; demonstrated on dual V100s (75 subdomains) with \textbf{15x speedup}, \textbf{56\% per-device memory reduction}, and \textbf{1000+ subdomain scaling}
+    \item[--] Engineered memory-efficient evaluation pipeline for V100 HPC clusters through \textbf{chunked inference} eliminating OOM errors, \textbf{hybrid 4th/2nd-order CPML stencils} for PML stability, and \textbf{adaptive spatial oversampling (6x)} with nearest-neighbor downsampling preserving sharp wavefronts
+    \item[--] Built a Full-Waveform Inversion visualization suite with real-time loss tracking, seismological wiggle plots, shot gathers, and spatial/temporal error analysis for ground-truth validation against CPML solvers
 \end{itemize}
+
+\jobgap
+Advisor: \textit{Prof. Swarnendu Biswas (Department of Computer Science)} \\
+\href{https://harsh-ps-2003.github.io/resume/CS636.pdf}{Multi-GPU Hash Table Optimization under UVM Oversubscription} $|$ \textit{Preliminary work toward \href{https://www.cse.iitk.ac.in/users/swarnendu/files/papers/gpu-ovs-ds-oopsla26.pdf}{OOPSLA 2026}}
+\begin{itemize}
+    \item[--] Achieved a \textbf{7.3x throughput gain (24.68M to 180.86M ops/s)} on \textbf{9.1x oversubscribed} multi-GPU hash table workloads by designing a \textbf{3-phase radix-routing scheduler} (GPU routing, local radix partitioning, and bucketed insertion)
+    \item[--] Eliminated inter-GPU page thrashing via partition alignment, routing keys to their owning GPU to cut DtoD PCIe traffic by \textbf{76x (24.4 GB to 320 MB)} and page-migration amplification from \textbf{38x} down to the in-memory minimum
+    \item[--] Converted UVM-oversubscribed workloads into compute-bound execution, reaching \textbf{365M ops/s} per GPU and matching the \textbf{355M ops/s} in-memory ceiling
+\end{itemize}
+
+% \textbf{Undergraduate Project :} \hfill  \\
+% Advisor: \textit{Prof. Yatinder Nath Singh (Department of Electrical Engineering)} \\
+% % {\textit{Skills - Rust, gRPC, libp2p, Consistent Hashing}} \\[1pt]
+% An asynchronous multidimensional distributed hash table implementation based on \href{https://pdos.csail.mit.edu/papers/chord:sigcomm01/chord_sigcomm.pdf}{Chord} DHT - {\href{https://github.com/harsh-ps-2003/pikachu}{Pikachu}}
+% \begin{itemize}[
+%     nosep, % No extra vertical space between items
+%     after=\strut, % Ensures consistent baseline for all items
+%     leftmargin=2em, % Adjust this value to control the indentation of the entire list
+%     itemsep=3pt, % Space between individual items
+%     label={--} % This sets the bullet symbol to a hyphen
+% ]
+%     \item[--] Engineered an asynchronous, in-memory \textbf{DHT} based on \href{https://pdos.csail.mit.edu/papers/chord:sigcomm01/chord_sigcomm.pdf}{Chord} with multi-dimensional keyspace support, \textbf{finger tables} and recursive lookup logic, achieving \textbf{average O(log N) hop count for key resolution}
+%     \item[--] Built a resilient \textbf{routing maintenance} subsystem with \textbf{periodic stabilization}, successor/predecessor checks, and finger-table repairs to ensure network consistency under churn
+%     \item[--] Engineered \textbf{connection-pooled gRPC layer with backpressure handling and bounded buffers}, reducing connection churn and ensuring stable performance during \textbf{high-volume key transfers }
+%     \item[--] Introduced \textbf{streaming handoff APIs} for efficient ownership transfer of large key ranges during join/leave, \textbf{reducing tail latencies} and avoiding head-of-line blocking
+%     \item[--] Implemented robust server \textbf{lifecycle management} with \textbf{readiness signalling}, \textbf{bounded startup timeouts}, and \textbf{graceful shutdown} for clean drain of in-flight requests
+% \end{itemize}
+
+% \textbf{Undergraduate Project :} \hfill  \\
+% Advisor: \textit{Prof. Hamim Zafar (Department of Biological Sciences and Bioengineering)} \\
+% Mosaic single-cell data integration using deep generative models
+% % {\textit{Skills - Python, PyTorch, Transformers, U-Net}} 
+% \begin{itemize}[
+%     nosep, % No extra vertical space between items
+%     after=\strut, % Ensures consistent baseline for all items
+%     leftmargin=2em, % Adjust this value to control the indentation of the entire list
+%     itemsep=3pt, % Space between individual items
+%     label={--} % This sets the bullet symbol to a hyphen
+% ]
+%     \item[--] Explored various deep generative models like scMODAL, MaxFuse, Harmony, and developed an improved scMGAT to integrate mosaic single-cell multi-omics data (RNA+ADT), replacing unstable GAN baselines.
+%     \item[--] Built a \textbf{dual-branch autoencoder} with a \textbf{geometry-preserving loss} (cosine-kernel similarity + progressive scheduling) to retain local and global manifold structure in latent embeddings, improving downstream graph quality
+%     \item[--] Introduced \textbf{early-stage supervised contrastive learning} within a multi-head GAT to explicitly align same-cell representations across modalities, significantly improving biological separability and cross-modal label transfer
+%     \item Achieved state-of-the-art integration performance on CITE-seq PBMC data, \textbf{improving clustering and cross-modal alignment with ARI = 0.889}, \textbf{NMI = 0.886}, and RNA$\leftrightarrow$ADT label transfer accuracy from \textbf{$\sim$60\% to $\sim$82\%}, alongside substantially reduced FOSCTTM alignment error
+% \end{itemize}
+
+% \textbf{Undergraduate Project :} \hfill  \\
+% Advisor: \textit{Prof. Arnab Bhattacharya (Department of Computer Science)} \\
+% A generative model to produce clinically accurate synthetic images across various medical modalities - \href{https://github.com/harsh-ps-2003/CS787}{Text2Med}
+% % {\textit{Skills - Python, PyTorch, Transformers, U-Net}} 
+% \begin{itemize}[
+%     nosep, % No extra vertical space between items
+%     after=\strut, % Ensures consistent baseline for all items
+%     leftmargin=2em, % Adjust this value to control the indentation of the entire list
+%     itemsep=3pt, % Space between individual items
+%     label={--} % This sets the bullet symbol to a hyphen
+% ]
+%     \item[--] Developed a \textbf{multi-modal text-to-image generative model} for producing synthetic medical images across modalities using \textbf{diffusion}-based architectures with \textbf{cross-attention mechanisms}
+%     \item[--] Engineered end-to-end training pipeline supporting image-text datasets with \textbf{CSV-based data ingestion}, \textbf{medically-trained BERT} tokenization for multi-modal inputs, and \textbf{U-Net architecture} with \textbf{progressive noise scheduling} for diffusion model training
+%     \item[--] Built \textbf{two-stage RLHF pipeline} to iteratively refine synthetic medical images utilizing a \textbf{custom Vision Transformer} model built with \textbf{multi-head self-attention} and \textbf{dropout regularization}, leveraging radiologist ratings to serve as an automated quality-assessment reward model
+%     \item [--] Optimized \textbf{Stable Diffusion} fine-tuning with \textbf{mixed precision}, \textbf{gradient checkpointing}, \textbf{cosine annealing learning rate scheduling}, \textbf{EMA model averaging}, and \textbf{SNR-weighted loss computation} with gamma parameter for noise prediction training
+%     \item [--] Achieved significant memory reduction via \textbf{8-bit Adam optimization}, \textbf{attention slicing}, \textbf{VAE tiling}, and \textbf{gradient accumulation} 
+%     \item [--] Developed evaluation metrics including \textbf{FID}, \textbf{Inception Score}, \textbf{SSIM}, and custom medical quality metrics
+%     \item[--] Implemented \textbf{multi-GPU distributed training with Accelerate} framework, automatic device detection and allocation, \textbf{gradient synchronization across processes}, \textbf{checkpoint management} with automatic resumption, \textbf{mixed precision} coordination, and \textbf{batch size scaling}
+% \end{itemize}
+
+% \textbf{Undergraduate Project :} \hfill  \\
+% Advisor: \textit{Prof. Adithya Vadapalli (Department of Computer Science)} \\
+% % {\textit{Skills - Rust, Cryptography}} \\[1pt]
+% A privacy-preserving discovery service \href{https://signal.org/blog/building-faster-oram/}{inspired by Signal} - \href{https://github.com/harsh-ps-2003/rumi}{Rumi}
+% \begin{itemize}[
+%     nosep, % No extra vertical space between items
+%     after=\strut, % Ensures consistent baseline for all items
+%     leftmargin=2em, % Adjust this value to control the indentation of the entire list
+%     itemsep=3pt, % Space between individual items
+%     label={--} % This sets the bullet symbol to a hyphen
+% ]
+%     \item[--] Engineered a privacy-preserving contact discovery service using \textbf{double-sided blinding over elliptic curves and compressed point encodings}, a \textbf{Path ORAM}-backed store, and \textbf{zero-knowledge set-membership proofs} to ensure the server learns nothing about queries, matches, or access patterns via fixed-size responses and uniform access paths and explicit secure wiping of ORAM blocks, stash, and internal buffers
+%     \item[--] Designed prefix-based bucket selection paired with fixed dummy accesses and constant response shaping on top of Path ORAM for efficient server-side filtering while maintaining indistinguishability; tunable privacy/performance balance
+%     \item[--] Benchmarked ORAM performance across read/write, sequential/random patterns, and \textbf{variable payload sizes}
+% \end{itemize}
 
 %----------------------------------------------------------------------------------------
 %   EDUCATION
@@ -193,6 +276,5 @@
 \section{Education}
 
 \noindent
-Bachelor's in Earth Science (major) and Computer Science (minors) -- \textit{Indian Institute of Technology, Kanpur}\\
-\textit{Relevant Coursework}: Data Structures and Algorithms, Introduction to Machine Learning, Generative Artificial Intelligence, High Performance Computing with Applications, Big Data Visual Analytics, Applied Cryptography, Cryptography for Privacy Protection, Peer-to-Peer Networks, Fundamentals of Remote Sensing and GIS, Analysis of Concurrent Programs
+Bachelor's in Earth Science (major), Computer Science and Philosophy (minors) -- \textit{Indian Institute of Technology, Kanpur}
 \end{document}

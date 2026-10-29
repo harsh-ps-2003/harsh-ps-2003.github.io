@@ -401,8 +401,8 @@ blockquote {
 
 @media (min-width: 900px) {
     body:has(.toc-rail) {
-        --toc-width: clamp(156px, 15.5vw, 192px);
-        margin-left: max(calc((100vw - var(--width)) / 2), calc(var(--toc-width) + 24px));
+        --toc-width: clamp(220px, 20vw, 260px);
+        margin-left: max(calc((100vw - var(--width)) / 2), calc(var(--toc-width) + 28px));
         margin-right: auto;
     }
 
@@ -411,37 +411,41 @@ blockquote {
     }
 
     .toc-rail {
-        --toc-width: clamp(156px, 15.5vw, 192px);
+        --toc-width: clamp(220px, 20vw, 260px);
         display: block;
         position: fixed;
         top: 88px;
-        left: max(12px, calc((100vw - var(--width)) / 2 - var(--toc-width) - 20px));
+        left: max(12px, calc((100vw - var(--width)) / 2 - var(--toc-width) - 24px));
         width: var(--toc-width);
         max-height: calc(100vh - 120px);
         overflow-y: auto;
         overscroll-behavior: contain;
-        padding: 2px 6px 12px;
+        padding: 14px 14px 16px;
         z-index: 20;
+        background: color-mix(in srgb, var(--text-color) 5%, var(--background-color));
+        border: 1px solid color-mix(in srgb, var(--text-color) 16%, transparent);
+        border-radius: 12px;
         scrollbar-width: thin;
-        scrollbar-color: color-mix(in srgb, var(--text-color) 20%, transparent) transparent;
+        scrollbar-color: color-mix(in srgb, var(--text-color) 22%, transparent) transparent;
 
         &::-webkit-scrollbar {
-            width: 3px;
+            width: 4px;
         }
 
         &::-webkit-scrollbar-thumb {
-            background: color-mix(in srgb, var(--text-color) 20%, transparent);
-            border-radius: 3px;
+            background: color-mix(in srgb, var(--text-color) 22%, transparent);
+            border-radius: 4px;
         }
     }
 
     .toc-rail__header {
-        margin: 0 0 6px 0;
-        padding: 0 6px;
-        font-size: 0.66rem;
-        font-weight: 500;
-        color: color-mix(in srgb, var(--text-color) 48%, var(--background-color));
-        letter-spacing: 0.01em;
+        margin: 0 0 10px 0;
+        padding: 0 2px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: color-mix(in srgb, var(--text-color) 62%, var(--background-color));
     }
 
     .toc-rail__nav {
@@ -457,7 +461,7 @@ blockquote {
     }
 
     .toc-rail__group {
-        margin-top: 5px;
+        margin-top: 10px;
 
         &:first-child {
             margin-top: 0;
@@ -465,27 +469,27 @@ blockquote {
     }
 
     .toc-rail__sublist {
-        margin-top: 1px;
-        padding-left: 6px;
+        margin-top: 4px;
+        padding-left: 12px;
     }
 
     .toc-rail__sublist--nested {
-        padding-left: 8px;
+        padding-left: 12px;
     }
 
     .toc-rail__subitem {
-        margin-top: 1px;
+        margin-top: 3px;
     }
 
     .toc-rail__link {
         display: block;
         margin: 0;
-        padding: 2px 6px;
+        padding: 3px 4px;
         border-radius: 4px;
         border-bottom: 1.5px solid transparent;
         text-decoration: none;
-        line-height: 1.22;
-        letter-spacing: -0.015em;
+        line-height: 1.4;
+        letter-spacing: -0.01em;
         transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 
         &:hover {
@@ -503,16 +507,21 @@ blockquote {
     }
 
     .toc-rail__link--h1 {
-        font-size: 0.7rem;
-        font-weight: 600;
+        font-size: 0.9rem;
+        font-weight: 500;
         color: var(--heading-color);
     }
 
-    .toc-rail__link--h2,
-    .toc-rail__link--h3 {
-        font-size: 0.65rem;
+    .toc-rail__link--h2 {
+        font-size: 0.82rem;
         font-weight: 400;
-        color: color-mix(in srgb, var(--text-color) 58%, var(--background-color));
+        color: color-mix(in srgb, var(--text-color) 72%, var(--background-color));
+    }
+
+    .toc-rail__link--h3 {
+        font-size: 0.78rem;
+        font-weight: 400;
+        color: color-mix(in srgb, var(--text-color) 62%, var(--background-color));
     }
 }
 
