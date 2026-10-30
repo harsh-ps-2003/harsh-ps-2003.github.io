@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 
 :root {
     --width: 720px;
@@ -117,14 +117,25 @@ a:hover {
     text-decoration: none;
 }
 
+.flag {
+    display: inline-block;
+    width: 1.25em;
+    height: 0.84em;
+    margin-left: 0.28em;
+    vertical-align: -0.12em;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
 .socials {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 28px;
-    margin: 0.4em 0 1.2em;
+    gap: 14px;
+    margin: 0 0 0 10px;
 
     a,
     a:hover {
+        margin-right: 0;
         border-bottom: none;
         background: none;
         color: var(--text-color);
@@ -137,8 +148,8 @@ a:hover {
 
     svg {
         display: block;
-        width: 32px;
-        height: 32px;
+        width: 18px;
+        height: 18px;
         fill: currentColor;
     }
 }
@@ -352,6 +363,10 @@ blockquote {
 article em,
 article i {
     font-style: normal;
+}
+
+article em.mystery {
+    font-style: italic;
 }
 
 // Table of Contents (inline fallback on narrow screens)
