@@ -117,13 +117,14 @@ a:hover {
     text-decoration: none;
 }
 
-.flag {
+svg.flag {
     display: inline-block;
-    width: 1.25em;
-    height: 0.84em;
-    margin-left: 0.28em;
+    width: auto;
+    height: 0.85em;
+    max-height: 0.85em;
+    margin: 0 0.12em 0 0.35em;
     vertical-align: -0.12em;
-    border-radius: 2px;
+    border-radius: 1px;
     overflow: hidden;
 }
 
