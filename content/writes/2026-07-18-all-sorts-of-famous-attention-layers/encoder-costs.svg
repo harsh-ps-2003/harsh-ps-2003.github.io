@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 420" width="920" height="420" role="img" aria-label="A transformer is a stack of layers. One layer is an MLP costing O of N d squared, then attention costing O of N squared d, and the KV cache that attention stores is O of N d.">
+  <rect width="920" height="420" fill="#ffffff"/>
+  <text x="460" y="40" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="26" font-weight="700" fill="#3a3a3a">One layer, three costs</text>
+
+  <!-- stack -->
+  <rect x="36" y="78" width="200" height="280" rx="22" fill="#e7eef8" stroke="#b7cbe6" stroke-width="2"/>
+  <g font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="18" font-weight="650" fill="#5c3a1e">
+    <rect x="58" y="100" width="156" height="58" rx="16" fill="#f6d3b0" stroke="#e0a56c" stroke-width="1.5"/>
+    <text x="136" y="135" text-anchor="middle">Encoder</text>
+    <rect x="58" y="186" width="156" height="58" rx="16" fill="#f6d3b0" stroke="#e0a56c" stroke-width="1.5"/>
+    <text x="136" y="221" text-anchor="middle">Encoder</text>
+    <rect x="58" y="272" width="156" height="58" rx="16" fill="#f6d3b0" stroke="#e0a56c" stroke-width="1.5"/>
+    <text x="136" y="307" text-anchor="middle">Encoder</text>
+  </g>
+  <g stroke="#6d5a4a" stroke-width="1.6" fill="#6d5a4a">
+    <line x1="136" y1="158" x2="136" y2="178"/>
+    <path d="M131 168 L136 158 L141 168"/>
+    <line x1="136" y1="244" x2="136" y2="264"/>
+    <path d="M131 254 L136 244 L141 254"/>
+  </g>
+  <text x="136" y="388" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#1c1c1c">Transformer</text>
+
+  <!-- zoom marks -->
+  <path d="M214 129 C250 110, 250 150, 292 168" fill="none" stroke="#8a8a84" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <path d="M214 301 C250 330, 250 250, 292 230" fill="none" stroke="#8a8a84" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+  <!-- one encoder -->
+  <rect x="292" y="78" width="280" height="280" rx="26" fill="#f8e2c8" stroke="#e0a56c" stroke-width="2"/>
+  <rect x="322" y="108" width="220" height="62" rx="16" fill="#e07a72" stroke="#c45b54" stroke-width="1.5"/>
+  <text x="432" y="146" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#ffffff">MLP</text>
+  <rect x="322" y="198" width="220" height="62" rx="16" fill="#6aaa5c" stroke="#4e8a42" stroke-width="1.5"/>
+  <text x="432" y="236" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#ffffff">Attention</text>
+
+  <g stroke="#5c4a3a" stroke-width="1.6" fill="#5c4a3a">
+    <line x1="432" y1="78" x2="432" y2="100"/>
+    <path d="M426 90 L432 78 L438 90"/>
+    <line x1="432" y1="170" x2="432" y2="190"/>
+    <path d="M426 180 L432 170 L438 180"/>
+  </g>
+
+  <g font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#3a3a3a">
+    <rect x="338" y="286" width="44" height="36" rx="8" fill="#fffaf4" stroke="#c4a07a" stroke-width="1.5"/>
+    <text x="360" y="310" text-anchor="middle">Q</text>
+    <rect x="398" y="286" width="44" height="36" rx="8" fill="#fffaf4" stroke="#c4a07a" stroke-width="1.5"/>
+    <text x="420" y="310" text-anchor="middle">K</text>
+    <rect x="458" y="286" width="44" height="36" rx="8" fill="#fffaf4" stroke="#c4a07a" stroke-width="1.5"/>
+    <text x="480" y="310" text-anchor="middle">V</text>
+  </g>
+  <g stroke="#5c4a3a" stroke-width="1.5" fill="none">
+    <path d="M360 286 V274 H432 V260"/>
+    <path d="M420 286 V270"/>
+    <path d="M480 286 V274 H432"/>
+  </g>
+
+  <text x="432" y="388" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#1c1c1c">Encoder</text>
+
+  <!-- costs -->
+  <g font-family="Georgia, 'Iowan Old Style', 'Times New Roman', serif" font-style="italic" font-size="22" fill="#1c1c1c">
+    <text x="600" y="146">MLP: O(Nd<tspan font-size="14" dy="-8">2</tspan><tspan dy="8" font-size="22">)</tspan></text>
+    <text x="600" y="228">Attention: O(N<tspan font-size="14" dy="-8">2</tspan><tspan dy="8" font-size="22">d)</tspan></text>
+    <text x="600" y="268">KV cache: O(Nd)</text>
+  </g>
+</svg>

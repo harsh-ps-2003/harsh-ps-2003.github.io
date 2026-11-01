@@ -13,12 +13,14 @@ Well, we had a bomb of Kimi K3 launch, and I writing this after going through it
 
 ## Basics
 
-Before Transformers, models like RNNs and LSTMs processed text sequentially, word by word. This process was slow and models struggled to remember information from the distant past, creating a long-range dependency problem. The attention mechanism solved this by allowing the model to look at all parts of the input sequence simultaneously and assign importance (attention) scores to each word, creating a rich context vector. It abandoned sequential processing entirely, enabling parallel computation and providing the model with a direct, weighted memory of its entire input.
+Before Transformers, models like RNNs and LSTMs processed text sequentially. This process was slow and models struggled to remember info from past, so we could not rely on it for long range problem. attention solved this by lettinh the model look at all parts of the input sequence simultaneously and assign importance (attention) scores to each word, creating a rich context vector. It abandoned sequential processing for processing new tokens entirely, enabling parallel computation of processing all the tokens at once and providing the model with a direct, weighted memory of its entire input.
 
 I mean, if you're reading my blogs, most probably you know what the attention is, but for reiteration, the standard scaled dot-product attention equation looks like :
 > Attention(Q, K, V) = softmax(QK^T^ / d^1/2^)V
 
-That is Softmax attention. The `/ √d` scale keeps the dot products from blowing up as head dimension grows. Causal vs bidirectional is just a mask on the scores before softmax. Cross attention uses the same formula with Q from one sequence and K/V from another. The code below is causal self-attention (decoder-style):
+![Queries along the side, keys across the top. Row-wise softmax turns the dots into scores, and those scores mix the values into the output.](softmax-attention.svg)
+
+That is softmax attention. Each query dots with every key (so quadratic) and that fills S. Softmax runs across the row, so A is how much this token cares about each other token, and then A mixes the values. The `/ √d` scale keeps the dot products from blowing up as head dim grows. Causal vs bidirectional is just a mask on the scores before softmax. Cross attention uses the same formula with Q from one sequence and K/V from another. The code below is causal self-attention (decoder-style):
 
 The attention process :
 ```python
@@ -43,7 +45,6 @@ The attention process :
         return y
 ```
 Once the final hidden-state matrix is produced, the language model head maps it into vocabulary logits. During autoregressive decoding, only the logits at the final position are needed to select the next token.
-
 
 ## There is a variety!
 
@@ -95,6 +96,8 @@ Attention Mechanisms
 │   ├── RetNet - retention mechanism
 │   └── RWKV - time-mixing
 │
+├── BASED - both, Tiny sliding-window softmax + Taylor linear attention
+│
 └── State-Space Models (not attention at all)
     ├── S4
     ├── Mamba
@@ -111,6 +114,10 @@ The visualization makes the differences clear. Dense attention fills the entire 
 Memory is the bottleneck in inference :
 * For every single token generated, the model must stream billions of parameters (weights) through the memory bus. The GPU spends more time moving data in and out of memory than doing actual mathematical calculations.
 * The KV cache stores the context and history of a prompt. Longer prompts and agentic workflows require exponentially more space, which reduces concurrent request capacity and limits batch sizes
+
+Each layer is an MLP on top of attention. The MLP is O(Nd²), Attention is O(N²d), The KV cache that attention writes is O(Nd). And things get even more complex if you add chain of thought and all.
+
+![A transformer stack - MLP at O(Nd²), attention at O(N²d), and a KV cache at O(Nd)](encoder-costs.svg)
 
 ### when does it even matter? 
 the attention mechanism matters less than you think (at moderate context). 
@@ -311,6 +318,8 @@ The coupling in softmax gave it expressiveness. the competition between keys (vi
 
 ### Linear Attention
 
+basically, as soon as it was known that attention is all you need, the first question that people started tackling is - can we do better than quadratic? 
+
 As softmax applied nonlinearity after Q·K product, coupling every query to every key, we have O(n^2^), that is full N×N attention matrix before applying softmax, as I explained earlier. Linear attention trades expressiveness for efficiency. Softmax attention can express arbitrary attention patterns, any token can attend strongly to any other token. Linear attention's feature map constrains what patterns are representable. This is why modern hybrids (Kimi K3, Qwen3) use both! softmax layers for complex reasoning, linear layers for efficient long-range propagation.
 
 Linear attention applies a feature map φ (such as ELU+1, or simply ReLU) to Q and K separately, before the dot product:
@@ -320,12 +329,19 @@ Softmax:  Attention = softmax(QK^T / √d) V     # must compute N×N first
 Linear:   Attention = φ(Q)(φ(K)^T V)           # associativity trick
 ```
 
+![The softmax path is crossed out. No softmax of QK transpose V, and no row-wise softmax. Linear attention approximates that mix with phi of Q times the low-rank product of phi of K transpose and V.](linear-attention.svg)
+> φ(Q) reads φ(K)ᵀV instead. That product is the low-rank stand-in for the n×n scores. a short wide matrix x the values.
+
 I had an obvious question, why ELU+1 is used as the feature map and how linear attention still preserves the attention contract despite removing softmax? Both softmax and linear attention preserve the same fundamental contract, they just implement it differently:
 1. Make QK scores non-negative - Attention weights can't be negative (obviously). Softmax uses exp(x) which is always positive. Linear attention uses ELU+1, since ELU(x) ≥ -1 for all x, adding 1 guarantees non-negativity.
 2. Normalize by dividing by sum - We still divide by Σ φ(q)·φ(k_j) to get proper weights. This is often omitted from diagrams but it's there.
 3. Compute weighted average of values - Same as softmax
 
 Also, ELU(x) is smooth unlike ReLU which helps gradients. It approximates the exponential kernel that softmax uses. Softmax's exp() function creates a sharper distribution, small differences in scores become large differences in weights. ELU+1 is flatter, so the attention distribution is more diffuse. The model can't say "attend ONLY to this token" as sharply. This is interesting kernel trick. 
+
+Same reorder, with the matrix sizes on it. d′ is the width of Q and K after the down-projection, and D is the width after φ. For ELU+1 those two widths match. The brace is φ(K)^T V, the product you form first, which brings the cost from O(N²d) down to O(NDd).
+
+![Left side keeps Q, K, and V at N by d and builds exp of Q K transpose, which is O of N squared d. Right side projects Q and K down to d prime and multiplies phi of K transpose by V first, which is O of N D d and scales linearly in N.](reorder-multiplies.svg)
 
 Its the game of association. (AB)C = A(BC) from your Linear Algebra class. With softmax, you're forced into (QK^T^)V because softmax breaks associativity. Without softmax, you can compute (K^T^ V) first, that's a (d×N) × (N×d) = d×d matrix, independent of sequence length. Then multiply by Q. This means the growing history of K and V vectors can be folded into a fixed D×D state matrix S:
 ```python
@@ -336,6 +352,10 @@ for t in range(seq_len):
     o_t = φ(q_t) @ S               # query state: O(d²)
 ```
 You get it right? Constant memory, constant compute per token. No KV cache that grows with context.
+
+Left side is the cache, one key and one value per token, O(Nd). Right side is the state they fold into, O(d²).
+
+![Softmax attention keeps a key and a value for every token, so the KV cache is O of N d. Linear attention folds those tokens into one square state, O of d squared.](kv-cache-vs-state.svg)
 
 ```python
 
@@ -390,6 +410,18 @@ def generate_token(model, all_previous_tokens):
 Per-token decode cost was O(t²) without cache in 2020 which became O(t) with cache, and full sequence generation was O(N³) which now is O(N²). Rememeber, algorithmic complexity is not implementation complexity.
 
 > Linear Attention has no recoverability guarantee. Query k₅, get a mixture influenced by all tokens with similar keys.
+
+### BASED Attention
+
+MQAR is multi-query associative recall. You stash key-value pairs in a long sequence and later ask for the value that belonged to a key. Attention reaches perfect recall only at the big end of the axis. Sliding attention spends less state and loses the recall. Gated convolutions land lower than that window.
+
+![MQAR recall against recurrent state size. Blue attention climbs to perfect recall only when the state is huge. Red sliding attention sits lower. Gold gated convolutions sit lower still.](mqar-recall.svg)
+
+in short [Based](https://arxiv.org/abs/2402.18668) is just a Taylor approximation of softmax, combined with a plain sliding window. exp(q·k) becomes a short polynomial. That polynomial is a feature map, so the long-range part runs as linear attention and the memory you keep is a recurrent state. The window is the ordinary sliding window from earlier. Nearby tokens still get exact softmax.
+
+The plot on the right is how much of the sequence you can recall against how big that recurrent state is. Up recalls more. Right is a bigger state. The orange dots are Based, the smaller states that still recall more of the sequence.
+
+![Linear attention fills the causal triangle with an approximation, a sliding window keeps a band on the diagonal, and BASED keeps both. Orange points on the right recall more of the sequence from a smaller recurrent state.](based-attention.svg)
 
 ### DeltaNet
 

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 500" width="1120" height="500" role="img" aria-label="Left: Q, K, and V are N by d, and y equals exp of Q K transpose times V, which costs O of N squared d and scales quadratically in N. Right: Q and K are projected to N by d prime, V stays N by d, and y equals phi of Q times phi of K transpose times V. Multiplying phi of K transpose by V first costs O of N D d and scales linearly in N.">
+  <rect width="1120" height="500" fill="#ffffff"/>
+
+  <g font-family="Georgia, 'Iowan Old Style', 'Times New Roman', serif" font-style="italic" font-size="28" fill="#1a1a1a">
+    <text x="28" y="72">Q = W<tspan font-size="17" dy="8">q</tspan><tspan dy="-8" font-size="28">u,</tspan></text>
+    <text x="214" y="72">Q &#8712; &#8477;<tspan font-size="16" dy="-12">N&#215;d</tspan></text>
+
+    <text x="28" y="122">K = W<tspan font-size="17" dy="8">k</tspan><tspan dy="-8" font-size="28">u,</tspan></text>
+    <text x="214" y="122">K &#8712; &#8477;<tspan font-size="16" dy="-12">N&#215;d</tspan></text>
+
+    <text x="28" y="172">V = W<tspan font-size="17" dy="8">v</tspan><tspan dy="-8" font-size="28">u,</tspan></text>
+    <text x="214" y="172">V &#8712; &#8477;<tspan font-size="16" dy="-12">N&#215;d</tspan></text>
+
+    <text x="36" y="268">y = exp(QK<tspan font-size="16" dy="-12">T</tspan><tspan dy="12" font-size="28">)V</tspan></text>
+    <text x="118" y="348">O(N<tspan font-size="16" dy="-12">2</tspan><tspan dy="12" font-size="28">d)</tspan></text>
+
+    <text x="620" y="72">Q = W<tspan font-size="17" dy="8">q</tspan><tspan dy="-8" font-size="28">u,</tspan></text>
+    <text x="806" y="72">Q &#8712; &#8477;<tspan font-size="16" dy="-12">N&#215;d&#8242;</tspan></text>
+
+    <text x="620" y="122">K = W<tspan font-size="17" dy="8">k</tspan><tspan dy="-8" font-size="28">u,</tspan></text>
+    <text x="806" y="122">K &#8712; &#8477;<tspan font-size="16" dy="-12">N&#215;d&#8242;</tspan></text>
+
+    <text x="620" y="172">V = W<tspan font-size="17" dy="8">v</tspan><tspan dy="-8" font-size="28">u,</tspan></text>
+    <text x="806" y="172">V &#8712; &#8477;<tspan font-size="16" dy="-12">N&#215;d</tspan></text>
+
+    <text x="620" y="268">y = &#966;(Q)&#966;(K<tspan font-size="16" dy="-12">T</tspan><tspan dy="12" font-size="28">)V</tspan></text>
+    <text x="724" y="348">O(NDd)</text>
+  </g>
+
+  <path d="M132 292 C142 292 149 306 158 312 C161 317 163 318 164 318 C165 318 167 317 170 312 C179 306 186 292 196 292" fill="none" stroke="#5c5c5c" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M722 292 C739 292 749 306 764 312 C770 317 773 318 774 318 C775 318 778 317 784 312 C799 306 809 292 826 292" fill="none" stroke="#5c5c5c" stroke-width="2.4" stroke-linecap="round"/>
+
+  <g font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="700">
+    <text x="29" y="414" font-size="24" fill="#d23b2e">Scales quadratically in N!</text>
+    <text x="657" y="414" font-size="24" fill="#d23b2e">Scales linearly in N!</text>
+    <text x="643" y="454" font-size="24" fill="#1a1a1a">Reorder the multiplies</text>
+  </g>
+
+  <line x1="470" y1="122" x2="548" y2="122" stroke="#1a1a1a" stroke-width="14" stroke-linecap="butt"/>
+  <polygon points="544,100 596,122 544,144" fill="#1a1a1a"/>
+</svg>

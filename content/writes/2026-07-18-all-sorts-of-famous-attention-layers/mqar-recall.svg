@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 470" width="1040" height="470" role="img" aria-label="MQAR plot of associative recall against recurrent state size. Attention climbs to perfect recall at a huge state. Sliding attention sits lower. Gated convolutions sit lower still.">
+  <rect width="1040" height="470" fill="#ffffff"/>
+
+  <text x="28" y="42" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="26" font-weight="700" fill="#5c564e">Memory consumption and recall on MQAR</text>
+
+  <text x="28" y="120" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="22" fill="#6a6a66">
+    <tspan font-weight="700" fill="#3b6fb6">Attention</tspan> achieves perfect recall, but
+  </text>
+  <text x="28" y="152" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="22" fill="#6a6a66">has a huge recurrent state</text>
+
+  <text x="28" y="214" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="22" fill="#6a6a66">
+    <tspan font-weight="700" fill="#d06a5c">Sliding attention</tspan> can reduce memory
+  </text>
+  <text x="28" y="246" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="22" fill="#6a6a66">consumption but at the cost of recall</text>
+
+  <text x="28" y="308" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="22" fill="#6a6a66">
+    <tspan font-weight="700" fill="#8a6810">Gated Convolutions</tspan> fall below even
+  </text>
+  <text x="28" y="340" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="22" fill="#6a6a66">sliding attention!</text>
+
+  <g stroke="#eceae4" stroke-width="1">
+    <line x1="600" y1="100" x2="980" y2="100"/>
+    <line x1="600" y1="160" x2="980" y2="160"/>
+    <line x1="600" y1="220" x2="980" y2="220"/>
+    <line x1="600" y1="280" x2="980" y2="280"/>
+    <line x1="600" y1="340" x2="980" y2="340"/>
+    <line x1="600" y1="400" x2="980" y2="400"/>
+    <line x1="600" y1="100" x2="600" y2="400"/>
+    <line x1="695" y1="100" x2="695" y2="400"/>
+    <line x1="790" y1="100" x2="790" y2="400"/>
+    <line x1="885" y1="100" x2="885" y2="400"/>
+    <line x1="980" y1="100" x2="980" y2="400"/>
+  </g>
+  <g stroke="#2c2c2c" stroke-width="1.4">
+    <line x1="600" y1="400" x2="990" y2="400"/>
+    <line x1="600" y1="92" x2="600" y2="400"/>
+  </g>
+
+  <g font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" fill="#6b6b66">
+    <text x="592" y="108" text-anchor="end">1.0</text>
+    <text x="592" y="164" text-anchor="end">0.8</text>
+    <text x="592" y="224" text-anchor="end">0.6</text>
+    <text x="592" y="284" text-anchor="end">0.4</text>
+    <text x="592" y="344" text-anchor="end">0.2</text>
+    <text x="600" y="422" text-anchor="middle">2<tspan font-size="10" dy="-6">14</tspan></text>
+    <text x="695" y="422" text-anchor="middle">2<tspan font-size="10" dy="-6">16</tspan></text>
+    <text x="790" y="422" text-anchor="middle">2<tspan font-size="10" dy="-6">18</tspan></text>
+    <text x="885" y="422" text-anchor="middle">2<tspan font-size="10" dy="-6">20</tspan></text>
+    <text x="980" y="422" text-anchor="middle">2<tspan font-size="10" dy="-6">22</tspan></text>
+  </g>
+
+  <text x="790" y="456" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" fill="#2c2c2c">Recurrent state size (bytes)</text>
+  <text x="548" y="250" text-anchor="middle" transform="rotate(-90 548 250)" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" fill="#2c2c2c">Associative Recall Accuracy</text>
+
+  <circle cx="614.2" cy="379.0" r="7" fill="#3b6fb6"/>
+  <circle cx="647.5" cy="355.0" r="7" fill="#3b6fb6"/>
+  <circle cx="680.8" cy="307.0" r="7" fill="#3b6fb6"/>
+  <circle cx="718.8" cy="250.0" r="7" fill="#3b6fb6"/>
+  <circle cx="756.8" cy="205.0" r="7" fill="#3b6fb6"/>
+  <circle cx="804.2" cy="154.0" r="7" fill="#3b6fb6"/>
+  <circle cx="842.2" cy="118.0" r="7" fill="#3b6fb6"/>
+  <circle cx="880.2" cy="100.0" r="7" fill="#3b6fb6"/>
+  <circle cx="918.2" cy="100.0" r="7" fill="#3b6fb6"/>
+  <circle cx="956.2" cy="100.0" r="7" fill="#3b6fb6"/>
+
+  <circle cx="623.8" cy="346.0" r="7" fill="#c4a83a"/>
+  <circle cx="680.8" cy="322.0" r="7" fill="#c4a83a"/>
+  <circle cx="742.5" cy="304.0" r="7" fill="#c4a83a"/>
+  <circle cx="804.2" cy="292.0" r="7" fill="#c4a83a"/>
+
+  <circle cx="809.0" cy="340.0" r="7" fill="#d06a5c"/>
+  <circle cx="856.5" cy="301.0" r="7" fill="#d06a5c"/>
+  <circle cx="904.0" cy="265.0" r="7" fill="#d06a5c"/>
+  <circle cx="951.5" cy="247.0" r="7" fill="#d06a5c"/>
+
+  <line x1="936" y1="248" x2="936" y2="124" stroke="#c4473a" stroke-width="3"/>
+  <polygon points="928,128 936,108 944,128" fill="#c4473a"/>
+</svg>
