@@ -132,7 +132,7 @@
 {\centering
 {\Huge HARSH PRATAP SINGH}\\[4pt]
 \href{https://github.com/harsh-ps-2003}{\raisebox{-0.05\height}\faGithub\ harsh-ps-2003} \ $|$ \
-\href{https://harsh-ps-2003.bearblog.dev/}{\raisebox{-0.05\height}\faGlobe \ harsh-ps-2003.bearblog.dev} \ $|$ \
+\href{https://harsh-ps-2003.github.io/}{\raisebox{-0.05\height}\faGlobe \ personal blogs} \ $|$ \
 \href{mailto:harshpratapsingh8210@gmail.com}{\raisebox{-0.05\height}\faEnvelope \ harshpratapsingh8210@gmail.com}\par
 }
 
@@ -142,14 +142,17 @@
 
 \section{Professional Experience}
 
-\jobheader{Sqwish AI, Cambridge, England, UK}{September 2026 -- Present}
+\jobheader{Sqwish AI{\normalfont, Cambridge, England}}{September 2026 -- Present}
 \jobrole{Founding Member of Technical Staff}
 Building low-latency contextual bandit inference for \href{https://routeworks.github.io/}{Sqwish Router}, enabling sub-50ms routing decisions for AI agents.
 
 \jobgap
 \jobheader{Cloud Native Computing Foundation (CNCF)}{March 2025 -- May 2025}
 \jobrole{Linux Foundation Mentee $|$ Member of Istio's Networking Working Group}
-\href{https://docs.google.com/document/d/19vMr22inhLAPjWcVJkZWiG_GY6ZG3PLxG9QqAmIlnIc/edit?tab=t.0\#heading=h.5d4q82tdn6qhq}{Designed} and \href{https://github.com/istio/ztunnel/pull/1507}{implemented} support for \textbf{mTLS via HBONE} for the metrics endpoint in Istio's Ambient mesh.
+\begin{itemize}
+    \item[--] \href{https://docs.google.com/document/d/19vMr22inhLAPjWcVJkZWiG_GY6ZG3PLxG9QqAmIlnIc/edit?tab=t.0\#heading=h.5d4q82tdn6qhq}{Designed} and \href{https://github.com/istio/ztunnel/pull/1507}{implemented} \textbf{mTLS}-secured metrics access in Istio Ambient's Rust-based ztunnel, introducing a self-proxy inbound listener that leveraged workload identities and \textbf{HBONE} tunneling to secure observability traffic.
+    \item[--] Integrated the feature with ztunnel's existing certificate management and inbound proxy infrastructure, and added \mbox{end-to-end} tests validating authenticated metrics scraping and mTLS telemetry.
+\end{itemize}
 
 \jobgap
 % \jobheader{Ethereum Foundation}{June 2025 -- November 2025}
@@ -157,16 +160,6 @@ Building low-latency contextual bandit inference for \href{https://routeworks.gi
 % Implemented \href{https://arxiv.org/pdf/2405.00549}{Fast Confirmation Rule} in Ethereum Clients, providing block confirmation in \textbf{12-24 seconds vs traditional 13-19 minutes} on the Ethereum Blockchain.
 %
 % \jobgap
-\jobheader{Jenkins}{May 2023 -- Present}
-\jobrole{Open Source Maintainer $|$ Google Summer of Code}
-\begin{itemize}
-    \item[--] \textbf{Mentored Google Summer of Code contributors} building an \textbf{agentic AI diagnostic system}, architecting a \textbf{filesystem-first debugging stack} that combines live Jenkins state via \textbf{Jenkins MCP server} with \textbf{LightRAG} graph-backed plugin knowledge to automate failure diagnosis across \textbf{2{,}000+ Jenkins plugins}
-    \item[--] Built \textbf{semantic log retrieval} with structure-aware chunking, metadata indexing, query expansion, reranking, and an \textbf{async resumable ETL pipeline} for continuous Jenkins knowledge-graph ingestion, achieving an \textbf{F1 of 0.93} on curated Jenkins failure-pattern queries
-    \item[--] Designed secure multi-instance Jenkins operations with URL-based routing, instance-aware caching, file-lock-protected concurrency, \textbf{credential redaction for 15+ secret types}, CSRF handling, and API-token authentication
-    \item[--] Migrated the \href{https://www.jenkins.io/blog/2023/08/24/gitlab-plugin-modernization-report/}{Jenkins GitLab Plugin} from RESTEasy to GitLab4J-API with reverse-proxy support and integration tests as a \textbf{Google Summer of Code 2023 mentee}
-\end{itemize}
-
-\jobgap
 \jobheader{uv}{}
 \jobrole{Open Source Contributor}
 \begin{itemize}
@@ -174,28 +167,34 @@ Building low-latency contextual bandit inference for \href{https://routeworks.gi
     \item[--] Improved packaging UX with compressed package size reporting - \href{https://github.com/astral-sh/uv/pull/15531}{PR}, authoritative local-over-global pin resolution - \href{https://github.com/astral-sh/uv/pull/15473}{PR}, and a context-aware warning for conflicting VIRTUALENV setups - \href{https://github.com/astral-sh/uv/pull/15467}{PR}
 \end{itemize}
 
+\jobgap
+\jobheader{Jenkins}{May 2023 -- Present}
+\jobrole{Open Source Maintainer $|$ Google Summer of Code}
+\begin{itemize}
+    \item[--] Nurtured Google Summer of Code contributors and worked with them to make Jenkins more AI native
+    \item[--] Migrated the \href{https://www.jenkins.io/blog/2023/08/24/gitlab-plugin-modernization-report/}{Jenkins GitLab Plugin} from RESTEasy to GitLab4J-API with reverse-proxy support and integration tests as a \textbf{Google Summer of Code 2023 mentee}
+\end{itemize}
+
 %----------------------------------------------------------------------------------------
-%   RESEARCH
+%   RESEARCH PUBLICATIONS
 %----------------------------------------------------------------------------------------
 
-\section{Research}
-Advisors: \textit{Prof. Dibakar Ghosal and Subhajit Roy (Department of Earth Science \& Computer Science)} \\
-Forward and Inverse Waveform Inversions via \href{https://arxiv.org/pdf/2107.07871}{Finite Basis Physics-Informed Neural Networks} - \href{https://harsh-ps-2003.github.io/writes/2026-01-02-the-chronicles-of-training-fbpinns/}{blog} $|$ \textit{Accepted at \href{https://ai4sciencecommunity.github.io/neurips26.html}{NeurIPS 2026 AI for Science}} (\href{https://harsh-ps-2003.github.io/about/neurIPS_ai4science.pdf}{paper})
+\section{Research Publications}
+\jobheader{Matching the wavefield is not matching the CPML solver}{\textit{\href{https://ai4sciencecommunity.github.io/neurips26.html}{NeurIPS 2026 AI for Science Workshop}}}
+\textit{\href{https://home.iitk.ac.in/~dghosal/Home.html}{Prof. Dibakar Ghosal} and \href{https://www.cse.iitk.ac.in/users/subhajit/}{Subhajit Roy}} $|$ \href{https://harsh-ps-2003.github.io/writes/2026-01-02-the-chronicles-of-training-fbpinns/}{blog} $|$ \href{https://harsh-ps-2003.github.io/about/neurIPS_ai4science.pdf}{paper}
 \begin{itemize}
-    \item[--] Proved that pressure-only neural surrogates (\textbf{FNO}, \textbf{DeepONet}, \textbf{SIREN}) with \textbf{0.10\% receiver error} violate the \textbf{1e-4 CPML recurrence residual} (\textbf{0.0283}) due to hidden boundary-memory state, inducing \textbf{11/100 harmful FWI steps} (\textbf{56/100} memory-free vs \textbf{0/100} full-state tangent readouts across 5 verification levels)
-    \item[--] Architected \textbf{multiscale Finite Basis Physics-Informed Neural Network} for \textbf{subsurface modelling}, solving \textbf{2D acoustic and elastic wave equations} via JAX \textbf{JIT compilation} (\textbf{2x training speedup}), domain decomposition with \textbf{partition-of-unity windows}, and architectures tackling \textbf{spectral bias} in \textbf{full waveform inversion}
-    \item[--] Designed scalable model-parallel architecture for \textbf{arbitrary subdomain distribution} across GPU clusters using \textbf{topology-aware sharding} with \textbf{NVLink field exchange} (300 GB/s), block-accumulation sync, and chunked evaluation; demonstrated on dual V100s (75 subdomains) with \textbf{15x speedup}, \textbf{56\% per-device memory reduction}, and \textbf{1000+ subdomain scaling}
-    \item[--] Engineered memory-efficient evaluation pipeline for V100 HPC clusters through \textbf{chunked inference} eliminating OOM errors, \textbf{hybrid 4th/2nd-order CPML stencils} for PML stability, and \textbf{adaptive spatial oversampling (6x)} with nearest-neighbor downsampling preserving sharp wavefronts
-    \item[--] Built a Full-Waveform Inversion visualization suite with real-time loss tracking, seismological wiggle plots, shot gathers, and spatial/temporal error analysis for ground-truth validation against CPML solvers
+    \item[--] Improved full-waveform inversion by showing that pressure-only \textbf{FNO}, \textbf{DeepONet}, and \textbf{SIREN} models can match the receivers and still miss the \textbf{CPML} solver. The \textbf{FNO} takes \textbf{11 harmful inversion steps out of 100} at \textbf{0.10\%} receiver error, so a close match at the receivers does not mean the subsurface model got better.
+    \item[--] Used multiscale \href{https://arxiv.org/pdf/2107.07871}{\textbf{FBPINNs}} for successful forward modeling and inversion in complex \textbf{2D acoustic} geological settings.
+    \item[--] Executed forward and inverse inversion end to end on dual V100s, reaching \textbf{15x} faster runs and \textbf{56\% less memory per GPU} at 75 subdomains, so it can grow past \textbf{1000 subdomains}.
 \end{itemize}
 
 \jobgap
-Advisor: \textit{Prof. Swarnendu Biswas (Department of Computer Science)} \\
-\href{https://harsh-ps-2003.github.io/resume/CS636.pdf}{Multi-GPU Hash Table Optimization under UVM Oversubscription} $|$ \textit{Preliminary work toward \href{https://www.cse.iitk.ac.in/users/swarnendu/files/papers/gpu-ovs-ds-oopsla26.pdf}{OOPSLA 2026}}
+\jobheader{Multi-GPU Hash Tables under UVM Oversubscription}{\textit{Preliminary, \href{https://www.cse.iitk.ac.in/users/swarnendu/files/papers/gpu-ovs-ds-oopsla26.pdf}{OOPSLA 2026}}}
+\textit{\href{https://www.cse.iitk.ac.in/users/swarnendu/}{Prof. Swarnendu Biswas}}
 \begin{itemize}
-    \item[--] Achieved a \textbf{7.3x throughput gain (24.68M to 180.86M ops/s)} on \textbf{9.1x oversubscribed} multi-GPU hash table workloads by designing a \textbf{3-phase radix-routing scheduler} (GPU routing, local radix partitioning, and bucketed insertion)
-    \item[--] Eliminated inter-GPU page thrashing via partition alignment, routing keys to their owning GPU to cut DtoD PCIe traffic by \textbf{76x (24.4 GB to 320 MB)} and page-migration amplification from \textbf{38x} down to the in-memory minimum
-    \item[--] Converted UVM-oversubscribed workloads into compute-bound execution, reaching \textbf{365M ops/s} per GPU and matching the \textbf{355M ops/s} in-memory ceiling
+    \item[--] Optimized multi-GPU hash tables so the working set no longer has to fit in GPU memory, and at \textbf{9.1x} oversubscription they still match in-memory speed, \textbf{365M ops/s} per GPU against a \textbf{355M} ceiling.
+    \item[--] Developed a \textbf{3-phase radix-routing scheduler} so each key stays on its owning GPU and pages stop thrashing across devices.
+    \item[--] Achieved \textbf{76x} less inter-GPU traffic (\textbf{24.4 GB to 320 MB}) and \textbf{7.3x} throughput (\textbf{24.68M to 180.86M ops/s}), so the time goes to the lookup instead of the bus.
 \end{itemize}
 
 % \textbf{Undergraduate Project :} \hfill  \\

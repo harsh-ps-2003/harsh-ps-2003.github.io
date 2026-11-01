@@ -46,7 +46,7 @@ Check out my [blog](/writes/2025-05-23-istio-lfx/) on contributing to Istio to l
 
 **Undergraduate Research**
 
-Did my [bachelors thesis](/about/neurIPS_ai4science.pdf) under *Prof. Dibakar Ghosal (Department of Earth Science) and Subhajit Roy (Department of Computer Science)* which got accepted in [NeurIPS AI for Science Workshop](https://ai4sciencecommunity.github.io/neurips26.html).
+Did my [bachelors thesis](/about/neurIPS_ai4science.pdf) under *[Prof. Dibakar Ghosal](https://home.iitk.ac.in/~dghosal/Home.html) (Department of Earth Science) and [Subhajit Roy](https://www.cse.iitk.ac.in/users/subhajit/) (Department of Computer Science)* which got accepted in [NeurIPS AI for Science Workshop](https://ai4sciencecommunity.github.io/neurips26.html).
 
 I explored a lot of topics around SciML for Geophysics during the 2 years! From basic Fourier Neural Operator to Forward and Inverse Waveform Inversions via Finite Basis Physics-Informed Neural Networks, for Seismic Data Interpretation on an actual Supercomputer.
 
@@ -59,9 +59,9 @@ I explored a lot of topics around SciML for Geophysics during the 2 years! From 
 
 **Undergraduate Project**
 
-Advisor: *Prof. Swarnendu Biswas (Department of Computer Science)*
+Advisor: *[Prof. Swarnendu Biswas](https://www.cse.iitk.ac.in/users/swarnendu/) (Department of Computer Science)*
 
-[Multi-GPU hash table optimization under Unified Virtual Memory (UVM) oversubscription](/resume/CS636.pdf) - preliminary work toward [OOPSLA 2026](https://www.cse.iitk.ac.in/users/swarnendu/files/papers/gpu-ovs-ds-oopsla26.pdf)
+Multi-GPU hash table optimization under Unified Virtual Memory (UVM) oversubscription - preliminary work toward [OOPSLA 2026](https://www.cse.iitk.ac.in/users/swarnendu/files/papers/gpu-ovs-ds-oopsla26.pdf)
 
 * Achieved a **7.3x throughput improvement (24.68M to 180.86M ops/s)** on oversubscribed multi-GPU workloads by implementing a **radix-routing scheduler** with GPU routing, local radix partitioning, and bucketed execution phases
 * Eliminated page-thrashing via partition alignment, routing keys to their owning GPU reduced DtoD PCIe traffic by **76x (24.4 GB to 320 MB)**, cutting amplification from 38x down to the theoretical in-memory minimum.
