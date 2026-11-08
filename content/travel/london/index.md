@@ -1,6 +1,6 @@
 +++
 title = "London, UK"
-date = 2026-08-10
+template = "travel.html"
 in_search_index = false
 
 +++

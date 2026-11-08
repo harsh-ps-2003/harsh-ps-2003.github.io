@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} | {{ config.title }}{% endblock title %}
+{% block meta_title %}{{ page.title }} | {{ config.title }}{% endblock meta_title %}
+
+{% block description %}{{ page.description | default(value=config.description) }}{% endblock description %}
+
+{% block og_type %}article{% endblock og_type %}
+{% block og_url %}{{ page.permalink }}{% endblock og_url %}
+{% block og_title %}{{ page.title }}{% endblock og_title %}
+{% block og_description %}{{ page.description | default(value=config.description) }}{% endblock og_description %}
+
+{% block twitter_card %}{% if page.extra.photos %}summary_large_image{% else %}summary{% endif %}{% endblock twitter_card %}
+{% block twitter_title %}{{ page.title }}{% endblock twitter_title %}
+{% block twitter_description %}{{ page.description | default(value=config.description) }}{% endblock twitter_description %}
+
+{% block social_image %}
+{% if page.extra.photos %}
+{% set cover_photo = page.extra.photos | first %}
+<meta property="og:image" content="{{ page.permalink ~ cover_photo.src }}">
+<meta name="twitter:image" content="{{ page.permalink ~ cover_photo.src }}">
+{% endif %}
+{% endblock social_image %}
+
+{% block canonical %}{{ page.permalink }}{% endblock canonical %}
+
+{% block content %}
+<article>
+    <h1>{{ page.title }}</h1>
+
+    {{ page.content | safe }}
+
+    {% if page.extra.photos %}
+    <div class="travel-photos">
+        {% for photo in page.extra.photos %}
+        {% set photo_url = page.permalink ~ photo.src %}
+        <a href="{{ photo_url }}">
+            <img
+                src="{{ photo_url }}"
+                width="{{ photo.width }}"
+                height="{{ photo.height }}"
+                alt="{{ photo.alt }}"
+                {% if loop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}
+                decoding="async"
+            >
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</article>
+{% endblock content %}

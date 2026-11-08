@@ -252,6 +252,35 @@ img {
     }
 }
 
+// Travel photos sit wider than the text column on a laptop, still inside the viewport.
+.travel-photos {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 8px 0 0;
+
+    a {
+        display: block;
+        border-bottom: none;
+        line-height: 0;
+
+        &:hover {
+            background-color: transparent;
+        }
+    }
+
+    img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    @media (min-width: 1120px) {
+        width: 1040px;
+        margin-left: calc(50% - 520px);
+    }
+}
+
 // Excalidraw diagrams - invert colors in dark mode
 // Use class="excalidraw" or place in a container with class="diagram"
 img.excalidraw,
@@ -724,13 +753,6 @@ ul.blog-posts li.is-hidden {
 
 .post-date {
     font-style: normal;
-}
-
-// Back link
-.back-link {
-    display: inline-block;
-    margin-bottom: 20px;
-    font-size: 0.9em;
 }
 
 // Section intro
