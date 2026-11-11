@@ -16,10 +16,10 @@ TODO before publishing (every number must come from a public model):
 - Looking: an xctrace flame graph by layer and step (the profile-based ones are by operation)
 - Writing my own Metal kernels: the threadgroup-layout comparison and the independent-vs-chain table on a public
   model's shapes
-- numbers and figure presets from models neki has since dropped (Laya, d1-3B, d1-omni-600M, d3-lite): re-measure
+- numbers and figure presets from models ippon has since dropped (Laya, d1-3B, d1-omni-600M, d3-lite): re-measure
   on current models or say they were dropped; the reduce figure offers Laya and d1-3B as row widths
 - figures: checked 30 Oct at phone width (390 px), light and dark: no overflow, no console errors; look them over
-- link neki once its repository is public
+- link ippon once its repository is public
 -->
 
 <link rel="stylesheet" href="lab.css">
@@ -31,7 +31,7 @@ The models I work with are decision models. You give one a state (a support tick
 
 Most of what's written about running models on a Mac is about generation, where every new token reads all of the weights once and memory bandwidth is the limit. Prefill is different: a prompt of a few hundred tokens multiplies the weights by that many rows at once, and the limit is arithmetic. Decision requests sit in an awkward middle, from a few dozen rows for a short question to a few thousand for a long state, and neither the generation advice nor the training advice quite fits.
 
-This is what I learned doing that on one laptop, an M5 Pro. It ended up as neki, a library that runs public decision models, twelve of them from nine makers as I write: Liquid's d1-2B and d1-Omni-2B, Cloudflare's Clef-Flash, Perplexity's pplx-decider flash, vllm-sr's d3-mini and d3-flash, Bespoke Labs' Nimble v3, Base Labs' elephant-1, H2O.ai's H2O-Lightning-4B, Torchcast's Decision 4B, and our own Kettei Core and Dot. Every number below comes from a public model. Some come from the models neki started with, Liquid's d1-3B and d1-omni-600M, vllm-sr's d3-lite and Laya, which their makers have since replaced or which dropped out of the rankings; they're still public, and what they taught carries over. Two rules held throughout. A model runs as its maker published it, with the same weights, tokenizer and prompt. And a faster path counts only if it gives the maker's answers, checked against the maker's own code run in fp32.
+This is what I learned doing that on one laptop, an M5 Pro. It ended up as ippon, a library that runs public decision models, twelve of them from nine makers as I write: Liquid's d1-2B and d1-Omni-2B, Cloudflare's Clef-Flash, Perplexity's pplx-decider flash, vllm-sr's d3-mini and d3-flash, Bespoke Labs' Nimble v3, Base Labs' elephant-1, H2O.ai's H2O-Lightning-4B, Torchcast's Decision 4B, and our own Kettei Core and Dot. Every number below comes from a public model. Some come from the models ippon started with, Liquid's d1-3B and d1-omni-600M, vllm-sr's d3-lite and Laya, which their makers have since replaced or which dropped out of the rankings; they're still public, and what they taught carries over. Two rules held throughout. A model runs as its maker published it, with the same weights, tokenizer and prompt. And a faster path counts only if it gives the maker's answers, checked against the maker's own code run in fp32.
 
 Every useful step followed the same loop: write down the fastest a request could possibly be, look at where the time goes before touching anything, change one thing, test it in an experiment shaped like the model, let the request's own clock decide, and keep the record, failures included. My wasted days were the ones that skipped a step.
 
@@ -49,7 +49,7 @@ The laptop is a MacBook Pro with an M5 Pro, on macOS 27.0.1 and MLX 0.32.4. Like
 - The **Neural Engine** is a separate block of 16 cores for running Core ML models at low power. Despite the name, it has nothing to do with the Neural Accelerators.
 - **Unified memory**, 48 GB here, is shared by all of them at up to 307 GB/s. There's no graphics memory to copy weights into: the GPU reads them where they are, and can keep about 78% of the memory resident (MLX reports 40.2 GB).
 
-Software reaches these through different doors, which is why the same model can run at very different speeds on the same Mac. NumPy goes through Accelerate to the CPU. Core ML decides for itself where each operation runs, and it's the only way onto the Neural Engine. PyTorch's Mac backend uses Apple's prebuilt GPU kernels in Metal Performance Shaders. [MLX](https://github.com/ml-explore/mlx), and neki on top of it, go straight to **Metal**: each operation is a kernel, a small program in Metal's C++-like shading language that the GPU runs as thousands of copies at once. Since macOS 26.2, MLX's matmul and attention kernels reach the Neural Accelerators through Metal 4's tensor operations ([Apple's write-up](https://machinelearning.apple.com/research/exploring-llms-mlx-m5)). On this laptop a large matmul runs at about **33 TFLOPS**.
+Software reaches these through different doors, which is why the same model can run at very different speeds on the same Mac. NumPy goes through Accelerate to the CPU. Core ML decides for itself where each operation runs, and it's the only way onto the Neural Engine. PyTorch's Mac backend uses Apple's prebuilt GPU kernels in Metal Performance Shaders. [MLX](https://github.com/ml-explore/mlx), and ippon on top of it, go straight to **Metal**: each operation is a kernel, a small program in Metal's C++-like shading language that the GPU runs as thousands of copies at once. Since macOS 26.2, MLX's matmul and attention kernels reach the Neural Accelerators through Metal 4's tensor operations ([Apple's write-up](https://machinelearning.apple.com/research/exploring-llms-mlx-m5)). On this laptop a large matmul runs at about **33 TFLOPS**.
 
 ### Inside a GPU core
 
@@ -122,7 +122,7 @@ How a model is called decides what's worth optimizing, so before any kernel I lo
 - **The same context again and again.** The next step asks a new question about the same conversation, or about the conversation plus one new message. Most of the prompt is text the model has already read.
 - **Many agents at once.** A team of agents, or one agent running steps in parallel, sends a burst of short requests together, each a few hundred tokens.
 
-Each pattern rewards something different. Questions about one state reward reading the state once. A context sent again, or grown by a message, rewards keeping what was read and reading only what's new. A burst of short requests rewards reading them together, because one short prompt can't keep 20 GPU cores busy. Runtimes built for chat do some of this for their own reasons, prompt caches mostly, but none was designed around it. The sections below are how neki does each one, and what it was worth.
+Each pattern rewards something different. Questions about one state reward reading the state once. A context sent again, or grown by a message, rewards keeping what was read and reading only what's new. A burst of short requests rewards reading them together, because one short prompt can't keep 20 GPU cores busy. Runtimes built for chat do some of this for their own reasons, prompt caches mostly, but none was designed around it. The sections below are how ippon does each one, and what it was worth.
 
 
 ## Decision models, as the GPU sees them
@@ -154,7 +154,7 @@ Two tricks turn that into a per-kernel profile. The Metal Application instrument
 
 My first trace taught me what not to work on. The GPU was busy almost the whole time, with MLX encoding command buffers well ahead of it, so there was no idle time for fewer Python calls to recover. That was true for the large model I traced. The CPU's share, further down, is about the small models, where it wasn't.
 
-**A profile** is cheaper and answers "which operation". `neki profile` runs a request one operation at a time, waits for the GPU after each, and subtracts that wait. A [flame graph](https://www.brendangregg.com/flamegraphs.html) shows the result at a glance: every frame is as wide as its share of the time, and its children sit on top of it.
+**A profile** is cheaper and answers "which operation". `ippon profile` runs a request one operation at a time, waits for the GPU after each, and subtracts that wait. A [flame graph](https://www.brendangregg.com/flamegraphs.html) shows the result at a glance: every frame is as wide as its share of the time, and its children sit on top of it.
 
 <section class="mac-lab" data-lab="flame" id="flame-lab" aria-labelledby="flame-title">
 <h3 id="flame-title">Where a request's time goes</h3>
@@ -190,7 +190,7 @@ That only works when the model reads causally, each token seeing only the ones b
 - **Models whose state looks at the questions** can't. vllm-sr's d3 reads every prompt both ways, so the state's reading depends on the question that follows it, and Liquid's d1 lets the state see every question packed after it. Every request is read whole, and no runtime can do otherwise without changing the answers.
 - **Block models** sit between. elephant-1 reads its system turn and state as one block, both ways inside itself, and every question after it. A state sent again unchanged keeps its block; a state that grows changes the block and has to be read again.
 
-The hybrids add a wrinkle. A Gated DeltaNet or short-convolution layer has no per-token keys to keep, only a running state that summarises everything read so far, so neki stores a copy of that state at a mark it picks while reading. The mark sits a few tokens before the end of the state, because an agent re-sends its state with something appended: the closing tag or bracket after the old state moves, and the tokenizer may merge the old text's last characters with what now follows them. Resuming from a mark a little earlier and re-reading those few tokens gives the same answer as reading everything. Each mark splits every recurrent layer's pass and costs a copy of its state, 18 MB for a 2B hybrid, which made a fresh 20-word request 3 to 4% slower, so each prompt gets one mark, at the state's end. The kept readings also go to disk, so a state outlives the process that read it.
+The hybrids add a wrinkle. A Gated DeltaNet or short-convolution layer has no per-token keys to keep, only a running state that summarises everything read so far, so ippon stores a copy of that state at a mark it picks while reading. The mark sits a few tokens before the end of the state, because an agent re-sends its state with something appended: the closing tag or bracket after the old state moves, and the tokenizer may merge the old text's last characters with what now follows them. Resuming from a mark a little earlier and re-reading those few tokens gives the same answer as reading everything. Each mark splits every recurrent layer's pass and costs a copy of its state, 18 MB for a 2B hybrid, which made a fresh 20-word request 3 to 4% slower, so each prompt gets one mark, at the state's end. The kept readings also go to disk, so a state outlives the process that read it.
 
 **Batch by length.** Requests answered together share a pass, but a batch pads every prompt to its longest. Sorting eight requests of 40 to 1,800 words by length cut d1-omni's time by 21% and d1-3B's by 13%, with the same answers.
 
@@ -200,7 +200,7 @@ Real requests don't arrive back to back. After about half a second idle, a Mac's
 
 Here is what that looks like from a client, on d1-2B's Q8_0 file served over HTTP, a one-question request about a 20-word state, the median of five after each gap:
 
-| Idle before the request | With the keep-alive (neki's default) | Without it |
+| Idle before the request | With the keep-alive (ippon's default) | Without it |
 |---|---:|---:|
 | none, sent right after another | 12.6 ms | 12.5 ms |
 | 0.5 s | 25.4 ms | 25.4 ms |
@@ -208,7 +208,7 @@ Here is what that looks like from a client, on d1-2B's Q8_0 file served over HTT
 | 10 s | 26.0 ms | 65.4 ms |
 | 30 s | 25.6 ms | 64.5 ms |
 
-The clock costs the first doubling and the keep-alive can't stop it. The re-wiring costs the second, from 26 to 65 ms, and a once-a-second add on the GPU takes it away. `neki serve` keeps the heartbeat going for five minutes after the last request and stops it after that, so an idle server doesn't keep the GPU awake all day.
+The clock costs the first doubling and the keep-alive can't stop it. The re-wiring costs the second, from 26 to 65 ms, and a once-a-second add on the GPU takes it away. `ippon serve` keeps the heartbeat going for five minutes after the last request and stops it after that, so an idle server doesn't keep the GPU awake all day.
 
 ## Writing my own Metal kernels
 
@@ -224,7 +224,7 @@ MLX's kernels are good, and they're written for everyone's shapes, mostly the tw
 
 Each row of that table turned into a kernel or a fix, and the matmul gets the most space.
 
-**How they're written.** `mx.fast.metal_kernel` compiles a Metal source string at run time and launches it like any MLX operation. neki keeps its GPU code in 35 `.metal` files; Python only picks a variant, fills in template parameters and launches. MLX ships its own tile library as headers inside the Python wheel, and since the Metal compiler can't read files, those headers get inlined into the source. Every candidate kernel is checked against MLX's result before it's timed: a good fraction of the tile configurations I first generated compiled fine and computed garbage, and my first tuner, which didn't check, reported one faster than the chip's peak. If your benchmark beats physics, the kernel is wrong.
+**How they're written.** `mx.fast.metal_kernel` compiles a Metal source string at run time and launches it like any MLX operation. ippon keeps its GPU code in 35 `.metal` files; Python only picks a variant, fills in template parameters and launches. MLX ships its own tile library as headers inside the Python wheel, and since the Metal compiler can't read files, those headers get inlined into the source. Every candidate kernel is checked against MLX's result before it's timed: a good fraction of the tile configurations I first generated compiled fine and computed garbage, and my first tuner, which didn't check, reported one faster than the chip's peak. If your benchmark beats physics, the kernel is wrong.
 
 One detail I liked: MLX hashes a custom kernel's whole source at every launch, to find it in its cache. With the tile library inlined that's 42 KB of text, about 2 µs per launch, and on d1-omni 7.6% of the main thread's time. Stripping comments, indentation and blank lines gives the same program in 32 KB.
 
@@ -254,7 +254,7 @@ The second was the few-rows regime. With a few dozen rows, a matmul is only a hu
 
 ### Teaching the tuner to measure like the model
 
-`neki tune` measured every matrix shape a model has at 28 row counts from 8 to 4,096 and stored the winners per chip, MLX version, macOS version and kernel version. Getting it to choose well took longer than writing the kernels, because four times it measured something the model doesn't do.
+`ippon tune` measured every matrix shape a model has at 28 row counts from 8 to 4,096 and stored the winners per chip, MLX version, macOS version and kernel version. Getting it to choose well took longer than writing the kernels, because four times it measured something the model doesn't do.
 
 **Independent instead of dependent matmuls.** The tuner first timed eight matmuls at once on separate weight copies. MLX runs independent kernels concurrently, so the GPU overlapped them, and a tile with a slow last wave looked fine. In a model every matmul waits for the one before and pays that tail in full. It now times a dependent chain. <!-- TODO: the independent-vs-chain table on a public model's shapes -->
 
@@ -274,7 +274,7 @@ Tile B won at the top by 0.3% and lost by 2 to 2.4% over most of the band. So th
 
 Re-tuning every model with the fixed tuner made each request another 2 to 7% faster at most lengths, against its tunings from before, in fresh-process comparisons. That sounds small after all that, but these models were already close to their floor. The answers stayed well inside their bounds against the makers' fp32 code: d1-3B at 0.0013 against 0.039, Perplexity's flash at 0.0069 against 0.0119.
 
-Nobody runs that tuner on their own Mac anymore. Once its winners settled into patterns of chip, matrix shape and row count, they became rules neki applies when a model loads, with the measured tables behind them shipped in the library. A first request on a new M5 gets the chosen kernels with no tuning step, and asking a user to spend twenty minutes measuring before anything works was the worst part of the old design.
+Nobody runs that tuner on their own Mac anymore. Once its winners settled into patterns of chip, matrix shape and row count, they became rules ippon applies when a model loads, with the measured tables behind them shipped in the library. A first request on a new M5 gets the chosen kernels with no tuning step, and asking a user to spend twenty minutes measuring before anything works was the worst part of the old design.
 
 ### The quantized matmul
 
@@ -288,7 +288,7 @@ Part of that was MLX's kernel. MLX 0.32.4 runs a prompt's rows through one fixed
 
 Against the faster of MLX's two routes, on seven decision models' shapes from 16 to 2,048 rows, the 8-bit version is 6% to 90% faster and the 4-bit 2% to 122%. Clef-Flash's and Nimble's down projection is 76% faster at 16 rows, 35% at 333 and 15% at 2,048. From 1,024 rows it runs at 25 to 30 TFLOPS, where MLX's reaches 22 to 27.
 
-In whole requests the kernel is one part of the time, so the gain shrinks. On Clef-Flash's MLX 8-bit build, one question about ~1,000 tokens took 660 ms on neki and 796 and 778 ms on oMLX and mlx-vlm, which run MLX's quantized matmul on the same file: 21% and 18% faster. With 50 questions the margins were 9% and 8%. A typical call of about 500 tokens and three questions took 437 ms against 522 and 518. On Ollama's MXFP8 builds, the same kernel in its MXFP8 form, neki was 5% faster than Ollama on Clef-Flash and 16 to 37% on d1-2B, d3-mini and d3-flash.
+In whole requests the kernel is one part of the time, so the gain shrinks. On Clef-Flash's MLX 8-bit build, one question about ~1,000 tokens took 660 ms on ippon and 796 and 778 ms on oMLX and mlx-vlm, which run MLX's quantized matmul on the same file: 21% and 18% faster. With 50 questions the margins were 9% and 8%. A typical call of about 500 tokens and three questions took 437 ms against 522 and 518. On Ollama's MXFP8 builds, the same kernel in its MXFP8 form, ippon was 5% faster than Ollama on Clef-Flash and 16 to 37% on d1-2B, d3-mini and d3-flash.
 
 The bug that taught me most: every loop over a thread's registers has to be unrolled in full, as MLX's are. Rolled, the compiler can't keep an indexed register array in registers, spills it to memory, and the kernel ran at a quarter of MLX's speed.
 
@@ -300,7 +300,7 @@ How the two tiles get computed mattered more than the fusion. My first version w
 
 ### Norms, and adding across a SIMD group
 
-Between blocks, every layer adds the block's output to the residual and normalizes it. An RMSNorm needs the sum of squares of the whole row before it can scale any element, so it's a reduction: many numbers in, one out. neki does the add and the norm in one kernel, one threadgroup per row:
+Between blocks, every layer adds the block's output to the residual and normalizes it. An RMSNorm needs the sum of squares of the whole row before it can scale any element, so it's a reduction: many numbers in, one out. ippon does the add and the norm in one kernel, one threadgroup per row:
 
 <section class="mac-lab" data-lab="reduce" id="reduce-lab" aria-labelledby="reduce-title">
 <h3 id="reduce-title">How a threadgroup sums a row</h3>
@@ -311,13 +311,13 @@ The step that makes this fast is `simd_sum`. Threads in a SIMD group already run
 
 The same pattern runs elsewhere. Gated DeltaNet needs its queries and keys normalized per head: MLX's composition makes about five full passes over them in fp32, plus five small kernels for its gates, and one kernel with one SIMD group per head does it all.
 
-Two fixes in this area weren't about arithmetic at all. MLX's fused Gated DeltaNet kernels only take a few head counts, and any other shape ran 50 to 100 times slower, so neki pads the heads with zeros up to a shape the kernel takes: for 8 key and 16 value heads, 99 ms became about 2 ms at 2,048 tokens. Zero heads add nothing to a state or an output, so the answers don't change. And several of my kernels took the request's length as a template constant, so Metal compiled them again for every new length, about 60 ms each time. Decision traffic has a new length on nearly every request, and d1-omni at 50 words ran at 63 ms instead of 6 to 10. The kernels now read their sizes from a small input.
+Two fixes in this area weren't about arithmetic at all. MLX's fused Gated DeltaNet kernels only take a few head counts, and any other shape ran 50 to 100 times slower, so ippon pads the heads with zeros up to a shape the kernel takes: for 8 key and 16 value heads, 99 ms became about 2 ms at 2,048 tokens. Zero heads add nothing to a state or an output, so the answers don't change. And several of my kernels took the request's length as a template constant, so Metal compiled them again for every new length, about 60 ms each time. Decision traffic has a new length on nearly every request, and d1-omni at 50 words ran at 63 ms instead of 6 to 10. The kernels now read their sizes from a small input.
 
 ### Attention
 
 An attention kernel walks the keys in blocks for a block of queries: multiply the queries by those keys to get scores, keep a running softmax (each row's maximum and sum so far, rescaling as the maximum grows), and multiply the weights by the values into an output tile. The full table of scores never exists in memory, which is the trick of [FlashAttention](https://arxiv.org/abs/2205.14135).
 
-At head size 256, the size of the Qwen3.5 models' full-attention layers, MLX 0.32.4 uses its fused kernel on an M5 only for 1,024 queries or more under a causal or array mask. Everything else, including every both-ways call and every short prompt, multiplies the queries by the keys into a score matrix in memory: at d3-mini's shape, an extra 0.53 GiB at 4,096 tokens, 2.06 at 8,192 and 4.59 at 12,288. neki's kernel is MLX's head-split kernel for the Neural Accelerators with 16 or 32 query rows per threadgroup instead of 64, so a short prompt still makes enough threadgroups, and with the queries kept in registers.
+At head size 256, the size of the Qwen3.5 models' full-attention layers, MLX 0.32.4 uses its fused kernel on an M5 only for 1,024 queries or more under a causal or array mask. Everything else, including every both-ways call and every short prompt, multiplies the queries by the keys into a score matrix in memory: at d3-mini's shape, an extra 0.53 GiB at 4,096 tokens, 2.06 at 8,192 and 4.59 at 12,288. ippon's kernel is MLX's head-split kernel for the Neural Accelerators with 16 or 32 query rows per threadgroup instead of 64, so a short prompt still makes enough threadgroups, and with the queries kept in registers.
 
 The kernel is much faster than MLX's unfused path: 49 to 60% for causal prompts of 256 to 1,000 tokens, 15% both ways at 1,100 tokens and 17% at 4,100. Past 8,000 tokens the gain shrinks to 0 to 7%, because each block of keys is read again for every 32 queries and that runs into the bandwidth. The request barely noticed. In pplx-decider flash at 4,000 words attention went from 104 ms to 86 ms of a request of about 1,150 ms, and a clean four-round comparison came out 0.89% faster, under the 3% bar. So it ships behind a switch, and MLX's path stays the default. Its real gain is the gigabytes of scores it never allocates on a long prompt. A kernel 17% faster in a tenth of the request can make the request at most 1.7% faster, and that's the arithmetic to do before writing one.
 
@@ -336,9 +336,9 @@ Instructions per decision puts the rest in one number. On d1-2B's Q8_0 file, a d
 
 ## We don't trade accuracy for performance
 
-Every speedup in this post was counted only after the answers matched. For each model, neki runs the same requests as the maker's own code run in fp32 on the CPU: the standard set, each maker's own cases, and pictures, clips and videos where the model reads them. Prompts have to match token for token, which is checked exactly. Each probability then has to land within a bound of the maker's: 0.01, or how far the maker's own fast path (its bf16 on the Mac's GPU) lands from its fp32, plus 0.0005, whichever is larger. So neki has to be at least as close to the maker's exact answers as the maker's own fast path.
+Every speedup in this post was counted only after the answers matched. For each model, ippon runs the same requests as the maker's own code run in fp32 on the CPU: the standard set, each maker's own cases, and pictures, clips and videos where the model reads them. Prompts have to match token for token, which is checked exactly. Each probability then has to land within a bound of the maker's: 0.01, or how far the maker's own fast path (its bf16 on the Mac's GPU) lands from its fp32, plus 0.0005, whichever is larger. So ippon has to be at least as close to the maker's exact answers as the maker's own fast path.
 
-| Model | neki's default, worst difference | Bound |
+| Model | ippon's default, worst difference | Bound |
 |---|---:|---:|
 | Liquid d1-2B | 0.0012 | 0.0162 |
 | Liquid d1-Omni-2B | 0.0018 | 0.0172 |
@@ -354,15 +354,15 @@ Every speedup in this post was counted only after the answers matched. For each 
 
 Pictures, audio and video are held to the same rule: on d3-flash, 0.012 on pictures (bound 0.022) and 0.0022 on video (0.025); on d1-Omni-2B's clips, 0.0010 (0.0144). Clef-Flash is the exception: its prompts and scoring head are checked against Cloudflare's code, and its community 8-bit build against the runtime it was published for.
 
-neki's default computes in fp16 wherever a model's activations fit, because on these models fp16 lands several times closer to fp32 than bf16 does. Nimble's own engine in bf16 is 0.64 from its fp32, enough to change answers, where neki's fp16 is 0.010. bf16 is the fallback for the rare request that overflows fp16, and an option; on a few models it lands past the bound (d3-flash 0.0185 on a 40-question request, Kettei Core 0.045). The docs say so, and neki reports when it falls back.
+ippon's default computes in fp16 wherever a model's activations fit, because on these models fp16 lands several times closer to fp32 than bf16 does. Nimble's own engine in bf16 is 0.64 from its fp32, enough to change answers, where ippon's fp16 is 0.010. bf16 is the fallback for the rare request that overflows fp16, and an option; on a few models it lands past the bound (d3-flash 0.0185 on a 40-question request, Kettei Core 0.045). The docs say so, and ippon reports when it falls back.
 
-The two 16-bit formats split their bits differently. fp16 keeps 10 bits of mantissa and 5 of exponent, bf16 7 bits of mantissa and 8 of exponent. bf16 can hold the same range of magnitudes as fp32, which is why training uses it, but it rounds every number about eight times more coarsely than fp16. fp16 is more precise but tops out at 65,504, and a model whose activations pass that overflows into infinities. So neki measures the largest activation a model produces while warming up and uses fp16 when there's room, bf16 when there isn't. If a later request still overflows, neki answers it again in bf16 and stays there.
+The two 16-bit formats split their bits differently. fp16 keeps 10 bits of mantissa and 5 of exponent, bf16 7 bits of mantissa and 8 of exponent. bf16 can hold the same range of magnitudes as fp32, which is why training uses it, but it rounds every number about eight times more coarsely than fp16. fp16 is more precise but tops out at 65,504, and a model whose activations pass that overflows into infinities. So ippon measures the largest activation a model produces while warming up and uses fp16 when there's room, bf16 when there isn't. If a later request still overflows, ippon answers it again in bf16 and stays there.
 
-The tempting shortcut was fewer bits. On a 9B model a 4-bit build halves the memory again, and many runtimes default to one. For decision answers it's the wrong trade: elephant-1 at 4-bit landed 0.52 from its fp32 and at 6-bit 0.14, with top answers changed, and even 8-bit landed 0.028 against a bound of 0.025. So neki never loads fewer bits than the maker published unless asked to, and every precision option carries its measured distance in the docs. When neki races another runtime's quantized build, it runs that exact build and reproduces that build's answers. Where the build itself drifts from the maker's (Ollama's MXFP8 build of d3-mini is 0.062 from vllm-sr's fp32), the docs mark it experimental.
+The tempting shortcut was fewer bits. On a 9B model a 4-bit build halves the memory again, and many runtimes default to one. For decision answers it's the wrong trade: elephant-1 at 4-bit landed 0.52 from its fp32 and at 6-bit 0.14, with top answers changed, and even 8-bit landed 0.028 against a bound of 0.025. So ippon never loads fewer bits than the maker published unless asked to, and every precision option carries its measured distance in the docs. When ippon races another runtime's quantized build, it runs that exact build and reproduces that build's answers. Where the build itself drifts from the maker's (Ollama's MXFP8 build of d3-mini is 0.062 from vllm-sr's fp32), the docs mark it experimental.
 
 ## Against the other runtimes
 
-Each comparison runs the same build of the model on both sides: neki reads the same GGUF file as llama.cpp, the same MLX 8-bit build as oMLX and mlx-vlm, Ollama's own MXFP8 and NVFP4 builds through its blobs, and the maker's full checkpoint against the maker's code. On 28 October, for Clef-Flash 9B with a 1,000-token state:
+Each comparison runs the same build of the model on both sides: ippon reads the same GGUF file as llama.cpp, the same MLX 8-bit build as oMLX and mlx-vlm, Ollama's own MXFP8 and NVFP4 builds through its blobs, and the maker's full checkpoint against the maker's code. On 28 October, for Clef-Flash 9B with a 1,000-token state:
 
 | Against, on the same build | One question | 50 questions |
 |---|---|---|
@@ -372,15 +372,15 @@ Each comparison runs the same build of the model on both sides: neki reads the s
 | Ollama 0.40.11, its MXFP8 build | 765 ms against 816: 7% faster | 8% slower |
 | Cloudflare's own code, full weights | 659 ms; out of memory on this 48 GB Mac | |
 
-The makers' own code is where the gaps are widest. With eight clients at once, neki served 635% more d3-mini requests a second than vllm-sr's own runtime, and on single requests Perplexity's package in bf16 took 2.8 s against 0.39.
+The makers' own code is where the gaps are widest. With eight clients at once, ippon served 635% more d3-mini requests a second than vllm-sr's own runtime, and on single requests Perplexity's package in bf16 took 2.8 s against 0.39.
 
 ### Where the extra speed comes from
 
-Against llama.cpp and the makers' own code, neki wins on almost everything at once. Against the runtimes built on MLX, it wins on what decision traffic does differently. In one place:
+Against llama.cpp and the makers' own code, ippon wins on almost everything at once. Against the runtimes built on MLX, it wins on what decision traffic does differently. In one place:
 
-| What neki does | What it saves | Measured |
+| What ippon does | What it saves | Measured |
 |---|---|---|
-| Reads a request's state once for all its questions | the state read once per question | three questions about a 4,000-token state: about 14,200 tokens read by Perplexity's package, the state once plus each question's own tokens by neki |
+| Reads a request's state once for all its questions | the state read once per question | three questions about a 4,000-token state: about 14,200 tokens read by Perplexity's package, the state once plus each question's own tokens by ippon |
 | Keeps what it has read between requests | the whole state, when only a question changed | a new question about a 4,000-word state on Clef-Flash: 233 ms instead of 2.48 s |
 | Computes only the rows and options it reads | the last layer for unread rows, most of the output matrix | 2 GB of a 9B model's weights never read |
 | Kernels shaped for 30 to 3,000 rows | MLX's tiles at row counts it wasn't built for | matmuls up to 43% faster between 96 and a few hundred rows; 2 to 7% per request after tuning |
@@ -394,35 +394,35 @@ A batch puts several requests into one pass: their rows stack up, and every weig
 
 A short request, say 300 tokens, is a matmul of 300 rows. That's the few-rows regime from the kernels section: too few tiles in flight to hide each core's waits on memory. MLX's stock tile reads the weights at half the bandwidth or less there, and even the best tile does far less arithmetic per second than it does at a few thousand rows. A layer also runs dozens of small kernels (norms, the recurrence, the gates) whose launch and synchronization cost doesn't shrink with the prompt. Sixteen such requests in one pass fill every core and pay those fixed costs once. Below about 110 tokens the request is also waiting on memory, and reading the weights once for sixteen requests saves the reads outright.
 
-A long request is already a full GPU. 1,344 rows make enough tiles for every core, the fixed costs are small next to the arithmetic, and stacking seven of them only makes bigger matrices and one later finish for everyone. The Clef-Flash loss below is that case. So neki reads waiting requests together when they're short and one after another when they're long, decided from their shapes.
+A long request is already a full GPU. 1,344 rows make enough tiles for every core, the fixed costs are small next to the arithmetic, and stacking seven of them only makes bigger matrices and one later finish for everyone. The Clef-Flash loss below is that case. So ippon reads waiting requests together when they're short and one after another when they're long, decided from their shapes.
 
-The agents' round tested exactly that: 16 clients each sending a ~300-token request at the same moment. On d1-2B, neki answered 31 requests a second, where Ollama 0.40.13 answered 21 to 23 on its own builds and llama.cpp 16.5 on the same Q8_0 file. On d3-mini it was 8.8 against Ollama's 5.2 and oMLX's 7.3, and on Clef-Flash 4.0 against 3.3, 3.2 and 2.6. The waits tell the other half. neki's are even: on d1-2B's Q8_0 file the median client waited 515 ms and the 90th percentile 518. llama.cpp answers its first few clients almost at once, a median of 121 ms, and makes the rest queue, 5.3 s at the 90th percentile, and 33 s on Clef-Flash. A lower median that hides a starved tail is why the README shows both numbers and the requests per second.
+The agents' round tested exactly that: 16 clients each sending a ~300-token request at the same moment. On d1-2B, ippon answered 31 requests a second, where Ollama 0.40.13 answered 21 to 23 on its own builds and llama.cpp 16.5 on the same Q8_0 file. On d3-mini it was 8.8 against Ollama's 5.2 and oMLX's 7.3, and on Clef-Flash 4.0 against 3.3, 3.2 and 2.6. The waits tell the other half. ippon's are even: on d1-2B's Q8_0 file the median client waited 515 ms and the 90th percentile 518. llama.cpp answers its first few clients almost at once, a median of 121 ms, and makes the rest queue, 5.3 s at the 90th percentile, and 33 s on Clef-Flash. A lower median that hides a starved tail is why the README shows both numbers and the requests per second.
 
 ### The ceiling
 
-The margins over Ollama, oMLX and mlx-vlm are small, and the flame graph says why. On Clef-Flash the matmuls are 89% of a request, and from about a thousand rows MLX's own matmul runs within a few percent of the best tile I could find, near 30 TFLOPS. Ollama's MLX engine, oMLX and mlx-vlm all call those same kernels. On one fresh 1,000-token request, then, every runtime built on MLX does the same 89% at the same speed, and the most anyone can win is a share of the remaining 11% plus overhead. neki's 7 to 21% is most of that share. llama.cpp brings its own kernels and the makers bring PyTorch on the Mac's GPU, which is why those gaps are wider.
+The margins over Ollama, oMLX and mlx-vlm are small, and the flame graph says why. On Clef-Flash the matmuls are 89% of a request, and from about a thousand rows MLX's own matmul runs within a few percent of the best tile I could find, near 30 TFLOPS. Ollama's MLX engine, oMLX and mlx-vlm all call those same kernels. On one fresh 1,000-token request, then, every runtime built on MLX does the same 89% at the same speed, and the most anyone can win is a share of the remaining 11% plus overhead. ippon's 7 to 21% is most of that share. llama.cpp brings its own kernels and the makers bring PyTorch on the Mac's GPU, which is why those gaps are wider.
 
-That ceiling will move under everyone. MLX's main branch has merged a staged quantized matmul for the M5's Neural Accelerators ([#4682](https://github.com/ml-explore/mlx/pull/4682)) close to the one I built, sliding-window attention inside the fused kernel ([#4734](https://github.com/ml-explore/mlx/pull/4734)) and faster fp4 unpacking for older Macs ([#4709](https://github.com/ml-explore/mlx/pull/4709)). When they ship, every runtime on MLX gets faster on single requests, neki included.
+That ceiling will move under everyone. MLX's main branch has merged a staged quantized matmul for the M5's Neural Accelerators ([#4682](https://github.com/ml-explore/mlx/pull/4682)) close to the one I built, sliding-window attention inside the fused kernel ([#4734](https://github.com/ml-explore/mlx/pull/4734)) and faster fp4 unpacking for older Macs ([#4709](https://github.com/ml-explore/mlx/pull/4709)). When they ship, every runtime on MLX gets faster on single requests, ippon included.
 
 What doesn't move is how decision models are called. An agent asks about the same state again and again, its context grows one message at a time, and many agents ask short questions at once. Keeping what's been read made a new question about a 4,000-word state take 233 ms instead of 2.48 s, and that's the kind of margin a kernel can't buy.
 
-Against the other runtimes it's the same story. With the same ~1,000-token context sent again and a new question, neki answered Clef-Flash in 76 ms, where llama.cpp took 1,037 ms on the same Q8_0 file and oMLX 810 ms on the same 8-bit build: 14 and 11 times as fast. H2O-Lightning-4B took 31 ms against llama.cpp's 589. Ollama keeps a prompt cache of its own (it reported 1,246 of Clef-Flash's tokens as cached), so its gap is smaller: 88 against 103 ms when the context comes back unchanged, and 123 against 179 when it has grown by one message. Models that read in both directions, d3 among them, can't keep anything, and their margins stay where a fresh request's are, 10 to 36% over Ollama.
+Against the other runtimes it's the same story. With the same ~1,000-token context sent again and a new question, ippon answered Clef-Flash in 76 ms, where llama.cpp took 1,037 ms on the same Q8_0 file and oMLX 810 ms on the same 8-bit build: 14 and 11 times as fast. H2O-Lightning-4B took 31 ms against llama.cpp's 589. Ollama keeps a prompt cache of its own (it reported 1,246 of Clef-Flash's tokens as cached), so its gap is smaller: 88 against 103 ms when the context comes back unchanged, and 123 against 179 when it has grown by one message. Models that read in both directions, d3 among them, can't keep anything, and their margins stay where a fresh request's are, 10 to 36% over Ollama.
 
 ### Losing to Ollama, and why
 
-The one place neki lost was Clef-Flash with eight clients at once on Ollama's MXFP8 build, where neki served 22% fewer requests a second. The logs showed Ollama answering the eight requests one at a time, 0.81 s each. neki answered the first alone in 0.76 s, faster, then read the seven that had queued meanwhile in one batched pass, and that pass took 7.69 s: 1.10 s a request, 45% slower than seven single passes. The quantized matmul at 9,400 rows was the slow part, and every client waited for the whole batch.
+The one place ippon lost was Clef-Flash with eight clients at once on Ollama's MXFP8 build, where ippon served 22% fewer requests a second. The logs showed Ollama answering the eight requests one at a time, 0.81 s each. ippon answered the first alone in 0.76 s, faster, then read the seven that had queued meanwhile in one batched pass, and that pass took 7.69 s: 1.10 s a request, 45% slower than seven single passes. The quantized matmul at 9,400 rows was the slow part, and every client waited for the whole batch.
 
-Reading requests together is a win when each is short, because a short prompt can't fill the GPU and the weights get read once for all of them. A 1,344-token prompt already fills it. neki now reads requests together only where that's faster for their shapes, and long ones go one after another. With eight clients it then served 1.30 requests a second against Ollama's 1.24, and the median wait fell from 8.77 s to 6.14 s.
+Reading requests together is a win when each is short, because a short prompt can't fill the GPU and the weights get read once for all of them. A 1,344-token prompt already fills it. ippon now reads requests together only where that's faster for their shapes, and long ones go one after another. With eight clients it then served 1.30 requests a second against Ollama's 1.24, and the median wait fell from 8.77 s to 6.14 s.
 
 ## What else it took
 
 Most of the work wasn't kernels. Choosing which models to support meant reading two public leaderboards (JevBench and the Artificial Analysis Decision Index), keeping only models from companies, and dropping ones that fell out of the rankings: Laya and d3-lite went, and when Liquid replaced d1-3B and d1-omni-600M with d1-2B and d1-Omni-2B, the old ones went too. The 27B models were the hardest call. In bf16 they take 52 to 55 GB, more than this 48 GB Mac has. In 8-bit they fit with little room, and 8-bit had already drifted past the bound on the 9B elephant-1. Checking one against its maker would have meant streaming the weights from disk layer by layer. So the largest tier is 9B, which runs in full precision on a 32 GB Mac and in 8-bit on 24 GB.
 
-Reading pictures, audio and video the way each maker does was its own project. A video's frames have to be the ones the maker's decoder picks at the same timestamps, so neki decodes Liquid's videos with PyAV and checked all 98 sampled frames against Liquid's TorchCodec pixel for pixel, and vllm-sr's with OpenCV, as their code does. Audio goes through Liquid's own resampler, matched to within one float32 rounding step, and images get each maker's own EXIF handling and resize.
+Reading pictures, audio and video the way each maker does was its own project. A video's frames have to be the ones the maker's decoder picks at the same timestamps, so ippon decodes Liquid's videos with PyAV and checked all 98 sampled frames against Liquid's TorchCodec pixel for pixel, and vllm-sr's with OpenCV, as their code does. Audio goes through Liquid's own resampler, matched to within one float32 rounding step, and images get each maker's own EXIF handling and resize.
 
 ## The Neural Engine
 
-The M5 Pro also has a 16-core Neural Engine, and I assumed a dedicated ML block would win short requests. On this chip it doesn't: one d1-omni-600M question of 44 to 172 tokens took 3.5 to 6.0 ms on the GPU and 5.2 to 8.0 ms on the Neural Engine, like against like. Its case would be the M1 to M4, whose GPUs have no Neural Accelerators; neki dropped its Neural Engine path when Liquid replaced d1-omni-600M, the only decision model with a Core ML build.
+The M5 Pro also has a 16-core Neural Engine, and I assumed a dedicated ML block would win short requests. On this chip it doesn't: one d1-omni-600M question of 44 to 172 tokens took 3.5 to 6.0 ms on the GPU and 5.2 to 8.0 ms on the Neural Engine, like against like. Its case would be the M1 to M4, whose GPUs have no Neural Accelerators; ippon dropped its Neural Engine path when Liquid replaced d1-omni-600M, the only decision model with a Core ML build.
 
 ## What decides speed on a Mac
 
@@ -432,7 +432,7 @@ Four numbers, all from a model's config before running it, decide most of it: ma
 - **At long prompts it's the bill**, unless the model avoids it. At 16,000 tokens attention is about 7% of Clef-Flash's arithmetic; for Llama 3.2 3B, which attends in all 28 layers with 24 heads of 128, it would be about a third.
 - **Fewer key-value heads save memory, not time.** The cache shrinks, so a longer context fits.
 
-And the chip. The M5's Neural Accelerators matter much more for prefill than for generation: by my estimates from cores and clocks, an M4 Pro multiplies 16-bit matrices at about 9 TFLOPS and an M3 Pro at about 7, against 33 here, while bandwidth grew far less. Apple's own measurements show prefill 230 to 310% faster on the M5 than on the M4, and generation only 19 to 27% faster. The roofline figure has both older chips; their ridges sit at about 33 and 47 FLOPs per byte, so even short prompts are compute-bound there. On M1 to M4 neki keeps MLX's own matrix kernels until it has measured those chips. I haven't measured an older Mac yet, and I won't scale these numbers by a factor and call it a measurement.
+And the chip. The M5's Neural Accelerators matter much more for prefill than for generation: by my estimates from cores and clocks, an M4 Pro multiplies 16-bit matrices at about 9 TFLOPS and an M3 Pro at about 7, against 33 here, while bandwidth grew far less. Apple's own measurements show prefill 230 to 310% faster on the M5 than on the M4, and generation only 19 to 27% faster. The roofline figure has both older chips; their ridges sit at about 33 and 47 FLOPs per byte, so even short prompts are compute-bound there. On M1 to M4 ippon keeps MLX's own matrix kernels until it has measured those chips. I haven't measured an older Mac yet, and I won't scale these numbers by a factor and call it a measurement.
 
 ## What I'd tell myself on day one
 

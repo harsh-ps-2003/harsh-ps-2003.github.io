@@ -2,8 +2,8 @@
 import {html, svg, controls, choice, button, canvas, fitText, reducedMotion} from './lab-core.mjs';
 
 const ROUTES = {
-  neki: {fw: 'MLX · neki', api: 'Metal kernels', target: 'gpu',
-    text: 'MLX, and neki on top of it, turn each operation into a <b>Metal kernel</b>, a small program the GPU runs as thousands of copies. '
+  ippon: {fw: 'MLX · ippon', api: 'Metal kernels', target: 'gpu',
+    text: 'MLX, and ippon on top of it, turn each operation into a <b>Metal kernel</b>, a small program the GPU runs as thousands of copies. '
       + 'On the M5 the matrix multiplies inside those kernels run on each GPU core\'s <b>Neural Accelerator</b>, through Metal 4\'s tensor operations; '
       + 'everything else (adds, softmax, norms) runs on the same cores\' ordinary arithmetic units. The weights are read straight from unified memory.'},
   torch: {fw: 'PyTorch (mps)', api: 'Metal Performance Shaders', target: 'gpu',
@@ -26,7 +26,7 @@ const PHASES = [
 const ACCENT = 'var(--l-accent)', FAINT = 'var(--l-faint)', LIGHT = 'var(--l-light)', BG = 'var(--l-bg)', PANEL = 'var(--l-panel)', TINT = 'var(--l-tint)';
 
 export async function mount(section) {
-  const state = {view: 'chip', route: 'neki', phase: -1};
+  const state = {view: 'chip', route: 'ippon', phase: -1};
   const bar = controls(section);
   choice(bar, 'show', [['chip', 'the chip'], ['core', 'inside one GPU core']], state.view, v => {
     state.view = v; state.phase = -1;
@@ -61,7 +61,7 @@ export async function mount(section) {
         const on = k === state.route, y = chip.y + 46 + i * (rowH + 10);
         box(root, 0, y, sw, rowH, route.fw, `→ ${route.api}`, on);
         const t = b[route.target], mx = sw + 12 + i * 6;
-        const ty = route.target === 'gpu' ? b.gapY + (k === 'neki' ? -3 : 3) : t.y + t.h / 2;
+        const ty = route.target === 'gpu' ? b.gapY + (k === 'ippon' ? -3 : 3) : t.y + t.h / 2;
         connector(root, `M${sw},${y + rowH / 2} H${mx} V${ty} H${t.x - 2}`, on);
       });
     } else {

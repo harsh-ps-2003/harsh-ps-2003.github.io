@@ -23,7 +23,7 @@ export async function mount(section, {data}) {
   key.innerHTML = '<span><i class="k-matmul" style="background: var(--l-accent)"></i>matrix multiply</span>'
     + '<span><i style="background: var(--l-ink)"></i>attention itself</span>'
     + '<span><i style="background: var(--l-light)"></i>everything else</span>';
-  html(section, 'p', 'lab-note', 'neki profile on the M5 Pro: the request runs one operation at a time and waits for the GPU after each, '
+  html(section, 'p', 'lab-note', 'ippon profile on the M5 Pro: the request runs one operation at a time and waits for the GPU after each, '
     + 'subtracting that wait. 1,000-word state, one question.');
 
   function draw(root, w) {
