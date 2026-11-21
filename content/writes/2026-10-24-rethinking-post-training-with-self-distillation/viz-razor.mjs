@@ -2,18 +2,19 @@
 // old skills fade with distance, and the pale oval is every model with 90% on
 // the new task. Each method's path ends somewhere different inside it.
 // A schematic in the spirit of the RL's Razor and SDFT papers, not their data.
-import {el, sv, attrs, clamp, lerp, fmt, ease, story, onceVisible, pauseOffscreen, segmented, playButton, canvas} from './viz-core.mjs';
+import {el, sv, attrs, clamp, lerp, fmt, ease, holdHeight, story, onceVisible, pauseOffscreen, segmented, playButton, canvas} from './viz-core.mjs';
 
 const U = 1.36;                                   // map is U wide and 1 tall, in map units
 const BASE = [.20, .86], SPREAD = .42, TOP_SKILL = 80;
 const OVAL = {c: [.835, .40], rx: .50, ry: .095, a: Math.atan2(-.46, .87)};
-const DEMO = [1.18, .215], TEACHER = [.48, .59];
+const DEMO = [1.18, .215], TEACHER = [.43, .605];
 const RINGS = [70, 30, 10].map(level => [level, SPREAD * Math.sqrt(2 * Math.log(TOP_SKILL / level))]);
 
 const METHODS = {
   sft: {name: 'SFT', path: [BASE, [.42, .98], [1.20, .80], [.97, .38]], ms: 2800},
-  rl: {name: 'RL', path: [BASE, [.17, .66], [.30, .62], [.45, .605]], ms: 2400},
-  sdft: {name: 'SDFT', path: [BASE, [.26, .74], [.36, .64], [.44, .615]], ms: 3600},
+  rl: {name: 'RL', path: [BASE, [.17, .66], [.31, .61], [.47, .595]], ms: 2400},
+  sdpo: {name: 'SDPO', path: [BASE, [.21, .70], [.36, .59], [.53, .565]], ms: 2600},
+  sdft: {name: 'SDFT', path: [BASE, [.25, .75], [.34, .65], [.42, .625]], ms: 3600},
 };
 const ARROW = [DEMO, [1.20, .52], [.78, .66], TEACHER];   // demonstrator to teacher, "reads the demonstration"
 
@@ -28,7 +29,8 @@ const CAPTION = {
   intro: 'Every point is a version of the model. Distance from the base stands for KL, how differently it answers, and <b>old skills fade with distance.</b>',
   rl: 'RL only reweights answers the model already gives, so <b>it stops at the near end of the oval</b>, 90% on the new task with most old skills kept.',
   sft: 'SFT has to reproduce someone else’s text, wording and habits included, so <b>it ends at the far end.</b> Same 90% on the new task, old skills mostly gone.',
-  sdft: 'The demonstrator is far away. The teacher is the base model reading the demonstration, it still answers in the model’s own words so <b>it sits close by, and the SDFT student follows it there.</b>',
+  sdpo: 'SDPO grades the model’s own attempts, and its teacher is the same model reading the feedback, so like RL <b>it only reweights what the model already says and ends close by.</b>',
+  sdft: 'SDFT, coming up next, learns from a demonstration without copying it. The demonstrator is far away. The teacher is the base model reading the demonstration, it still answers in the model’s own words so <b>it sits close by, and the SDFT student follows it there.</b>',
 };
 
 export function mount(figure, data) {
@@ -51,8 +53,9 @@ export function mount(figure, data) {
   const whoOut = cell('method'), newOut = cell('new task'), oldOut = cell('old skills'), klOut = cell('distance from base, KL');
   whoOut.classList.remove('sd-mono');
   const caption = el('p', {class: 'sd-caption', 'aria-live': 'polite'});
-  const foot = el('div', {class: 'sd-foot'}, el('span', {class: 'sd-note', text: 'schematic, after the RL’s Razor and SDFT papers'}));
+  const foot = el('div', {class: 'sd-foot'}, el('span', {class: 'sd-note', text: 'schematic, after the RL’s Razor, SDPO and SDFT papers'}));
   figure.append(stats, caption, foot);
+  holdHeight(caption, () => ['intro', ...methods].map(m => CAPTION[m]));
   const play = playButton(foot, s, () => tour());
 
   // ---- the map ----
@@ -96,7 +99,7 @@ export function mount(figure, data) {
         sv('text', {x: dx, y: dy - 12, 'text-anchor': 'end', class: 'rz-label', text: 'demonstrator'}));
       layer.arrowLabel = sv('text', {x: mid[0] + 6, y: mid[1] + 18, 'text-anchor': 'middle', class: 'rz-arrow-label', text: 'reads the demonstration'});
       layer.teacher = sv('g', {class: 'rz-teacher'}, sv('circle', {cx: tx, cy: ty, r: 6.5}),
-        sv('text', {x: tx + 10, y: ty - 10, class: 'rz-label rz-teacher-label', text: 'teacher'}));
+        sv('text', {x: tx - 10, y: ty - 10, 'text-anchor': 'end', class: 'rz-label rz-teacher-label', text: 'teacher'}));
       svg.append(layer.arrow, layer.demo, layer.arrowLabel, layer.teacher);
     }
     layer.paths = Object.fromEntries(methods.map(m => {
@@ -156,8 +159,8 @@ export function mount(figure, data) {
         attrs(L.line, {d: walk > 0 ? pathD(METHODS[m].path, P, walk) : ''});
         L.g.dataset.state = m === current ? 'now' : walk > 0 ? 'done' : 'todo';
         const end = P(bez(METHODS[m].path, Math.max(walk, .001)));
-        const off = m === 'sft' ? [10, 4] : m === 'rl' ? [-8, -10] : [-12, 18];
-        attrs(L.label, {x: end[0] + off[0], y: end[1] + off[1], 'text-anchor': m === 'sft' ? 'start' : 'end', opacity: walk > .98 ? 1 : 0});
+        const off = {sft: [10, 4], rl: [6, -11], sdpo: [8, 17], sdft: [-12, 18]}[m];
+        attrs(L.label, {x: end[0] + off[0], y: end[1] + off[1], 'text-anchor': m === 'sdft' ? 'end' : 'start', opacity: walk > .98 ? 1 : 0});
       }
       if (layer.arrow) {
         const {arrow} = split('sdft'), len = layer.arrow.getTotalLength?.() || 400;
@@ -175,7 +178,7 @@ export function mount(figure, data) {
         for (let i = 0; i <= 40; i++) { const t = walk * i / 40; pts.push(`${Pl.X(newTask(t)).toFixed(1)},${Pl.Y(oldSkills(bez(METHODS[m].path, t))).toFixed(1)}`); }
         attrs(T.line, {points: walk > 0 ? pts.join(' ') : '', 'data-state': m === current ? 'now' : 'done'});
         const end = bez(METHODS[m].path, walk);
-        attrs(T.label, {x: Pl.X(newTask(walk)) - 6, y: Pl.Y(oldSkills(end)) + (m === 'sft' ? -8 : -9), 'text-anchor': 'end', opacity: walk > .98 ? 1 : 0, 'data-state': m === current ? 'now' : 'done'});
+        attrs(T.label, {x: Pl.X(newTask(walk)) - 6, y: Pl.Y(oldSkills(end)) + ({sft: -8, rl: -9, sdpo: 16, sdft: 16}[m]), 'text-anchor': 'end', opacity: walk > .98 ? 1 : 0, 'data-state': m === current ? 'now' : 'done'});
       }
     }
     const walk = split(current).walk, p = bez(METHODS[current].path, walk);

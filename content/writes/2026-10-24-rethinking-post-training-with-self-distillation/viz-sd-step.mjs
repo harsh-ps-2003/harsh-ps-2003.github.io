@@ -1,7 +1,7 @@
 // One self-distillation step on 3x + 7 = 22, in four chapters. The student
 // writes, the checker explains, the same weights reread the attempt with and
 // without the explanation, and the gap at each token becomes the grade.
-import {el, attrs, fmt, lerp, story, onceVisible, pauseOffscreen, segmented, playButton} from './viz-core.mjs';
+import {el, attrs, fmt, lerp, holdHeight, story, onceVisible, pauseOffscreen, segmented, playButton} from './viz-core.mjs';
 
 // same numbers as viz-blame, student and teacher probability for each written token
 const TOKENS = [
@@ -57,10 +57,7 @@ export function mount(figure) {
     el('p', {class: 'sd-label', html: 'the student’s next token right after <span class="sd-mono">3x = 22</span>'}),
     el('div', {class: 'ss-at'}, atPlus.map(r => r.row)));
   zone.append(z1, z2, z3, z4);
-  const panels = {1: z1, 2: z2, 3: z3, 4: z4};
-  // the zone eases to the height of the panel that is showing
-  const fitZone = () => { zone.style.height = `${panels[st.chapter].offsetHeight}px`; };
-  new ResizeObserver(fitZone).observe(zone);
+  // the panels share one grid cell, so the zone is always as tall as the tallest one
 
   // ---- the attempt, a column per token with probability and grade bars ----
   const row = el('div', {class: 'ss-row', role: 'group', 'aria-label': 'The attempt, one column per token'});
@@ -87,6 +84,7 @@ export function mount(figure) {
   const caption = el('p', {class: 'sd-caption', 'aria-live': 'polite'});
   const foot = el('div', {class: 'sd-foot'}, el('span', {class: 'sd-note', text: 'illustration with made-up numbers'}));
   figure.append(caption, foot);
+  holdHeight(caption, () => Object.values(CAPTIONS));
   const play = playButton(foot, tour, () => startTour());
 
   function render() {
@@ -95,7 +93,6 @@ export function mount(figure) {
     figure.dataset.moved = String(u > 0);
     seg.set(String(chapter));
     zone.dataset.z = chapter;
-    fitZone();
     TOKENS.forEach((tok, i) => {
       const c = cols[i], ps = lerp(tok.ps, MOVED[i], u), g = Math.log(tok.pt) - Math.log(ps);
       c.col.classList.toggle('is-typed', i < typed);

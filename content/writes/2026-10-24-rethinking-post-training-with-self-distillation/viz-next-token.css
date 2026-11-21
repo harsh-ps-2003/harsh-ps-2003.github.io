@@ -1,7 +1,7 @@
 .sd-viz .nt-question { display: inline-flex; flex-wrap: wrap; gap: 14px; align-items: center; padding: 7px 16px; margin: 0 0 10px;
   background: var(--sd-card); border: 1px solid var(--sd-line); border-radius: 999px; font-size: 14.5px; }
 .sd-viz .nt-question .sd-mono { font-size: 15px; }
-.sd-viz .nt-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 2.6em; }
+.sd-viz .nt-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 60px; }
 .sd-viz .nt-slot { transition: background-color .25s, border-color .25s; }
 .sd-viz .nt-slot.is-plain { border: 2px solid var(--sd-ink); background: var(--sd-card); font-weight: 600; }
 .sd-viz .nt-tail { display: contents; }

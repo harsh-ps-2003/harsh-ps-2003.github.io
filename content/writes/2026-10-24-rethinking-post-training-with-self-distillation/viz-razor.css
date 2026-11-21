@@ -15,17 +15,18 @@
 .sd-viz .rz-line { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; transition: opacity .3s; }
 .sd-viz .rz-path[data-state="done"] .rz-line { opacity: .38; }
 .sd-viz .sd-svg text.rz-path-label { font-size: 12.5px; font-weight: 700; paint-order: stroke; stroke: var(--sd-card); stroke-width: 4px; stroke-linejoin: round; transition: opacity .3s; }
-.sd-viz .rz-path[data-state="done"] text.rz-path-label { opacity: .55; }
+.sd-viz .rz-path[data-state="done"] text.rz-path-label { fill-opacity: .55; }
 .sd-viz .rz-rl .rz-line { stroke: var(--sd-ink); }
 .sd-viz .rz-sft .rz-line { stroke: var(--sd-muted); stroke-dasharray: 6 5; }
 .sd-viz .rz-sdft .rz-line { stroke: var(--sd-student); }
+.sd-viz .rz-sdpo .rz-line { stroke: var(--sd-student); stroke-dasharray: 2 4; stroke-linecap: round; }
 .sd-viz .sd-svg .rz-rl text, .sd-viz .sd-svg text.rz-rl { fill: var(--sd-ink); }
 .sd-viz .sd-svg .rz-sft text, .sd-viz .sd-svg text.rz-sft { fill: var(--sd-muted); }
-.sd-viz .sd-svg .rz-sdft text, .sd-viz .sd-svg text.rz-sdft { fill: var(--sd-student); }
+.sd-viz .sd-svg .rz-sdft text, .sd-viz .sd-svg text.rz-sdft, .sd-viz .sd-svg .rz-sdpo text, .sd-viz .sd-svg text.rz-sdpo { fill: var(--sd-student); }
 .sd-viz .rz-dot { stroke: var(--sd-card); stroke-width: 2.5; }
 .sd-viz .rz-dot.rz-rl { fill: var(--sd-ink); }
 .sd-viz .rz-dot.rz-sft { fill: var(--sd-muted); }
-.sd-viz .rz-dot.rz-sdft { fill: var(--sd-student); }
+.sd-viz .rz-dot.rz-sdft, .sd-viz .rz-dot.rz-sdpo { fill: var(--sd-student); }
 
 .sd-viz .rz-demo circle { fill: var(--sd-card); stroke: var(--sd-ink); stroke-width: 2; }
 .sd-viz .rz-teacher circle { fill: var(--sd-teacher); stroke: var(--sd-card); stroke-width: 2; }
@@ -46,6 +47,7 @@
 .sd-viz .rz-trace.rz-rl { stroke: var(--sd-ink); }
 .sd-viz .rz-trace.rz-sft { stroke: var(--sd-muted); stroke-dasharray: 6 5; }
 .sd-viz .rz-trace.rz-sdft { stroke: var(--sd-student); }
+.sd-viz .rz-trace.rz-sdpo { stroke: var(--sd-student); stroke-dasharray: 2 4; }
 .sd-viz .sd-svg text.rz-trace-label { font-size: 12px; font-weight: 700; paint-order: stroke; stroke: var(--sd-card); stroke-width: 4px; }
 .sd-viz .sd-svg text.rz-trace-label[data-state="done"] { fill-opacity: .55; }
 
@@ -54,7 +56,7 @@
 .sd-viz .rz-stats span { display: block; font-size: 12px; color: var(--sd-muted); }
 .sd-viz .rz-who.rz-rl { color: var(--sd-ink); }
 .sd-viz .rz-who.rz-sft { color: var(--sd-muted); }
-.sd-viz .rz-who.rz-sdft { color: var(--sd-student); }
+.sd-viz .rz-who.rz-sdft, .sd-viz .rz-who.rz-sdpo { color: var(--sd-student); }
 
 @media (max-width: 560px) {
   .sd-viz .rz-grid { grid-template-columns: 1fr; }

@@ -1,7 +1,7 @@
 // How a model writes. After "3x = 22" the student puts a probability on every
 // next token, a random point between 0 and 1 picks one, and the line carries on
 // from whatever got drawn. Sampling many times shows the draws follow the bars.
-import {el, attrs, fmt, ease, story, reduced, onceVisible, pauseOffscreen, playButton} from './viz-core.mjs';
+import {el, attrs, fmt, ease, holdHeight, story, reduced, onceVisible, pauseOffscreen, playButton} from './viz-core.mjs';
 
 const DIST = [['−', .55], ['+', .30], ['=', .06], ['×', .04], ['7', .03], ['…', .02]];
 const STARTS = DIST.reduce((acc, [, p], i) => [...acc, acc[i] + p], [0]);
@@ -71,6 +71,9 @@ export function mount(figure) {
   const caption = el('p', {class: 'sd-caption', 'aria-live': 'polite'});
   const foot = el('div', {class: 'sd-foot'}, el('span', {class: 'sd-note', text: 'illustration with made-up numbers'}));
   figure.append(caption, foot);
+  holdHeight(caption, () => { const keep = [total, last, counts.slice()]; const out = [];
+    for (const [t, l, after] of [[100, null, 'many'], [1, '+'], [1, '−'], [1, '×'], [0, null]]) { total = t; last = l; counts[1] = 30; tell(after); out.push(caption.innerHTML); }
+    [total, last] = keep; keep[2].forEach((v, i) => { counts[i] = v; }); return out; });
   const play = playButton(foot, tour, () => startTour());
 
   // ---- state to DOM ----
