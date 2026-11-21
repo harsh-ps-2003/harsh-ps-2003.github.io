@@ -218,7 +218,7 @@ The loop and the update stay the same as RL, only the advantage changed. The new
 
 So far the teacher has been a bigger model. Here's a case where it isnt, and its one tons of companies are in rn - they want an internal assistant that knows their own documents and still behaves like a good assistant. This is the personalisation experiment from the same [On-Policy Distillation](https://thinkingmachines.ai/blog/on-policy-distillation/) post, and you can watch forgetting happen and then get repaired.
 
-<figure class="diagram diagram-fit">
+<figure class="diagram diagram-row">
 <a href="opd-repair.svg"><img src="opd-repair.svg" alt="Checkpoint A, Qwen3-8B, is mid-trained on company documents to give checkpoint B. Then B writes answers to chat prompts and a frozen A grades every token, which gives checkpoint C." loading="lazy"></a>
 </figure>
 
