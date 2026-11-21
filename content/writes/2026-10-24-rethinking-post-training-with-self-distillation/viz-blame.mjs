@@ -1,7 +1,7 @@
 // Where does the grade land? The same wrong attempt at 3x + 7 = 22 graded four
 // ways, from GRPO's one shared number down to a grade for every candidate token.
 // Used three times in the post, data-modes picks which tabs a copy shows.
-import {el, attrs, fmt, signed, story, onceVisible, pauseOffscreen, segmented, playButton} from './viz-core.mjs';
+import {el, attrs, fmt, signed, holdHeight, story, onceVisible, pauseOffscreen, segmented, playButton} from './viz-core.mjs';
 
 // the written tokens, with student and teacher probability for each, and the
 // other likely candidates at that position (illustrative numbers, same as the static figures)
@@ -31,7 +31,6 @@ const MODES = {
   logit: 'every candidate',
 };
 const UP = 26, DOWN = 30;         // px per unit of push, above and below the zero line
-const TOP = 58, BOTTOM = 78;      // room above and below the zero line
 
 export function mount(figure, data) {
   const modes = (data.modes || 'grpo,seq,token,logit').split(',').filter(m => MODES[m]);
@@ -63,12 +62,13 @@ export function mount(figure, data) {
         el('span', {class: 'sd-tok is-plain bl-small', text: 'the question'}),
         el('span', {class: 'sd-tok is-teacher bl-small', text: data.hint || 'x = 29/3 gives 36, not 22'}),
         el('span', {class: 'sd-tok bl-small', text: 'the same attempt'})));
-  context.append(group, reads);
+  // both share one grid cell, so swapping them never changes the height
+  if (modes.includes('grpo')) context.append(group);
+  if (modes.some(m => m !== 'grpo')) context.append(reads);
 
   // ---- the attempt with a bar under every token ----
   const row = el('div', {class: 'bl-row', role: 'group', 'aria-label': 'The attempt, one column per token'});
   figure.append(row);
-  row.style.setProperty('--top', `${TOP}px`); row.style.setProperty('--bottom', `${BOTTOM}px`);
   const cols = TOKENS.map((tok, i) => {
     const chip = el('span', {class: `sd-tok${tok.bad ? ' is-bad' : ''}`, text: tok.t});
     const down = el('i', {class: 'bl-down'}), up = el('i', {class: 'bl-up'});
@@ -92,6 +92,17 @@ export function mount(figure, data) {
   figure.append(caption, foot);
   const play = playButton(foot, s, () => tour());
 
+  // room above and below the zero line, fixed at the most any of this figure's modes
+  // can draw (GRPO's advantage reaches ±√3 with 4 attempts), so the figure never resizes
+  const GRPO_MAX = Math.sqrt(3);
+  const upIn = m => Math.max(...TOKENS.map(t => m === 'grpo' ? GRPO_MAX : m === 'seq' ? Math.max(0, SEQ) : m === 'logit' && t.up ? t.up[1] : Math.max(0, t.push)));
+  const downIn = m => Math.max(...TOKENS.map(t => m === 'grpo' ? GRPO_MAX : -Math.min(0, m === 'seq' ? SEQ : t.push)));
+  const TOP = Math.round(Math.max(...modes.map(upIn)) * UP) + (modes.includes('logit') ? 34 : 18);
+  const BOTTOM = Math.round(Math.max(...modes.map(downIn)) * DOWN) + 34;
+  row.style.setProperty('--top', `${TOP}px`); row.style.setProperty('--bottom', `${BOTTOM}px`);
+  holdHeight(readout, () => modes.flatMap(m => TOKENS.map(t => readoutFor(m, t, -GRPO_MAX))));
+  holdHeight(caption, () => modes.flatMap(m => m === 'grpo' ? [captionFor(m, -1, 1), captionFor(m, 1, 1), captionFor(m, 0, 0)] : [captionFor(m, 0, 1)]));
+
   function grpoAdvantage() {
     const mu = rewards.reduce((a, b) => a + b, 0) / rewards.length;
     const sigma = Math.sqrt(rewards.reduce((a, r) => a + (r - mu) ** 2, 0) / rewards.length);
@@ -102,7 +113,7 @@ export function mount(figure, data) {
   function render() {
     const {mu, sigma, a} = grpoAdvantage();
     figure.dataset.mode = mode;
-    group.hidden = mode !== 'grpo'; reads.hidden = mode === 'grpo';
+    group.classList.toggle('is-off', mode !== 'grpo'); reads.classList.toggle('is-off', mode === 'grpo');
     groupChips.forEach((b, i) => {
       b.innerHTML = `<span>${i === 0 ? 'ours' : `#${i + 1}`}</span><b>${rewards[i]}</b>`;
       b.dataset.pass = String(rewards[i] === 1);
@@ -112,33 +123,33 @@ export function mount(figure, data) {
       ? `μ = ${fmt(mu)}  σ = 0  so A = 0`
       : `μ = ${fmt(mu)}  σ = ${fmt(sigma)}  A = (${rewards[0]} − ${fmt(mu)}) / ${fmt(sigma)} = ${fmt(a)}`});
 
+    const valueOf = tok => mode === 'grpo' ? a : mode === 'seq' ? SEQ : tok.push;
+    const upOf = tok => mode === 'logit' && tok.up ? tok.up[1] : Math.max(0, valueOf(tok));
     TOKENS.forEach((tok, i) => {
-      const v = mode === 'grpo' ? a : mode === 'seq' ? SEQ : tok.push;
+      const v = valueOf(tok);
       const c = cols[i];
       const h = v < 0 ? -v * DOWN : v * UP;
-      attrs(c.down, {style: {height: `${v < 0 ? Math.min(h, BOTTOM - 16) : 0}px`}});
+      attrs(c.down, {style: {height: `${v < 0 ? Math.max(0, Math.min(h, BOTTOM - 16)) : 0}px`}});
       const upV = mode === 'logit' && tok.up ? tok.up[1] : v > 0 ? v : 0;
-      attrs(c.up, {style: {height: `${Math.min(upV * UP, TOP - 16)}px`}});
+      attrs(c.up, {style: {height: `${Math.max(0, Math.min(upV * UP, TOP - 16))}px`}});
       const show = i === selected || Math.abs(v) > .25;
-      attrs(c.value, {text: show ? fmt(v) : '', style: {top: `${TOP + (v < 0 ? Math.min(h, BOTTOM - 16) : 0) + 3}px`}});
-      attrs(c.upLabel, {text: mode === 'logit' && tok.up ? tok.up[0] : '', style: {bottom: `${BOTTOM + Math.min(upV * UP, TOP - 16) + 2}px`}});
+      attrs(c.value, {text: show ? fmt(v) : '', style: {top: `${TOP + (v < 0 ? Math.max(0, Math.min(h, BOTTOM - 16)) : 0) + 3}px`}});
+      attrs(c.upLabel, {text: mode === 'logit' && tok.up ? tok.up[0] : '', style: {bottom: `${BOTTOM + Math.max(0, Math.min(upV * UP, TOP - 16)) + 2}px`}});
       c.col.setAttribute('aria-pressed', String(i === selected));
       c.col.setAttribute('aria-label', `${tok.t}, push ${fmt(v)}`);
     });
 
     const tok = TOKENS[selected];
-    if (mode === 'grpo') {
-      readout.innerHTML = `<span class="sd-tok bl-small">${tok.t}</span><span>push = A = <b>${fmt(a)}</b>, the same as every other token</span>`;
-    } else if (mode === 'seq') {
-      readout.innerHTML = `<span class="sd-tok bl-small">${tok.t}</span><span>push = the average of log π<sub>T</sub> − log π<sub>S</sub> over all ${TOKENS.length} tokens = <b>${fmt(SEQ)}</b></span>`;
-    } else {
-      readout.innerHTML = `<span class="sd-tok bl-small">${tok.t}</span><span class="sd-student">π<sub>S</sub> = ${fmt(tok.ps)}</span><span class="sd-teacher">π<sub>T</sub> = ${fmt(tok.pt)}</span><span>push = log ${fmt(tok.pt)} − log ${fmt(tok.ps)} = <b>${fmt(tok.push)}</b></span>`;
-    }
+    readout.innerHTML = readoutFor(mode, tok, a);
 
-    cands.hidden = mode !== 'logit';
-    if (mode === 'logit') {
+    // the candidates stay on screen in every mode, greyed out until the mode grades them
+    cands.hidden = !modes.includes('logit');
+    if (modes.includes('logit')) {
+      const graded = mode === 'logit';
+      cands.classList.toggle('is-idle', !graded);
       const prefix = TOKENS.slice(0, selected).map(t => t.t).join(' ');
-      cands.replaceChildren(el('p', {class: 'sd-label', html: prefix ? `every candidate after <span class="sd-mono">${prefix}</span>` : 'every candidate for the first token'}),
+      const where = prefix ? `after <span class="sd-mono">${prefix}</span>` : 'for the first token';
+      cands.replaceChildren(el('p', {class: 'sd-label', html: graded ? `every candidate ${where}` : `the other candidates ${where}, <b>not graded in this mode</b>`}),
         ...tok.alts.map(([name, ps, pt]) => {
           const push = Math.log(pt) - Math.log(ps);
           return el('div', {class: `bl-cand${name === tok.t ? ' is-written' : ''}`},
@@ -149,13 +160,20 @@ export function mount(figure, data) {
             el('span', {class: 'bl-probs sd-mono', html: `<span class="sd-student">${fmt(ps)}</span> <span class="sd-teacher">${fmt(pt)}</span>`}),
             el('span', {class: `bl-push sd-mono ${push < -.05 ? 'is-down' : push > .05 ? 'is-up' : ''}`, text: `${push < -.05 ? '▾' : push > .05 ? '▴' : '·'} ${signed(push)}`}));
         }),
-        el('p', {class: 'bl-cand-key', html: '<span class="sd-student">student</span> and <span class="sd-teacher">teacher</span> probability, then the push'}));
+        el('p', {class: 'bl-cand-key', html: graded ? '<span class="sd-student">student</span> and <span class="sd-teacher">teacher</span> probability, then the push' : 'the student\'s probability for each'}));
     }
 
-    caption.innerHTML = captionFor(a, sigma);
+    caption.innerHTML = captionFor(mode, a, sigma);
   }
 
-  function captionFor(a, sigma) {
+  function readoutFor(m, tok, a) {
+    const chip = `<span class="sd-tok bl-small">${tok.t}</span>`;
+    if (m === 'grpo') return `${chip}<span>push = A = <b>${fmt(a)}</b>, the same as every other token</span>`;
+    if (m === 'seq') return `${chip}<span>push = the average of log π<sub>T</sub> − log π<sub>S</sub> over all ${TOKENS.length} tokens = <b>${fmt(SEQ)}</b></span>`;
+    return `${chip}<span class="sd-student">π<sub>S</sub> = ${fmt(tok.ps)}</span><span class="sd-teacher">π<sub>T</sub> = ${fmt(tok.pt)}</span><span>push = log ${fmt(tok.pt)} − log ${fmt(tok.ps)} = <b>${fmt(tok.push)}</b></span>`;
+  }
+
+  function captionFor(mode, a, sigma) {
     if (mode === 'grpo') {
       if (sigma < 1e-9) return `Every attempt scored the same, so σ = 0 and every push is 0. <b>The whole group teaches nothing.</b>`;
       if (a > 0) return `Our attempt passed this time, so <b>every token goes up, the plus too.</b>`;

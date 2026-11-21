@@ -2,7 +2,7 @@
 // playhead sweeps both runs phase by phase, so the moment a new skill starts
 // you see what happens to the old ones in each.
 import DATA from './viz-seq-data.mjs';
-import {el, sv, attrs, clamp, lerp, ease, fmt, story, onceVisible, pauseOffscreen, canvas, playButton} from './viz-core.mjs';
+import {el, sv, attrs, clamp, lerp, ease, fmt, story, onceVisible, pauseOffscreen, canvas, playButton, holdHeight} from './viz-core.mjs';
 
 const SKILLS = [['tool', 'tool use', 'var(--sd-ink)'], ['science', 'science', 'var(--sd-student)'], ['medical', 'medical', 'var(--sd-teacher)']];
 const PHASES = ['tool use', 'science', 'medical'];
@@ -57,6 +57,7 @@ export function mount(figure) {
   const caption = el('p', {class: 'sd-caption', 'aria-live': 'polite'});
   const foot = el('div', {class: 'sd-foot'}, el('span', {class: 'sd-note', text: 'SDFT paper, Qwen2.5-7B, shaded is the spread over seeds, each phase drawn the same width'}));
   figure.append(caption, foot);
+  holdHeight(caption, () => { const keep = u; const out = [0, .5, 1.5, 2.5, 3].map(v => { u = v; return captionFor(); }); u = keep; return out; });
   const play = playButton(foot, s, () => tour());
 
   // ---- drawing, rebuilt at the real width, then update(u) moves the live parts ----
@@ -64,7 +65,7 @@ export function mount(figure) {
   function draw(svg, W) {
     svg.replaceChildren();
     const narrow = W < 520;
-    const padL = narrow ? 28 : 36, padR = narrow ? 108 : 124, plotW = W - padL - padR;
+    const padL = narrow ? 28 : 36, padR = narrow ? 100 : 108, plotW = W - padL - padR;
     const PH = narrow ? 112 : 128, stripH = 26, chartGap = narrow ? 18 : 22;
     const X = uu => padL + uu / 3 * plotW;
 

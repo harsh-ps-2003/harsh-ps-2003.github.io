@@ -1,7 +1,7 @@
 // Forward vs reverse KL on "water boils at ___". The teacher knows two answers,
 // 100 (Celsius) and 212 (Fahrenheit), the student can hold one bump. Training is
 // real, Adam on the student's mean and width against the KL on a grid.
-import {el, sv, attrs, clamp, fmt, story, onceVisible, pauseOffscreen, segmented, playButton, canvas} from './viz-core.mjs';
+import {el, sv, attrs, clamp, fmt, holdHeight, story, onceVisible, pauseOffscreen, segmented, playButton, canvas} from './viz-core.mjs';
 
 const X0 = 40, X1 = 272, STEP = .5;              // symmetric round 156 so neither peak is favoured
 const X = []; for (let x = X0; x <= X1 + 1e-9; x += STEP) X.push(x);
@@ -64,6 +64,7 @@ export function mount(figure) {
   const caption = el('p', {class: 'sd-caption', 'aria-live': 'polite'});
   const foot = el('div', {class: 'sd-foot'}, el('span', {class: 'sd-note', text: 'real optimisation on a toy pair of distributions'}));
   figure.append(formula, stats, caption, foot);
+  holdHeight(caption, () => [TEXT.forward.idle, TEXT.reverse.idle, captionTrained('forward', 163, null, 1), captionTrained('reverse', 100, 100, 2), captionTrained('reverse', 156, null, 1)]);
   const play = playButton(foot, s, () => tour());
 
   // ---- the plot, redrawn at real width ----
@@ -105,7 +106,7 @@ export function mount(figure) {
     const valley = sv('text', {x: px(156), y: base - 10, 'text-anchor': 'middle', class: 'kl-valley', text: 'teacher is empty'});
     svg.append(strip, student, ...peakLabels, valley, handle, says);
     svg.append(sv('rect', {x: M.left, y: M.top - 6, width: w - M.left - M.right, height: H + 6, class: 'kl-hit'}));
-    L = {px, py, base, H, w, student, handle, says, strip, stripTop, curve};
+    L = {px, py, base, H, w, student, handle, says, strip, stripTop, curve, valley};
     paint();
     return total;
   });
@@ -118,6 +119,9 @@ export function mount(figure) {
     const hx = L.px(mu), hy = Math.max(L.py(peak), L.base - L.H);
     attrs(L.handle, {cx: hx, cy: hy});
     attrs(L.says, {x: clamp(hx, 50, L.w - 50), y: hy - 14, text: `says ${Math.round(mu)}`});
+    // a wide student parked in the valley would sit on top of the valley label, so the label steps aside
+    const vx = L.px(156), clash = Math.abs(hx - vx) < 110 && hy > L.base - 64;
+    attrs(L.valley, {y: clash ? L.base - L.H * .62 : L.base - 10, opacity: clash ? .85 : 1});
     // positive terms only, scaled to the strip, so you see where the cost sits
     const t = terms(dir, mu, sd), top = Math.max(1e-12, ...t);
     let d = `M${L.px(X0)} ${L.stripTop + M.strip}`;
@@ -141,11 +145,14 @@ export function mount(figure) {
       : sd > 30 && mu > 125 && mu < 190 ? 'mean in the valley, wrong in both units' : 'still somewhere in between';
     attrs(verdictOut, {text: verdict});
     let text = TEXT[dir].idle;
-    if (trained && dir === 'forward') text = `The bell covers both answers, so <b>its top sits in the valley, near ${Math.round(mu)}</b>. That is not a mode the teacher has. A single bell that has to stay up at 100 and at 212 has nowhere else to put its mean.`;
-    if (trained && dir === 'reverse') text = near
+    if (trained) text = captionTrained(dir, mu, near, times);
+    caption.innerHTML = text;
+  }
+  function captionTrained(dir, mu, near, times) {
+    if (dir === 'forward') return `The bell covers both answers, so <b>its top sits in the valley, near ${Math.round(mu)}</b>. That is not a mode the teacher has. A single bell that has to stay up at 100 and at 212 has nowhere else to put its mean.`;
+    return near
       ? `Zero-forcing. The student puts all of its mass on <b>${near}</b> and drops the other answer. The peak is about <b>${fmt(times, 1)}×</b> the teacher’s, because the teacher had split its mass in half. Start on the other side of 156 and it picks the other one.`
       : `<b>The two pulls cancel.</b> Wide and in the middle, the valley under the student is not empty, so reverse KL does not snap. That is why people train with forward KL first and reverse after.`;
-    caption.innerHTML = text;
   }
 
   function setDir(d) { dir = d; trained = false; update(); }

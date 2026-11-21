@@ -22,38 +22,35 @@
 .sd-viz .sd-svg .st-update.is-done { fill: var(--sd-ink); }
 
 /* caps */
-.sd-viz .st-controls { align-items: flex-end; }
-.sd-viz .st-controls .sd-range { flex: 1 1 260px; }
-.sd-viz .st-toggles { display: flex; flex-wrap: wrap; gap: 8px; }
-.sd-viz .st-toggle { display: inline-flex; align-items: center; gap: 8px; }
-.sd-viz .st-check { width: 13px; height: 13px; border: 1.5px solid var(--sd-muted); border-radius: 3px; flex: 0 0 auto; transition: background-color .15s, border-color .15s; }
-.sd-viz .st-toggle[aria-pressed="true"] { border-color: var(--sd-ink); }
-.sd-viz .st-check { position: relative; }
-.sd-viz .st-toggle[aria-pressed="true"] .st-check { background: var(--sd-ink); border-color: var(--sd-ink); }
-.sd-viz .st-toggle[aria-pressed="true"] .st-check::after { content: ""; position: absolute; left: 3.2px; top: .4px; width: 3.4px; height: 7px;
-  border: solid var(--sd-card); border-width: 0 1.8px 1.8px 0; transform: rotate(45deg); }
 .sd-viz .sd-svg .st-head { fill: var(--sd-muted); font-size: 11.5px; font-weight: 600; }
 .sd-viz .sd-svg .st-axis { stroke: var(--sd-faint); }
-.sd-viz .sd-svg .st-grid { stroke: var(--sd-line); stroke-dasharray: 2 4; }
-.sd-viz .sd-svg .st-tok { fill: var(--sd-ink); font-family: var(--sd-mono); font-size: 12.5px; white-space: pre; }
-.sd-viz .sd-svg .st-num { fill: var(--sd-muted); font-family: var(--sd-mono); font-size: 12px; font-variant-numeric: tabular-nums; }
-.sd-viz .sd-svg .st-num.is-capped { fill: var(--sd-teacher); font-weight: 600; }
-.sd-viz .sd-svg .st-push { fill: var(--sd-teacher); transition: x .45s var(--sd-ease), width .45s var(--sd-ease); }
+.sd-viz .sd-svg .st-band { fill: var(--sd-card); }
+.sd-viz .sd-svg .st-tok { fill: var(--sd-muted); font-family: var(--sd-mono); font-size: 12.5px; white-space: pre; }
+.sd-viz .sd-svg .is-key .st-tok { fill: var(--sd-ink); font-weight: 600; }
+.sd-viz .sd-svg .st-num { fill: var(--sd-faint); font-family: var(--sd-mono); font-size: 12px; font-variant-numeric: tabular-nums; }
+.sd-viz .sd-svg .is-key .st-num { fill: var(--sd-ink); }
+.sd-viz .sd-svg .st-num.is-capped, .sd-viz .sd-svg .is-key .st-num.is-capped { fill: var(--sd-teacher); font-weight: 600; }
+.sd-viz .sd-svg .st-push { fill: var(--sd-teacher); }
 .sd-viz .sd-svg .st-push.is-up { fill: var(--sd-student); }
-.sd-viz .sd-svg .st-ghost { fill: none; stroke: var(--sd-muted); stroke-dasharray: 3 2; transition: x .45s var(--sd-ease), width .45s var(--sd-ease), opacity .3s; }
 .sd-viz .sd-svg .st-arrow { fill: var(--sd-teacher); }
 .sd-viz .sd-svg .st-arrow.is-up { fill: var(--sd-student); }
 .sd-viz .sd-svg .st-value { fill: var(--sd-ink); font-family: var(--sd-mono); font-size: 11px; font-variant-numeric: tabular-nums; }
 .sd-viz .sd-svg .st-value.is-inside { fill: var(--sd-card); font-weight: 600; }
+.sd-viz .sd-svg .st-note { fill: var(--sd-muted); font-size: 11.5px; font-style: italic; }
 
-.sd-viz .st-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0 0; padding: 10px 0 0; border-top: 1px solid var(--sd-line); }
-.sd-viz .st-stats strong { display: block; font-family: var(--sd-mono); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.sd-viz .st-stats span { font-size: 12.5px; color: var(--sd-muted); }
+.sd-viz .st-share { margin: 14px 0 0; }
+.sd-viz .st-share-head { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; color: var(--sd-muted); margin: 0 0 6px; }
+.sd-viz .st-share-head b { color: var(--sd-ink); font-family: var(--sd-mono); font-weight: 600; white-space: nowrap; }
+.sd-viz .st-share-bar { display: flex; gap: 2px; height: 14px; border-radius: 4px; overflow: hidden; }
+.sd-viz .st-share-bar i { display: block; min-width: 2px; background: var(--sd-line); }
+.sd-viz .st-share-bar i.is-down { background: var(--sd-teacher); }
+.sd-viz .st-share-bar i.is-up { background: var(--sd-student); }
 
 @media (max-width: 560px) {
   .sd-viz .sd-svg .st-tok { font-size: 11.5px; }
   .sd-viz .sd-svg .st-num { font-size: 11px; }
+  .sd-viz .sd-svg .st-note { font-size: 10.5px; }
   .sd-viz .sd-svg .st-k { font-size: 12px; }
-  .sd-viz .st-toggle { flex: 1 1 100%; }
-  .sd-viz .st-stats strong { font-size: 18px; }
+  .sd-viz .st-share-head { flex-direction: column; gap: 2px; }
+  .sd-viz .sd-seg > button:last-child:nth-child(odd) { grid-column: 1 / -1; }
 }

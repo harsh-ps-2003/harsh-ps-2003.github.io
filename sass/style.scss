@@ -316,7 +316,18 @@ figure.diagram {
         display: block;
         width: 100%;
         height: auto;
+        // never taller than most of the screen, the drawing shrinks inside its box
+        max-height: min(80vh, 720px);
+        object-fit: contain;
     }
+}
+
+// A small plot drawn near its final size (matplotlib exports at ~350px).
+// Show it at that size instead of stretching it and its text to the column.
+figure.diagram.diagram-native img {
+    width: auto;
+    max-width: 100%;
+    margin-inline: auto;
 }
 
 // Stacked cards are drawn near 600px with 19px text. At the column that text
@@ -326,15 +337,6 @@ figure.diagram {
 figure.diagram.diagram-fit img {
     width: min(100%, 490px);
     margin-inline: auto;
-}
-
-// A wide row, authored near 1100 to 1800px. It runs out to the right of the
-// column, up to the viewport edge, so the panels stay side by side.
-@media (min-width: 900px) {
-    figure.diagram.diagram-row {
-        width: min(1836px, calc(100vw - var(--content-left) - 48px));
-        max-width: none;
-    }
 }
 
 figure.sd-viz.sd-ready,

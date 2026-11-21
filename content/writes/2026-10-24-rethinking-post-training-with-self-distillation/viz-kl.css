@@ -7,10 +7,10 @@
 .sd-viz .kl-teacher { fill: color-mix(in srgb, var(--sd-teacher) 26%, transparent); stroke: var(--sd-teacher); stroke-width: 1.6; stroke-linejoin: round; }
 .sd-viz .kl-student { fill: color-mix(in srgb, var(--sd-student) 16%, transparent); stroke: var(--sd-student); stroke-width: 2.4; stroke-linejoin: round; pointer-events: none; }
 .sd-viz .kl-handle { fill: var(--sd-card); stroke: var(--sd-student); stroke-width: 2.4; pointer-events: none; }
-.sd-viz .sd-svg text.kl-peak, .sd-viz .sd-svg text.kl-says { font-size: 12.5px; font-weight: 600; font-family: var(--sd-mono);
+.sd-viz .sd-svg text.kl-peak, .sd-viz .sd-svg text.kl-says { font-size: 13.5px; font-weight: 600; font-family: var(--sd-mono);
   paint-order: stroke; stroke: var(--sd-card); stroke-width: 4px; stroke-linejoin: round; }
 .sd-viz .sd-svg text.kl-peak { fill: var(--sd-teacher); }
-.sd-viz .sd-svg text.kl-valley { font-size: 11px; font-weight: 600; fill: var(--sd-muted);
+.sd-viz .sd-svg text.kl-valley { font-size: 12px; font-weight: 600; fill: var(--sd-muted);
   paint-order: stroke; stroke: var(--sd-card); stroke-width: 4px; stroke-linejoin: round; }
 .sd-viz .sd-svg text.kl-says { fill: var(--sd-student); }
 .sd-viz .sd-svg text.kl-key { font-size: 12px; font-weight: 600; }
@@ -25,7 +25,7 @@
 .sd-viz .kl-formula { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 12px 0 0; font-size: 14px; }
 .sd-viz .kl-formula b { font-weight: 600; }
 .sd-viz .kl-weight { font-size: 13px; color: var(--sd-muted); }
-.sd-viz .kl-stats { display: grid; grid-template-columns: 1fr 1.2fr 2fr; gap: 10px; margin: 12px 0 0; padding: 10px 0 0; border-top: 1px solid var(--sd-line); }
+.sd-viz .kl-stats { min-height: 58px; display: grid; grid-template-columns: 1fr 1.2fr 2fr; gap: 10px; margin: 12px 0 0; padding: 10px 0 0; border-top: 1px solid var(--sd-line); }
 .sd-viz .kl-stats strong { display: block; font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .sd-viz .kl-stats span { display: block; font-size: 12px; color: var(--sd-muted); }
 .sd-viz .kl-stats .kl-verdict strong { font-family: var(--sd-sans); font-size: 15px; padding-top: 2px; }

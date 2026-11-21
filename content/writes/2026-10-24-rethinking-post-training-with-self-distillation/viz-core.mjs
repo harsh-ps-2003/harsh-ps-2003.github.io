@@ -64,6 +64,9 @@ export function animate(ms, onFrame, curve = ease.inOut) {
 // Story runner. story.run(async go => { await go.wait(400); await go.tween(600, t => ...); })
 // A newer run, or story.stop(), ends the old one at its next await.
 const STOP = Symbol('stop');
+// Scales every wait and tween in the figures' scripted tours, below 1 is faster.
+export const SPEED = .65;
+
 export function story() {
   let token = 0, current = null;
   const api = {
@@ -77,11 +80,11 @@ export function story() {
         alive: () => mine === token,
         wait: ms => new Promise((resolve, reject) => {
           if (reduced.matches) { resolve(); return; }
-          setTimeout(() => (mine === token ? resolve() : reject(STOP)), ms);
+          setTimeout(() => (mine === token ? resolve() : reject(STOP)), ms * SPEED);
         }),
         tween: async (ms, onFrame, curve) => {
           alive();
-          const a = animate(ms, onFrame, curve); current = a;
+          const a = animate(ms * SPEED, onFrame, curve); current = a;
           await a; alive();
         },
       };
@@ -92,6 +95,24 @@ export function story() {
     },
   };
   return api;
+}
+
+// Keeps a text block as tall as its longest version, so the figure never
+// grows or shrinks when the text changes. variants() returns every html it can show.
+export function holdHeight(elm, variants) {
+  const fit = () => {
+    const keep = elm.innerHTML;
+    elm.style.minHeight = '';
+    let tallest = 0;
+    for (const html of variants()) { elm.innerHTML = html; tallest = Math.max(tallest, elm.offsetHeight); }
+    elm.innerHTML = keep;
+    elm.style.minHeight = `${tallest}px`;
+  };
+  let width = 0;
+  new ResizeObserver(entries => {
+    const w = Math.round(entries[0].contentRect.width);
+    if (w && w !== width) { width = w; fit(); }
+  }).observe(elm);
 }
 
 // Calls cb the first time el is mostly on screen.
