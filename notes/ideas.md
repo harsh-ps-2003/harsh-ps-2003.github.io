@@ -1,4 +1,5 @@
 * cutting that inferece cost should have info about how i did tokenization optimizatoin in sqwish, and latency was kept low and all
+* interpretability of decision models deeply (take reference from anthropic blogs as referecen and all)
 * pagerank algo - https://stackoverflow.com/questions/1867934/pagerank-vs-svd https://fse.studenttheses.ub.rug.nl/12910/1/Googlepagerank.pdf https://bonetto.math.gatech.edu/teaching/3235-spring20/Projects_template/MATH3235%20Report.pdf
 * jane street and interesting ML findings you can work on for paper! you can explore the topics yourself
 * uni of cambrige seminar talks condence into blogs

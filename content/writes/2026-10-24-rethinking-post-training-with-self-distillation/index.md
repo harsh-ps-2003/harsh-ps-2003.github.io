@@ -21,7 +21,7 @@ pretraining is the huge first phase, where the model reads trillions of words an
 
 literally every major claim like cyber security, reasoning, or agentic capabilities are forced in in post training via synthetic data. labs make synthetic training data to teach models specific skills in post training because pre training stopped delivering i think
 
-<figure class="diagram">
+<figure class="diagram diagram-row">
 <a href="paradigms.svg"><img src="paradigms.svg" alt="Three problems with post-training today: training on a new task makes old skills fall, each method needs hand-built data, and the model breaks when the prompt is reworded." loading="lazy"></a>
 </figure>
 
@@ -49,10 +49,6 @@ The 2nd is that the explanation gets thrown away. a compiler says the syntax is 
 
 The fix comes from something whihc is literally bread and butter of models capabilities these days - in-context learning. The context is everything the model is reading right now (your prompt, the conversation so far, pasted docs), and in-context learning means it changes behaviour because of what's in there, with zero training whatsoever. when you write - "shorter, please", the answers actually get shorter! just think about it, this works with messy shit you are saying to you model, and just a tiny bit is enough. THis is the key, a magical key to continual learning world
 
-<figure class="diagram">
-<a href="icl-weights.svg"><img src="icl-weights.svg" alt="In-context learning changes behaviour from the prompt without changing weights, but the lesson is lost in a new session. Self-distillation runs the model with and without the extra text and trains the plain run toward the hinted one, so the lesson moves into the weights." loading="lazy"></a>
-</figure>
-
 But the problem is that it doesnt stay. as soon as i start a new session, the model to zero, and the context window is finite anyways, so to keep a lesson the weights themselves have to change. the model actually needs to learn
 
 Self-distillation moves the learnings into the weights. run the same model twice, once with the extra text in its prompt, the teacher, and once without, the student, and train the student's next token probabilities toward the teacher's, so once the student matches them without seeing the lesson, the lesson lives in the weights :)
@@ -77,7 +73,7 @@ The obvious question is why should the teacher's view be any better when its lit
 
 The loop never changes, only the extra text in the teacher's prompt does. All it needs is some text the student doesnt see that changes how the teacher reads the student's answer, and every source of such text is a new use.
 
-<figure class="diagram">
+<figure class="diagram diagram-row">
 <a href="five-uses.svg"><img src="five-uses.svg" alt="Five sources of extra text for the teacher: demonstrations, new knowledge, verifiable rewards with a passing sibling, rich feedback, and user interactions. The first two are SDFT, the middle two SDPO, the last learning from users." loading="lazy"></a>
 </figure>
 
@@ -222,7 +218,7 @@ The loop and the update stay the same as RL, only the advantage changed. The new
 
 So far the teacher has been a bigger model. Here's a case where it isnt, and its one tons of companies are in rn - they want an internal assistant that knows their own documents and still behaves like a good assistant. This is the personalisation experiment from the same [On-Policy Distillation](https://thinkingmachines.ai/blog/on-policy-distillation/) post, and you can watch forgetting happen and then get repaired.
 
-<figure class="diagram">
+<figure class="diagram diagram-fit">
 <a href="opd-repair.svg"><img src="opd-repair.svg" alt="Checkpoint A, Qwen3-8B, is mid-trained on company documents to give checkpoint B. Then B writes answers to chat prompts and a frozen A grades every token, which gives checkpoint C." loading="lazy"></a>
 </figure>
 
@@ -247,7 +243,7 @@ So the teacher doesnt need to be bigger, it needs to be better at the skill bein
 
 On-policy distillation is the best corner of the grid, but it needs a teacher thats better at the skill, and when there isnt one the labs use RL. Every method from here on plugs into RL, so here's how its actually run today. The 2 big algorithms differ in 1 thing, where the baseline comes from. The diagram is my redraw of the one in [DeepSeekMath](https://arxiv.org/abs/2402.03300), yellow boxes are being trained and grey ones are frozen.
 
-<figure class="diagram">
+<figure class="diagram diagram-row">
 <a href="ppo-grpo.svg"><img src="ppo-grpo.svg" alt="PPO: the policy writes one answer, a reward model scores it, a frozen reference model adds a KL penalty, and a trained value model feeds GAE to give per-token advantages. GRPO: the policy writes a group of answers, each is scored, and the group's mean and spread turn the scores into one advantage per answer, with no value model." loading="lazy"></a>
 </figure>
 
@@ -292,7 +288,7 @@ The reasoning goes like this -
 
 That something extra is a hint - any text in the teacher's prompt that the student doesnt get to see, or privileged information if you want the fancy name. With the same weights on both sides, the hint is the only difference between teacher and student. A good hint changes the teacher's opinion about the student's mistakes and only those. A bad one either changes nothing, so there's nothing to learn, or gives away something the student could never work out, so the student learns to imitate a teacher that knows more than it can, and that trade-off decides how well every method from here on works.
 
-<figure class="diagram">
+<figure class="diagram diagram-row">
 <a href="grade-three.svg"><img src="grade-three.svg" alt="The same student attempt graded three ways: by a separate larger model, by the same weights with a verified solution in the prompt (OPSD), and by the same weights with the environment's feedback in the prompt (SDPO)." loading="lazy"></a>
 </figure>
 
@@ -315,7 +311,7 @@ On competition maths, OPSD clearly beats RL on the smallest Qwen3 model (1.7B) a
 
 OPSD is a cute idea, and ngl I dont think it survives most real training setups. The reason sits in the setup itself, no hyperparameter will save it.
 
-<figure class="diagram">
+<figure class="diagram diagram-row">
 <a href="opsd-bias.svg"><img src="opsd-bias.svg" alt="The teacher sees the solution 3x = 15, so x = 5 and the student does not. At one position the student prefers working it out (3x = 15, 0.74) while the teacher prefers stating x = 5 (0.64). Trained toward the teacher, the student later jumps to a confident wrong answer, x = 7." loading="lazy"></a>
 </figure>
 
@@ -653,7 +649,7 @@ Why doesnt practising on its own attempts teach recovery? An update built from y
 
 PivotOPD finds the turn that decided a failed run and trains 2 things there, avoiding the mistake and recovering from it.
 
-<figure class="diagram">
+<figure class="diagram diagram-fit">
 <a href="pivot-method.svg"><img src="pivot-method.svg" alt="A teacher names the right action at the pivotal turn; the hinted frozen student rescores the student's line there with reverse KL; then it writes the recovery line, which the student learns with forward KL." loading="lazy"></a>
 </figure>
 
@@ -754,23 +750,6 @@ With both caps they pick K = 3, the stalest setting that loses nothing, because 
 </figure>
 
 Then they took the same caps, no retuning, to [APEX-Agents](https://www.mercor.com/blog/introducing-apex-agents/), long professional tasks in investment banking, consulting and law that take an expert about 2 hours, graded against expert checklists. The model is GPT-OSS-120B, which almost never passes at the start, so a group-based method would discard nearly everything, while SDPO learns from each failure's feedback. The advantage cap is relative, so it adapts to the new task's scale, and the ratio cap is the standard PPO range, which is why stabilisers found on a 4B model carried over to a 120B one (◕▽◕)
-
-## 1 model, 2 prompts
-
-here's every method in this post in 1 table.
-
-| method | who grades it | what the grader knows that the student doesn't | feedback | what you need |
-| --- | --- | --- | --- | --- |
-| copying (SFT) | nobody, you imitate it | nothing | the expert's next word | expert answers |
-| GRPO | a checker | the right answer, as 1 number | 1 number per attempt | a checker, groups with mixed results |
-| on-policy distillation | a separate, better model | its own knowledge | probabilities, every token | a better model to query |
-| OPSD | the same model, frozen | a worked solution in its prompt | probabilities, every token | a solution per problem |
-| SDFT | the same model, moving slowly | an expert demonstration, or an article, in its prompt | probabilities, every token | demonstrations, a model that learns from examples in context |
-| SDPO | the same model, moving slowly | the error message, or a sibling's success | top candidate tokens, every position | useful feedback text, a model that can use hints |
-| SDPO from user interactions | the same model | the user's next message | a grade per written token | conversations where people react, guardrails |
-| PivotOPD | the same model, frozen for the step, inside GRPO | the action a teacher named for that turn | probabilities at the pivotal and recovery turns | a model that can name the right action, an environment you can replay |
-
-read top to bottom, its the story of this post, the student writes the text in every row but the first, and each row keeps what worked in the row above and changes 1 thing :)
 
 ### so which one do I use?
 

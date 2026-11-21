@@ -74,7 +74,7 @@
   color: var(--v-ink); font-family: var(--font-main, monospace); font-size: 13px; fill: var(--v-ink); }
 /* text inherits font and fill from the stage, so a lab's own fill/font-size attributes win */
 .svd-lab canvas { display: block; width: 100%; image-rendering: pixelated; border-radius: 3px; aspect-ratio: 1; }
-.svd-lab figure { margin: 0; min-width: 0; }
+.svd-lab figure { margin: 0; min-width: 0; background: transparent; border: 0; border-radius: 0; padding: 0; }
 .svd-lab figcaption { font-size: .8em; margin: 6px 0 0; text-align: center; color: var(--lab-muted); }
 .svd-lab .lab-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .svd-lab .lab-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }

@@ -1,5 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 960" width="920" height="960" role="img" aria-label="Linear attention drops the softmax path. The n by n scores and the row-wise softmax are crossed out. The replacement is phi of Q times the low-rank product of phi of K transpose and V.">
-  <rect width="920" height="960" fill="#ffffff"/>
 
   <!-- softmax path, same picture as the basics figure -->
   <text x="318" y="96" text-anchor="middle" font-family="Georgia, 'Iowan Old Style', 'Times New Roman', serif" font-style="italic" font-size="30" fill="#2a2a2a">softmax(QK<tspan font-size="17" dy="-12">T</tspan><tspan dy="12" font-size="30"> / &#8730;d) V</tspan></text>
