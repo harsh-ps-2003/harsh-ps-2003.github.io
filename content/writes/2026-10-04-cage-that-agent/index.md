@@ -268,7 +268,7 @@ I find it easiest to place every platform on 3 axes, and these bullets are basic
 
 That gives 8 combinations, the 3 anchor platforms picked 3 different ones on purpose, and a few cells are still nearly empty. Vendors optimize for the workload shape they think will win, and not for covering the whole design space. ( ͡° ͜ °)
 
-<figure class="diagram"><a href="workload-map.svg"><img src="workload-map.svg" alt="Eight cell map of agent sandbox products by duration, CPU or GPU, and session model, tagged with the isolation primitive each product uses." loading="lazy"></a></figure>
+<figure class="diagram"><a href="workload-map.svg"><img src="workload-map.svg" alt="Agent sandbox products on two questions, CPU or GPU, and whether the sandbox forgets everything after each call or keeps its files. CPU and forgets: short jobs with a fresh sandbox every call, E2B and AWS AgentCore. CPU and keeps files: a computer per agent that sleeps between tasks, where most products live, Fly Sprites, Vercel Sandbox, Cursor, Coder, Together, and Daytona and Cloudflare, which share the host kernel. GPU and forgets: serverless GPU that wakes from a snapshot, Modal on gVisor. GPU and keeps files: rent a GPU VM such as RunPod, Lambda, Lightning AI or Fly GPU Machines, nothing built for agents yet." loading="lazy"></a></figure>
 
 ### E2B
 
