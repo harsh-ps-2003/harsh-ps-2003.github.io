@@ -1,5 +1,5 @@
 .sd-viz .kn-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.sd-viz .kn-col { position: relative; display: flex; flex-direction: column; min-width: 0; padding: 10px; border-radius: 8px;
+.sd-viz .kn-col { position: relative; display: flex; flex-direction: column; min-width: 0; padding: 10px; border-radius: 12px;
   background: var(--sd-card); border: 1px solid var(--sd-line); transition: border-color 0.12s, box-shadow 0.12s; }
 .sd-viz .kn-col[role="button"] { cursor: pointer; }
 .sd-viz .kn-col[role="button"]:hover { border-color: var(--sd-muted); }
@@ -11,7 +11,7 @@
 
 /* one row per layer, the same heights in every column so the host kernels line up */
 .sd-viz .kn-stack { display: grid; grid-template-rows: 52px 72px 48px 60px; gap: 6px; }
-.sd-viz .kn-box { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 6px 8px; border-radius: 6px;
+.sd-viz .kn-box { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 6px 8px; border-radius: 9px;
   border: 1px solid var(--sd-line); background: var(--sd-card); transition: background-color 0.22s, border-color 0.22s; }
 .sd-viz .kn-box b { font-size: 12.5px; }
 .sd-viz .kn-box small { font-size: 11px; color: var(--sd-muted); line-height: 1.3; }
@@ -50,10 +50,10 @@
 
 .sd-viz .kn-run { border-color: var(--sd-accent); color: var(--sd-accent-ink); font-weight: 700; }
 
-.sd-viz .kn-inside { margin: 12px 0 0; padding: 12px 14px; border-radius: 8px; background: var(--sd-card); border: 1px solid var(--sd-line); min-height: 64px; }
+.sd-viz .kn-inside { margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--sd-card); border: 1px solid var(--sd-line); min-height: 64px; }
 .sd-viz .kn-inside-hint { margin: 0; font-size: 12.5px; color: var(--sd-muted); }
 .sd-viz .kn-chain { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px; }
-.sd-viz .kn-part { flex: 1 1 120px; display: flex; flex-direction: column; gap: 2px; padding: 7px 9px; border-radius: 6px; background: var(--sd-panel); min-width: 0; }
+.sd-viz .kn-part { flex: 1 1 120px; display: flex; flex-direction: column; gap: 2px; padding: 7px 9px; border-radius: 9px; background: var(--sd-panel); min-width: 0; }
 .sd-viz .kn-part b { font-size: 12.5px; }
 .sd-viz .kn-part span { font-size: 11.5px; color: var(--sd-muted); line-height: 1.35; }
 .sd-viz .kn-arrow { align-self: center; color: var(--sd-faint); }

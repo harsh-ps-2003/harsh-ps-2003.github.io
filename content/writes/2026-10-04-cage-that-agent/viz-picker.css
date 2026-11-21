@@ -1,19 +1,19 @@
 /* the runtime questions next to the answer */
 .sd-viz .pk-wrap { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 14px; align-items: start; }
 .sd-viz .pk-questions { display: flex; flex-direction: column; gap: 5px; }
-.sd-viz .pk-q { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 8px 6px 10px; border-radius: 6px;
+.sd-viz .pk-q { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 8px 6px 10px; border-radius: 9px;
   border-left: 3px solid transparent; background: var(--sd-card); transition: opacity 0.15s, border-color 0.15s; }
 .sd-viz .pk-q.pk-under { margin-left: 18px; }
 .sd-viz .pk-q[data-state="asked"] { border-left-color: var(--sd-line); }
 .sd-viz .pk-q[data-state="last"] { border-left-color: var(--sd-accent); }
 .sd-viz .pk-q[data-state="skipped"] { opacity: .38; }
 .sd-viz .pk-text { font-size: 12.5px; line-height: 1.35; }
-.sd-viz .pk-yn { display: inline-flex; flex: 0 0 auto; border: 1px solid var(--sd-line); border-radius: 6px; overflow: hidden; }
+.sd-viz .pk-yn { display: inline-flex; flex: 0 0 auto; border: 1px solid var(--sd-line); border-radius: 9px; overflow: hidden; }
 .sd-viz .pk-yn button { border: 0; border-radius: 0; min-height: 28px; padding: 3px 9px; font-size: 12px; color: var(--sd-muted); background: var(--sd-card); }
 .sd-viz .pk-yn button + button { border-left: 1px solid var(--sd-line); }
 .sd-viz .pk-yn button[aria-pressed="true"] { background: var(--sd-ink); color: var(--sd-card); }
 
-.sd-viz .pk-card { padding: 12px 14px; border-radius: 8px; background: var(--sd-card); border: 1px solid var(--sd-ink); position: sticky; top: 12px; }
+.sd-viz .pk-card { padding: 12px 14px; border-radius: 12px; background: var(--sd-card); border: 1px solid var(--sd-ink); position: sticky; top: 12px; }
 .sd-viz .pk-name { font-size: 17px; font-weight: 700; margin: 0 0 8px; line-height: 1.25; }
 .sd-viz .pk-line { font-size: 12.5px; margin: 4px 0; line-height: 1.4; }
 .sd-viz .pk-who { font-size: 11.5px; color: var(--sd-muted); margin: 10px 0 0; }
@@ -34,7 +34,7 @@
 .sd-viz .pk-cell[data-tag="crowded"] { font-weight: 700; }
 .sd-viz .pk-cell[aria-pressed="true"] { border-color: var(--sd-ink); box-shadow: 0 0 0 1px var(--sd-ink); background: var(--sd-panel); }
 
-.sd-viz .pk-list { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 8px; background: var(--sd-card); border: 1px solid var(--sd-line); min-height: 120px; }
+.sd-viz .pk-list { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 12px; background: var(--sd-card); border: 1px solid var(--sd-line); min-height: 120px; }
 .sd-viz .pk-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 0; border-bottom: 1px solid var(--sd-line); }
 .sd-viz .pk-item:last-child { border-bottom: 0; }
 .sd-viz .pk-item-name { display: flex; flex-direction: column; min-width: 0; }
@@ -53,3 +53,4 @@
   .sd-viz .pk-cell { font-size: 10.5px; min-height: 36px; padding: 2px; }
   .sd-viz .pk-col-h { font-size: 9.5px; }
 }
+.sd-viz .pk-line { min-height: 35px; }

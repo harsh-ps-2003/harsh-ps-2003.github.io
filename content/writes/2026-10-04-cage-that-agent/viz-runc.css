@@ -9,7 +9,7 @@
 .sd-viz .rc-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
 .sd-viz .rc-step {
   display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; grid-template-areas: "n text dots" ". mark mark"; align-items: center; column-gap: 8px;
-  padding: 6px 8px; border-radius: 6px; border: 1px solid transparent; color: var(--sd-faint); font-size: 13px;
+  padding: 6px 8px; border-radius: 9px; border: 1px solid transparent; color: var(--sd-faint); font-size: 13px;
   transition: background-color 0.19s, color 0.19s, border-color 0.19s;
 }
 .sd-viz .rc-n { grid-area: n; font-size: 11px; color: var(--sd-faint); }
@@ -20,9 +20,9 @@
 .sd-viz .rc-step.done { color: var(--sd-ink); }
 .sd-viz .rc-step.open { background: var(--sd-accent-soft); }
 .sd-viz .rc-step.now { border-color: var(--sd-ink); }
-.sd-viz .rc-mark { grid-area: mark; justify-self: start; display: none; align-items: center; gap: 6px; min-height: 0; margin-top: 4px; padding: 2px 8px;
+.sd-viz .rc-mark { grid-area: mark; justify-self: start; display: inline-flex; visibility: hidden; align-items: center; gap: 6px; min-height: 0; margin-top: 4px; padding: 2px 8px;
   font-size: 11.5px; color: var(--sd-accent-ink); border-color: var(--sd-accent); background: var(--sd-card); border-radius: 999px; }
-.sd-viz .rc-mark.shown { display: inline-flex; animation: rc-pop 0.22s var(--sd-ease); }
+.sd-viz .rc-mark.shown { visibility: visible; animation: rc-pop 0.22s var(--sd-ease); }
 @keyframes rc-pop { from { opacity: 0; transform: scale(.8); } }
 .sd-viz .rc-mark[aria-pressed="true"] { background: var(--sd-accent); color: var(--sd-card); }
 .sd-viz .rc-mark-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
@@ -30,7 +30,7 @@
 .sd-viz .rc-window.shown { opacity: 1; }
 .sd-viz .rc-window::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; border-radius: 2px; background: var(--sd-accent-soft); border: 1px solid var(--sd-accent); }
 
-.sd-viz .rc-detail { background: var(--sd-card); border: 1px solid var(--sd-line); border-radius: 8px; padding: 14px; }
+.sd-viz .rc-detail { background: var(--sd-card); border: 1px solid var(--sd-line); border-radius: 12px; padding: 14px; }
 .sd-viz .rc-head { margin: 0 0 6px; font-weight: 700; }
 .sd-viz .rc-detail:not(.idle) .rc-head { color: var(--sd-accent-ink); }
 .sd-viz .rc-story { margin: 0; font-size: 13px; color: var(--sd-muted); }
@@ -53,3 +53,7 @@
   .sd-viz .rc-grid { grid-template-columns: 1fr; gap: 12px; }
   .sd-viz .rc-lamps { gap: 6px 10px; font-size: 12px; }
 }
+
+/* fixed height, parts that come and go keep their space so the figure never resizes */
+.sd-viz .rc-detail { min-height: 340px; }
+.sd-viz .rc-race[hidden] { display: block; visibility: hidden; }

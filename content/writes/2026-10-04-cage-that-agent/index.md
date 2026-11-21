@@ -94,9 +94,9 @@ Say the task is "Fix the failing test in `src/auth/login.test.ts`", and if you j
 
 Every step hands the session something new, a token to clone, the whole repo to read, `pnpm install` running 100s of strangers postinstall scripts with the agents permissions, an unreviewed LLM fix, tests over fixtures that may be hostile, and finally repo write access, and nothing ever gets handed back.
 
-<figure class="diagram sd-viz" data-viz="pile"><a href="fix-the-test.svg"><img src="fix-the-test.svg" alt="Six steps of fixing a failing test, from git clone to git push. For each step: what the session newly holds, a meter of everything held that grows from 2 to 9 items, the worst case at that step, and which defense-in-depth gate stops it." loading="lazy"></a></figure>
+<figure class="diagram"><a href="fix-the-test.svg"><img src="fix-the-test.svg" alt="What the session holds after each step of fixing one failing test, a stack that grows from 2 things at git clone to 9 at git push, blue for the authority it holds and orange for the untrusted input it runs or reads, and nothing is ever handed back." loading="lazy"></a></figure>
 
-Play it with the gates off and then on. Notice that none of the fixes says "write a better system prompt" ;)
+Every one of those has a gate from the section above, and notice that none of them is "write a better system prompt" ;)
 
 At every step untrusted input shapes behaviour and the agent acts with real creds that have real consequences, which is why approving each bash command is not a security model.
 
@@ -266,9 +266,9 @@ I find it easiest to place every platform on 3 axes, and these bullets are basic
 * Resource, CPU vs GPU
 * Session model, stateless (each call is independent) vs stateful (a named sandbox with a continuous fs and processes)
 
-That gives 8 combinations, the 3 anchor platforms picked 3 different ones on purpose, and a few cells are still nearly empty, flip the switches below and see. Vendors optimize for the workload shape they think will win, and not for covering the whole design space. ( ͡° ͜ °)
+That gives 8 combinations, the 3 anchor platforms picked 3 different ones on purpose, and a few cells are still nearly empty. Vendors optimize for the workload shape they think will win, and not for covering the whole design space. ( ͡° ͜ °)
 
-<figure class="diagram sd-viz" data-viz="picker" data-show="products"><a href="workload-map.svg"><img src="workload-map.svg" alt="Eight cell map of agent sandbox products by duration, CPU or GPU, and session model, tagged with the isolation primitive each product uses." loading="lazy"></a></figure>
+<figure class="diagram"><a href="workload-map.svg"><img src="workload-map.svg" alt="Eight cell map of agent sandbox products by duration, CPU or GPU, and session model, tagged with the isolation primitive each product uses." loading="lazy"></a></figure>
 
 ### E2B
 

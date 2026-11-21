@@ -22,6 +22,7 @@ for (const figure of figures) {
       figure.classList.remove('diagram');
       figure.classList.add('sd-ready');
       viz.mount(figure, figure.dataset);
+      holdTallest(figure);
     } catch (error) {
       console.error(`viz ${name} failed`, error);
       figure.classList.remove('sd-ready');
@@ -29,4 +30,16 @@ for (const figure of figures) {
       figure.replaceChildren(...fallback);
     }
   }).catch(error => console.error(`viz ${name} did not load`, error));
+}
+
+// Once a figure has been a height it keeps it, so stepping through states never makes the page jump.
+// Reset when the width changes, since the layout reflows.
+function holdTallest(figure) {
+  let width = 0, tallest = 0;
+  new ResizeObserver(() => {
+    const w = Math.round(figure.clientWidth);
+    if (w !== width) { width = w; tallest = 0; figure.style.minHeight = ''; }
+    const h = Math.ceil(figure.getBoundingClientRect().height);
+    if (h > tallest) { tallest = h; figure.style.minHeight = `${h}px`; }
+  }).observe(figure);
 }
