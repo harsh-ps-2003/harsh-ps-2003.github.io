@@ -18,7 +18,7 @@ Before Transformers, models like RNNs and LSTMs processed text sequentially. Thi
 I mean, if you're reading my blogs, most probably you know what the attention is, but for reiteration, the standard scaled dot-product attention equation looks like :
 > Attention(Q, K, V) = softmax(QK^T^ / d^1/2^)V
 
-![Queries along the side, keys across the top. Row-wise softmax turns the dots into scores, and those scores mix the values into the output.](softmax-attention.svg)
+<figure class="diagram"><a href="softmax-attention.svg"><img src="softmax-attention.svg" alt="Queries along the side, keys across the top. Row-wise softmax turns the dots into scores, and those scores mix the values into the output." loading="lazy"></a></figure>
 
 That is softmax attention. Each query dots with every key (so quadratic) and that fills S. Softmax runs across the row, so A is how much this token cares about each other token, and then A mixes the values. The `/ √d` scale keeps the dot products from blowing up as head dim grows. Causal vs bidirectional is just a mask on the scores before softmax. Cross attention uses the same formula with Q from one sequence and K/V from another. The code below is causal self-attention (decoder-style):
 
@@ -106,7 +106,7 @@ Attention Mechanisms
 
 Causal vs bidirectional is a mask on top of any Softmax node above. Decoder LLMs almost always use a causal mask so token `t` only attends to positions `≤ t`. Encoder models like BERT use bidirectional (full) attention within a segment. Cross attention still shows up in encoder-decoder models, multimodal stacks (text Q attending to vision/audio K/V), and some memory setups. Head sharing (MQA/GQA) and Flash kernels apply to both self and cross.
 
-![Attention patterns comparison](attention-patterns.png)
+<figure class="diagram"><a href="attention-patterns.png"><img src="attention-patterns.png" alt="Attention patterns comparison" loading="lazy"></a></figure>
 
 The visualization makes the differences clear. Dense attention fills the entire matrix (O(n²)). Linear attention only tracks a diagonal state that grows with sequence position. Sparse attention skips positions. Flash Attention computes the same dense pattern but tiles it for better memory access. Paged Attention handles variable-length sequences with dynamic allocation. Local/Sliding Window attention restricts each token to only attend to nearby tokens.
 
@@ -117,7 +117,7 @@ Memory is the bottleneck in inference :
 
 Each layer is an MLP on top of attention. The MLP is O(Nd²), Attention is O(N²d), The KV cache that attention writes is O(Nd). And things get even more complex if you add chain of thought and all.
 
-![A transformer stack - MLP at O(Nd²), attention at O(N²d), and a KV cache at O(Nd)](encoder-costs.svg)
+<figure class="diagram"><a href="encoder-costs.svg"><img src="encoder-costs.svg" alt="A transformer stack - MLP at O(Nd²), attention at O(N²d), and a KV cache at O(Nd)" loading="lazy"></a></figure>
 
 ### when does it even matter? 
 the attention mechanism matters less than you think (at moderate context). 
@@ -203,7 +203,7 @@ Require: Matrices Q, K, V e RNxd in HBM.
 
 You can [refer Multi-Head Attention in BERT for reference](https://github.com/huggingface/transformers/blob/f208766a6551d381475cd8eeed1256f9a5af7b65/src/transformers/models/bert/modeling_bert.py#L143). 
 
-![MQA vs GQA vs MHA vs MLA comparison](mqa-gqa-mha-mla.png)
+<figure class="diagram"><a href="mqa-gqa-mha-mla.png"><img src="mqa-gqa-mha-mla.png" alt="MQA vs GQA vs MHA vs MLA comparison" loading="lazy"></a></figure>
 
 The diagram shows the progression. In MHA every head has its own K and V. In GQA groups of heads share K and V. In MQA all heads share a single K and V. In MLA the K and V are compressed through a latent projection before being used.
 
@@ -329,7 +329,7 @@ Softmax:  Attention = softmax(QK^T / √d) V     # must compute N×N first
 Linear:   Attention = φ(Q)(φ(K)^T V)           # associativity trick
 ```
 
-![The softmax path is crossed out. No softmax of QK transpose V, and no row-wise softmax. Linear attention approximates that mix with phi of Q times the low-rank product of phi of K transpose and V.](linear-attention.svg)
+<figure class="diagram"><a href="linear-attention.svg"><img src="linear-attention.svg" alt="The softmax path is crossed out. No softmax of QK transpose V, and no row-wise softmax. Linear attention approximates that mix with phi of Q times the low-rank product of phi of K transpose and V." loading="lazy"></a></figure>
 > φ(Q) reads φ(K)ᵀV instead. That product is the low-rank stand-in for the n×n scores. a short wide matrix x the values.
 
 I had an obvious question, why ELU+1 is used as the feature map and how linear attention still preserves the attention contract despite removing softmax? Both softmax and linear attention preserve the same fundamental contract, they just implement it differently:
@@ -341,7 +341,7 @@ Also, ELU(x) is smooth unlike ReLU which helps gradients. It approximates the ex
 
 Same reorder, with the matrix sizes on it. d′ is the width of Q and K after the down-projection, and D is the width after φ. For ELU+1 those two widths match. The brace is φ(K)^T V, the product you form first, which brings the cost from O(N²d) down to O(NDd).
 
-![Left side keeps Q, K, and V at N by d and builds exp of Q K transpose, which is O of N squared d. Right side projects Q and K down to d prime and multiplies phi of K transpose by V first, which is O of N D d and scales linearly in N.](reorder-multiplies.svg)
+<figure class="diagram"><a href="reorder-multiplies.svg"><img src="reorder-multiplies.svg" alt="Left side keeps Q, K, and V at N by d and builds exp of Q K transpose, which is O of N squared d. Right side projects Q and K down to d prime and multiplies phi of K transpose by V first, which is O of N D d and scales linearly in N." loading="lazy"></a></figure>
 
 Its the game of association. (AB)C = A(BC) from your Linear Algebra class. With softmax, you're forced into (QK^T^)V because softmax breaks associativity. Without softmax, you can compute (K^T^ V) first, that's a (d×N) × (N×d) = d×d matrix, independent of sequence length. Then multiply by Q. This means the growing history of K and V vectors can be folded into a fixed D×D state matrix S:
 ```python
@@ -355,7 +355,7 @@ You get it right? Constant memory, constant compute per token. No KV cache that 
 
 Left side is the cache, one key and one value per token, O(Nd). Right side is the state they fold into, O(d²).
 
-![Softmax attention keeps a key and a value for every token, so the KV cache is O of N d. Linear attention folds those tokens into one square state, O of d squared.](kv-cache-vs-state.svg)
+<figure class="diagram"><a href="kv-cache-vs-state.svg"><img src="kv-cache-vs-state.svg" alt="Softmax attention keeps a key and a value for every token, so the KV cache is O of N d. Linear attention folds those tokens into one square state, O of d squared." loading="lazy"></a></figure>
 
 ```python
 
@@ -415,13 +415,13 @@ Per-token decode cost was O(t²) without cache in 2020 which became O(t) with ca
 
 MQAR is multi-query associative recall. You stash key-value pairs in a long sequence and later ask for the value that belonged to a key. Attention reaches perfect recall only at the big end of the axis. Sliding attention spends less state and loses the recall. Gated convolutions land lower than that window.
 
-![MQAR recall against recurrent state size. Blue attention climbs to perfect recall only when the state is huge. Red sliding attention sits lower. Gold gated convolutions sit lower still.](mqar-recall.svg)
+<figure class="diagram"><a href="mqar-recall.svg"><img src="mqar-recall.svg" alt="MQAR recall against recurrent state size. Blue attention climbs to perfect recall only when the state is huge. Red sliding attention sits lower. Gold gated convolutions sit lower still." loading="lazy"></a></figure>
 
 in short [Based](https://arxiv.org/abs/2402.18668) is just a Taylor approximation of softmax, combined with a plain sliding window. exp(q·k) becomes a short polynomial. That polynomial is a feature map, so the long-range part runs as linear attention and the memory you keep is a recurrent state. The window is the ordinary sliding window from earlier. Nearby tokens still get exact softmax.
 
 The plot on the right is how much of the sequence you can recall against how big that recurrent state is. Up recalls more. Right is a bigger state. The orange dots are Based, the smaller states that still recall more of the sequence.
 
-![Linear attention fills the causal triangle with an approximation, a sliding window keeps a band on the diagonal, and BASED keeps both. Orange points on the right recall more of the sequence from a smaller recurrent state.](based-attention.svg)
+<figure class="diagram"><a href="based-attention.svg"><img src="based-attention.svg" alt="Linear attention fills the causal triangle with an approximation, a sliding window keeps a band on the diagonal, and BASED keeps both. Orange points on the right recall more of the sequence from a smaller recurrent state." loading="lazy"></a></figure>
 
 ### DeltaNet
 
@@ -661,7 +661,7 @@ The forward substitution (the T matrix computation) is the magic that makes this
 
 ####  Kimi Delta Attention (KDA)
 
-![Kimi Delta Attention architecture](kda-architecture.png)
+<figure class="diagram"><a href="kda-architecture.png"><img src="kda-architecture.png" alt="Kimi Delta Attention architecture" loading="lazy"></a></figure>
 
 The core innovation is Kimi Delta Attention (KDA), which extends Gated DeltaNet with fine-grained gating. Instead of a single scalar decay β, KDA learns a separate decay value for each channel:
 ```python
@@ -704,7 +704,7 @@ The paper also replaces the standard MLP with [Mixture-of-Experts (MoE)](https:/
 
 Speaking of MoE, here's where things get interesting. Kimi K3 isn't just big, it's efficiently big.
 
-![MoE activation comparison](moe-landscape.png)
+<figure class="diagram diagram-dark"><a href="moe-landscape.png"><img src="moe-landscape.png" alt="MoE activation comparison" loading="lazy"></a></figure>
 
 The activation percentage tells you how much of the model actually runs per token:
 * Kimi K3: 1.8% activation (104B of 2.8T parameters)
@@ -716,7 +716,7 @@ K3 is currently the biggest open MoE model, but what's more impressive is the sm
 
 The scaling from K2 to K3 tells the story:
 
-![Kimi K2 to K3 scaling](kimi-k2-k3-scaling.png)
+<figure class="diagram diagram-dark"><a href="kimi-k2-k3-scaling.png"><img src="kimi-k2-k3-scaling.png" alt="Kimi K2 to K3 scaling" loading="lazy"></a></figure>
 
 K2 had 1T parameters with 384 experts, activating 8 per token (2% activation). K3 scaled to 2.8T with 896 experts, activating 16 per token. The math: they nearly tripled the total parameters but only doubled the activated parameters. More experts, sparser activation, better efficiency. This is the MoE scaling playbook - grow the expert pool faster than you grow the activation budget.
 
@@ -729,7 +729,7 @@ Previous hybrid approaches (like the early Kimi experiments) stacked linear and 
 K3 scales the Kimi Linear architecture to 2.8 trillion parameters with 104 billion activated (it's an MoE model). To put that in perspective: one K3 contains roughly 22,580 GPT-2 models worth of parameters.
 But the interesting part isn't the scale. It's what they scaled. K3 uses the same KDA + MLA hybrid from Kimi Linear, but with several additions:
 
-![Kimi K3 architecture](kimi-k3-architecture.png)
+<figure class="diagram"><a href="kimi-k3-architecture.png"><img src="kimi-k3-architecture.png" alt="Kimi K3 architecture" loading="lazy"></a></figure>
 
 The diagram shows the full picture. On the left, the overall architecture: 93 transformer blocks with the 3:1 KDA/MLA ratio (layers 1-3 use KDA, layer 4 uses MLA, repeat). Layer 1 is dense, layers 2-93 use LatentMoE. On the right, the two attention mechanisms side by side - Gated MLA (softmax-based with latent compression) and KDA (the delta rule with per-channel gating via α and β).
 

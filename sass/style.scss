@@ -36,6 +36,13 @@
     }
 }
 
+// Figures drawn light on dark (chalkboard style) flip the other way, inverted in light mode, as is in dark
+figure.diagram.diagram-dark img { filter: invert(93%) hue-rotate(180deg); }
+[data-theme="dark"] figure.diagram.diagram-dark img { filter: none; }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) figure.diagram.diagram-dark img { filter: none; }
+}
+
 // Dark mode - manual toggle
 [data-theme="dark"] {
     --background-color: #000000;
@@ -386,10 +393,10 @@ code {
 }
 
 pre {
-    padding: 1px 15px;
+    padding: 14px 18px;
     background-color: var(--code-background-color);
     color: var(--code-color);
-    border-radius: 0;
+    border-radius: 10px;
     margin-block-start: 0.35em;
     margin-block-end: 1em;
     overflow-x: auto;
@@ -401,22 +408,38 @@ pre {
 }
 
 .code-block-wrapper {
+    position: relative;
     margin-block-start: 1em;
     margin-block-end: 1em;
+
+    pre { margin: 0; }
 }
 
+// a small rounded button in the block's top right corner, shown on hover, always on touch screens
 .copy-btn {
-    background: none;
-    border: none;
-    color: var(--text-color);
-    padding: 0;
-    cursor: pointer;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 1;
+    padding: 3px 10px;
     font-family: var(--font-main);
-    font-size: 0.85em;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--code-color);
+    background: var(--code-background-color);
+    border: 1px solid color-mix(in srgb, var(--code-color) 25%, transparent);
+    border-radius: 8px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity .15s, border-color .15s;
 
-    &:hover {
-        color: var(--heading-color);
-    }
+    &:hover { border-color: color-mix(in srgb, var(--code-color) 55%, transparent); }
+    &.copied { opacity: 1; }
+}
+.code-block-wrapper:hover .copy-btn,
+.copy-btn:focus-visible { opacity: 1; }
+@media (hover: none) {
+    .copy-btn { opacity: .8; }
 }
 
 blockquote {
