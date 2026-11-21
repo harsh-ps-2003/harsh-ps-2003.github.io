@@ -15,6 +15,8 @@
     --code-color: #222;
     --blockquote-color: #222;
     --toc-rail-background: color-mix(in srgb, var(--background-color) 96%, var(--text-color) 4%);
+    --figure-panel: #f6f5f2;
+    --figure-line: #dcdbd5;
 }
 
 // Dark mode - system preference
@@ -29,6 +31,8 @@
         --code-color: #d4d4d4;
         --blockquote-color: #d4d4d4;
         --toc-rail-background: color-mix(in srgb, var(--background-color) 88%, var(--text-color) 12%);
+        --figure-panel: #171716;
+        --figure-line: #3a3936;
     }
 }
 
@@ -43,6 +47,8 @@
     --code-color: #d4d4d4;
     --blockquote-color: #d4d4d4;
     --toc-rail-background: color-mix(in srgb, var(--background-color) 88%, var(--text-color) 12%);
+    --figure-panel: #171716;
+    --figure-line: #3a3936;
 }
 
 // Light mode - manual toggle (override system dark preference)
@@ -57,6 +63,8 @@
     --code-color: #222;
     --blockquote-color: #222;
     --toc-rail-background: color-mix(in srgb, var(--background-color) 96%, var(--text-color) 4%);
+    --figure-panel: #f6f5f2;
+    --figure-line: #dcdbd5;
 }
 
 // Required for Zola giallo syntax highlighting
@@ -252,6 +260,35 @@ img {
     }
 }
 
+// Travel photos sit wider than the text column on a laptop, still inside the viewport.
+.travel-photos {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 8px 0 0;
+
+    a {
+        display: block;
+        border-bottom: none;
+        line-height: 0;
+
+        &:hover {
+            background-color: transparent;
+        }
+    }
+
+    img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    @media (min-width: 1120px) {
+        width: 1040px;
+        margin-left: calc(50% - 520px);
+    }
+}
+
 // Excalidraw diagrams - invert colors in dark mode
 // Use class="excalidraw" or place in a container with class="diagram"
 img.excalidraw,
@@ -264,7 +301,9 @@ img.excalidraw,
 figure.diagram {
     margin: 1.6em 0;
     padding: 16px 18px;
-    border: 1px solid var(--heading-color);
+    background: var(--figure-panel);
+    border: 0;
+    border-radius: 12px;
 
     a,
     a:hover {
@@ -280,8 +319,29 @@ figure.diagram {
     }
 }
 
-figure.sd-viz.sd-ready {
-    border: 1px solid var(--heading-color);
+// Stacked cards are drawn near 600px with 19px text. At the column that text
+// lands near 20px, larger than the 15px type in the interactive figures.
+// Hold the drawing to the width where 19px becomes 15px. The card stays the
+// column width, same as a visualization.
+figure.diagram.diagram-fit img {
+    width: min(100%, 490px);
+    margin-inline: auto;
+}
+
+// A wide row, authored near 1100 to 1800px. It runs out to the right of the
+// column, up to the viewport edge, so the panels stay side by side.
+@media (min-width: 900px) {
+    figure.diagram.diagram-row {
+        width: min(1836px, calc(100vw - var(--content-left) - 48px));
+        max-width: none;
+    }
+}
+
+figure.sd-viz.sd-ready,
+article figure {
+    background: var(--figure-panel);
+    border: 0;
+    border-radius: 12px;
     padding: 16px 18px;
 }
 
@@ -291,7 +351,10 @@ article p > img {
     height: auto;
     box-sizing: border-box;
     margin: 1.6em 0;
-    border: 1px solid var(--heading-color);
+    padding: 16px 18px;
+    background: var(--figure-panel);
+    border: 0;
+    border-radius: 12px;
 }
 
 // Dark mode - manual toggle
@@ -428,7 +491,9 @@ article em.mystery {
 @media (min-width: 900px) {
     body:has(.toc-rail) {
         --toc-width: clamp(220px, 20vw, 260px);
-        margin-left: max(calc((100vw - var(--width)) / 2), calc(var(--toc-width) + 44px));
+        --toc-left: max(16px, calc((100vw - var(--width)) / 2 - var(--toc-width) - 36px));
+        --content-left: max(calc((100vw - var(--width)) / 2), calc(var(--toc-width) + 44px));
+        margin-left: var(--content-left);
         margin-right: auto;
     }
 
@@ -724,13 +789,6 @@ ul.blog-posts li.is-hidden {
 
 .post-date {
     font-style: normal;
-}
-
-// Back link
-.back-link {
-    display: inline-block;
-    margin-bottom: 20px;
-    font-size: 0.9em;
 }
 
 // Section intro

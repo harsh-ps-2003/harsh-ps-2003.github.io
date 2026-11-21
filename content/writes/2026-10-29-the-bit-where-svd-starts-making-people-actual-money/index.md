@@ -9,20 +9,24 @@ description = "A hands-on, animated look at SVD, from stretching a circle to com
 tags = ["math", "ml", "svd", "interactive"]
 +++
 
-In undergrad, singular value decomposition mostly meant [grinding through matrix arithmetic](https://www.youtube.com/watch?v=rYz83XPxiZo) untill three matrices multiplied back into the one I started with, which was great for exams, but I could follow every single step of the calculation without having any idea why anyone would want the answer (ー_ー；)
+You know SVD is kinda the gigachad of Linear ALgebra. Quite literally absorbs so many imp concepts into one theorem, and on other end, extremely applicable to ML. Its literally a fuking decomposition that rules them all (Jordan, Spectral, QR, LU, Cholessky, Interpolative, Schur, Polar, Mostow, etcc). 
 
-Then my professor casually mentioned that the same idea sits behind image compression, face recognition and recommendation systems, and even Google's PageRank, and that felt like a far more interesting invitation than another worked example of AX = B. How does a pile of numbers know which parts of a picture to keep, or which movie you are probably going to like? And a bunch of those are literally how companies make money, hence the title ;)
+In undergrad, it mostly means [grinding through matrix arithmetic](https://www.youtube.com/watch?v=rYz83XPxiZo) untill three matrices multiplied back into the one I started with, which is boringg obviously (ー_ー；)
 
-I got one thing wrong when I started, so let me fix it up front. Classic PageRank is not really an SVD problem, it is an eigenvector problem from the same family of spectral linear algebra, and SVD shows up more directly in search through latent semantic indexing and the maths behind HITS. There is a visual for exactly this difference further down.
+SVD is the same idea sits behind image compression, face recognition and recommendation systems, and even Google's PageRank, and that felt like a far more interesting invitation than another worked example of AX = B. How does a pile of numbers know which parts of a picture to keep, or which movie you are probably going to like? And a bunch of those are literally how companies make money, hence the title ;)
+
+Classic PageRank is not really an SVD problem though, it is an eigenvector problem from the same family of spectral linear algebra, and SVD shows up more directly in search through latent semantic indexing and the maths behind HITS. 
 
 <link rel="stylesheet" href="lab.css">
 <noscript><p><strong>The interactive parts need JavaScript.</strong> The maths and the Python still read fine without it.</p></noscript>
 
 ## What a matrix does
 
+In simple terms, SVD says that any matrix, regardless of symmetry, rank, shape, can unconditionally can be decomposed into 3 beloved matrices
+
 I mean, you probably remember this from class, but a real m × n matrix A is just a linear map from ℝ<sup>n</sup> to ℝ<sup>m</sup>, x ↦ Ax, and linearity, A(αx + βy) = αAx + βAy, means the whole map is pinned down by what it does to the standard basis, because Ae<sub>j</sub> is just the j-th column of A and every other input is a combination of the e<sub>j</sub>. Geometrically that forces a lot of structure, lines through the origin go to lines through the origin, parallelograms go to parallelograms, and the unit sphere in ℝ<sup>n</sup> goes to an ellipsoid in ℝ<sup>m</sup>, a flat one of dimension r whenever A has rank r.
 
-And the SVD says this map always factors the exact same way, turn, stretch, turn: an orthogonal map, then a scaling along the coordinate axes, then another orthogonal map.
+And the SVD says this map always factors the exact same way, turn, stretch, turn- an orthogonal map, then a scaling along the coordinate axes, then another orthogonal map.
 
 <div class="svd-equation" role="math" aria-label="A equals U Sigma V transpose. x maps to V transpose x, then to Sigma V transpose x, then to U Sigma V transpose x which equals A x">A = U Σ V<sup>T</sup><br>x ↦ V<sup>T</sup>x ↦ ΣV<sup>T</sup>x ↦ UΣV<sup>T</sup>x = Ax</div>
 
@@ -77,7 +81,6 @@ The same multiplication also reads in a completely different way, and ngl this i
 <div class="svd-equation" role="math" aria-label="A equals the sum of sigma i u i v i transpose">A = σ₁u₁v₁<sup>T</sup> + σ₂u₂v₂<sup>T</sup> + …<br>A<sub>k</sub> = ∑<sub>i=1…k</sub> σ<sub>i</sub>u<sub>i</sub>v<sub>i</sub><sup>T</sup></div>
 
 Each outer product u<sub>i</sub>v<sub>i</sub><sup>T</sup> is a rank one matrix where every column is a scaled copy of the same vector, so if the matrix holds grayscale pixels, each term is a simple layer of stripes, and adding the layers back up rebuilds the picture.
-
 
 The order of the layers matters a lot, because keeping the first k gives the smallest possible error of any matrix with rank at most k, measured as the sum of squared pixel differences (this is the Eckart, Young and Mirsky result), and "smallest" means exactly that sum of squares, which isn't always what a person notices first. The [UBC lecture notes](https://www.cs.ubc.ca/~nando/540-2007/lectures/l1.pdf) connect this expansion to low rank image approximation and to information retrieval.
 
@@ -199,7 +202,6 @@ The answer is an eigenvector of G with eigenvalue 1, scaled so it sums to one. F
 Try the cycle with α = 1, where the probability just chases itself round the loop forever like a dog chasing its tail, so even though a uniform stationary distribution exists, starting from A you never get there. Bring α back to 0.85 and the swings die down, and at α = 0 a single step forgets the links completely.
 
 SVD can describe how G stretches things, but its top singular vector is generally not the vector with Gp = p, because "which direction gets stretched the most in one step" and "which probability distribution stays put" are different questions with different answers, and the panel at the bottom of the visual above puts both answers side by side for whichever web you pick. People have asked about this exact mix up [on Stack Overflow](https://stackoverflow.com/questions/1867934/pagerank-vs-svd), and if you want the PageRank maths in more detail, [this bachelor's project from Groningen](https://fse.studenttheses.ub.rug.nl/12910/1/Googlepagerank.pdf) walks through the Google matrix and the power method, and [this Georgia Tech report](https://bonetto.math.gatech.edu/teaching/3235-spring20/Projects_template/MATH3235%20Report.pdf) explains the Markov chain and Perron-Frobenius reasoning behind it.
-
 
 Search uses SVD much more directly in a couple of other places.
 

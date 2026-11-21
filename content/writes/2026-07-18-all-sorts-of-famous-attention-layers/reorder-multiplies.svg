@@ -1,5 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 500" width="1120" height="500" role="img" aria-label="Left: Q, K, and V are N by d, and y equals exp of Q K transpose times V, which costs O of N squared d and scales quadratically in N. Right: Q and K are projected to N by d prime, V stays N by d, and y equals phi of Q times phi of K transpose times V. Multiplying phi of K transpose by V first costs O of N D d and scales linearly in N.">
-  <rect width="1120" height="500" fill="#ffffff"/>
 
   <g font-family="Georgia, 'Iowan Old Style', 'Times New Roman', serif" font-style="italic" font-size="28" fill="#1a1a1a">
     <text x="28" y="72">Q = W<tspan font-size="17" dy="8">q</tspan><tspan dy="-8" font-size="28">u,</tspan></text>

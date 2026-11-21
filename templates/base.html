@@ -20,11 +20,12 @@
     <meta property="og:locale" content="en_US">
     
     <!-- Twitter -->
-    <meta name="twitter:card" content="summary">
+    <meta name="twitter:card" content="{% block twitter_card %}summary{% endblock twitter_card %}">
     <meta name="twitter:site" content="@harsh_ps2003">
     <meta name="twitter:creator" content="@harsh_ps2003">
     <meta name="twitter:title" content="{% block twitter_title %}{{ config.title }}{% endblock twitter_title %}">
     <meta name="twitter:description" content="{% block twitter_description %}{{ config.description }}{% endblock twitter_description %}">
+    {% block social_image %}{% endblock social_image %}
     
     <!-- Canonical URL -->
     <link rel="canonical" href="{% block canonical %}{{ config.base_url }}{% endblock canonical %}">

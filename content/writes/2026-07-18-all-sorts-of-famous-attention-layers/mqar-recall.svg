@@ -1,5 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 470" width="1040" height="470" role="img" aria-label="MQAR plot of associative recall against recurrent state size. Attention climbs to perfect recall at a huge state. Sliding attention sits lower. Gated convolutions sit lower still.">
-  <rect width="1040" height="470" fill="#ffffff"/>
 
   <text x="28" y="42" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="26" font-weight="700" fill="#5c564e">Memory consumption and recall on MQAR</text>
 

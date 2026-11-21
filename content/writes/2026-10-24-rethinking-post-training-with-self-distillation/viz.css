@@ -32,7 +32,7 @@
 
 figure.sd-viz { margin: 1.6em 0; }
 figure.sd-viz.sd-ready {
-  background: var(--sd-panel); color: var(--sd-ink); border-radius: 12px; padding: 18px 20px 16px;
+  background: var(--sd-panel); color: var(--sd-ink); border: 0; border-radius: 12px; padding: 18px 20px 16px;
   font-family: var(--sd-sans); font-size: 15px; line-height: 1.45;
 }
 .sd-viz * { box-sizing: border-box; }

@@ -1,5 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 440" width="900" height="440" role="img" aria-label="Softmax attention stores a key and a value for every token, a KV cache that costs O of N d. Linear attention folds those tokens into one fixed square KV state that costs O of d squared.">
-  <rect width="900" height="440" fill="#ffffff"/>
 
   <rect x="204" y="16" width="160" height="44" rx="8" fill="#f6e58a" stroke="#c9b84e" stroke-width="1.4"/>
   <text x="284" y="44" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#1a1a1a">Attention</text>
