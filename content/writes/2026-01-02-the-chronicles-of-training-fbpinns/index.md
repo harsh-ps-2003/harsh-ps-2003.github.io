@@ -17,11 +17,11 @@ First and foremost, I am using [V100](https://images.nvidia.com/content/volta-ar
 
 The V100 is built from multiple Streaming Multiprocessors (SMs), each executing warps (block of 32 threads) via CUDA cores (the general‑purpose ALUs that execute most integer and FP32 operations) and one instruction issued by the warp scheduler is carried out simultaneously by all active CUDA cores for that warp, SIMT style (Single Instruction Multiple Threads), backed by register files, small L1/texture caches, and shared memory. Tensor cores sit next to those CUDA cores and do the matrix‑multiply‑accumulate when a kernel actually issues a tensor instruction (GEMM, convolutions). On this chip, compute capability 7.0, a tensor core takes FP16 inputs and accumulates in FP16 or FP32. There is no BF16 and no TF32. Both of those start at compute capability 8.0.
 
-<figure class="diagram"><a href="volta-sm.svg"><img src="volta-sm.svg" alt="One Volta SM with four processing blocks, each holding a warp scheduler, a 64 KB register file, FP64, INT32, and FP32 units, and 2 tensor cores, over a shared 128 KB L1 and shared memory, next to how blocks and warps reach the SM, the compute capability 7.0 limits, and a note that V100 has no BF16 or TF32." loading="lazy"></a></figure>
+<figure class="diagram"><a href="volta-sm.svg"><img src="volta-sm.svg" alt="One Volta SM. An L1 instruction cache sits on top of four processing blocks. Each block has a warp scheduler and dispatch unit issuing 32 threads per clock, a 64 KB register file, 8 FP64, 16 INT32 and 16 FP32 units, 2 tensor cores, load/store units and an SFU. All four share a 128 KB L1 data cache and shared memory, with shared memory up to 96 KB. The tensor core computes D = A times B plus C on FP16 inputs, there is no BF16 or TF32, and V100 has 80 of these SMs." loading="lazy"></a></figure>
 
 All SMs talk to a large on‑package HBM2 memory stack through several memory controllers, providing around 900 GB/s of memory bandwidth for local tensor data (activations, parameters, wavefields, etc.).
 
-<figure class="diagram"><a href="gv100-chip.svg"><img src="gv100-chip.svg" alt="The GV100 chip, with a PCIe host interface and GigaThread engine on top, six GPCs of 7 TPCs and 2 SMs each around a shared 6 MB L2, eight memory controllers feeding four HBM2 stacks, and six NVLink ports under a high-speed hub, next to the V100 SXM2 numbers." loading="lazy"></a></figure>
+<figure class="diagram"><a href="gv100-chip.svg"><img src="gv100-chip.svg" alt="The GV100 die. Six GPCs of 14 SMs each, 80 of the 84 SMs switched on, sit around one 6 MB L2 cache shared by every SM, with the host interface and GigaThread engine on top and a high-speed hub below. Four HBM2 stacks sit on the sides. A chip has three exits, counting both directions, from L2 to HBM2 at about 900 GB/s, from the hub to 6 NVLink ports at 300 GB/s, and from the host interface to PCIe 3.0 at about 32 GB/s." loading="lazy"></a></figure>
 
 CPU and GPU communicate over the PCI Express bus (it’s not technically a bus but a point to point connection). From the perspective of software running on the CPU, these days, that communication is typically in the form of memory-mapped IO. The GPU has registers and memory mapped into the CPU address space using PCIe. A write to a particular address generates a message on the PCIe bus that’s received by the GPU and produces a write to a GPU register or GPU memory. The GPU also has access to system memory through the PCIe bus. Typically, the CPU will construct buffers in memory with data (textures, vertices), commands, and GPU code. It will then store the buffer address in a GPU register and ring some sort of “doorbell” by writing to another GPU register. The GPU (specifically, the GPU command processor) will then read the buffers from system memory, and start executing the commands. Those commands can include, for example, loading GPU shader programs into shader memory and triggering the shaders to execute those shaders.
 
@@ -33,7 +33,7 @@ The CPU has DRAM and possibly a NIC (InfiniBand/Ethernet) for off‑node traffic
 
 At the hardware level, NVLink attaches logically near the GPU’s L2/memory controller region, so a tensor in GPU0’s HBM2 can be read/written by GPU1 over NVLink without going through the CPU or system DRAM. So, the hardware path is: SMs on GPU0 write halo tensors to HBM2 → L2 → NVLink serdes → L2/HBM2 on GPU1, and vice versa. 
 
-<figure class="diagram"><a href="v100-node.svg"><img src="v100-node.svg" alt="A node with a CPU, DDR4 DRAM, a PCIe switch, a NIC, and two V100s joined by NVLink, with HBM2, L2, SMs, and CUDA cores marked, four numbered data paths, and the peak bandwidth of each link." loading="lazy"></a></figure>
+<figure class="diagram"><a href="v100-node.svg"><img src="v100-node.svg" alt="One node with two V100s. The CPU, running Python and JAX, has DDR4 DRAM and a NIC to the network, and reaches each GPU through a PCIe switch over PCIe Gen3 x16 at about 32 GB/s. Each GPU has 80 SMs, a 6 MB L2 and 16 or 32 GB of HBM2 at about 900 GB/s. The two GPUs are joined by NVLink at 300 GB/s, so halo exchanges stay on NVLink, since going through the CPU is about 9 times slower." loading="lazy"></a></figure>
 
 
 How it all works together :
@@ -44,7 +44,7 @@ How it all works together :
 
 So, an SM is essentially a many‑lane vector processor with its own control (warp schedulers) and fast memories, where CUDA cores handle general math, tensor cores accelerate matrix math, and the control logic juggles thousands of threads to maximize utilization.
 
-<figure class="diagram"><a href="cuda-launch-path.svg"><img src="cuda-launch-path.svg" alt="How a kernel launch reaches the SMs through the pushbuffer, GPFIFO, USERD, and the doorbell register, how pinned copies use the copy engines, and NVIDIA's V100 launch overhead numbers with and without a CUDA graph." loading="lazy"></a></figure>
+<figure class="diagram"><a href="cuda-launch-path.svg"><img src="cuda-launch-path.svg" alt="How a kernel launch reaches an SM. The CPU driver writes methods into a pushbuffer in host memory and rings the GPU's doorbell register with one MMIO write, the front end reads the GPFIFO entry and fetches the methods, and the work distributor drops a thread block on an SM with room. Below, NVIDIA's V100 numbers for 2.9 µs kernels, about 9.6 µs per kernel when every kernel is synced, about 3.8 µs with one sync per step, and about 3.4 µs once the kernels sit in one CUDA graph." loading="lazy"></a></figure>
 
 ## The Tech Stack
 
@@ -92,7 +92,7 @@ For FBPINNs, this enables:
 - Multi-GPU subdomain parallelism (each GPU owns different subdomains)
 - Synchronization via hardware `all-reduce` for combining weighted sums
 
-<figure class="diagram"><a href="nccl-collectives.svg"><img src="nccl-collectives.svg" alt="What each of four ranks holds before and after AllReduce, Broadcast, Reduce, AllGather, ReduceScatter, AlltoAll, and send and recv, with the JAX primitive for each and a ring AllReduce worked through step by step." loading="lazy"></a></figure>
+<figure class="diagram"><a href="nccl-collectives.svg"><img src="nccl-collectives.svg" alt="What each of four ranks holds before and after the main NCCL collectives, with the JAX call each lowers to. AllReduce, psum in JAX, leaves the full sum on every rank. Broadcast copies the root rank's data to all ranks. Reduce leaves the sum only on the root. AllGather, all_gather, gives every rank all four blocks in order. ReduceScatter, psum_scatter, leaves rank i with the sum of block i. AllToAll, all_to_all, sends chunk j of every rank to rank j. In a ring all-reduce each rank sends a chunk to the next rank, and after 2(n−1) steps every rank holds the sum. With two V100s n is 2, so each sends half its data twice, and psum is how the two GPUs add their u_sum and w_sum." loading="lazy"></a></figure>
 
 ## CPU Optimizaton
 
@@ -169,7 +169,7 @@ But how to verify topology of nodes? I used
 * `nvidia-smi -q -d NVLINK` to check which NVLink links are up between the two V100s
 * `nvidia-smi -L` or `CUDA_VISIBLE_DEVICES` to confirm device indices and then map shard placement: e.g., keep the most chatty tensor/model‑parallel ranks on GPU0 and GPU1 of the same node
 
-<figure class="diagram"><a href="nvlink-topology.svg"><img src="nvlink-topology.svg" alt="The DGX-1 V100 NVLink hybrid cube-mesh with its link counts and PCIe tree, a two GPU node, the nvidia-smi topo -m legend ranked fastest first, and the order NCCL tries transports." loading="lazy"></a></figure>
+<figure class="diagram"><a href="nvlink-topology.svg"><img src="nvlink-topology.svg" alt="The DGX-1 V100 hybrid cube-mesh. Eight V100s sit in two quads of four, and each GPU has 6 NVLinks, about 50 GB/s each. Inside a quad every pair is linked, some with 2 links and some with 1, and each GPU also links to its twin in the other quad, so GPU0 and GPU7 share no link at all. Between a pair NCCL uses P2P over NVLink if a link exists, else shared memory staged through the host, else the NIC, InfiniBand or sockets, and InfiniBand is off here. NVSwitch makes every pair one hop." loading="lazy"></a></figure>
 
 Once you know which GPU indices share NVLink, you can implement topology‑aware sharding at the framework level (PyTorch device_ids / process group mapping, JAX mesh layout, DeepSpeed/DTensor placement) so that heavy all‑reduce/all‑to‑all happens within those NVLink pairs and only coarser‑grained sync crosses nodes over InfiniBand.
 
@@ -180,13 +180,13 @@ Which subdomain goes to same GPU? I grouped subdomains so that those with the he
 In JAX terms, this was effectively a [model‑parallel sharding on distributed infrastructure](https://arxiv.org/pdf/2403.03699v1). The global domain is the model, and each subdomain network is a shard. 
 
 So, how it works under the hood? Let me walk through one FBPINN training step in this topology‑aware setup in simplistic way (just 2 GPUs):
-* Before training, I decide: “these 40 subdomains on GPU0, these 35 on GPU1.” I also precompute neighbor lists and overlap regions so I know exactly which data each GPU must send/receive at each step.
+* Before training, I decide: “subdomains 1 to 37 on GPU0, 38 to 75 on GPU1.” I also precompute neighbor lists and overlap regions so I know exactly which data each GPU must send/receive at each step.
 * On each V100, the bulk of compute (forward PDE solve and local backward) runs purely on local HBM2, maximizing the ~900 GB/s bandwidth and SM utilization; no inter‑GPU traffic yet. This is where JAX JIT helps; it compiles each subdomain’s work into efficient fused kernels and schedules them over the SMs.
 * For subdomains at the boundary between GPU0 and GPU1, I gather the boundary tensors (wavefields on the overlap, maybe derivative info) into contiguous buffers. I then initiate device‑to‑device copies or NCCL sends/receives across the NVLink link, which runs at up to 300 GB/s aggregate and significantly lower latency than PCIe. Because the GPUs are directly NVLink‑connected, the driver routes these as peer‑to‑peer transfers without staging through host memory.
 * After the halo exchange, I perform block‑level accumulation steps (e.g., summing overlapping contributions, enforcing partition‑of‑unity consistency) and then proceed to the next time step or optimization step.​ I explicitly synchronize only where necessary (e.g., before using updated halos) to avoid global barriers that would stall both GPUs.
 * The same idea extends to more complex topologies: you place the most communication‑heavy neighbors in groups that sit on NVLink or NVSwitch within a node, and only lower‑frequency communications (e.g., checkpoints, global misfit evaluation) cross node boundaries over InfiniBand or Ethernet.
 
-<figure class="diagram"><a href="topology-sharding.svg"><img src="topology-sharding.svg" alt="75 subdomains split into a solid block per GPU so only the seam crosses NVLink, one training step with a halo exchange and a psum, and a ladder of where each kind of traffic belongs." loading="lazy"></a></figure>
+<figure class="diagram"><a href="topology-sharding.svg"><img src="topology-sharding.svg" alt="75 overlapping subdomains split into one solid block per GPU, subdomains 1 to 37 on GPU0 and 38 to 75 on GPU1. The forward pass, residual and gradients stay on each GPU's own HBM2 at about 900 GB/s, and only the seam between the two blocks crosses NVLink, at up to 300 GB/s, with no host copy. Each GPU then has a partial u_sum and w_sum, a psum adds them across the two GPUs, and the solution is u_sum divided by the summed windows w_sum." loading="lazy"></a></figure>
 
 The benefits of topology‑aware sharing is clear :
 * Higher effective throughput: by matching communication patterns to the fastest links, you utilize the ~300 GB/s NVLink bandwidth and avoid PCIe bottlenecks.
@@ -215,7 +215,7 @@ The capture itself still fits FBPINNs. Fixed batch sizes mean static shapes, so 
 
 [XLA performance flags](https://kolonist26-jax-kr.readthedocs.io/en/latest/gpu_performance_tips.html) are very much version dependent. Use these with caution. Some flags (like [latency‑hiding scheduler](https://github.com/jax-ml/jax/issues/20763)) can increase memory usage a lot on some models!
 
-<figure class="diagram"><a href="xla-pipeline.svg"><img src="xla-pipeline.svg" alt="jax.jit traces a Python function into a jaxpr and StableHLO, and XLA compiles it through target independent passes, the GPU backend, and codegen into thunks and CUDA graph command buffers, with the post's five XLA flags tied to the stage each one changes." loading="lazy"></a></figure>
+<figure class="diagram"><a href="xla-pipeline.svg"><img src="xla-pipeline.svg" alt="From a Python function to GPU code. jax.jit traces the Python function with abstract shapes and dtypes into a jaxpr, which is lowered to StableHLO. The XLA GPU compiler runs passes like CSE, fusion and buffer assignment, and fusion turns several ops such as a mul, an add and a tanh into one kernel. What it emits is kernels plus cuBLAS, cuDNN and NCCL calls, which the runtime runs as thunks and CUDA graphs on streams on the V100. Compilation happens once per shape, cached in memory keyed by shape and on disk when compiling takes about a second or more. The XLA flags from the post are on a note, the latency hiding scheduler on, small all-reduces merged, Triton needing compute capability 8.0 where the V100 is 7.0, and fast min/max skipping NaNs." loading="lazy"></a></figure>
 
 ```bash
 export XLA_FLAGS="--xla_gpu_enable_fast_min_max \
@@ -316,7 +316,7 @@ Quite simple isnt it! Run the same job twice?
 ### Grouped Subdomain Evaluation
 The training domain is split into 75 overlapping subdomains. Each subdomain has its own neural network (75 networks total).
 
-<figure class="diagram"><a href="fbpinn-architecture.svg"><img src="fbpinn-architecture.svg" alt="The FBPINN architecture, where overlapping subdomains each get a small network, inputs are normalised per subdomain, outputs are blended by smooth windows that sum to one and constrained into one solution, with the loss, the scheduler, and the multilevel version." loading="lazy"></a></figure>
+<figure class="diagram"><a href="fbpinn-architecture.svg"><img src="fbpinn-architecture.svg" alt="The FBPINN idea on a 1D domain. The x axis is split into overlapping subdomains, each with its own small tanh network (2 by 16 in 2023, 1 by 16 later) that sees its input mapped to [-1, 1]. Smooth windows over each subdomain sum to 1, each net output is multiplied by its window and the pieces are summed into one solution curve, and the hard boundary constraint is applied last. The windows blend neighbours, so there are no interface loss terms." loading="lazy"></a></figure>
 
 Naive approach would have been:
 ```python
@@ -359,7 +359,7 @@ Quirks you ask?
 
 I get 3-5x faster than naive sequential evaluation + memory enables 262k-point test grids. Win.
 
-<figure class="diagram"><a href="grouped-evaluation.svg"><img src="grouped-evaluation.svg" alt="Grouped evaluation in four steps, gather the points inside each subdomain, vmap every network at once, segment_sum the pieces back per point, and divide by the summed windows, with the memory of a dense layout next to x_batch." loading="lazy"></a></figure>
+<figure class="diagram"><a href="grouped-evaluation.svg"><img src="grouped-evaluation.svg" alt="Grouped evaluation. Each of the overlapping subdomains gathers only the points inside it, all 75 networks run in one vmap call, segment_sum adds the pieces back per point so a point shared by two subdomains gets two contributions added, and the sum is divided by the summed windows. A dense points by subdomains copy would be 75 × 262,144 × 3 × 4 bytes, about 236 MB, while the grouped layout stores flat point and subdomain pairs, points times overlap with no padding, next to an x_batch of about 3 MB." loading="lazy"></a></figure>
 
 ### Chunked Processing for Large Validations
 
@@ -445,7 +445,7 @@ Why this is fast:
 
 Overall 2-3x speedup with 2 GPUs 
 
-<figure class="diagram"><a href="pmap-step.svg"><img src="pmap-step.svg" alt="One pmap call running 10 outer scan blocks of 10 inner gradient accumulation steps on each V100, with a psum over NVLink in every forward pass and one optax update per block, so the host dispatches once instead of 100 times." loading="lazy"></a></figure>
+<figure class="diagram"><a href="pmap-step.svg"><img src="pmap-step.svg" alt="One pmap step as a timeline. The host calls update_pmap once. On GPU0, which owns subdomains 1 to 37, and GPU1, which owns 38 to 75, the same program runs 10 outer scan blocks of 10 inner gradient accumulation steps, with one optax update at the end of each block, and every forward pass does a psum over NVLink between the two GPUs. A Python loop would have dispatched from the host 100 times." loading="lazy"></a></figure>
 
 ### Hardware-Native Subdomain Sharding
 
@@ -527,7 +527,7 @@ To push performance beyond standard JAX JIT compilation, I implemented three tar
 
 As FBPINN residual evaluations have low arithmetic intensity (few FLOPs per byte loaded). By processing in chunks that fit in L2, we can effectively increase the operational intensity by avoiding repeated DRAM fetches for the same parameters, keeping them 'hot' in cache.
 
-<figure class="diagram"><a href="memory-hierarchy.svg"><img src="memory-hierarchy.svg" alt="The V100 memory levels from registers to host DRAM with their sizes and bandwidths, next to the post's chunking and subdomain batching working sets drawn against the 6 MB L2 line." loading="lazy"></a></figure>
+<figure class="diagram"><a href="memory-hierarchy.svg"><img src="memory-hierarchy.svg" alt="The V100 memory levels, smallest and fastest first. Registers at 256 KB per SM, L1 and shared memory at 128 KB per SM, and one 6 MB L2 shared by all 80 SMs are on the chip. Off the chip are 16 or 32 GB of HBM2 at about 900 GB/s, a peer GPU over NVLink at up to 300 GB/s total, and host DRAM over PCIe at about 16 GB/s each way. Against the 6 MB L2 line, a 10 thousand point residual batch and all 75 subdomains at about 15 MB go over, while 2048 point chunks and 20 subdomains at a time, about 4 MB, stay under, so the hot working set fits in L2." loading="lazy"></a></figure>
 
 ```python
 # Naive approach: Large working set evicts L2 cache
