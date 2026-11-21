@@ -1,4 +1,4 @@
-.sd-viz .st-chart { background: var(--sd-card); border: 1px solid var(--sd-line); border-radius: 8px; padding: 10px 8px 4px; }
+.sd-viz .st-chart { background: var(--sd-card); border: 1px solid var(--sd-line); border-radius: 12px; padding: 10px 8px 4px; }
 .sd-viz .st-svg text { font-size: 12px; }
 .sd-viz .st-label { fill: var(--sd-ink); }
 .sd-viz .st-row { cursor: pointer; outline: none; }

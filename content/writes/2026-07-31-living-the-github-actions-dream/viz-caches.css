@@ -1,7 +1,7 @@
 .sd-viz .ca-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .sd-viz .ca-card {
   display: flex; flex-direction: column; gap: 6px; padding: 10px 11px; background: var(--sd-card);
-  border: 1px solid var(--sd-line); border-radius: 8px; transition: border-color .3s, background-color .3s;
+  border: 1px solid var(--sd-line); border-radius: 12px; transition: border-color .3s, background-color .3s;
 }
 .sd-viz .ca-card[data-state="ok"] { border-color: var(--sd-ok); }
 .sd-viz .ca-card[data-state="bad"] { border-color: var(--sd-accent); }
@@ -15,8 +15,8 @@
 .sd-viz .ca-row[data-current="true"] { opacity: 1; }
 .sd-viz .ca-row-name { font-size: 12px; color: var(--sd-muted); }
 .sd-viz .ca-row[data-current="true"] .ca-row-name { color: var(--sd-ink); font-weight: 700; }
-.sd-viz .ca-track { display: block; height: 12px; border-radius: 6px; background: var(--sd-line); overflow: hidden; }
-.sd-viz .ca-fill { display: block; height: 100%; width: 0; border-radius: 6px; background: var(--sd-muted); }
+.sd-viz .ca-track { display: block; height: 12px; border-radius: 9px; background: var(--sd-line); overflow: hidden; }
+.sd-viz .ca-fill { display: block; height: 100%; width: 0; border-radius: 9px; background: var(--sd-muted); }
 .sd-viz .ca-row[data-current="true"] .ca-fill { background: var(--sd-accent); }
 .sd-viz .ca-num { font-size: 13px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
 
@@ -27,3 +27,8 @@
   .sd-viz .ca-row { grid-template-columns: 7.2em minmax(0, 1fr) 3em; gap: 8px; }
   .sd-viz .sd-seg > button:last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
+
+/* fixed height, parts that come and go keep their space so the figure never resizes */
+.sd-viz .ca-role { min-height: 48px; }
+@media (min-width: 561px) { .sd-viz .ca-card { min-height: 140px; } }
+.sd-viz .ca-num { min-height: 19px; }

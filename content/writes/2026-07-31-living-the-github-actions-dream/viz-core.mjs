@@ -64,6 +64,9 @@ export function animate(ms, onFrame, curve = ease.inOut) {
 // Story runner. story.run(async go => { await go.wait(400); await go.tween(600, t => ...); })
 // A newer run, or story.stop(), ends the old one at its next await.
 const STOP = Symbol('stop');
+// Scales every wait and tween in the scripted tours, below 1 is faster.
+export const SPEED = .55;
+
 export function story() {
   let token = 0, current = null;
   const api = {
@@ -77,11 +80,11 @@ export function story() {
         alive: () => mine === token,
         wait: ms => new Promise((resolve, reject) => {
           if (reduced.matches) { resolve(); return; }
-          setTimeout(() => (mine === token ? resolve() : reject(STOP)), ms);
+          setTimeout(() => (mine === token ? resolve() : reject(STOP)), ms * SPEED);
         }),
         tween: async (ms, onFrame, curve) => {
           alive();
-          const a = animate(ms, onFrame, curve); current = a;
+          const a = animate(ms * SPEED, onFrame, curve); current = a;
           await a; alive();
         },
       };

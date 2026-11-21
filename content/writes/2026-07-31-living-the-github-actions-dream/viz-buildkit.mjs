@@ -65,7 +65,11 @@ export function mount(figure) {
   function draw(svg, W) {
     svg.replaceChildren();
     const narrow = W < 480;
-    return mode === 'dedupe' ? drawDedupe(svg, W, narrow) : drawGraph(svg, W, narrow);
+    // the chart is as tall as the taller of the two views, so switching never resizes the figure,
+    // the other view is drawn first into a scratch svg only to measure it
+    const other = mode === 'dedupe' ? drawGraph(sv('svg'), W, narrow) : drawDedupe(sv('svg'), W, narrow);
+    const mine = mode === 'dedupe' ? drawDedupe(svg, W, narrow) : drawGraph(svg, W, narrow);
+    return Math.max(mine, other);
   }
 
   function drawGraph(svg, W, narrow) {

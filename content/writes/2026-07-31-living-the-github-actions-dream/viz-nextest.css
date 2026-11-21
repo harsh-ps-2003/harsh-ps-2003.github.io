@@ -1,4 +1,4 @@
-.sd-viz .nx-chart { background: var(--sd-card); border: 1px solid var(--sd-line); border-radius: 8px; padding: 12px 14px; }
+.sd-viz .nx-chart { background: var(--sd-card); border: 1px solid var(--sd-line); border-radius: 12px; padding: 12px 14px; }
 .sd-viz .nx-lanes { position: relative; display: flex; flex-direction: column; gap: 6px; }
 .sd-viz .nx-row { display: grid; grid-template-columns: 4.6em minmax(0, 1fr); align-items: center; gap: 8px; }
 .sd-viz .nx-core { font-size: 11.5px; color: var(--sd-muted); }
@@ -22,8 +22,8 @@
 .sd-viz .nx-totals { display: flex; flex-direction: column; gap: 6px; margin: 14px 0 0; }
 .sd-viz .nx-total { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); align-items: center; gap: 8px; }
 .sd-viz .nx-total-name { font-size: 12.5px; }
-.sd-viz .nx-total-track { position: relative; display: block; height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--sd-line) 50%, transparent); }
-.sd-viz .nx-total-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; background: var(--sd-muted); }
+.sd-viz .nx-total-track { position: relative; display: block; height: 10px; border-radius: 8px; background: color-mix(in srgb, var(--sd-line) 50%, transparent); }
+.sd-viz .nx-total-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 8px; background: var(--sd-muted); }
 .sd-viz .nx-total-fill.nx-total-nextest { background: var(--sd-ok); }
 
 @media (max-width: 560px) {

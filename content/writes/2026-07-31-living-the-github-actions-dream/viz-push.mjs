@@ -92,8 +92,7 @@ export function mount(figure) {
   function renderDetail() {
     queueBox.hidden = !detail;
     rows[0].row.querySelector('.ps-queue-btn').setAttribute('aria-expanded', String(detail));
-    if (!detail) return;
-    if (mode === 'warm') {
+    if (detail && mode === 'warm') {
       queueChips.replaceChildren(el('span', {class: 'sd-chip is-ok', text: 'schema already on disk'}), el('span', {class: 'sd-chip', text: 'long poll for a job'}));
       queueText.innerHTML = 'A persistent runner keeps the schema on disk and refreshes it hourly, so <b>it only waits for a job</b>.';
     } else {

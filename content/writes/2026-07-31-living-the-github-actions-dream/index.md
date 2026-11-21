@@ -596,9 +596,9 @@ steps:
 ```
 {% endraw %}
 
-Here is the catch. Every job pays a setup cost before a single test runs, checkout, runtimes, dependencies, browsers, service containers, seed data, and that cost is paid again on every shard. Think of it as job density, the fraction of a job's wall time spent on the work the job exists for. Drag the sliders.
+Here is the catch. Every job pays a setup cost before a single test runs, checkout, runtimes, dependencies, browsers, service containers, seed data, and that cost is paid again on every shard. Think of it as job density, the fraction of a job's wall time spent on the work the job exists for.
 
-<figure class="sd-viz" data-viz="shards"></figure>
+<figure class="diagram"><a href="shard-density.svg"><img src="shard-density.svg" alt="The same 60 minutes of tests with 3 minutes of setup per machine. One machine takes 63 minutes and is 95 percent tests, four shards take 18 minutes and are 83 percent tests, twenty shards take 6 minutes but are only half tests." loading="lazy"></a></figure>
 
 The rule of thumb is to shard as wide as you like as long as every shard stays above roughly 80 percent density, which means each shard spends at least four times as long testing as setting up. The lever is setup time, not shard count. Build images once and snapshot the toolchain into a custom runner image, and the same suite can shard much wider before it starts to hurt.
 
@@ -790,7 +790,7 @@ In April 2026, a regression in merge queue operations silently reverted previous
 
 In March 2025, someone compromised a popular GitHub Action called tj-actions/changed-files. A malicious pull request exploited the `pull_request_target` trigger to steal a SpotBugs maintainer's personal access token, and from there the attackers hopped through SpotBugs and Reviewdog into tj-actions/changed-files, retroactively moved its version tags to a malicious commit that printed secrets from runner memory into the workflow logs, and hit over 23,000 repositories, Coinbase among them.
 
-<figure class="sd-viz" data-viz="supplychain"></figure>
+<figure class="diagram"><a href="supply-chain.svg"><img src="supply-chain.svg" alt="The tj-actions attack as a chain, from a malicious pull request through a pull_request_target workflow, a stolen maintainer token, SpotBugs, Reviewdog and tj-actions/changed-files to over 23,000 repositories printing their secrets. Never checking out PR code in pull_request_target cuts it at the start, pinning actions to a commit SHA cuts it before the repositories, and a read-only GITHUB_TOKEN only limits the leak." loading="lazy"></a></figure>
 
 The attack was live for about a day, and [Semgrep's analysis](https://semgrep.dev/blog/2025/popular-github-action-tj-actionschanged-files-is-compromised/) recommended removing the action from every branch and rotating anything that might have leaked. The usual advice is to pin actions to a commit hash, which almost nobody does because it is tedious, and most PyPI packages that use third party actions still reference at least one by a mutable tag. The real lesson is that the Actions security model is complicated enough that experienced teams get it wrong.
 
@@ -889,8 +889,6 @@ For decades, the biggest bottleneck to innovation was writing code. That is no l
 At first we bolted agents onto our existing human centric workflows, for code review and test generation, which was fine while models were hard to trust. Then they got better every couple of weeks, and teams working with agents now see pull requests piling up faster than humans can review them, CI queues growing, and merge conflicts multiplying. When a developer spent days on a feature, 20 minutes of CI was not the constraint. When you can generate a feature in 20 minutes, a 20 minute pipeline is unacceptable.
 
 CI was built around a developer who pushes, opens a pull request and context switches to something else while it runs. An agent can write code in seconds, commit it, watch CI, read the results, fix and push again much faster than any CI system was designed to support, and it is not doing something else while CI runs. It is blocked. Every time it has to wait, or a human has to paste CI errors back into it and say fix it, you have added friction to a process that is supposed to be autonomous. CI is now in the critical path in a way it never quite was before.
-
-<figure class="sd-viz" data-viz="agentloop"></figure>
 
 A few things matter most for agents. Rerunning 1 job instead of a fifteen step pipeline to validate a 3 line fix. Real CI on local patches, so the agent validates before committing instead of pushing broken commits to find out. All context behind an API, because agents do not click through dashboards. And speed at scale, because 1 engineer can run tens of agents on separate branches, all needing CI at once, so queueing and cold starts matter far more than they did for ten humans.
 

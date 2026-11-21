@@ -66,6 +66,10 @@ export function mount(figure) {
       stack.append(li);
       return li;
     });
+    // room for the longest Dockerfile, so switching orders never resizes the figure
+    const most = Math.max(...Object.values(ORDERS).map(o => o.length));
+    const rowH = rows[0]?.offsetHeight || 0;
+    stack.style.minHeight = rowH ? `${most * rowH + (most - 1) * 6}px` : '';
     fill.style.width = '0%';
   }
   function setOrder(v) { order = v; seg.set(v); change = null; draw(); caption.textContent = 'Pick a change and watch which layers survive.'; }

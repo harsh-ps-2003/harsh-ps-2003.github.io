@@ -1,10 +1,10 @@
-.sd-viz .ps-chart { display: flex; flex-direction: column; gap: 6px; background: var(--sd-card); border: 1px solid var(--sd-line); border-radius: 8px; padding: 12px 14px; }
+.sd-viz .ps-chart { display: flex; flex-direction: column; gap: 6px; background: var(--sd-card); border: 1px solid var(--sd-line); border-radius: 12px; padding: 12px 14px; }
 .sd-viz .ps-row { display: grid; grid-template-columns: 11.5em minmax(0, 1fr); align-items: center; gap: 10px; min-height: 26px; }
 .sd-viz .ps-name { font-size: 12.5px; color: var(--sd-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sd-viz .ps-row.is-work .ps-name { font-weight: 700; }
 .sd-viz .ps-row.is-skipped .ps-name { color: var(--sd-faint); text-decoration: line-through; text-decoration-color: var(--sd-line); }
 .sd-viz .ps-queue-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 26px; padding: 0 6px; margin-left: -6px; border: 1px dashed transparent;
-  background: transparent; text-align: left; border-radius: 5px; color: var(--sd-ink); }
+  background: transparent; text-align: left; border-radius: 8px; color: var(--sd-ink); }
 .sd-viz .ps-queue-btn:hover:not(:disabled) { border-color: var(--sd-line); }
 .sd-viz .ps-queue-btn[aria-expanded="true"] { border-color: var(--sd-accent); }
 .sd-viz .ps-more { font-size: 11px; color: var(--sd-accent-ink); }
@@ -21,8 +21,8 @@
 .sd-viz .ps-readout { margin: 12px 0 0; font-size: 14px; min-height: 1.5em; }
 .sd-viz .ps-readout b { font-size: 17px; color: var(--sd-ok); }
 
-.sd-viz .ps-detail { margin: 12px 0 0; padding: 12px 14px; border: 1px solid var(--sd-line); border-radius: 8px; background: var(--sd-card); }
-.sd-viz .ps-detail[hidden] { display: none; }
+.sd-viz .ps-detail { margin: 12px 0 0; padding: 12px 14px; border: 1px solid var(--sd-line); border-radius: 12px; background: var(--sd-card); }
+.sd-viz .ps-detail[hidden] { display: block; visibility: hidden; }
 .sd-viz .ps-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .sd-viz .ps-qchip { animation: ps-pop .4s var(--sd-ease) both; }
 @keyframes ps-pop { from { opacity: 0; transform: translateY(-6px); } }
