@@ -9,11 +9,11 @@ description = "One reward for a thousand tokens throws away the explanation of w
 tags = ["ml", "rl", "sdpo", "sdft", "self-distillation", "training", "llms"]
 +++
 
-okay, time for some RL research writing! I was reading SDPO paper on a cozy saturday. I think its a pretty important paper thats gonna have quite a lot of impact like GRPO did, so blogging about it seemed a nice idea to me.
+okay, time for some RL research writing! I was reading SDPO paper on a cozy saturday. I think its a pretty important paper thats gonna have quite a lot of impact like GRPO did, so blogging about it seemed a nice idea to me. but obviously, this is gonna be outdated soon.
 
-THese things are quite simple, for understanding, say the model is solving `3x + 7 = 22`. It moves the 7 across, forgets to flip the sign, and writes `3x = 22 + 7`, and it finishes at `x = 29/3`. The actual answer is 5, so the checker says wrong. 0 reward recieved, yayy. This is what we will discuss.
+These things are quite simple, for understanding, say the model is solving `3x + 7 = 22`. It moves the 7 across, forgets to flip the sign, and writes `3x = 22 + 7`, and it finishes at `x = 29/3`. The actual answer is 5, so the checker says wrong. 0 reward recieved, boooo. This is what we will discuss.
 
-observe, most of what the model generated was actually fine. The bad token was the +, its the only culprit. The only signal that came back was one number for the whole attempt, and that number is for every token, including `3x`, `=`, and `22`. now you must have gussed what this blog is about! its about getting a reward on every token, and about where that reward can come from, a bigger model, a CoT, an error message from the enviroment, and in the end the same weights reading the attempt again with extra text in the prompt.
+observe, most of what the model generated was actually fine. The bad token was the +, its the only culprit. The only signal that came back was one number for the whole attempt, and that number is for every token, including `3x`, `=`, and `22`. now you must have gussed what this blog is about! its about getting a reward on every token, and about where that reward can come from, a bigger model, a CoT, an error message from the env, and in the end the same weights reading the attempt again with extra text in the prompt.
 
 ## post-training is kinda broken rn
 
@@ -41,13 +41,13 @@ the standard recipe today is RL with GRPO. it basically lets model write some at
 <a href="intro-problem.svg"><img src="intro-problem.svg" alt="Four attempts at the same equation are scored 0, 1, 0, 0 by a verifier and the weights move toward the passing one. Next to it, a compiler error, a runtime exception and a judge's comment are reduced to a single zero." loading="lazy"></a>
 </figure>
 
-but this way of doing things has 2 problems, and the 2nd one turns out to be the answer to the 1st. The first is that 1 score covers the whole attempt. Which token caused the 0, the 3rd line or the 500th?? one number cant say, so the model works it out statistically over many attempts, tokens that show up in passing answers drift up and tokens in failing ones drift down. It works, slowly, because each attempt carries almost no information about any single token. this is the crazy credit assignment problem, deciding which steps deserve the credit or the blame.
+but this way of doing things has 2 problems, and the 2nd one turns out to be the answer to the 1st! The 1st is that 1 score covers the whole attempt. Which token caused the 0, the 3rd line or the 500th?? one number cant say, so the model works it out statistically over many attempts, tokens that show up in passing answers drift up and tokens in failing ones drift down. It works, slowly, because each attempt carries almost no information about any single token. this is the crazy credit assignment problem, deciding which steps deserve the credit or the blame.
 
 The 2nd is that the explanation gets thrown away. a compiler says the syntax is broken, a runtime exception says you did dumb thing of division by zero, whatever, and each of those points right at where the attempt went wrong, which is of importance as it is exactly the credit assignment the model was struggling with.obviously, you want to keep the info as well!
 
 ### moving learnings from the prompt into the weights
 
-The fix comes from something whihc is literally bread and butter of models capabilities these days - in-context learning. The context is everything the model is reading right now (your prompt, the conversation so far, pasted docs), and in-context learning means it changes behaviour because of what's in there, with zero training whatsoever. when you write - "shorter, please", the answers actually get shorter! just think about it, this works with messy shit you are saying to you model, and just a tiny bit is enough. THis is the key, a magical key to continual learning world
+The fix comes from something whihc is literally bread and butter of models capabilities these days - in-context learning. The context is everything the model is reading right now (your prompt, the conversation so far, pasted docs), and in-context learning means it changes behaviour because of what's in there, with 0 training whatsoever. when you write - "shorter, please", the answers actually get shorter! just think about it, this works with messy shit you are saying to you model, and just a tiny bit is enough. THis is the key, a magical key to continual learning world
 
 But the problem is that it doesnt stay. as soon as i start a new session, the model to zero, and the context window is finite anyways, so to keep a lesson the weights themselves have to change. the model actually needs to learn
 
@@ -63,11 +63,7 @@ There's 1 model with 1 set of weights, used with 2 prompts, and a training step 
 <a href="intro-idea.svg"><img src="intro-idea.svg" alt="One self-distillation step, write, check, reread with the feedback, and the plus gets the blame." loading="lazy"></a>
 </figure>
 
-The obvious question is why should the teacher's view be any better when its literally the same model? while writing, the model has to pick each token without knowing where it leads. While rereading, it sees the whole answer and what went wrong with it, so it only has to recognize the bad step, and recognizing a mistake youre shown is wayyyy easier than not making it, for people like me and for models unlike me. That gap between judging and writing is where the whole signal comes from. The teacher never writes a better answer, it only says, token by token, "I'd have been more likely, or less likely, to write that".
-
-<figure class="diagram">
-<a href="water.png"><img src="water.png" alt="The answer 'Yes, water is wet.' reread after the user says 'I said yes or no only': Yes is pushed up, the comma and the rest are pushed down." loading="lazy"></a>
-</figure>
+The obvious question is why should the teacher's view be any better when its literally the same model? while writing, the model has to pick each token without knowing where it leads. While rereading, it sees the whole answer and what went wrong with it, so it only has to recognize the bad step, and recognizing a mistake youre shown is wayyyyyyy easier than not making it, for people like me and for models unlike me. That gap between judging and writing is where the whole signal comes from. The teacher never writes a better answer, it only says, token by token, "I'd have been more likely, or less likely, to write that".
 
 ### just a loop and 5 possible kindof of signal
 
@@ -77,15 +73,15 @@ The loop never changes, only the extra text in the teacher's prompt does. All it
 <a href="five-uses.svg"><img src="five-uses.svg" alt="Five sources of extra text for the teacher: demonstrations, new knowledge, verifiable rewards with a passing sibling, rich feedback, and user interactions. The first two are SDFT, the middle two SDPO, the last learning from users." loading="lazy"></a>
 </figure>
 
-1 word from the figure that comes back a lot, siblings are a few attempts at the same question, and when the environment only says right or wrong, a sibling that passed becomes the extra text for grading the ones that failed.
+siblings are a few attempts at the same question, and when the environment only says right or wrong, a sibling that passed becomes the extra text for grading the ones that failed.
 
 The first 2 come from [Self-Distillation Enables Continual Learning](https://arxiv.org/abs/2601.19897) (SDFT), the middle 2 from [Reinforcement Learning via Self-Distillation](https://arxiv.org/abs/2601.20802) (SDPO), and the last from [Aligning Language Models from User Interactions](https://arxiv.org/abs/2603.12273). The last 2 come with no right answer to copy and no score to optimise, only text, so neither fine-tuning nor RL could use them before.
 
-Why a whole talk on it? There's no extra model and no labels, it works ( ͡° ͜ °) and its already in use, [OpenClaw-RL](https://github.com/Gen-Verse/OpenClaw-RL) trains agents from live conversations this way and [GLM-5](https://arxiv.org/abs/2602.15763) distils its own earlier stages back in on-policy.
+Why a whole blog on it? There's no extra model and no labels, it works ( ͡° ͜ °) and its already in use, [OpenClaw-RL](https://github.com/Gen-Verse/OpenClaw-RL) trains agents from live conversations this way and [GLM-5](https://arxiv.org/abs/2602.15763) distils its own earlier stages back in on-policy.
 
 ## how a model writes, and the 2 ways to teach it
 
-A model writes one token at a time, just your neighbourhood next token  you know. At every step it puts a probability on every candidate next token and draws one our, and that map, from "what is written so far" to a distribution over the next token, is the policy. Training decides, for each token the model actually wrote, whether that token should become more likely or less.
+A model writes one token at a time, just your neighbourhood next token you know. At every step it puts a probability on every candidate next token and draws one our, and that map, from "what is written so far" to a distribution over the next token, is the policy. Training decides, for each token the model actually wrote, whether that token should become more likely or less.
 
 <figure class="diagram sd-viz" data-viz="next-token">
 <a href="basics-next-token.svg"><img src="basics-next-token.svg" alt="After 3x = 22 the model puts .55 on minus and .30 on plus, and draws the plus." loading="lazy"></a>
@@ -101,7 +97,7 @@ RL - the try, score, update loop from before. Nobody has to write the ideal answ
 
 Just to make things clear, on-policy means learning from text the model wrote itself, so RL is on-policy and SFT isnt. Dense means feedback on every token, so SFT is dense and RL isnt. Learning on your own text means you practise exactly the situations you'll face, mistakes included, and per-token feedback means each mistake gets located instead of guessed. RL has the first, SFT has the second, and this whole post is about getting both at once (☝ ՞ਊ ՞)
 
-As we go I'll compare every new method with the ones before it using the same 5 questions, because otherwise all these acronyms blur into one soup (◎＿◎;)
+As we go I'll compare every new method with the ones before it using the same 5 questions, because otherwise all these acronyms blur into a big soup (◎＿◎;)
 
 1. Who writes the text the model learns from?
 2. Who grades it?
@@ -110,8 +106,6 @@ As we go I'll compare every new method with the ones before it using the same 5 
 5. What do you need to have?
 
 ### RL gives 1 number for the whole attempt
-
-The simple intuition is "do more of what worked and less of what didn't". we arent telling the model the right answer, the score alone steers it.
 
 <figure class="diagram sd-viz" data-viz="blame" data-modes="grpo">
 <a href="grade-one.svg"><img src="grade-one.svg" alt="GRPO puts the same advantage under every token of the attempt." loading="lazy"></a>
@@ -125,7 +119,7 @@ The update is easiest to read inside out -
 
 Why an advantage and not the raw score? If every reward were +ve, every attempt would get pushed up, the bad ones just a bit less, so what matters is whether the attempt beat what was expected for this question. That needs a baseline. PPO, the classic algorithm, gets it from a trained critic, and GRPO gets it from the other attempts, `A_i = (r_i − μ) / σ`, attempt i's reward minus the group's average, divided by the group's spread, flip the rewards in the figure and watch it move.
 
-The catch is right there in the figure, the plus gets pushed down and so do `3x`, the equals sign and `22`, which were all fine ( >︹<) RL learns on its own path, but from a sparse signal. The obvious alternative is a target at every token, and that exists, its called distillation.
+The obvious alternative is a target at every token, and that exists, its called distillation.
 
 ### distillation - dense, but on someone else's path
 
@@ -135,7 +129,7 @@ the words "teacher" and "student" come from distillation, which is traditional i
 <a href="grade-distill.svg"><img src="grade-distill.svg" alt="A teacher's solution is graded on every token, but once the student slips onto 3x = 22 + 7 it is off the only path the data covers, and the remaining targets no longer match what it is writing." loading="lazy"></a>
 </figure>
 
-The simplest version copies the teacher's words. The teacher writes `3x = 22 − 7, 3x = 15, x = 5` and the student is trained to predict each token, with loss minus the log of its probability for the teacher's token. Thats exactly SFT with a teacher model writing the solutions - dense, because every token has a target, and off-policy, because the tokens are the teacher's. And it breaks the moment the student slips. Once the student writes plus its on a line the data never covers, it never practised recovering from its own mistake, and the errors compound ◔̯◔
+The simplest version copies the teacher's words. The teacher writes `3x = 22 − 7, 3x = 15, x = 5` and the student is trained to predict each token, with (loss - the log of its probability for the teacher's token). Thats exactly SFT with a teacher model writing the solutions - dense, because every token has a target, and off-policy, because the tokens are the teacher's. And it breaks the moment the student slips. Once the student writes plus its on a line the data never covers, it never practised recovering from its own mistake, and the errors compound ◔̯◔
 
 A richer version copies the teachers probabilities. say at some position the teacher puts 45% on "so", 43% on "thus", 8% on "hence" and almost nothing on "+". Copying only the word "so" tells the student "thus" was as wrong as "+", while copying the whole distribution keeps the ranking. That extra ranking is called the infamopus dark knowledge, it goes back to [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531), and the methods below use it wherever they can afford to.
 
@@ -160,7 +154,7 @@ Why should "your own attempts" matter so much? The cleanest evidence I found is 
 | card colours | 23.6 | 41.2 | 13.7 |
 | new cities | 16.7 | 77.8 | 11.1 |
 
-Copying memorised the old answers and RL picked up the rule (◕‿◕) copying rewards reproducing the exact answers it was shown, so memorising them is enough, while RL rewards whatever the model's own attempts got right across tons of different deals and routes, and the cheapest way to be right on all of them is to learn the rule. And the RL model could read the checker's message and retry, and more retries transferred better, so reading feedback already helped here, which is exactly where SDPO is heading.
+copying memorised the old answers and RL picked up the rule (◕‿◕) copying rewards reproducing the exact answers it was shown, so memorising them is enough, while RL rewards whatever the model's own attempts got right across tons of different deals and routes, and the cheapest way to be right on all of them is to learn the rule. And the RL model could read the checker's message and retry, and more retries transferred better, so reading feedback already helped here, which is exactly where SDPO is heading.
 
 ### grading every token
 
@@ -255,7 +249,7 @@ What GRPO gains is pretty clear, no critic to train, which is 1 less big network
 
 What it costs, and these 4 drive the rest of the post -
 
-1. 1 grade for the whole answer, the plus and the 22 get the same push.
+1. 1 grade for the whole answer.
 2. Same-score groups teach nothing, all pass or all fail makes every advantage zero, and on hard questions early on everything fails.
 3. Many full answers per question, each finished before it can be scored, which is slow for long agent tasks, and in production a user asks once, so there's no group.
 4. Only the number survives. The error message, the judge's comment and the user's reply all get squashed into 1 score.
@@ -279,14 +273,9 @@ Look at the last column. After RL, several of them merge their specialists into 
 
 ## no bigger teacher? then who grades the tokens?
 
-The reasoning goes like this -
+Once you want the best model you have to get better than it has ever been, no version of it knows more, and a teacher identical to the student teaches nothing. So use the same weights and put the extra in the prompt.
 
-1. On-policy distillation needs a teacher thats better than the student at the skill being graded. That can be a bigger model, or, like the company assistant, the student's own earlier self for a skill it lost.
-2. But if you want the best model you have to get better than it has ever been, no version of it, bigger or earlier, knows more.
-3. A teacher identical to the student teaches nothing, it has to know something extra.
-4. So use the same model and put something extra in its prompt.
-
-That something extra is a hint - any text in the teacher's prompt that the student doesnt get to see, or privileged information if you want the fancy name. With the same weights on both sides, the hint is the only difference between teacher and student. A good hint changes the teacher's opinion about the student's mistakes and only those. A bad one either changes nothing, so there's nothing to learn, or gives away something the student could never work out, so the student learns to imitate a teacher that knows more than it can, and that trade-off decides how well every method from here on works.
+A hint is any text in the teacher's prompt that the student doesnt get to see, or privileged information if you want the fancy name. With the same weights on both sides, the hint is the only difference between teacher and student. A good hint changes the teacher's opinion about the student's mistakes and only those. A bad one either changes nothing, so there's nothing to learn, or gives away something the student could never work out, so the student learns to imitate a teacher that knows more than it can, and that trade-off decides how well every method from here on works.
 
 <figure class="diagram diagram-row">
 <a href="grade-three.svg"><img src="grade-three.svg" alt="The same student attempt graded three ways: by a separate larger model, by the same weights with a verified solution in the prompt (OPSD), and by the same weights with the environment's feedback in the prompt (SDPO)." loading="lazy"></a>
@@ -320,8 +309,6 @@ Trained toward a teacher that has read "x = 5", the student learns to jump strai
 1. The teacher's probabilities come from the question, which the student also sees, and the solution, which it never sees, and only the first part can be learned.
 2. Training still pushes the student toward the second part, so the student copies what it can copy, how the teacher behaves once it knows the answer - confident, decisive, skipping steps.
 3. The more the hint gives away, the bigger that unlearnable part, and the bigger the bias.
-
-its like practising for an exam where the marker has the answer sheet open and marks you on how much you sound like someone holding it, you'd learn to sound sure of yourself and not to solve anything lol.
 
 You can see it creeping in -
 
@@ -372,13 +359,7 @@ There are 2 ways to apply that number, the last 2 tabs in the figure, next to GR
 
 ### the teacher finds the plus
 
-now on a real model, Qwen3-8B, to check the grade actually lands where it should. It writes `return list(range(1, n + 1))`, a totally fair reading of "from 1 to n", and the checker only says "Don't include n", no Python error and no corrected answer.
-
-<figure class="diagram">
-<a href="sdpo-fig-logratios.png"><img src="sdpo-fig-logratios.png" alt="The question, the sampled range(1, n + 1) call, the feedback 'Don't include n', and the self-teacher's disagreement concentrated on the plus." loading="lazy"></a>
-</figure>
-
-The red sits on the plus and almost nowhere else. `def`, `range` and `(1,` are all consistent with "n shouldn't be included", so reading the feedback doesnt change the model's view of them, and only the `+ 1`, which is what puts n in, conflicts with it. The model found its own mistake just by rereading, and nobody told it where (◕▽◕)
+now on a real model, Qwen3-8B, to check the grade actually lands where it should. It writes `return list(range(1, n + 1))`, a totally fair reading of "from 1 to n", and the checker only says "Don't include n", no Python error and no corrected answer. `def`, `range` and `(1,` are all consistent with that, and only the `+ 1`, which is what puts n in, conflicts with it. The model found its own mistake just by rereading, and nobody told it where (◕▽◕)
 
 <figure class="diagram">
 <a href="sdpo-schematic-v5-grid-shorter.png"><img src="sdpo-schematic-v5-grid-shorter.png" alt="GRPO paints every written token one colour. SDPO colours each candidate token: the plus is red, and below it the token that closes the bracket is dark blue." loading="lazy"></a>
