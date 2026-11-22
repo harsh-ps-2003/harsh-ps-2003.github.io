@@ -12,7 +12,7 @@ tags = ["ci", "github-actions", "docker", "devops"]
 
 Personally, for me its deeply frustrating when I watch a CI pipeline spin for 45 minutes when I know the actual work takes maybe 3 minutes. You push a one line fix, grab coffee, check Slack, and the build is still chugging away. The green checkmark feels less like validation and more like a hostage release tbh. I have mass cancelled CI runs more times than I can count during my internship, and every time I do it I wonder why we collectively decided this was acceptable.
 
-I did lot of to-and-fro with CI during internships. This post is my attempt to document everything I have learned about making Docker builds fast, GitHub Actions efficient, and CI pipelines that do not make you want to mass cancel runs. We will go deep on how Docker layers actually work, why BuildKit changed everything, the dark arts of caching, the Arm situation that everyone is suddenly dealing with, and why Rust builds are thier own special circle of CI hell. Along the way I will share the tricks that actually work and the ones that sound good but dont.
+I did lot of to-and-fro with CI during internships. This post is my attempt to document everything I have learned about making Docker builds fast, GitHub Actions efficient, and CI pipelines that do not make you want to mass cancel runs. Along the way I will share the tricks that actually work and the ones that sound good but dont.
 
 ## What even is a Docker layer?
 
@@ -20,7 +20,7 @@ To understand why Docker builds are slow, you first need to understand what Dock
 
 The [OCI image specification](https://github.com/opencontainers/image-spec) defines how these layers work. Each layer is essentially a tarball of filesystem changes with a content-addressable hash, so two layers with identical contents have identical hashes, regardless of when or where they were built. The image manifest ties all these layers together and points to a config file that describes how to run the container.
 
-When Docker builds an image, it checks if it already has a layer with the same hash before building it. This is the foundation of Docker caching. The problem is that layers form a chain, and if any layer in the chain changes, every layer after it must be rebuilt. This is why the order of instructions in your Dockerfile matters so much, and why putting your `COPY . .` instruction early is such a disaster for caching. Every time any file in your project changes, that layer changes and a wave of invalidation runs to the end of the chain. How far that wave travels decides how much of the build reruns on every single change.
+When Docker builds an image, it checks if it already has a layer with the same hash before building it. This is the foundation of Docker caching. The problem is that layers form a chain, and if any layer in the chain changes, every layer after it must be rebuilt. This is why the order of instructions in your Dockerfile matters so much, and why putting your `COPY . .` instruction early is such a disaster for caching (been there, done that (ー_ー；)). Every time any file in your project changes, that layer changes and a wave of invalidation runs to the end of the chain. How far that wave travels decides how much of the build reruns on every single change.
 
 <figure class="sd-viz" data-viz="layers"></figure>
 
@@ -28,7 +28,7 @@ The union filesystem that Docker uses to combine these layers has its own quirks
 
 ### Why BuildKit changed everything
 
-For years, Docker used what is now called the legacy builder. It processed your Dockerfile sequentially, one instruction at a time, and even multi-stage builds ran one stage after another, whether or not they depended on each other. Obviously this is bad
+For years, Docker used what is now called the legacy builder. It processed your Dockerfile sequentially, one instruction at a time, and even multi-stage builds ran one stage after another, whether or not they depended on each other. Obviously this is bad, like really bad for anything with more than 1 stage.
 
 [BuildKit](https://github.com/moby/buildkit) changed this by treating the Dockerfile as a DAG rather than a linear sequence. A [solver](https://github.com/moby/buildkit/blob/master/docs/dev/solver.md) turns it into [LLB](https://docs.docker.com/build/buildkit/), the Low Level Build format, a content-addressable graph of every operation, and a [scheduler](https://github.com/moby/buildkit/blob/master/docs/dev/solver.md#scheduler) keeps running any node whose dependencies are done, so B and C both waiting on A run together the moment A finishes.
 
@@ -38,13 +38,13 @@ Parallelism happens at threex levels, independent stages (your Node frontend bui
 
 BuildKit also brought a far more flexible caching model, with local directories, registry images, inline cache metadata, and the GitHub Actions cache as backends you can stack as fallbacks. The cache mount feature is particularly powerful for builds that download dependencies. Instead of downloading your pnpm packages or pip dependencies fresh every time, you mount a persistent cache directory that survives between builds, like `RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt`, and since the directory is not part of the final image it does not bloat it.
 
-Here is the thing that explains a large fraction of "we enabled caching and it is still slow" complaints. Docker caching is not one cache, it is at least three. The layer cache is the chain of instructions, and export backends like `type=gha` or `type=registry` save and restore it. Mount caches are directories that make a rerun cheap when the invalidation wave hits your install step, because the package manager finds its downloads and the compiler its incremental state. And the image store at `/var/lib/docker` holds pulled and built images. Mount caches are not part of any layer, so they are never in the export bundle, and on a fresh runner the one step you needed to be fast runs from scratch.
+this one took me embarassingly long to get, and it explains a large fraction of "we enabled caching and it is still slow" complaints. Docker caching is not one cache, it is at least three. The layer cache is the chain of instructions, and export backends like `type=gha` or `type=registry` save and restore it. Mount caches are directories that make a rerun cheap when the invalidation wave hits your install step, because the package manager finds its downloads and the compiler its incremental state. And the image store at `/var/lib/docker` holds pulled and built images. Mount caches are not part of any layer, so they are never in the export bundle, and on a fresh runner the one step you needed to be fast runs from scratch.
 
 <figure class="sd-viz" data-viz="caches"></figure>
 
-The Rust scenario in the figure makes this concrete. A dependency change costs about 4 seconds when the mounts survive on a persistent builder, 164 seconds with the GitHub Actions cache backend, and 19 seconds with no cache at all. The export backend was 8 times slower than doing nothing, because it paid to import and export layers that the change invalidated anyway, and the state that would have helped was not in the export.
+The Rust scenario in the figure makes this concrete. A dependency change costs about 4 seconds when the mounts survive on a persistent builder, 164 seconds with the GitHub Actions cache backend, and 19 seconds with no cache at all. The export backend was 8 times slower than doing nothing (yes, slower than no cache at all xD), because it paid to import and export layers that the change invalidated anyway, and the state that would have helped was not in the export.
 
-BuildKit simply does not support saving or loading cache mounts, so on ephemeral runners they disappear with the runner. The workaround is the [buildkit-cache-dance](https://github.com/reproducible-containers/buildkit-cache-dance) pattern. You store the contents of your cache mount directorys in the GitHub Actions cache, inject them into the builder before the build, and extract them after. It is hacky but it works, not as fast as mounts that persist natively but much faster than starting from scratch every time.
+The workaround on ephemeral runners is the [buildkit-cache-dance](https://github.com/reproducible-containers/buildkit-cache-dance) pattern. You store the contents of your cache mount directorys in the GitHub Actions cache, inject them into the builder before the build, and extract them after. its hacky but it works, not as fast as mounts that persist natively but much faster than starting from scratch every time.
 
 {% raw %}
 ```yaml
@@ -105,7 +105,7 @@ COPY . .
 RUN pnpm run build
 ```
 
-The .dockerignore file is criminally underused. Without it, `COPY . .` copies everything in your build context including node_modules, .git, build artifacts, and whatever else is lying around. The COPY layer gets huge and slow, and your cache gets invalidated by files that have nothing to do with the build, edit your README and the whole app rebuilds. Exclude anything the Dockerfile recreates, like node_modules and dist, and anything the runtime never needs, and a COPY layer of over 100MB can drop to almost nothing.
+the .dockerignore file is criminally underused tbh. Without it, `COPY . .` copies everything in your build context including node_modules, .git, build artifacts, and whatever else is lying around. The COPY layer gets huge and slow, and your cache gets invalidated by files that have nothing to do with the build, edit your README and the whole app rebuilds. Exclude anything the Dockerfile recreates, like node_modules and dist, and anything the runtime never needs, and a COPY layer of over 100MB can drop to almost nothing.
 
 ```text
 node_modules
@@ -157,9 +157,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get install -y --no-install-recommends build-essential
 ```
 
-The first RUN disables the automatic cleanup that official Docker images ship with, otherwise apt wipes the cache after every install and the mount is pointless. `sharing=locked` matters because apt needs exclusive access to its cache files. On ephemeral CI runners the mount still needs the cache dance or a registry cache to survive between jobs.
+The first RUN disables the automatic cleanup that official Docker images ship with, otherwise apt wipes the cache after every install and the mount is pointless.
 
-Choosing the right base image has a dramatic impact on size. node:20-slim strips out documentation and build tools and is about 75 percent smaller than the full image, and node:20-alpine is smaller still because Alpine uses musl libc instead of glibc and a much smaller base system. But Alpine comes with real tradeoffs that bite people in production.
+Choosing the right base image has a dramatic impact on size. node:20-slim strips out documentation and build tools and is about 75 percent smaller than the full image, and node:20-alpine is smaller still because Alpine uses musl libc instead of glibc and a much smaller base system. But Alpine comes with real tradeoffs that bite people in production, and i learnt a couple of these the hard way ( >︹<)
 
 - DNS. Older musl only did DNS over UDP with a small size limit, so large responses in Kubernetes failed silently, and it still ignores search domains in `/etc/resolv.conf`.
 - Thread stacks are much smaller than glibc's, so apps that assume larger ones segfault, [Python had exactly this bug](https://github.com/python/cpython/issues/76488).
@@ -189,7 +189,7 @@ One thing that trips people up is that Docker cannot cache RUN commands that hav
 
 Docker uses storage drivers to manage image layers and the writable layer on top of running containers. The default on most Linux systems is overlay2, a union filesystem that puts a writable upperdir over read-only lowerdirs that hold your image layers, and for 95 percent of use cases it is the right choice. But understanding how it works explains some CI performance mysteries.
 
-Its biggest cost is copy-on-write. When a container modifies a file that exists in an image layer, overlay2 copies the entire file up into the writable layer before applying the write, even if you only change one byte of a 500MB file. This is why databases inside containers without volumes are catastrophically slow on first write. A [deep dive into OverlayFS performance](https://opslog.dev/blog/overlayfs-deep-dive) showed that writing a new file runs at full disk speed while writing an existing one pays a penalty proportional to its size. Volumes bypass OverlayFS entirely, so use them for anything write-heavy.
+Its biggest cost is copy-on-write. When a container modifies a file that exists in an image layer, overlay2 copies the entire file up into the writable layer before applying the write, even if you only change one byte of a 500MB file. This is why databases inside containers without volumes are catastrophically slow on first write, ask me how i know. A [deep dive into OverlayFS performance](https://opslog.dev/blog/overlayfs-deep-dive) showed that writing a new file runs at full disk speed while writing an existing one pays a penalty proportional to its size. Volumes bypass OverlayFS entirely, so use them for anything write-heavy.
 
 The filesystem underneath overlay2 matters too. Ext4 reserves a fixed number of inodes at format time and every file in every layer needs one, so a CI host with high container churn can run out of inodes while it still has plenty of disk space. The error says no space left on device, `df -h` shows free blocks, and only `df -i` tells the truth. XFS allocates inodes dynamically from free space and handles concurrent writes and metadata better, so format the Docker data volume of your CI runners as XFS, with `ftype=1`, which overlay2 needs.
 
@@ -216,7 +216,7 @@ One subtle issue on GitHub-hosted runners is that runner image updates can chang
 
 Apple releasing M1 Macs in 2020 set off a chain reaction that is still playing out. Suddenly a huge portion of developers were running Arm processors on their laptops while most servers were still Intel, and AWS had been pushing Graviton instances for years, so now everyone had a reason to care about building for Arm.
 
-The naive approach to multi-platform builds is QEMU emulation, which Docker Desktop does automatically, and it is painfully slow, often 10 to 20 times slower than native execution. For CI pipelines that run on every commit, this is not acceptable. The proper solution is to build natively on each architecture. buildx coordinates builders through the `--platform` flag and produces a multi-architecture manifest, and Docker automatically pulls the right image for each host.
+The naive approach to multi-platform builds is QEMU emulation, which Docker Desktop does automatically, and it is painfully slow, often 10 to 20 times slower than native execution, which is just not ok for pipelines that run on every commit. The proper solution is to build natively on each architecture. buildx coordinates builders through the `--platform` flag and produces a multi-architecture manifest, and Docker automatically pulls the right image for each host.
 
 ```yaml
 - name: Build and push
@@ -254,7 +254,7 @@ When you push a commit, GitHub receives the webhook, works out which workflows s
 
 <figure class="sd-viz" data-viz="push"></figure>
 
-Queue time is the part people forget. During busy periods, or on a plan with limited concurrency, jobs just wait for a free runner, and I have seen that wait stretch to 5 to 10 minutes at peak hours. Even once a runner exists, an ephemeral runner has to download an API schema, get an OAuth token, create a session and long poll for a job before it starts. One [detailed investigation](https://depot.dev/blog/reducing-queue-time-with-cached-schemas) found the schema (a 50KB JSON map from UUIDs to API endpoints) gets downloaded three times on every fresh runner, which pushed the p99 wait to 39 seconds. Caching one schema per organisation and dropping it on disk before the runner starts cut that to 9 seconds, and a faster timeout and retry on the OAuth call removed the remaining spikes. Invisible to users, but it is exactly the kind of thing that makes CI feel slow.
+queue time is the part people forget. During busy periods, or on a plan with limited concurrency, jobs just wait for a free runner, and I have seen that wait stretch to 5 to 10 minutes at peak hours. Even once a runner exists, an ephemeral runner has to download an API schema, get an OAuth token, create a session and long poll for a job before it starts. One [detailed investigation](https://depot.dev/blog/reducing-queue-time-with-cached-schemas) found the schema (a 50KB JSON map from UUIDs to API endpoints) gets downloaded three times on every fresh runner, which pushed the p99 wait to 39 seconds. Caching one schema per organisation and dropping it on disk before the runner starts cut that to 9 seconds, and a faster timeout and retry on the OAuth call removed the remaining spikes. invisible to users, but its exactly the kind of thing that makes CI feel slow.
 
 Self-hosted runners change the equation. The runner can be persistent, so your Docker layer cache and dependency caches survive between jobs and the machine is already warm. The price is that you maintain the infrastructure and its security, and the security part is real. Persistent runners accumulate credentials on disk over time, cloud configs, Kubernetes secrets, Docker configs, SSH keys, shell histories, infrastructure state files, and anyone who gets code execution can walk the filesystem or scrape secrets out of runner process memory through `/proc`. There is also a persistence trick where malicious code sets `RUNNER_TRACKING_ID` to zero so the runner stops killing orphaned processes, which can then sit there waiting for the next job's credentials. The usual advice is ephemeral runners that destroy everything after each job, which means losing the warm caches you wanted in the first place. Self-hosted runners that miss updates for more than 30 days also stop receiving jobs, so you are signing up for continuous image rebuilds (and since 2026 GitHub charges a small platform fee even for self-hosted minutes, more on that later).
 
@@ -278,7 +278,7 @@ The ephemeral nature of hosted runners is both a blessing and a curse. You get a
 
 ### The caching game
 
-Caching is where the real performance gains live, and also where things get confusing, because several caches interact in ways that are not obvious.
+Caching is where the real performance gains live, and also where things get confusing af, because several caches interact in ways that are not obvious (◎＿◎;)
 
 The GitHub Actions cache is the most common one. `actions/cache` saves and restores arbitrary directories between runs, keyed by a string you choose.
 
@@ -302,11 +302,11 @@ The real constraint is size. Each repository gets 10GB of cache, every workflow 
 - There are upload and download rate limits per repository, which only bite big matrix builds and monorepos.
 - Anyone with PR access can read cache contents, so never cache secrets. Fork PRs get read only access to the default branch cache, which prevents poisoning, but caches are not signed, so a compromised workflow could still write something nasty.
 
-Caches are also scoped to branches, which surprises people. A feature branch can read caches from main, but main cannot read the feature branch's caches. Tag triggered workflows get their own scope and cannot see branch caches at all, so you test on main with a warm cache, tag a release, and the release build crawls. The workaround is building release artifacts on the branch before tagging. Pull requests are scoped to `refs/pull/.../merge`, so every new PR starts cold, and fork PRs can read the default branch cache but never write their own.
+caches are also scoped to branches, which surprised me a lot the first time. A feature branch can read caches from main, but main cannot read the feature branch's caches. Tag triggered workflows get their own scope and cannot see branch caches at all, so you test on main with a warm cache, tag a release, and the release build crawls. The workaround is building release artifacts on the branch before tagging. Pull requests are scoped to `refs/pull/.../merge`, so every new PR starts cold, and fork PRs can read the default branch cache but never write their own.
 
 Cache thrashing is the other classic. The cache gets saved and restored but your install step still takes the full time. The cause is usually too many unique keys filling the 10GB and evicting the useful ones, for example the commit SHA or run ID in the key with no restore keys, which creates a new key every commit and never hits. Use stable keys based on lockfiles and let restore keys handle partial matches.
 
-When 10GB is not enough, or downloading the cache is the slow part, some third-party runner services mount NVMe backed sticky disks straight into the runner. There is no network transfer at all, the disk is just attached, so a 6GB cache that takes about a minute to restore from GitHub is there in about 3 seconds. Behind that are a few ideas worth stealing. Cache lives on distributed storage like Ceph in the same availability zone as the builders, so it survives the instance but stays close. A pool of preconfigured builders sits stopped and starts in seconds instead of minutes. The machine stays up for a couple of minutes after a build because you usually build again soon. And each build gets its own instance, so there are no noisy neighbours and no shared Kubernetes cluster. Some providers go further and intercept the GitHub Actions cache requests at the network level, sending them to a colocated cache so existing workflows get up to 10x faster cache transfers without any changes. The catch is that all of this needs specific infrastructure, it is not available on GitHub hosted runners, and actions that touch the host break inside container jobs.
+When 10GB is not enough, or downloading the cache is the slow part, some third-party runner services mount NVMe backed sticky disks straight into the runner. There is no network transfer at all, the disk is just attached, so a 6GB cache that takes about a minute to restore from GitHub is there in about 3 seconds. Some providers go further and intercept the GitHub Actions cache requests at the network level, sending them to a colocated cache so existing workflows get up to 10x faster cache transfers without any changes. None of this is available on GitHub hosted runners.
 
 Docker layer caching is a separate beast. `docker/build-push-action` can use the GitHub Actions cache as a BuildKit cache backend.
 
@@ -335,7 +335,7 @@ The builder also garbage collects in the background, and for large self-managed 
 
 Local caches have a basic problem. The same task gets re-executed by you, your teammates, your CI and your PaaS, even when every input is identical. Remote caching shares the result instead. The cache is keyed on a hash of the inputs, same inputs, same hash, same output, so if anyone already built it you just download it, and builds become incremental. For monorepos on Turborepo, [remote caching](https://turborepo.dev/docs/core-concepts/remote-caching) can take CI from 6 minutes to 45 seconds on a warm cache.
 
-Latency is the enemy here. If downloading the cached result takes longer than rebuilding, the cache is useless, so good remote caches sit behind a CDN and serve artifacts from the node closest to your laptop or your runner.
+latency is the enemy here. If downloading the cached result takes longer than rebuilding, the cache is useless, so good remote caches sit behind a CDN and serve artifacts from the node closest to your laptop or your runner.
 
 Rust shows how these layers compose. Turborepo's task cache is all or nothing for a Cargo crate, so any input change reruns the whole `cargo build`, and on a cold runner that means recompiling everything. The [Turborepo team added](https://github.com/vercel/turborepo/pull/13288) experimental support for serving the remote cache as an sccache backend, so a task cache hit skips the work entirely and a miss still gets its rustc calls served from the compile cache.
 
@@ -361,34 +361,14 @@ An [analysis of 66,821 workflow runs](https://depot.dev/blog/we-analyzed-66821-g
 - [astral-sh/setup-uv](https://github.com/astral-sh/setup-uv) installs Python dependencies with uv, several times faster than pip, with caching on by default.
 - [mozilla-actions/sccache-action](https://github.com/mozilla-actions/sccache-action) sets up sccache for Rust and C++ (more in the Rust section).
 - [awalsh128/cache-apt-pkgs-action](https://github.com/awalsh128/cache-apt-pkgs-action) caches apt packages as a fileset, which breaks for packages whose pre and post install scripts matter, `execute_install_scripts` sometimes helps and otherwise you install that package separately.
-- [nick-fields/retry](https://github.com/nick-fields/retry) retries a flaky step with backoff and can run a cleanup command between attempts. Controversial, but pragmatic.
 - [marocchino/sticky-pull-request-comment](https://github.com/marocchino/sticky-pull-request-comment) keeps updating one PR comment instead of posting a new one every run.
 - [dorny/test-reporter](https://github.com/dorny/test-reporter) turns JUnit or JSON test output into check runs, so you stop grepping `go test` logs for the word fail.
 - [taiki-e/install-action](https://github.com/taiki-e/install-action) installs precompiled tools like nextest and just, verifies checksums and attestations, and waits a day or so after upstream releases as a cooldown against supply chain attacks.
 - [pnpm/action-setup](https://github.com/pnpm/action-setup) was the most adopted of all, with [codecov](https://github.com/codecov/codecov-action), [dtolnay/rust-toolchain](https://github.com/dtolnay/rust-toolchain) and [oven-sh/setup-bun](https://github.com/oven-sh/setup-bun) close behind.
 
-paths-filter deserves a snippet, because it is a big step up from workflow level filters. Skipped jobs show up as skipped in the UI, and the output can drive a dynamic matrix, which can cut most of the CI time for single package PRs in a monorepo.
-
-```yaml
-- uses: dorny/paths-filter@v3
-  id: changes
-  with:
-    filters: |
-      backend:
-        - 'src/api/**'
-      frontend:
-        - 'src/web/**'
-
-- name: Run backend tests
-  if: steps.changes.outputs.backend == 'true'
-  run: pnpm run test:api
-```
-
-Be careful though. Path filters that skip the full regression suite before merge are a classic source of green PR, broken main. Skip on PRs if you like, but run the full suite on pushes to main.
-
 ## Rust in CI is its own special problem
 
-Rust compilation is notoriously slow, and CI makes it worse. Locally, incremental compilation means you only recompile what changed, but CI usually starts from scratch, and a medium sized project can take 10 to 20 minutes to compile cold. Monomorphization, borrow checking and optimization all cost time, much of the compiler is single threaded, and the target directory grows to gigabytes.
+Rust compilation is notoriously slow, and CI makes it worse, a lot worse ༼ ༎ຶ ෴ ༎ຶ༽ Locally, incremental compilation means you only recompile what changed, but CI usually starts from scratch, and a medium sized project can take 10 to 20 minutes to compile cold. Monomorphization, borrow checking and optimization all cost time, much of the compiler is single threaded, and the target directory grows to gigabytes.
 
 Caching the whole target directory with `actions/cache` does not work well. It is tied to the exact compiler version, features and profile, it hoards stale artifacts and grows without bound, it is restored as one coarse blob even when most of it is useless, and it eats the 10GB quota fast.
 
@@ -451,7 +431,7 @@ linker = "clang"
 rustflags = ["-C", "link-arg=-fuse-ld=mold"]
 ```
 
-mold only targets Linux (the macOS version, sold, was [discontinued](https://github.com/rui314/mold/issues/189) once Apple shipped a faster linker in Xcode 15). There is also [Wild](https://github.com/davidlattimore/wild), written in Rust and aiming for incremental linking, which the [Zed team](https://github.com/zed-industries/zed/pull/37717) found faster than mold on incremental rebuilds, so they use Wild locally and mold in CI for stability. In some of the same benchmarks the linker choice was in the noise though, because when compilation dominates a faster linker does not help. Measure first.
+mold only targets Linux (the macOS version, sold, was [discontinued](https://github.com/rui314/mold/issues/189) once Apple shipped a faster linker in Xcode 15). There is also [Wild](https://github.com/davidlattimore/wild), written in Rust and aiming for incremental linking, which the [Zed team](https://github.com/zed-industries/zed/pull/37717) found faster than mold on incremental rebuilds, so they use Wild locally and mold in CI for stability. In some of the same benchmarks the linker choice was in the noise though, because when compilation dominates a faster linker does not help. so measure first, always.
 
 ### Nightly compiler features for faster builds
 
@@ -470,7 +450,7 @@ Two nightly flags are worth knowing. `-Z share-generics` shares generic code acr
 
 ### cargo-nextest is the biggest single optimization
 
-If you only make one change to your Rust CI, make it [cargo-nextest](https://nexte.st/). `cargo test` runs test binaries one after another, and inside a binary one slow test holds everything up, so cores sit idle while a single long test finishes. Nextest lists every test from every binary first and runs each one in its own process across all cores at once.
+if you only make one change to your Rust CI, make it [cargo-nextest](https://nexte.st/). `cargo test` runs test binaries one after another, and inside a binary one slow test holds everything up, so cores sit idle while a single long test finishes. Nextest lists every test from every binary first and runs each one in its own process across all cores at once.
 
 <figure class="sd-viz" data-viz="nextest"></figure>
 
@@ -562,6 +542,25 @@ on:
       - 'services/api/**'
       - 'packages/shared/**'
 ```
+
+[dorny/paths-filter](https://github.com/dorny/paths-filter) is a big step up from workflow level filters, because it works per job and per step. Skipped jobs show up as skipped in the UI, and the output can drive a dynamic matrix, which can cut most of the CI time for single package PRs in a monorepo.
+
+```yaml
+- uses: dorny/paths-filter@v3
+  id: changes
+  with:
+    filters: |
+      backend:
+        - 'src/api/**'
+      frontend:
+        - 'src/web/**'
+
+- name: Run backend tests
+  if: steps.changes.outputs.backend == 'true'
+  run: pnpm run test:api
+```
+
+Be careful though. Path filters that skip the full regression suite before merge are a classic source of green PR, broken main. Skip on PRs if you like, but run the full suite on pushes to main.
 
 [Nx](https://nx.dev/), [Turborepo](https://turbo.build/) and [Bazel](https://bazel.build/) understand the dependency graph, so something like `npx nx affected --target=build --base=origin/main` builds only the projects your change touches directly or through dependencies, and their shared caches reuse anyone else's output for the same inputs, which can turn a 30 minute build into a couple of minutes. For huge repos, sparse checkout plus a shallow clone keeps even the checkout fast.
 
@@ -719,13 +718,13 @@ Test suites leak memory too. pytest-memray markers like `@pytest.mark.limit_memo
 
 ### The push wait guess loop
 
-The CI debugging experience is painful. You edit a workflow file, hope you have not committed some ancient YAML war crime, commit, push, wait, and squint at the logs. Was I in the right working directory? Did the variable get set in this context? Who knows. Certainly not me. If the failing step sits at the end of a long job, you get to wait 15 minutes to learn that your latest guess was also wrong.
+the CI debugging experience is painful, like genuinely painful. You edit a workflow file, hope you have not committed some ancient YAML war crime, commit, push, wait, and squint at the logs. Was I in the right working directory? Did the variable get set in this context? who knows, certainly not me (╯°□°)╯︵ ┻━┻ If the failing step sits at the end of a long job, you get to wait 15 minutes to learn that your latest guess was also wrong.
 
 The best debugging strategy most people end up with is a test repository and `git commit -a -m "wip" && git push` until CI works as expected. This is slow and tedious but at least you get real feedback, and your git history becomes a graveyard of commits like fix typo, fix typo again, and fix asdfasdl.
 
 Some third party CI services have started to change this by turning CI into a local closed loop you drive from your terminal. You run a workflow against your current local diff without committing, scope it to 1 job, stop after a specific step, SSH into the machine, fix locally and rerun until it passes. Half the pain is not even the bug, its the tab olympics between IDE, terminal and logs page, and by the time you have a decent hypothesis you are already cognitively cooked.
 
-Once debugging becomes a loop of CLI commands, it becomes something an agent can handle. Read the logs, rerun with a stop after the interesting step, SSH in and check reality with `pwd` and `ls`, apply a local fix, rerun, and keep going until the job turns green. The agent has something you lack during a 6pm debugging session. Patience.
+Once debugging becomes a loop of CLI commands, it becomes something an agent can handle. Read the logs, rerun with a stop after the interesting step, SSH in and check reality with `pwd` and `ls`, apply a local fix, rerun, and keep going until the job turns green. The agent has something you lack during a 6pm debugging session, patience.
 
 ### YAML is not a programming language
 
@@ -752,7 +751,7 @@ The advice that keeps coming up from people who have done CI for years is to wri
 
 ### Docker and GitHub Actions do not mix well
 
-GitHub lets you run jobs inside a container. This sounds great because you can prepackage all your dependencies into a dev container instead of installing them on every run. In practice, it is a minefield.
+GitHub lets you run jobs inside a container. This sounds great because you can prepackage all your dependencies into a dev container instead of installing them on every run. in practice its a minefield.
 
 File permissions break constantly. The container writes files as one user while the runner uses a different uid and gid, so you sprinkle `chown` everywhere or run everything as root. Runner version 2.332.0 in early 2026 made it worse with stricter ownership checks ("EACCES: permission denied", git complaining about dubious ownership), and the fix is matching the container user to the host runner user.
 
@@ -780,7 +779,7 @@ on:
   merge_group:
 ```
 
-The trick people discover after hours of debugging is to name the jobs identically in both phases so GitHub treats them as the same required check, otherwise the queue either never starts or, worse, merges things whose queue job failed. There is a [Stack Overflow answer](https://stackoverflow.com/questions/76655935/when-does-a-github-workflow-trigger-for-merge-group-and-is-it-restricted-by-bran/78030618#78030618) that explains this, after you have already spent a few hours figuring it out yourself.
+The trick people discover after hours of debugging is to name the jobs identically in both phases so GitHub treats them as the same required check, otherwise the queue either never starts or, worse, merges things whose queue job failed. There is ofc a [Stack Overflow answer](https://stackoverflow.com/questions/76655935/when-does-a-github-workflow-trigger-for-merge-group-and-is-it-restricted-by-bran/78030618#78030618) that explains this, after you have already spent a few hours figuring it out yourself.
 
 `merge_group` also has different context variables. `github.base_ref` and `github.head_ref` are empty, and you need `github.event.merge_group.base_ref` and `github.event.merge_group.head_ref` instead, so anything that uses branch names needs both cases. Ejections just say "removed from queue", so you dig through the temporary `gh-readonly-queue/` branch, and a force push to a queued PR keeps its stale green results for about 30 minutes.
 
@@ -804,7 +803,7 @@ permissions:
 
 The gotcha that trips people constantly is that specifying any permission sets every unspecified one to none, so adding `contents: write` silently takes away `pull-requests: read` and your PR comments start failing. The trigger matters too. `pull_request` runs in the context of the fork with limited permissions, while `pull_request_target` runs in the context of the base repository with full access to secrets, which is useful for labelling PRs from external contributors and a massive footgun if you check out and run code from the PR, exactly how the chain above started.
 
-Self hosted runners add another layer. GitHub recommends them only for private repositories because forks of public repositories can run dangerous code on your runner. There is a setting to require approval for workflows from external contributors, but the documentation does not clearly say whether that makes self hosted runners safe for public repositories. The answer is probably yes, but probably is not good enough for security.
+Self hosted runners add another layer. GitHub recommends them only for private repositories because forks of public repositories can run dangerous code on your runner. There is a setting to require approval for workflows from external contributors, but the documentation does not clearly say whether that makes self hosted runners safe for public repositories. The answer is probably yes, but probably is not good enough for security imo.
 
 ### The reliability question
 
@@ -846,7 +845,7 @@ Not all CI providers are created equal when it comes to Docker builds, and the d
 
 GitHub Actions fully supports BuildKit but its caching story is weak. The cache is backed by Azure Blob Storage with limited bandwidth to the runner, the per repository limit evicts old caches in LRU order, which can break layer dependencies and force full rebuilds, and hosted runners being single architecture means Arm builds go through emulation. CircleCI has built in Docker layer caching on volumes instead of object storage, which is much faster and has a bigger limit, but it costs extra on top of your plan and multi platform builds still need emulation. Google Cloud Build supports BuildKit with no persistent cache between builds, so you pull the latest image and use `cache-from` every time, and there is no Arm compute. GitLab's hosted runners have no persistent layer cache either, and self hosted GitLab, Jenkins and Buildkite make you choose between root for the runner user, Docker in Docker with no cache, or a mounted Docker socket that opens the host to privilege escalation.
 
-[Blacksmith](https://blacksmith.sh/) (my fav) takes a different approach as a drop in replacement for GitHub Actions runners. Instead of object storage it keeps Docker builder state on persistent NVMe backed sticky disks in Ceph clusters, so there is nothing to serialize or deserialize and a cache restore is a mount rather than a download. You swap the standard Docker actions for their equivalents and delete all the `cache-from` and `cache-to` lines, you get native Arm runners instead of emulating through QEMU, and compute is noticeably cheaper than GitHub hosted runners. The tradeoffs are lock in to their specific actions, and running jobs inside containers needs privileged mode and special environment variables to coordinate with their control plane.
+[Blacksmith](https://blacksmith.sh/) (my fav btw (◕‿◕)) takes a different approach as a drop in replacement for GitHub Actions runners. Instead of object storage it keeps Docker builder state on persistent NVMe backed sticky disks in Ceph clusters, so there is nothing to serialize or deserialize and a cache restore is a mount rather than a download. You swap the standard Docker actions for their equivalents and delete all the `cache-from` and `cache-to` lines, you get native Arm runners instead of emulating through QEMU, and compute is noticeably cheaper than GitHub hosted runners. The tradeoffs are lock in to their specific actions, and running jobs inside containers needs privileged mode and special environment variables to coordinate with their control plane.
 
 The fundamental trade is security from isolated builds versus performance from persistent caches and native architectures, and teams that need both usually end up with a third party service that specializes in Docker builds.
 
@@ -892,7 +891,7 @@ CI was built around a developer who pushes, opens a pull request and context swi
 
 A few things matter most for agents. Rerunning 1 job instead of a fifteen step pipeline to validate a 3 line fix. Real CI on local patches, so the agent validates before committing instead of pushing broken commits to find out. All context behind an API, because agents do not click through dashboards. And speed at scale, because 1 engineer can run tens of agents on separate branches, all needing CI at once, so queueing and cold starts matter far more than they did for ten humans.
 
-Teams with 60 second builds make fundamentally different decisions than teams with 40 minute builds. They try more things, validate assumptions faster and catch issues earlier. Speed does not trade off with quality. Speed enables quality.
+Teams with 60 second builds make fundamentally different decisions than teams with 40 minute builds. They try more things, validate assumptions faster and catch issues earlier, so speed does not trade off with quality, it kinda enables it.
 
 Obviously, GitHub is aware of this shift. In February 2026 they launched [Agentic Workflows](https://github.blog/ai-and-ml/automate-repository-tasks-with-github-agentic-workflows/) in technical preview, what they call Continuous AI. You define intent in Markdown with YAML frontmatter, `gh aw compile` turns it into a hardened GitHub Actions lock file with multiple jobs, trust boundaries and permission gates, and agents (GitHub Copilot, Claude Code, OpenAI Codex or a custom OpenAI compatible engine) handle the judgment heavy work like issue triage, code review, documentation drift and CI failure investigation. Writes like labels, comments and PRs run in separate permission controlled jobs after the agent finishes, with hard limits and sanitization. Havent tried it yet, and it adds a layer on top of your build test deploy pipeline rather than fixing the underlying problem, which is that CI was designed for humans.
 
@@ -904,7 +903,7 @@ Some teams now hand this to an agent. A daily workflow checks upstream, the agen
 
 ### Where is this all going?
 
-AI assisted CI is the obvious one. LLMs already review code, suggest fixes for failing tests and generate test cases, and the next step is AI that diagnoses build failures, suggests optimizations and fixes common issues on its own. Security scanning keeps shifting left too, with [Snyk](https://snyk.io/), [Trivy](https://github.com/aquasecurity/trivy) and Dependabot checking dependencies and container images as part of CI.
+Security scanning keeps shifting left, with [Snyk](https://snyk.io/), [Trivy](https://github.com/aquasecurity/trivy) and Dependabot checking dependencies and container images as part of CI.
 
 Nix is gaining traction as a way to define reproducible build environments. Instead of hoping that your CI runner has the right versions of everything installed, you declare exactly what you need and Nix provides it, so the build you run locally is the build that runs in CI, no more debugging the difference between Ubuntu as set up in GitHub Actions and Arch as it is on your laptop. I wrote about [getting started with Nix](/writes/2024-07-31-nix/) a while back and you can check out Fedimint codebase to see what it can offer. Your workflow becomes a thin wrapper around `nix build` or `nix flake check`, a cache like [Cachix](https://www.cachix.org/) makes anything CI built instantly available locally, and builds are pinned and sandboxed by default. The downside has always been the learning curve.
 
@@ -912,8 +911,8 @@ The nerdy [Hacker News discussion](https://news.ycombinator.com/item?id=43427996
 
 ### The dream
 
-Despite all the pain, GitHub Actions is still the most practical CI system for many projects. It is integrated with GitHub, it scales automatically, and the ecosystem of actions is huge. But it is not the only option anymore, and for teams that have outgrown it, Buildkite's reliability, easier self hosting, test analytics and automatic retries make the migration worth considering. To be fair, migration is real work, Marketplace actions do not transfer, and GitHub's stated priority is now availability first, capacity second, features third. Whether they execute remains to be seen.
+Despite all the pain, GitHub Actions is still the most practical CI system for many projects. It is integrated with GitHub, it scales automatically, and the ecosystem of actions is huge. But it is not the only option anymore, and for teams that have outgrown it, Buildkite is worth considering. To be fair, migration is real work, Marketplace actions do not transfer, and GitHub's stated priority is now availability first, capacity second, features third. Whether they execute remains to be seen.
 
-The dream is a CI pipeline that runs in seconds, catches all the bugs, and never gives false positives. We are not there yet. But understanding how the pieces fit together, from Docker layers to BuildKit caching to runner architecture to security gotchas, at least gives you a fighting chance. The green checkmark should feel like validation, not a hostage release. With enough optimization and enough understanding of the system, it can.
+The dream is a CI pipeline that runs in seconds, catches all the bugs, and never gives false positives, and we are not there yet, but understanding how the pieces fit together, from Docker layers to BuildKit caching to runner architecture to security gotchas, at least gives you a fighting chance. The green checkmark should feel like validation, not a hostage release. With enough optimization and enough understanding of the system, it can.
 
 <script type="module" src="viz.mjs"></script>
