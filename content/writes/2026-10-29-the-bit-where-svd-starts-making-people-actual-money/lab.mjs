@@ -18,7 +18,7 @@ for (const section of document.querySelectorAll('.svd-lab[data-lab]')) {
   const name = section.dataset.lab;
   section.classList.add('lab-loading');
   Promise.all([import(`./lab-${name}.mjs`), css(name)])
-    .then(([lab]) => lab.mount(section, {data}))
+    .then(([lab]) => { lab.mount(section, {data}); holdTallest(section); })
     .catch(error => {
       console.error(`SVD lab "${name}" failed to start:`, error);
       const note = document.createElement('p');
@@ -27,4 +27,16 @@ for (const section of document.querySelectorAll('.svd-lab[data-lab]')) {
       section.append(note);
     })
     .finally(() => section.classList.remove('lab-loading'));
+}
+
+// Once a lab has been a height it keeps it, so playing or switching examples never makes the page jump.
+// Reset when the width changes, since the layout reflows.
+function holdTallest(section) {
+  let width = 0, tallest = 0;
+  new ResizeObserver(() => {
+    const w = Math.round(section.clientWidth);
+    if (w !== width) { width = w; tallest = 0; section.style.minHeight = ''; }
+    const h = Math.ceil(section.getBoundingClientRect().height);
+    if (h > tallest) { tallest = h; section.style.minHeight = `${h}px`; }
+  }).observe(section);
 }

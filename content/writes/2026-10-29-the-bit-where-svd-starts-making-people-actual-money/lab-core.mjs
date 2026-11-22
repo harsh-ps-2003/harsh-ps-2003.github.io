@@ -212,7 +212,7 @@ export function tween(key, from, to, ms, onFrame, done) {
 // briefly on each whole number, so the reader can see every checkpoint.
 let active = null; // only one lab plays at a time
 export function transport(parent, opts) {
-  const {input, render, secondsPerUnit = 2, dwell = .25, direction = 1, chapters, section} = opts;
+  const {input, render, secondsPerUnit = 2, dwell = .25, direction = 1, chapters, section, compact = false} = opts;
   const min = Number(input.min), max = Number(input.max);
   const unitSeconds = typeof secondsPerUnit === 'function' ? secondsPerUnit : () => secondsPerUnit;
   const bar = html(parent, 'div', 'lab-transport');
@@ -222,7 +222,7 @@ export function transport(parent, opts) {
   const reset = button(bar, '↺', '', 'Reset');
   const speedWrap = html(bar, 'label', 'lab-speed', 'speed ');
   const speed = html(speedWrap, 'select');
-  for (const v of [.5, 1, 2]) { const o = html(speed, 'option', '', `${v}×`); o.value = v; o.selected = v === 1; }
+  for (const v of [.5, 1, 1.5, 2]) { const o = html(speed, 'option', '', `${v}×`); o.value = v; o.selected = v === 1.5; }
 
   let chapterButtons = [];
   if (chapters) {
@@ -300,6 +300,25 @@ export function transport(parent, opts) {
   document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
   reducedMotion.addEventListener('change', pause);
   if (section) new IntersectionObserver(e => { if (!e[0].isIntersecting) pause(); }).observe(section);
+  // compact mode: just a replay button, the animation starts by itself the first time the lab is on screen
+  if (compact) {
+    for (const b of [back, next, reset]) b.hidden = true;
+    speedWrap.hidden = true;
+    bar.classList.add('lab-transport-compact');
+    // plays the first time it is half on screen, and if it got interrupted (scrolled away, another lab
+    // started) it picks up again when it is back, unless the reader paused or dragged it themselves
+    if (section) {
+      let started = false, userStopped = false;
+      play.addEventListener('click', () => { if (started && !playing) userStopped = true; });
+      input.addEventListener('input', () => { userStopped = true; });
+      section.addEventListener('pointerdown', e => { if (e.target.closest('button, input, select')) userStopped = true; });
+      new IntersectionObserver(e => {
+        if (!e[0].isIntersecting || e[0].intersectionRatio <= .5 || reducedMotion.matches || playing || userStopped) return;
+        if (!started) { started = true; seek(start); startPlaying(); }
+        else if (!atEnd()) startPlaying();
+      }, {threshold: [.5]}).observe(section);
+    }
+  }
   render(position); update();
   return {pause, seek, play: startPlaying, refresh: () => render(position), get position() { return position; }};
 }

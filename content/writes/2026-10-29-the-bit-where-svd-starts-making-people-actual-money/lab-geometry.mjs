@@ -1,6 +1,6 @@
 // The unit circle under A = UΣVᵀ, applied one factor at a time: x, Vᵀx, ΣVᵀx, UΣVᵀx = Ax.
 import {svd2, mv, geometryFrame as frame} from './math.mjs';
-import {C, html, svg, setAttrs, setText, setHTML, stage, arrowMarker, slider, choice, row, readouts, legend,
+import {C, html, svg, setAttrs, setText, stage, arrowMarker, slider, choice, row, legend,
   narrator, transport, tween, fmt, sym} from './lab-core.mjs';
 
 const PRESETS = [
@@ -12,7 +12,7 @@ const PRESETS = [
   ['turn', 'Rotation by 90°', [0, -1, 1, 0]],
   ['zero', 'The zero matrix', [0, 0, 0, 0]],
 ];
-const W = 640, H = 430, CX = 330, CY = 245;
+const W = 640, H = 340, CX = 320, CY = 188, R = 138;
 const EXPR = ['x', 'Vᵀx', 'ΣVᵀx', 'UΣVᵀx', 'UΣVᵀx = Ax'];
 
 export function mount(section) {
@@ -46,12 +46,8 @@ export function mount(section) {
   matrix('U', 'U'); matrix('S', 'Σ'); matrix('V', 'Vᵀ');
 
   const plot = stage(section, W, H, 'The unit circle carried through Vᵀ, Σ and U');
-  legend(section, [['x', 'x, drag its tip'], ['s1', 'v₁ ↦ σ₁u₁'], ['s2', 'v₂ ↦ σ₂u₂'],
-    ['i', 'e₁ ↦ Ae₁ and e₂ ↦ Ae₂, the columns of A']]);
+  legend(section, [['x', 'x, drag its tip'], ['s1', 'v₁ ↦ σ₁u₁'], ['s2', 'v₂ ↦ σ₂u₂'], ['i', 'Ae₁, Ae₂, the columns of A']]);
   const say = narrator(section);
-  const [setS1, setS2, setRank, setDet] = readouts(section, [
-    {label: 'σ₁ = ‖A‖₂, the largest stretch', cls: 's1'}, {label: 'σ₂, the smallest stretch', cls: 's2'},
-    {label: 'rank A, nonzero σᵢ'}, {label: '|det A| = σ₁σ₂, area scale'}]);
 
   // ---- drawing ----
   const mark = {x: arrowMarker(plot, 'geo-ax', C.x), s1: arrowMarker(plot, 'geo-a1', C.s1), s2: arrowMarker(plot, 'geo-a2', C.s2),
@@ -72,16 +68,10 @@ export function mount(section) {
   const knob = svg(plot, 'circle', {r: 9, fill: C.x, 'fill-opacity': .25, stroke: C.x, cursor: 'grab'});
   const labels = [C.s1, C.s2, C.i, C.j, C.x].map(fill => svg(plot, 'text', {class: 'geo-lbl', fill, 'font-weight': 700, 'font-size': 14}));
   svg(plot, 'circle', {cx: CX, cy: CY, r: 3, fill: C.ink});
-  const flipNote = svg(plot, 'text', {class: 'geo-note', x: CX, y: CY + 46, 'text-anchor': 'middle', fill: C.dim, opacity: 0},
+  const flipNote = svg(plot, 'text', {class: 'geo-note', x: CX, y: CY + 40, 'text-anchor': 'middle', fill: C.dim, opacity: 0},
     'U reflects, the plane turning over, seen edge on');
   const expr = svg(plot, 'text', {class: 'geo-head', x: 18, y: 34, 'font-size': 22, 'font-weight': 700, fill: C.x});
   const stepName = svg(plot, 'text', {class: 'geo-step', x: W - 18, y: 32, 'text-anchor': 'end', fill: C.dim, 'font-size': 14});
-  // inset with the input, which never changes as the steps play
-  const inset = svg(plot, 'g', {transform: 'translate(16 56)'});
-  svg(inset, 'rect', {width: 112, height: 112, rx: 3, fill: C.bg, stroke: C.faint});
-  svg(inset, 'text', {class: 'geo-inset', x: 8, y: 17, fill: C.dim, 'font-size': 12}, 'input x, v₁, v₂');
-  svg(inset, 'circle', {cx: 56, cy: 64, r: 36, fill: 'none', stroke: C.dim, opacity: .7});
-  const mini = [C.s1, C.s2, C.x].map(color => svg(inset, 'line', {x1: 56, y1: 64, stroke: color, 'stroke-width': 2.4, 'stroke-linecap': 'round'}));
 
   // ---- state ----
   let M = PRESETS[0][2].slice(), dec = svd2([[M[0], M[1]], [M[2], M[3]]]), scale = 1, theta = 35 * Math.PI / 180;
@@ -91,7 +81,7 @@ export function mount(section) {
 
   function render(q) {
     const f = x => frame(dec, q, x);
-    scale = 150 / Math.max(1.35, dec.s[0] + .3);
+    scale = R / Math.max(1.35, dec.s[0] + .3);
     const xy = p => [CX + p[0] * scale, CY - p[1] * scale];
     const line = (el, a, b) => { const [x1, y1] = xy(a), [x2, y2] = xy(b); setAttrs(el, {x1, y1, x2, y2}); };
     for (const g of lines) { line(g.a, ...g.ends); line(g.b, ...g.ends.map(f)); }
@@ -124,63 +114,39 @@ export function mount(section) {
     setText(expr, EXPR[s]);
     setText(stepName, ['the input', 'step 1 of 3 · rotate by Vᵀ', 'step 2 of 3 · scale by Σ',
       `step 3 of 3 · ${mirrored() ? 'reflect and rotate' : 'rotate'} by U`, 'all three factors applied'][s]);
-    const m = v => [56 + v[0] * 36, 64 - v[1] * 36];
-    [dec.vt[0], dec.vt[1], x].forEach((v, k) => { const [x2, y2] = m(v); setAttrs(mini[k], {x2, y2}); });
     for (const [key, active] of [['V', s === 1], ['S', s === 2], ['U', s === 3], ['A', s === 4]]) {
       mats[key].box.dataset.active = String(active);
       mats[key].box.dataset.done = String(key === 'A' ? false : s >= {V: 1, S: 2, U: 3}[key] && !active);
     }
-    tell(q, s, x, f(x));
+    tell(s);
   }
 
-  function tell(q, s, x, y) {
-    const [s1, s2] = dec.s, det = M[0] * M[3] - M[1] * M[2];
+  // one short sentence per step, the drawing and the number strip carry the rest
+  function tell(s) {
+    const [s1, s2] = dec.s;
     const zero = s1 < 1e-9, flat = !zero && s2 < 1e-9, rigid = Math.abs(s1 - 1) < 1e-6 && Math.abs(s2 - 1) < 1e-6;
-    const round = !zero && Math.abs(s1 - s2) < 1e-6, mirror = mirrored();
-    const v = p => `(${p.map(a => fmt(a, 2)).join(', ')})`;
+    const round = !zero && Math.abs(s1 - s2) < 1e-6;
     const V1 = sym('s1', 'v₁'), V2 = sym('s2', 'v₂'), U1 = sym('s1', 'u₁'), U2 = sym('s2', 'u₂');
-    const S1 = sym('s1', 'σ₁'), S2 = sym('s2', 'σ₂'), vx = mv(dec.vt, x);
-    let step, text, moving, still, math;
-    if (s === 0) {
-      step = 'x, the unit circle';
-      text = zero ? 'A is the zero matrix, so every x goes to 0 and σ₁ = σ₂ = 0. Any orthonormal pair works as v₁, v₂, the factorisation is far from unique here.'
-        : round ? `σ₁ = σ₂ here, so A scales every direction by the same amount and any orthonormal pair can serve as ${V1} and ${V2}. The SVD is not unique when singular values repeat, the code just picks one pair.`
-        : `The circle is the set of unit vectors x, and the dots mark a few of them, getting darker as they go round, so you can track them through each step. The right singular vectors ${V1} and ${V2} are orthonormal, ${V1} is the unit vector that A stretches most and ${V2} the one it stretches least.`;
-      moving = []; still = ['‖x‖ = 1', 'v₁ ⊥ v₂'];
-      math = `x = (cos θ, sin θ) = ${v(x)}`;
-    } else if (s === 1) {
-      step = 'Vᵀx, rotate';
-      text = `Vᵀ is orthogonal, so it keeps every length and angle. It is the rotation that sends ${V1} to e₁ and ${V2} to e₂, so the coordinates of Vᵀx are just v₁ᵀx and v₂ᵀx, the components of x along the two singular directions.`;
-      moving = ['the direction of every vector']; still = ['lengths', 'angles', 'the unit circle'];
-      math = `Vᵀx = (v₁ᵀx, v₂ᵀx) = ${v(vx)}    ‖Vᵀx‖ = ‖x‖ = 1`;
-    } else if (s === 2) {
-      step = 'ΣVᵀx, scale';
-      text = zero ? 'Σ = 0, so both coordinates are multiplied by zero and the whole circle collapses to the origin.'
-        : flat ? `Σ = diag(${S1}, ${S2}) with ${sym('s2', 'σ₂ = 0')}, so the second coordinate is wiped out and the circle collapses onto a segment of the first axis. The component of x along ${V2} is lost, ${V2} spans the null space of A, and no later factor can bring it back.`
-        : rigid ? 'Σ = I here, both singular values are 1, so nothing changes size and A is orthogonal, a pure rotation or reflection.'
-        : `Σ = diag(${S1}, ${S2}) scales the first coordinate by ${fmt(s1)} and the second by ${fmt(s2)}. It is the only factor that changes lengths, so this is where the unit circle becomes an axis aligned ellipse with semi axes σ₁ and σ₂.`;
-      moving = ['lengths along e₁ and e₂', 'the shape']; still = ['the axes', 'which dot is which'];
-      math = `ΣVᵀx = (σ₁·v₁ᵀx, σ₂·v₂ᵀx) = ${v(vx.map((a, i) => a * dec.s[i]))}`;
-    } else if (s === 3) {
-      step = 'UΣVᵀx, rotate';
-      text = mirror
-        ? `det U = −1 here, so U is a reflection followed by a rotation. The reflection is drawn as the plane turning over in 3D, edge on it looks squashed for a moment but U keeps all lengths, and afterwards the dots run round the other way. Then the rotation takes e₁ to ${U1} and e₂ to ${U2}.`
-        : `U is orthogonal again, the rotation that takes e₁ to ${U1} and e₂ to ${U2}. It moves the ellipse rigidly, so the shape from step 2 is unchanged and its semi axes end up along σ₁u₁ and σ₂u₂.`;
-      moving = mirror ? ['orientation', 'where the ellipse points'] : ['where the ellipse points']; still = ['the ellipse’s shape', 'lengths'];
-      math = `UΣVᵀx = ${v(y)}`;
-    } else {
-      step = 'UΣVᵀx = Ax';
-      text = zero ? 'Everything sits at the origin, the zero map keeps no information about x.'
-        : `This is exactly Ax for every x. The thin ${sym('i', 'grey')} vectors are Ae₁ and Ae₂, the two columns of A, and Av₁ = σ₁u₁ is the longest image of any unit vector, which is why σ₁ is the operator norm ‖A‖₂.${flat ? ' The image of the circle is a segment because rank A = 1 and Av₂ = 0.' : ''}`;
-      moving = []; still = ['the final picture'];
-      math = `Ax = ${v(y)}    |det A| = σ₁σ₂ = ${fmt(s1 * s2)}${det < -1e-12 ? ', det A < 0 so orientation flips' : ''}`;
-    }
-    say({step, text, moving, still, math});
+    const S1 = sym('s1', 'σ₁'), S2 = sym('s2', 'σ₂');
+    const text = [
+      zero ? 'The zero matrix sends every x to 0, so any orthonormal pair can play v₁ and v₂.'
+        : round ? `σ₁ = σ₂, every direction stretches the same, so any orthonormal pair works as ${V1} and ${V2}.`
+        : `The dots are unit vectors x, ${V1} is the direction A stretches most and ${V2} the one it stretches least.`,
+      `Vᵀ turns ${V1} onto e₁ and ${V2} onto e₂, lengths and angles stay exactly the same.`,
+      zero ? 'Σ = 0, so the whole circle collapses to the origin.'
+        : flat ? `${S2} = 0 wipes out the second coordinate, the part of x along ${V2} is gone for good.`
+        : rigid ? 'Σ = I, nothing changes size, so A is a pure rotation or reflection.'
+        : `Σ stretches the axes by ${S1} = ${fmt(s1)} and ${S2} = ${fmt(s2)}, the only step that changes lengths.`,
+      mirrored() ? `det U = −1, so U flips the plane over, then turns e₁ to ${U1} and e₂ to ${U2}.`
+        : `U turns the ellipse rigidly, taking e₁ to ${U1} and e₂ to ${U2}.`,
+      zero ? 'Everything sits at the origin, the zero map keeps nothing of x.'
+        : flat ? 'Rank 1, so the circle lands on a segment and Av₂ = 0.'
+        : `That is Ax for every x, and σ₁u₁ is the longest image of a unit vector, so σ₁ = ‖A‖₂.`,
+    ][s];
+    say({text});
   }
 
   function refreshNumbers() {
-    setS1(fmt(dec.s[0])); setS2(fmt(dec.s[1]));
-    setRank(String(dec.s.filter(v => v > 1e-9).length)); setDet(fmt(dec.s[0] * dec.s[1]));
     const put = (key, a, colour) => mats[key].entries.forEach((e, i) => {
       setText(e, fmt(a[i >> 1][i & 1])); e.className = colour(i >> 1, i & 1);
     });
@@ -194,10 +160,12 @@ export function mount(section) {
     setText(mats.V.note, 'rotate');
   }
 
-  const controls = transport(section, {input: stepper.input, render, secondsPerUnit: 2.6, dwell: .3,
-    chapters: ['x\nstart', 'Vᵀx\nrotate', 'ΣVᵀx\nscale', 'UΣVᵀx\nrotate'], section});
-  // playback sits with the sliders, above the matrices and the drawing
-  sliders.after(section.querySelector('.lab-transport'), section.querySelector('.lab-chapters'));
+  const controls = transport(section, {input: stepper.input, render, secondsPerUnit: 2.6, dwell: .3, compact: true,
+    chapters: ['x · start', 'Vᵀx · rotate', 'ΣVᵀx · scale', 'UΣVᵀx · rotate'], section});
+  // one row with the play button and the step chapters, under the sliders
+  const playRow = html(null, 'div', 'geo-playrow');
+  playRow.append(section.querySelector('.lab-transport'), section.querySelector('.lab-chapters'));
+  sliders.after(playRow);
 
   const morphTo = target => {
     tween('geo-matrix', M.slice(), target, 650, m => { setMatrix(m); controls.refresh(); refreshNumbers(); });
