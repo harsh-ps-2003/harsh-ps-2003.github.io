@@ -20,7 +20,9 @@ Classic PageRank is not really an SVD problem though, it is an eigenvector probl
 <link rel="stylesheet" href="lab.css">
 <noscript><p><strong>The interactive parts need JavaScript.</strong> The maths and the Python still read fine without it.</p></noscript>
 
-## What a matrix does
+## What SVD is
+
+### What a matrix does
 
 In simple terms, SVD says that any matrix, regardless of symmetry, rank, shape, can unconditionally can be decomposed into 3 beloved matrices
 
@@ -33,8 +35,8 @@ And the SVD says this map always factors the exact same way, turn, stretch, turn
 Here V ∈ ℝ<sup>n×n</sup> and U ∈ ℝ<sup>m×m</sup> are orthogonal, so V<sup>T</sup>V = I and U<sup>T</sup>U = I, and Σ ∈ ℝ<sup>m×n</sup> is zero everywhere except for σ₁ ≥ σ₂ ≥ … ≥ 0 down its diagonal. Read right to left, V<sup>T</sup> rotates (or reflects) ℝ<sup>n</sup> so the right singular vectors v<sub>i</sub> go to e<sub>i</sub>, Σ multiplies the i-th coordinate by σ<sub>i</sub> (and pads with zeros or drops coordinates when m ≠ n), and U rotates (or reflects) ℝ<sup>m</sup> so e<sub>i</sub> goes to the left singular vector u<sub>i</sub>. Orthogonal maps keep every length and angle, so all the stretching lives in Σ, and the visual below plays the three maps one at a time on the unit circle of a 2 × 2 matrix, with the actual numbers of each factor on top.
 
 <section class="svd-lab" data-lab="geometry" id="geometry-lab" aria-labelledby="geometry-title">
-<h3 id="geometry-title">The unit circle under UΣV<sup>T</sup></h3>
-<p class="lab-intro">Press play or click a step to apply V<sup>T</sup>, then Σ, then U. The two sliders on top move through the steps and turn the input x, and you can also drag the tip of x directly.</p>
+<h4 class="lab-title" id="geometry-title">The unit circle under UΣV<sup>T</sup></h4>
+<p class="lab-intro">Press play or click a step to apply V<sup>T</sup>, then Σ, then U, and drag the tip of x or use the θ slider to pick another input.</p>
 </section>
 
 Two things are worth trying in there, starting with the rank 1 matrix, where if you stop at ΣV<sup>T</sup>x you can see σ₂ = 0 wipe out the second coordinate, so the circle collapses onto a segment and U has no way of getting the lost direction back, since v₂ spans the null space. Then try the one with a negative determinant, its singular values still come out positive, because the sign lives in U, which is the wierd little moment where the plane turns over during the last step (◎＿◎;)
@@ -47,7 +49,7 @@ If I had to keep just 1 equation from all of this, its this one.
 
 Feed in the special input direction v<sub>i</sub> and you get the special output direction u<sub>i</sub>, scaled by σ<sub>i</sub>. So its pairs of directions, and the 2 can even live in different spaces, while an eigenvector asks for something much stricter, the output has to point along the <em>same</em> direction as the input, which only makes sense for a square matrix in the first place.
 
-## Why those directions
+### Why those directions
 
 Take any unit vector x, and ask how long its output is.
 
@@ -74,7 +76,9 @@ print(s)                          # [4. 2.]
 print(np.allclose((U * s) @ Vt, A))  # True
 ```
 
-## Pictures as layers
+## Where it makes money
+
+### Pictures as layers
 
 The same multiplication also reads in a completely different way, and ngl this is my favourite one.
 
@@ -85,8 +89,8 @@ Each outer product u<sub>i</sub>v<sub>i</sub><sup>T</sup> is a rank one matrix w
 The order of the layers matters a lot, because keeping the first k gives the smallest possible error of any matrix with rank at most k, measured as the sum of squared pixel differences (this is the Eckart, Young and Mirsky result), and "smallest" means exactly that sum of squares, which isn't always what a person notices first. The [UBC lecture notes](https://www.cs.ubc.ca/~nando/540-2007/lectures/l1.pdf) connect this expansion to low rank image approximation and to information retrieval.
 
 <section class="svd-lab" data-lab="compression" id="compression-lab" aria-labelledby="compression-title">
-<h3 id="compression-title">Rebuild a picture, one layer at a time</h3>
-<p class="lab-intro">Press play and watch the picture come back one layer at a time. Each new layer is just a column pattern times a row pattern.</p>
+<h4 class="lab-title" id="compression-title">Rebuild a picture, one layer at a time</h4>
+<p class="lab-intro">The landscape coming back one layer at a time, biggest σ first, with a count of how many numbers it costs.</p>
 </section>
 
 The error is sitting right there in the singular values.
@@ -109,9 +113,9 @@ The original has m × n numbers and the factors have k(m + n + 1), so for this 8
 
 Keeping "99% of the energy" also doesn't mean the picture is 99% recognisable. A bright background can hold most of the squared energy while the small details that actually matter disappear, and singular components are global patterns, so they don't line up with objects or neat bands of frequency.
 
-The noisy picture is the fun one ( ͡° ͜ °), the error against the noisy version keeps falling as you add layers, but the error against the clean picture bottoms out and then creeps back up as the later layers start faithfully rebuilding the noise. In real life you never get to see the clean picture (we can only do it here because we added the noise ourselves), and small singular values are not automatically noise, but it shows why keeping everything can be the wrong goal.
+Noisy pictures are the fun case ( ͡° ͜ °), add noise to the landscape and the error against the noisy version keeps falling as you add layers, but the error against the clean picture bottoms out and then creeps back up as the later layers start faithfully rebuilding the noise. In real life you never get to see the clean picture (we can only do it here because we added the noise ourselves), and small singular values are not automatically noise, but it shows why keeping everything can be the wrong goal.
 
-## A space of faces
+### A space of faces
 
 The image matrix gets used in two quite different ways in this post. For compression the rows and columns were positions inside one picture, but for eigenfaces each row is a whole flattened face and each column is one pixel position across the entire dataset.
 
@@ -124,11 +128,11 @@ And this is exactly where SVD turns into principal component analysis, or PCA. T
 For a new face f you work out its coordinates z = V<sub>k</sub><sup>T</sup>(f − μ), and then you can rebuild it as μ + V<sub>k</sub>z, or compare its coordinates with the stored training ones. [Turk and Pentland's 1991 paper](https://direct.mit.edu/jocn/article/3/1/71/3025/Eigenfaces-for-Recognition) built face recognition on exactly this idea, and an eigenface doesn't have to look like any familiar feature, its just a direction along which the training faces differ alot (they usually look kinda ghostly tbh).
 
 <section class="svd-lab" data-lab="faces" id="faces-lab" aria-labelledby="faces-title">
-<h3 id="faces-title">A face as a handful of numbers</h3>
-<p class="lab-intro">Pick a person, change how many ingredients you keep, then move the light and watch where the face sits in face space.</p>
+<h4 class="lab-title" id="faces-title">A face as a handful of numbers</h4>
+<p class="lab-intro">One new photo rebuilt as the average face plus more and more eigenfaces.</p>
 </section>
 
-Set k to zero and everyone turns into the average face, which is lowkey creepy, then add components and push the light far over to one side. Keeping most of the <em>training</em> variance doesn't promise a good rebuild of a new face, and even all 11 components only span the centred training faces, which is a tiny corner of all the possible 1,600 pixel pictures.
+At k = 0 everyone is just the average face, which is lowkey creepy, and even with all 11 eigenfaces the new photo never comes back quite right. Keeping most of the <em>training</em> variance doesn't promise a good rebuild of a new face, and even all 11 components only span the centred training faces, which is a tiny corner of all the possible 1,600 pixel pictures.
 
 ```python
 # Each row is one flattened training face.
@@ -147,7 +151,7 @@ The sneaky problem is the objective. PCA keeps variation, and light, pose or bac
 
 Centring matters too, because without subtracting μ the first component mostly ends up describing the shared brightness of every face. For compression we deliberately kept the raw intensities, but here we care about how faces vary <em>around</em> the shared face.
 
-## Shared taste
+### Shared taste
 
 And this is the bit the title is about ;) Imagine a table where the rows are people, the columns are movies and the entries are ratings. Two viewers who keep enjoying the same movies leave similar patterns in their rows, two movies liked by the same viewers leave similar patterns in their columns, and the model doesn't need to know anyone's age or any movie's genre to pick up on that.
 
@@ -158,8 +162,8 @@ Start with a deliberately complete, made up table R, subtract a baseline of 3 st
 Each viewer gets a short vector p and each movie a short vector q, and their dot product measures how well those learned coordinates line up. Splitting the singular values evenly between P and Q is only a convention (putting all of Σ on one side gives the same product), and the patterns it finds are associations, which aren't necessarily correlations or genres you could put a name to.
 
 <section class="svd-lab" data-lab="recommend" id="recommend-lab" aria-labelledby="recommend-title">
-<h3 id="recommend-title">Taste as a direction</h3>
-<p class="lab-intro">Click any rating to see how it gets rebuilt, then rate two movies yourself and watch your dot move on the taste map.</p>
+<h4 class="lab-title" id="recommend-title">Taste as a direction</h4>
+<p class="lab-intro">Rate Orbit and Starlit yourself and watch your dot move on the taste map, the four movies you havent rated get a guess next to their name.</p>
 </section>
 
 For the new viewer we solve a small regularised least squares problem, where Q<sub>O</sub> holds only the two movie vectors whose ratings we already know and y holds those two ratings minus 3.
@@ -184,7 +188,7 @@ The training RMSE isn't a recommendation quality score either, since every one o
 
 And the limits just keep coming ( >︹<), a new movie has no vector until someone rates it or some other model supplies one, people's taste drifts over time, what gets shown to people shapes what gets rated, and an axis that looks like "sci-fi versus romance" in this tiny example won't necessarily mean the same thing in another dataset. [Google's collaborative filtering summary](https://developers.google.com/machine-learning/recommendation/collaborative/summary) covers the cold start problem and how extra features help.
 
-## Where PageRank fits
+### Where PageRank fits
 
 PageRank asks a different question altogether, if a surfer keeps clicking random links and occassionally jumps to a completely random page, where do they end up spending their time? The classic model is in [Brin and Page's search engine paper](https://research.google/pubs/the-anatomy-of-a-large-scale-hypertextual-web-search-engine/), and I'm only playing with that model here, nowhere near rebuilding a search engine (that one made somebody a LOT of money, sadly not me).
 
@@ -195,13 +199,13 @@ Use a column probability vector p, and let T<sub>ij</sub> be the probability of 
 The answer is an eigenvector of G with eigenvalue 1, scaled so it sums to one. For 0 ≤ α < 1 and a strictly positive v, the random jumps guarantee there is exactly one stationary distribution and that you reach it from any starting point, while α = 1 throws that guarantee away.
 
 <section class="svd-lab" data-lab="pagerank" id="pagerank-lab" aria-labelledby="pagerank-title">
-<h3 id="pagerank-title">Where does the random surfer end up?</h3>
-<p class="lab-intro">Pick a little web, set how often the surfer follows links, and press play to watch the probability flow.</p>
+<h4 class="lab-title" id="pagerank-title">Where does the random surfer end up?</h4>
+<p class="lab-intro">Everyone starts on A and the probability flows round a tiny web until it settles, flip α to see how much the random jumps matter.</p>
 </section>
 
-Try the cycle with α = 1, where the probability just chases itself round the loop forever like a dog chasing its tail, so even though a uniform stationary distribution exists, starting from A you never get there. Bring α back to 0.85 and the swings die down, and at α = 0 a single step forgets the links completely.
+At α = 1 nobody ever jumps, so D, which no page links to, ends up with nothing at all, and on a web that is just one loop the probability would chase itself round forever like a dog chasing its tail, so even though a uniform stationary distribution exists, starting from A you'd never get there. At α = 0 a single step forgets the links completely.
 
-SVD can describe how G stretches things, but its top singular vector is generally not the vector with Gp = p, because "which direction gets stretched the most in one step" and "which probability distribution stays put" are different questions with different answers, and the panel at the bottom of the visual above puts both answers side by side for whichever web you pick. People have asked about this exact mix up [on Stack Overflow](https://stackoverflow.com/questions/1867934/pagerank-vs-svd), and if you want the PageRank maths in more detail, [this bachelor's project from Groningen](https://fse.studenttheses.ub.rug.nl/12910/1/Googlepagerank.pdf) walks through the Google matrix and the power method, and [this Georgia Tech report](https://bonetto.math.gatech.edu/teaching/3235-spring20/Projects_template/MATH3235%20Report.pdf) explains the Markov chain and Perron-Frobenius reasoning behind it.
+SVD can describe how G stretches things, but its top singular vector is generally not the vector with Gp = p, because "which direction gets stretched the most in one step" and "which probability distribution stays put" are different questions with different answers. On the little web above at α = 0.85 PageRank puts about 39% on C and 37% on A, while the top singular vector of the same G leans on B and D (~36% each) and gives C only ~6%. People have asked about this exact mix up [on Stack Overflow](https://stackoverflow.com/questions/1867934/pagerank-vs-svd), and if you want the PageRank maths in more detail, [this bachelor's project from Groningen](https://fse.studenttheses.ub.rug.nl/12910/1/Googlepagerank.pdf) walks through the Google matrix and the power method, and [this Georgia Tech report](https://bonetto.math.gatech.edu/teaching/3235-spring20/Projects_template/MATH3235%20Report.pdf) explains the Markov chain and Perron-Frobenius reasoning behind it.
 
 Search uses SVD much more directly in a couple of other places.
 
@@ -210,7 +214,7 @@ Search uses SVD much more directly in a couple of other places.
 
 So all of these ask some matrix for 1 useful direction, its just a different matrix each time, and a different reason for wanting it.
 
-## When inverses explode
+### When inverses explode
 
 Back to good old Ax = b from undergrad. In singular vector coordinates solving the system is just dividing by the singular values, and the minimum norm least squares solution uses the pseudoinverse.
 
@@ -219,17 +223,131 @@ Back to good old Ax = b from undergrad. In singular vector coordinates solving t
 An exactly zero singular value simply gets skipped, but a very small nonzero one is much sneakier, because any measurement error in its output direction gets divided by a tiny number, so the arithmatic can be perfectly correct while the answer is wildly wrong (@д@)
 
 <section class="svd-lab" data-lab="inverse" id="inverse-lab" aria-labelledby="inverse-title">
-<h3 id="inverse-title">A tiny error, a huge answer</h3>
-<p class="lab-intro">Shrink the small stretch ε and watch what a fixed little measurement error turns into once we undo the matrix.</p>
+<h4 class="lab-title" id="inverse-title">A tiny error, a huge answer</h4>
+<p class="lab-intro">A = diag(1, ε) with a fixed measurement error of 0.01 along v₂, shrink ε and watch what that error turns into once we undo the matrix.</p>
 </section>
 
-With δ = 0.01 and ε shrinking from 1 to 0.0001, the second coordinate is 1 + δ/ε, so it climbs from about 1 to about 100 even though the measurement error never changed at all. Set δ = 0 and the exact inverse is perfect again, while the truncated one still throws away a real component once ε drops under the cutoff.
+With δ = 0.01 and ε shrinking from 1 to 0.0001, the second coordinate is 1 + δ/ε, so it climbs from about 1 to about 100 even though the measurement error never changed at all. The usual fix is truncation, drop every σ<sub>i</sub> under some cutoff, say 0.01, so once ε goes below it the second coordinate is just set to 0, the error can't blow up anymore but you also throw away the real x₂ = 1, and with no error at all the exact inverse would have been perfect.
 
-Thats the price of regularising, you get less sensitivity and pay for it with some bias, no free lunch here. The 0.01 cutoff here is a teaching choice and not a universal threshold, in practice it depends on the scale of the matrix, the noise, and how much error you can live with. Ridge regularisation is the smooth version, it replaces the weight 1/σ<sub>i</sub> with σ<sub>i</sub> / (σ<sub>i</sub>² + λ) for some λ > 0.
+Thats the price of regularising, you get less sensitivity and pay for it with some bias, no free lunch here. That 0.01 is just an example and not a universal threshold, in practice it depends on the scale of the matrix, the noise, and how much error you can live with. Ridge regularisation is the smooth version, it replaces the weight 1/σ<sub>i</sub> with σ<sub>i</sub> / (σ<sub>i</sub>² + λ) for some λ > 0.
 
 For an invertible matrix the condition number is κ₂(A) = σ<sub>max</sub> / σ<sub>min</sub>, which measures the worst case, so not every input gets amplified that much, the direction of the error matters a lot, and the singular vectors tell you exactly which directions are the dangerous ones.
 
-## More places
+## Decompositions inside transformers
+
+ok so here is the part that made me actualy care about all of this again. Modern LLMs are full of the same moves as everything above, keep a few directions, rotate without stretching, or pick a basis where the maths falls apart into independent pieces, its just that the matrices are weights, caches, optimizer states and activations instead of pixels. here's where each one sits, roughly.
+
+<figure class="diagram"><a href="decomp-map.svg"><img src="decomp-map.svg" alt="A transformer drawn as a vertical stack, embedding at the bottom, then L layers of attention and MLP, then the LM head on top, with coloured tags for where decompositions appear. Low rank, in blue: each attention head's Q K transpose has rank at most d sub h, multi-head latent attention caches a low-dimensional KV latent, LoRA adds a low rank update W plus B A on any weight matrix, and the LM head logits have rank at most d, the softmax bottleneck. Rotations or orthogonal, in orange: RoPE rotates q and k, the optimizer box holds Muon, whose update is the orthogonal polar factor U V transpose, and Shampoo or SOAP, which work in eigenbases of gradient statistics. Diagonal or eigen, in violet: an SSM or linear attention layer can replace attention, with recurrence h sub t equals A h sub t-1 plus B x sub t and a diagonal state matrix A. Direction, in green: steering and refusal directions in the residual stream activations." loading="lazy"></a></figure>
+
+### Low rank
+
+low rank just means the matrix only really uses a few independent directions, so you can write it as a thin column block times a thin row block, the same layers-of-a-picture idea as the compression animation.
+
+#### Every head is low rank
+
+this one is hiding inside every attention head, and i didnt notice it for the longest time. A head scores n queries against n keys, but Q is n × d<sub>h</sub> and K is n × d<sub>h</sub>, so the n × n score matrix QK<sup>T</sup> has rank at most d<sub>h</sub>, usually 128, no matter if n is a thousand or a million. Multi-head attention is basically many small low rank maps running side by side, each head only gets d<sub>h</sub> directions of "what counts as a match", which is a big part of why more heads helps.
+
+<figure class="diagram"><a href="attention-lowrank.svg"><img src="attention-lowrank.svg" alt="Left, an attention head multiplies Q, n by d sub h, with K transposed, d sub h by n, so the n by n score matrix has rank at most d sub h, about 128, however long the sequence. Right, multi-head latent attention projects each hidden state h of width 7168 down to a latent c of width 512 and only caches c, with per-head up projections producing K and V, which can be folded into the query at decode time." loading="lazy"></a></figure>
+
+#### The LM head bottleneck
+
+the same argument shows up again at the very top of the model, which was kinda a lightbulb moment for me. The last layer turns a hidden state h of size d into logits over the whole vocabulary with one matrix, logits = W<sub>out</sub> h, so if you stack the logits for every possible context into one big matrix, it has rank at most d. With d around 4096 and a vocabulary of 100k+ tokens, the model literally cant express every possible pattern of next token probabilities, which [this paper](https://arxiv.org/abs/1711.03953) called the softmax bottleneck. In practice it mostly works becuase language doesnt need all of those patterns, but its why people keep poking at bigger or mixed output layers ( ͡° ͜ʖ ͡°)
+
+#### MLA
+
+[MLA](https://arxiv.org/abs/2405.04434), the attention DeepSeek-V3 and Kimi K2 use. Plain multi-head attention caches a K and a V for every head at every token, for DeepSeek-V3's 128 heads of size 128 thats ~32k numbers per token per layer. MLA pushes each hidden state through a learned down projection into a 512 wide latent, caches only that (plus a tiny 64 wide slice for RoPE), and rebuilds the per head K and V with up projections when it needs them. The up projection can even be folded into the query matrix, so decoding reads the latent directly and never builds the full K at all. Its a learned low rank factorisation, not an SVD you compute, but the bet is the same one, the K and V of all those heads live in a much smaller subspace than their size suggests. I go deeper on it in the [attention post](/writes/2026-07-18-all-sorts-of-famous-attention-layers/).
+
+#### LoRA
+
+[LoRA](https://arxiv.org/abs/2106.09685) is how most of us fine-tune big models, and its a decomposition hiding in plain sight. it starts from a pretty simple question, when you fine-tune a model for a new task, how complicated is the change to each weight matrix really? and the paper bets its not very complicated at all.
+
+> We hypothesize that the change in weights during model adaptation also has a low "intrinsic rank"
+
+rank is just the number of independent directions a matrix can push along, nothing fancier. A d × d matrix could in principle use all d of them, but a rank r matrix is always a sum of r rank-one layers, a column times a row each, exactly like the picture layers above. Stack those r columns side by side and you get B, which is d × r, stack the r rows and you get A, which is r × d, so any rank r update can be written as ΔW = BA. thats literally the whole decomposition, and "low rank" just means r is tiny compared to d, like 16 vs 4096.
+
+<figure class="diagram"><a href="lora-rank.svg"><img src="lora-rank.svg" alt="Top, a d by d update Delta W written as a sum of r rank-one terms u1 v1 transpose plus u2 v2 transpose plus up to u sub r v sub r transpose. Each term is drawn as a thin column u times a thin row v transpose giving a full square whose every row is a multiple of v transpose. Bottom, stacking the r columns side by side gives B of size d by r, and stacking the r rows gives A of size r by d, so Delta W equals B A equals the sum of u sub i v sub i transpose. Any rank r matrix can be written this way, and r is the fewest terms that work, which is what rank r means. Side note, Delta W x always lands in the span of u1 to u sub r, so the update can push in only r directions, for example d 4096 and r 16." loading="lazy"></a></figure>
+
+so instead of learning a full d × d change, LoRA freezes W and learns only B and A, d·r + r·d numbers instead of d², and starts B at zero so the model begins exactly where the pretrained one was. after training you just add BA back into W, so inference costs nothing extra, which is kinda the best part tbh.
+
+<figure class="diagram"><a href="lora.svg"><img src="lora.svg" alt="LoRA keeps the pretrained weight W frozen and adds a learned update B times A, with B of size d by r and A of size r by d, so the update has rank at most r, 8 to 64, and costs 2dr trainable parameters instead of d squared, about 0.8 percent of the layer for d 4096 and r 16. It works because fine-tuning updates have a fast falling spectrum, a few directions carry most of the change, the same idea as keeping a few layers of a picture." loading="lazy"></a></figure>
+
+ok but why would a tiny r be enough? because the update you get from full fine-tuning tends to have a fast falling spectrum, a handful of directions carry most of it, which [this paper on intrinsic dimension](https://arxiv.org/abs/2012.13255) had already measured for fine-tuning in general. Its the compression animation again, the first few layers already look like the photo ;) The paper found ranks as small as 4 or 8 doing about as well as full fine-tuning on GPT-3, with 10,000× fewer trainable parameters. fwiw LoRA doesnt run an SVD though, it learns B and A by gradient descent, the decomposition is in the shape you force the update into, not in some algorithm you call.
+
+```python
+class LoRALinear(nn.Module):
+    def __init__(self, base: nn.Linear, r=16, alpha=32):
+        super().__init__()
+        self.base = base.requires_grad_(False)          # W stays frozen
+        d_out, d_in = base.weight.shape
+        self.A = nn.Parameter(torch.randn(r, d_in) * 0.01)  # r × d_in
+        self.B = nn.Parameter(torch.zeros(d_out, r))     # d_out × r, starts at 0 so BA = 0
+        self.scale = alpha / r
+
+    def forward(self, x):
+        return self.base(x) + (x @ self.A.T @ self.B.T) * self.scale
+```
+
+### Rotations
+
+orthogonal maps keep every length and angle, thats the U and V part of the SVD, and transformers lean on that in 2 big places.
+
+#### RoPE
+
+[RoPE](https://arxiv.org/abs/2104.09864) is how almost every LLM rn tells attention where tokens are. It splits q and k into pairs of dimensions and rotates each pair by an angle that grows with the position, fast for the first pairs and slow for the last. The whole thing is a block diagonal orthogonal matrix R(m), so it never changes the length of q or k, and because R(m)<sup>T</sup>R(n) = R(n − m), the score q<sub>m</sub>·k<sub>n</sub> only depends on how far apart the 2 tokens are, not where they sit, which is honestly so neat (◕‿◕)
+
+<figure class="diagram"><a href="rope.svg"><img src="rope.svg" alt="RoPE. Left, a query vector of width d is split into d/2 pairs, each pair a 2D plane, three planes drawn. For a token at position m, pair i is rotated by angle m times theta sub i, with theta sub i equal to b to the power minus 2(i minus 1) over d and b equal to 10000, so the first pair spins fast, theta sub 1 equals 1, and the last pair spins slowly, theta about 1 over b. Rotation matrix R(m theta) is cos, minus sin, sin, cos. Right, in one plane q at position m is rotated by m theta and k at position n by n theta from the same start direction, so the angle between them is (m minus n) theta, and since rotations keep lengths, (R sub m q) dot (R sub n k) equals q transpose R sub (n minus m) k, so the score only sees the offset m minus n." loading="lazy"></a></figure>
+
+#### Muon and the polar decomposition
+
+the optimizer is my favourite one ngl. [Muon](https://kellerjordan.github.io/posts/muon/) is what [Kimi K2](https://arxiv.org/abs/2507.20534) was trained with (as MuonClip, Muon plus a clip on the attention logits), and it is literally the SVD with Σ thrown away. For every 2D weight matrix it takes the momentum G = UΣV<sup>T</sup> and steps along UV<sup>T</sup> instead, the same directions with every singular value set to 1. That UV<sup>T</sup> has a name, its the orthogonal factor of the polar decomposition G = (UV<sup>T</sup>)(VΣV<sup>T</sup>), a rotation times a pure stretch, and its the closest semi-orthogonal matrix to G.
+
+why bother tho? momentum for a weight matrix usually has a few huge singular values and a long tail of tiny ones, so a plain step mostly pushes along the directions that were already moving, and the rare but useful directions barely learn. Flattening Σ gives every direction the same step size. Computing a real SVD every step would be way too slow, so Muon gets UV<sup>T</sup> with 5 Newton–Schulz iterations, a little polynomial applied to the matrix that only needs matrix multiplies, which GPUs love. Each iteration maps every singular value through σ ↦ aσ + bσ³ + cσ⁵ and leaves the singular vectors alone, so you can watch it in the same circle picture as the first visual.
+
+<section class="svd-lab" data-lab="muon" id="muon-lab" aria-labelledby="muon-title">
+<h4 class="lab-title" id="muon-title">Muon flattens the spectrum of an update</h4>
+<p class="lab-intro">Each Newton–Schulz step pushes both singular values toward the same size while the directions stay put, so the squashed ellipse turns back into a circle.</p>
+</section>
+
+```python
+def newton_schulz(G, steps=5):
+    a, b, c = 3.4445, -4.7750, 2.0315        # tuned for speed, not exactness
+    X = G / (G.norm() + 1e-7)                # biggest σ is now at most 1
+    for _ in range(steps):
+        S = X @ X.T
+        X = a * X + (b * S + c * S @ S) @ X  # σ ↦ aσ + bσ³ + cσ⁵, same U and V
+    return X                                  # ≈ U Vᵀ
+```
+
+The coefficients are picked so the small singular values shoot up as fast as possible, so the result doesnt land exactly on 1, it ends up somewhere around 0.7 to 1.2, and that turns out to be totally fine for training (◕‿◕) Muon only handles the 2D weight matrices, embeddings, the output head and norm parameters still go through AdamW.
+
+#### Shampoo and SOAP
+
+Muon has an older, heavier cousin, and the maths connecting them is lowkey beautiful. [Shampoo](https://arxiv.org/abs/1802.09568) keeps 2 small curvature matrices per weight, L = Σ GG<sup>T</sup> for the rows and R = Σ G<sup>T</sup>G for the columns, a Kronecker factorisation of the full curvature that would otherwise be impossibly big, and steps along L<sup>−1/4</sup> G R<sup>−1/4</sup>, which needs the eigendecomposition of L and R. the fun bit, if you drop the history and use only the current G, then L = UΣ²U<sup>T</sup> and R = VΣ²V<sup>T</sup>, and the update collapses to UΣ<sup>−1/2</sup>ΣΣ<sup>−1/2</sup>V<sup>T</sup> = UV<sup>T</sup>, which is exactly Muon (ﾉ◕ヮ◕)ﾉ [SOAP](https://arxiv.org/abs/2409.11321) runs Adam inside Shampoo's eigenbasis, and both show up in large training runs that want a stronger optimizer than AdamW.
+
+### Diagonal
+
+the third trick is picking a basis where a matrix becomes diagonal, which is the eigendecomposition A = PΛP<sup>−1</sup>, the square matrix cousin of the SVD. In that basis a matrix just scales each coordinate on its own, and that is what makes recurrent layers cheap.
+
+#### SSMs and linear attention
+
+State space layers and linear attention keep a state and update it every token, roughly h<sub>t</sub> = A h<sub>t−1</sub> + B x<sub>t</sub>. with a full A thats a matrix multiply per token, which is slow af, but if A is diagonal the state splits into independent channels, each just decays by its own number, so the whole sequence can be computed with a parallel scan or in chunks. [S4](https://arxiv.org/abs/2111.00396) started from a structured A written as diagonal plus low rank, because the matrix it wanted wasnt nicely diagonalisable, and [Mamba](https://arxiv.org/abs/2312.00752) went fully diagonal and made the decay depend on the input. The gates in GLA and Gated DeltaNet are the same idea, a diagonal decay on the state. I wrote about how this lines up with attention in the [state space duality part of the attention post](/writes/2026-07-18-all-sorts-of-famous-attention-layers/#state-space-duality).
+
+### Directions inside the model
+
+last one, and the most fun imo. If you look at a model's activations, a lot of behaviour turns out to sit along a few directions in the residual stream. The cleanest example is [refusal](https://arxiv.org/abs/2406.11717), take the difference between the average activation on harmful prompts and on harmless ones, and you get one direction r. Project it out of every activation, x ← x − r̂r̂<sup>T</sup>x, and the model mostly stops refusing, add it and it starts refusing harmless stuff xD [Steering vectors](https://arxiv.org/abs/2308.10248) do the same for style, sentiment or topic. Its the same "keep or drop a direction" decision as the whole post, applied to what the model is thinking instead of to a picture.
+
+```python
+r = (acts_harmful.mean(0) - acts_harmless.mean(0))   # difference of means, one direction
+r = r / r.norm()
+def ablate(x):                                        # x: (..., d) residual stream
+    return x - (x @ r)[..., None] * r                 # orthogonal projection, removes r
+```
+
+what i like about all of these is that almost none of them call `svd()` in the hot path, the decomposition is the way of thinking, keep the directions that matter, rotate without stretching, pick the basis where things decouple, and the code just finds a cheap way to do exactly that.
+
+## Using it well
+
+### More places
 
 The question I find more useful than "does this use SVD?" is "what is the matrix, and what does keeping or dropping a direction actually do?" Here's a wider map, including a few places where SVD is only one piece of the method.
 
@@ -254,7 +372,7 @@ For the last few rows, [Candès and colleagues' robust PCA paper](https://arxiv.
 
 Every row is a small set of useful directions, and whether that compact description is any good depends on how you prepared the data, what you are minimising and how you check the result. PageRank sits next to this list as a related spectral method, with its own goal of a stationary vector.
 
-## Before you trust it
+### Before you trust it
 
 The scale of the columns comes first, since a feature measured in thousands will drown one measured in tenths, and centring and scaling are modelling choices that PCA can't make for you because it has no idea which units matter.
 

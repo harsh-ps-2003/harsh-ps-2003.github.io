@@ -1,0 +1,4 @@
+.svd-lab .mu-foot { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.svd-lab .mu-caption { flex: 1; margin: 0; font-size: .82em; line-height: 1.5; color: var(--lab-muted); min-height: 3em; }
+.svd-lab .mu-foot .lab-transport { margin: 0; flex: 0 0 auto; }
+.svd-lab[data-lab="muon"] .lab-speed[hidden] { display: none; }
