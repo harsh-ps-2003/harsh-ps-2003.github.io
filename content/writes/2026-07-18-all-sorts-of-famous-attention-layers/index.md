@@ -15,6 +15,10 @@ Well, we had a bomb of Kimi K3 launch, and I writing this after going through it
 
 Before Transformers, models like RNNs and LSTMs processed text sequentially. This process was slow and models struggled to remember info from past, so we could not rely on it for long range problem. attention solved this by lettinh the model look at all parts of the input sequence simultaneously and assign importance (attention) scores to each word, creating a rich context vector. It abandoned sequential processing for processing new tokens entirely, enabling parallel computation of processing all the tokens at once and providing the model with a direct, weighted memory of its entire input.
 
+funny thing, i always thought attention was something the Transformer invented, and its not. It was [added to RNN translators back in 2014](https://arxiv.org/abs/1409.0473), where a tiny network scored the decoder state against every encoder state and the softmax of those scores picked what to read. a year later [that tiny network got swapped for a plain dot product](https://arxiv.org/abs/1508.04025), which is cheaper and just one matrix multiply. What [Attention Is All You Need](https://arxiv.org/abs/1706.03762) added in 2017 was the √d scale, many heads running side by side, and the bold part, throwing the RNN away entirely so every token attends to every other token.
+
+<figure class="diagram"><a href="attention-history.svg"><img src="attention-history.svg" alt="Attention before the Transformer. In 2014 additive attention scored an RNN decoder state against each encoder state with a small network, v times tanh of W s plus U h. In 2015 multiplicative attention made the score a dot product. In 2017 the Transformer dropped the RNN, scaled the dot product by root d and ran several heads side by side." loading="lazy"></a></figure>
+
 I mean, if you're reading my blogs, most probably you know what the attention is, but for reiteration, the standard scaled dot-product attention equation looks like :
 > Attention(Q, K, V) = softmax(QK^T^ / d^1/2^)V
 
@@ -69,6 +73,10 @@ Axes (compose freely)
 ├── Head layout: MHA | MQA | GQA | MLA
 └── Implementation: naive | Flash* | Paged
 ```
+
+<figure class="diagram"><a href="attention-knobs.svg"><img src="attention-knobs.svg" alt="One attention layer with six knobs that compose, which pairs attend, where Q and K V come from, how K V are stored, the score function, how it runs, and position." loading="lazy"></a></figure>
+
+The thing that took me embarassingly long to see is that these are independent choices. A local window layer can be causal or bidirectional, a GQA layer can run naive or under Flash, and cross attention can be sparse too, so when a paper says "new attention" its worth asking which of these knobs it actually turned.
 
 The rest of this post is the efficiency evolution (what changed after the Basics equation), not a replacement taxonomy for those axes:
 
@@ -223,6 +231,17 @@ The way it works is that input queries get divided into groups. For each group a
 
 GQA scales more effectively with sequence length than MHA. Llama and Mistral both use it. The grouping preserves more diversity than MQA while still being more efficient than full MHA.
 
+The number to remember is that the KV cache scales with the number of K/V heads, not query heads. With 32 layers, head dim 128, fp16 and a 128k token context, 32 KV heads (plain MHA) need about 69 GB per sequence, 8 KV heads (GQA) about 17 GB, and 1 KV head (MQA) a bit over 2 GB.
+```python
+def kv_cache_bytes(layers, kv_heads, head_dim, tokens, bytes_per=2):
+    return 2 * layers * kv_heads * head_dim * tokens * bytes_per   # 2 for K and V
+
+kv_cache_bytes(32, 32, 128, 131072) / 1e9   # MHA  ~68.7 GB
+kv_cache_bytes(32,  8, 128, 131072) / 1e9   # GQA  ~17.2 GB
+kv_cache_bytes(32,  1, 128, 131072) / 1e9   # MQA  ~2.1 GB
+```
+None of this touches the quadratic prefill, these only shrink what you store and stream during decoding.
+
 This can be [referenced from Llama 2](https://github.com/huggingface/transformers/blob/f208766a6551d381475cd8eeed1256f9a5af7b65/src/transformers/models/llama/modeling_llama.py#L209)
 
 ### Sliding Window Attention
@@ -232,6 +251,29 @@ In vanilla attention, we compute attention score from all token, and at inferenc
 Sliding window is just one type of sparse attention pattern. There are others worth knowing about. Strided attention has each token attend to every kth token which is useful for capturing periodic patterns. Reformer uses locality sensitive hashing to cluster similar queries and keys into buckets so queries only attend to keys in the same bucket giving O(n log n) complexity. BigBird combines random attention with local attention with global attention. Longformer uses local sliding window attention with task specific global attention where some tokens like CLS attend to all tokens while others use local attention.
 
 The tradeoff with sparse patterns is loss of global context. Fixed patterns may miss long range dependencies. Choosing the right sparsity pattern is task dependent. But for long sequences the memory savings are worth it. Reformer can handle 64K tokens. Longformer works well for summarizing legal contracts or books.
+
+I find it useful to split sparse attention into 2 camps. Fixed patterns decide ahead of time which pairs can talk, a window around each token, every k-th token further back ([strided](https://arxiv.org/abs/1904.10509)), or a few global tokens that everybody can see. Content-picked patterns decide per query, using the tokens themselves.
+
+<figure class="diagram"><a href="sparse-patterns.svg"><img src="sparse-patterns.svg" alt="Six causal attention masks, dense, sliding window, dilated or strided, window plus global tokens, window plus global plus random, and picked by content." loading="lazy"></a></figure>
+
+Fixed patterns are predictable and easy to turn into fast kernels, but they can miss the one far away token that actually matters. Content-picked ones can find it, and here is the catch most people (me included) miss at first, if you pick the top-k keys by first computing all of QKᵀ, you already paid the quadratic cost and only saved the softmax over the rest. So the real question for adaptive sparsity is how to find candidates cheaply, and there are a few answers. Hash or cluster the keys into buckets and only look inside your own bucket ([LSH](https://arxiv.org/abs/2001.04451), [k-means routing](https://arxiv.org/abs/2003.05997)), squash blocks of keys into coarse summaries and only open the blocks that score well, or train a tiny separate scorer whose only job is picking positions.
+
+<figure class="diagram"><a href="pick-keys.svg"><img src="pick-keys.svg" alt="Picking keys without scoring all of them. Naive top-k still scores all N keys first. Cheaper routes are hashing or clustering keys into buckets, NSA's three branches of compressed blocks, selected blocks and a sliding window mixed by a gate, and DSA's small indexer that hands the top-k positions to the real attention." loading="lazy"></a></figure>
+
+[Native Sparse Attention](https://arxiv.org/abs/2502.11089) (NSA, 2025) is the one i'd study, because it solves 3 problems at once, learning which connections to keep, not losing quality, and making the result actually fast on GPUs. Every query reads 3 branches, compressed blocks for the gist of the whole history, a handful of blocks picked at full resolution using those compressed scores, and a sliding window for the recent stuff, and a learned gate mixes them. The blocks are sized for the hardware, which is why it trains and runs fast instead of only looking sparse on paper. [DeepSeek Sparse Attention](https://github.com/deepseek-ai/DeepSeek-V3.2-Exp) (DSA, 2025) goes the other way with a tiny indexer, a few cheap low precision heads score every past position and only the top-k go into the real attention. It still touches every position, but at a small fraction of the cost.
+
+Roughly the selection branch, block level top-k on cheap coarse scores
+```python
+def select_blocks(q, k, block=64, top=16):
+    # q: (d,)   k: (N, d)
+    N, d = k.shape
+    k_blocks = k[: N // block * block].view(-1, block, d)
+    coarse = k_blocks.mean(dim=1)              # one summary key per block, (N/block, d)
+    scores = coarse @ q                        # N/block scores instead of N
+    keep = scores.topk(min(top, len(scores))).indices
+    idx = (keep[:, None] * block + torch.arange(block)).flatten()
+    return idx                                 # full resolution attention only over these keys
+```
 
 You can refer [Mistral 7B paper](https://arxiv.org/pdf/2310.06825) and reference [sliding window causal mask code](https://github.com/huggingface/transformers/blob/f208766a6551d381475cd8eeed1256f9a5af7b65/src/transformers/masking_utils.py#L1118). 
 
@@ -257,6 +299,24 @@ The fused kernel execution replaces the traditional multi step attention with a 
 
 Later, there was FlashAttension-2 that did some rewriting to reduce number of non-matmul operations to maximize GPU throughput. Also, it optimize operations for Multi-Query Attention and Grouped-Query Attention. Even more sequence parallelism. Its over staggering 9x faster than standard attention. 
 
+The part that makes the tiling legal is [online softmax](https://arxiv.org/abs/1805.02867). You dont need the whole row to normalize, you keep a running max and a running sum per query, and when a new block brings a bigger max you rescale what you already have.
+```python
+m, l, o = -inf, 0.0, 0.0                 # running max, running sum, running output (per query row)
+for k_blk, v_blk in blocks:
+    s = q @ k_blk.T / sqrt(d)            # scores for this block only, stays in SRAM
+    m_new = max(m, s.max())
+    scale = exp(m - m_new)               # how much the old stuff shrinks
+    p = exp(s - m_new)
+    l = l * scale + p.sum()
+    o = o * scale + p @ v_blk
+    m = m_new
+o = o / l                                # exact softmax(QKᵀ)V, the N×N matrix never existed
+```
+
+<figure class="diagram"><a href="flash-online-softmax.svg"><img src="flash-online-softmax.svg" alt="FlashAttention keeps a Q block in fast SRAM while K and V blocks stream through from HBM, computes each score tile in SRAM and throws it away, and keeps a running max, sum and output per row so only the output goes back to HBM." loading="lazy"></a></figure>
+
+[FlashAttention-3](https://arxiv.org/abs/2407.08608) (2024) uses Hopper's async copies and warp specialisation to overlap all of this, and FlashAttention-4 (2026) is built around Blackwell, where the matmuls got so fast that exp and the rescaling start to dominate. So making attention fast is not only about cutting FLOPs anymore. And remember FlashAttention is not a replacement for softmax attention, its a better algorithm for computing the exact same thing.
+
 Refer the [FlashAttension Paper-1](https://arxiv.org/pdf/2205.14135) and [paper 2](https://arxiv.org/pdf/2307.08691). 
 
 ### Paged Attention
@@ -275,6 +335,10 @@ THe KV cache without pagedAttention is a rectangle with batch vs max seq length.
 
 Refer the [paper](https://arxiv.org/pdf/2309.06180).
 
+Flash and Paged solve different bottlenecks and stack fine together, one cuts memory traffic inside a kernel and the other cuts wasted memory across requests. 2 more that come up a lot. [FlashDecoding](https://crfm.stanford.edu/2023/10/12/flashdecoding.html) handles the decode case where there is one query and a giant KV cache, by splitting the cache into chunks processed in parallel and merging them with the same rescaling trick. [Ring Attention](https://arxiv.org/abs/2310.01889) (2023) spreads one long sequence across devices, each holds a chunk of queries and passes its K/V chunk around the ring while it computes, so the context can be longer than any single GPU's memory.
+
+<figure class="diagram"><a href="ring-attention.svg"><img src="ring-attention.svg" alt="Left, FlashDecoding splits a long KV cache into chunks processed in parallel and merges the partial results. Right, Ring Attention puts four devices in a ring, each with a chunk of queries, and passes K and V chunks around so every query chunk sees all keys while sends overlap with compute." loading="lazy"></a></figure>
+
 ### Multi-Head Latent Attention
 
 Got introduced in Deepseek v2 (also used in v3). This literally avoids caching K, V altogether. A low-rank representation of K and V learned during training is cached instead (LoRA like). This gives us much less KV cache use (90%+ savings). Also, as metrix size is also reduced, a good 5-6x inference speedup is there. And interestingly higher accuracy than MHA is achieved.
@@ -286,6 +350,12 @@ The mechanics work like this. A fixed number of latent embeddings are initialize
 Compared to MHA which suffers from quadratic complexity MLA achieves linear or near linear complexity by compressing the attention space. Compared to MQA which uses a single shared key value pair MLA maintains diversity by having latent embeddings act as a middle layer allowing richer context capture. Compared to GQA which focuses on groups and can miss global dependencies MLA's latent embeddings inherently capture global patterns acting as global summaries.
 
 The tradeoff is that compressing input tokens into latent embeddings may lose fine grained details critical for some tasks. The performance also depends on how effectively the latent embeddings are initialized and trained.
+
+MLA compresses how each token's K and V are stored. A different family compresses the sequence itself, so the query attends to fewer things. You can learn a k×N projection that squashes N keys into k rows ([2020](https://arxiv.org/abs/2006.04768)), approximate the N×N matrix through a few landmark tokens ([2021](https://arxiv.org/abs/2102.03902)), or let a small fixed set of latents read the whole input once and do the rest of the work on those latents ([inducing points](https://arxiv.org/abs/1810.00825), [latent arrays](https://arxiv.org/abs/2103.03206)).
+
+<figure class="diagram"><a href="compress-sequence.svg"><img src="compress-sequence.svg" alt="Three ways to shrink what a query attends to, project the N keys down to k rows along the sequence, approximate the score matrix through m landmark tokens, or let M latents cross-attend to the N inputs and work on the latents." loading="lazy"></a></figure>
+
+All of them trade exact token to token detail for a smaller matrix, which is fine for a lot of tasks and terrible for copying an exact string from far back.
 
 ## Linear Magic
 
@@ -393,7 +463,10 @@ def forward_linear(self, x, state=None):
 ```
 > Notice the difference! softmax attention returns (k, v) that grow with sequence length. Linear attention returns a fixed-size state matrix.
 
-If you see [original paper](https://arxiv.org/pdf/2006.16236), they say `the cost per time-step for transformers scales with the square of the current sequence length` which might trip you up! Today we know Flash Attention makes softmax attention practical. Well the paper was released in 2020 (a different world altogether). 
+If you see [original paper](https://arxiv.org/pdf/2006.16236), they say
+> the cost per time-step for transformers scales with the square of the current sequence length
+
+which might trip you up! Today we know Flash Attention makes softmax attention practical. Well the paper was released in 2020 (a different world altogether). 
 ```python
 # 2020-era: recompute everything, no KV cache
 def generate_token(model, all_previous_tokens):
@@ -408,6 +481,8 @@ def generate_token(model, all_previous_tokens):
     return output[-1]  # only need last token's output
 ```
 Per-token decode cost was O(t²) without cache in 2020 which became O(t) with cache, and full sequence generation was O(N³) which now is O(N²). Rememeber, algorithmic complexity is not implementation complexity.
+
+2 things i wish someone told me earlier. First, linear attention is not automatically faster for short sequences, a cheaper big-O can still lose on latency because of awkward matrix shapes, more kernel launches, worse parallelism or bad memory access, so below a few thousand tokens a good Flash kernel usually wins. Second, the state has a fixed capacity, every new token has to share the same d×d matrix, which is a very different thing from keeping a separate K and V for every token. [Gated Linear Attention](https://arxiv.org/abs/2312.06635) (GLA, 2024) works on both, a data dependent decay so the state can choose what to keep, and a chunked IO aware kernel so it actually runs fast.
 
 > Linear Attention has no recoverability guarantee. Query k₅, get a mixture influenced by all tokens with similar keys.
 
@@ -443,6 +518,10 @@ o_t = q_t @ S = q_t @ (k₁⊗v₁ + k₂⊗v₂ + ... + kₙ⊗vₙ)
 ```
 The information from all previous tokens is superimposed. If k₃ and k₇ are similar, their values interfere, you can't cleanly separate them. This is called retrieval interference or memory interference. The D×D state matrix has finite capacity. With N tokens compressed into D² slots, information must overlap when N > D². Even before that limit, similar keys cause interference.
 
+Here is the problem in plain words. Say the context says "Harsh's access level is admin", and much later "Harsh's access level is now viewer". An additive state just stacks both, so asking about Harsh gives you a mix of the two, and you need some way to change what an existing key returns.
+
+<figure class="diagram"><a href="editable-memory.svg"><img src="editable-memory.svg" alt="What a fixed-size memory returns for Harsh after storing admin and later viewer. Plain linear attention returns a blend of both. Decay returns mostly viewer but fades every other fact too. The delta rule edits only Harsh's entry and returns viewer. The gated delta rule edits and can also clear stale memory." loading="lazy"></a></figure>
+
 DeltaNet addresses this by using the delta rule from associative memory literature, instead of pure addition. the insightful thing here is, instead of blindly adding k⊗v to the state, subtract what's already there for that key first:
 ```
 # Linear attention (naive additive)
@@ -465,8 +544,7 @@ Why this helps:
 
 As we see in [Fast Weight Programmers](https://arxiv.org/abs/2102.11174): 
 
-> "when the sequence length exceeds storage capacity, the model may end up in an overcapacity regime. To properly operate under such a regime, the model should learn to dynamically interact with the memory contents and selectively decide which key-value associations to keep and which ones to delete. The purely additive instruction may be inappropriate for this purpose… endlessly adding new associations to a memory of finite size, as in Eq. 17, inevitably will reach a limit."
-
+> when the sequence length exceeds storage capacity, the model may end up in an overcapacity regime. To properly operate under such a regime, the model should learn to dynamically interact with the memory contents and selectively decide which key-value associations to keep and which ones to delete. The purely additive instruction may be inappropriate for this purpose… endlessly adding new associations to a memory of finite size, as in Eq. 17, inevitably will reach a limit.
 The regime that makes linear attention attractive (N >> D) also exposes its main limitation. Once the state exceeds its effective capacity, associations begin to interfere because the update is purely additive, nothing ever leaves the cache.
 
 ```python
@@ -560,11 +638,18 @@ The architecture kept evolving:
 - RWKV-7 "Goose": Incorporated a generalized delta rule (yes, the same delta rule from DeltaNet!)
 
 From the [RWKV-7 paper](https://arxiv.org/abs/2503.14456):
-> "RWKV-7 introduces a newly generalized formulation of the delta rule with vector-valued gating and in-context learning rates"
-
+> RWKV-7 introduces a newly generalized formulation of the delta rule with vector-valued gating and in-context learning rates
 So the field is converging, RWKV started from RNNs and added delta-rule-like updates, while DeltaNet started from linear attention and added gating. They're meeting in the middle.
 
 RWKV is actually used in production. The community has trained models up to 14B parameters, there are multilingual variants, music generation models, and even edge deployment with quantization. It's one of the few non-Transformer architectures that has a real user base beyond research papers.
+
+### State space duality
+
+The paper that made all of this click for me is [Transformers are SSMs](https://arxiv.org/abs/2405.21060) (2024), which also gave us Mamba-2. It shows that a state space model and attention with a specially structured mask are the same computation written 2 ways. Write the outputs as y = M v with a lower triangular matrix whose entries are a product of decays times q·k, and it trains like attention, unroll it along time and its a recurrence with a constant size state that decodes like an RNN.
+
+<figure class="diagram"><a href="ssd-duality.svg"><img src="ssd-duality.svg" alt="One layer computed two ways. The parallel form multiplies by a lower triangular structured matrix whose entries are decays times q dot k, and trains like attention. The recurrent form keeps a constant size state, and decodes like an RNN. The chunked algorithm does diagonal blocks as attention and passes the rest through the state. Softmax attention is not in this family." loading="lazy"></a></figure>
+
+That gives a chunked algorithm for free, small attention inside each chunk and the state carried between chunks, the same trick as the prefill section below. The bigger point is that attention, linear recurrences, fast weights and state space models are not unrelated inventions, they sit on one shared mathematical picture. Just dont over read it, softmax attention is not in this family because its mask doesnt have that structure, so this does not mean softmax attention equals a constant size SSM, or that the 2 behave the same.
 
 #### The Prefill Problem
 
@@ -685,8 +770,7 @@ Why does this matter? The D×D state matrix has limited capacity. With a single 
 This was Moonshot AI's approach before K3. The idea was simple, if softmax attention is expensive at long contexts and linear attention loses expressiveness, why not use both?
 
 [Kimi Linear](https://arxiv.org/abs/2510.26692) made a bold claim :
-> "We introduce Kimi Linear, a hybrid linear attention architecture that, for the first time, outperforms full attention under fair comparisons across various scenarios—including short-context, long-context, and reinforcement learning (RL) scaling regimes."
-
+> We introduce Kimi Linear, a hybrid linear attention architecture that, for the first time, outperforms full attention under fair comparisons across various scenarios—including short-context, long-context, and reinforcement learning (RL) scaling regimes.
 They used a hybrid architecture:
 - Early layers: Linear attention (cheap, handles long-range dependencies)
 - Later layers: Softmax attention (expensive, but more expressive for final reasoning)
@@ -757,6 +841,33 @@ Looking at the evolution:
 | K3 | KDA + MLA hybrid | Scale + multimodality |
 
 Each step adds capacity to address a concrete limitation in the preceding system. This isn't "make it bigger and hope" - it's targeted architectural improvements that compound.
+
+## Small knobs that ride along
+
+These are not new attention mechanisms, they get bolted onto almost all of the above, and some of them matter more than the big switches.
+
+| knob | examples | what it does |
+| --- | --- | --- |
+| position | [RoPE](https://arxiv.org/abs/2104.09864), scaled RoPE, YaRN | rotates q and k by position so the score depends on relative distance |
+| position as a bias | [ALiBi](https://arxiv.org/abs/2108.12409), T5 relative bias | adds a distance penalty to the scores instead |
+| logit control | QK-norm, softcapping, temperature | keeps scores from exploding, mostly for training stability |
+| gates | gated outputs, head gates | lets the model scale down what attention returns |
+| sinks | [StreamingLLM](https://arxiv.org/abs/2309.17453) | keeps the first few tokens that soak up attention mass, so you can evict the rest |
+| two maps | [Differential attention](https://arxiv.org/abs/2410.05258) | subtracts one attention map from another to cancel noise |
+
+RoPE deserves the extra look, because how you handle position decides how well a model stretches to longer contexts and whether old cache entries are still valid after you change it.
+```python
+def rope(x, pos, base=10000):
+    # x: (..., d) with d even, pos: (...,) positions
+    d = x.shape[-1]
+    freqs = base ** (-torch.arange(0, d, 2) / d)          # one frequency per pair of dims
+    ang = pos[..., None] * freqs                          # (..., d/2)
+    x1, x2 = x[..., 0::2], x[..., 1::2]
+    return torch.stack([x1 * ang.cos() - x2 * ang.sin(),
+                        x1 * ang.sin() + x2 * ang.cos()], dim=-1).flatten(-2)
+# q·k after rope depends on pos_q - pos_k, not on where the pair sits
+```
+Attention sinks are the other one worth knowing, the first tokens collect a weird amount of attention, which matters a lot once you start streaming and evicting old KV entries.
 
 ## What happens after for text generation? 
 
