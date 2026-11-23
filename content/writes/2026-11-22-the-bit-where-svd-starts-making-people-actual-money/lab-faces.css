@@ -1,6 +1,0 @@
-.svd-lab .faces-trio { max-width: 520px; margin: 12px auto 4px; }
-.svd-lab .faces-trio canvas { border: 1px solid var(--lab-border); transition: opacity .2s; }
-.svd-lab .faces-count { margin: 6px 0 0; text-align: center; font-size: .86em; font-variant-numeric: tabular-nums; color: var(--lab-muted); }
-.svd-lab[data-lab="faces"] .lab-transport-compact { justify-content: center; }
-/* lab.css gives .lab-speed display:flex, which beats the hidden attribute compact mode sets */
-.svd-lab[data-lab="faces"] .lab-speed[hidden] { display: none; }

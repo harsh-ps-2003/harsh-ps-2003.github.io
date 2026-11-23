@@ -1,6 +1,0 @@
-.svd-lab .rec-rate { align-items: end; margin: 4px 0 12px; }
-.svd-lab .rec-swap { flex: 0 0 auto; }
-.svd-lab .rec-caption { font-size: .82em; line-height: 1.5; color: var(--lab-muted); min-height: 3em; margin: 8px 0 0; }
-@media (max-width: 520px) {
-  .svd-lab[data-lab="recommend"] .lab-stage text { font-size: 19px; }
-}
